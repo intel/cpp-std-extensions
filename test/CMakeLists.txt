@@ -1,0 +1,21 @@
+add_unit_test(
+    stdx_test
+    CATCH2
+    FILES
+    always_false.cpp
+    bit.cpp
+    bitset.cpp
+    callable.cpp
+    concepts.cpp
+    conditional.cpp
+    ct_string.cpp
+    function_traits.cpp
+    overload.cpp
+    priority.cpp
+    remove_cvref.cpp
+    to_underlying.cpp
+    with_result_of.cpp
+    udls.cpp
+    LIBRARIES
+    warnings
+    stdx)
