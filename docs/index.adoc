@@ -1,0 +1,335 @@
+= stdx - Polyfill for the C++ standard library
+:revnumber: 0.1
+:revdate: Sep 09, 2023
+:source-highlighter: rouge
+:rouge-style: base16.solarized
+:source-language: c++
+:toc: left
+
+== Introduction
+
+`stdx` has several aims:
+
+* Where possible, to enable using parts of the C++ standard library in versions
+  earlier than when they were introduced, and where standard library
+  implementations are lagging behind the standard.
+* To provide a common interface across C++ versions such that preprocessor
+  directives in application code are minimized.
+* To provide implementations of standard behaviour that are richer or more
+  efficient -- at either compile-time or runtime -- than the standard versions.
+* To provide useful functionality that is missing from the C++ standard but
+  arguably belongs at a base level.
+
+=== Compiler and C++ version support
+
+The following compilers are supported:
+
+* clang 14
+* clang 15
+* gcc 12
+
+In general, `stdx` supports the C++17 standard; however some functionality is
+available only in 20 and later.
+
+=== Synopsis
+
+Everything is in the `stdx` namespace. Where suitable, functionality is grouped
+into headers whose names match the standard.
+
+The following headers are available:
+
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bitset.hpp[`bit.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bitset.hpp[`bitset.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/compiler.hpp[`compiler.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/concepts.hpp[`concepts.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ct_string.hpp[`ct_string.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/function_traits.hpp[`function_traits.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/functional.hpp[`functional.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/priority.hpp[`priority.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/type_traits.hpp[`type_traits.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/utility.hpp[`utility.hpp`]
+
+== `bit.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bit.hpp[`bit.hpp`]
+provides an implementation that mirrors
+https://en.cppreference.com/w/cpp/header/bit[`<bit>`], but is
+`constexpr` in C++17. It is mostly based on intrinsics.
+
+== `bitset.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bitset.hpp[`bitset.hpp`]
+provides an implementation that mirrors
+https://en.cppreference.com/w/cpp/utility/bitset[`std::bitset`], but is
+`constexpr` in C++17 and has the following differences:
+
+The underlying type can be specified: `stdx::bitset<8, std::uint16_t>` defines a
+bitset with 8 bits whose storage type is `std::uint16_t`. The storage type must
+be an unsigned integral type. It controls the `value_type` of the underlying
+storage and hence may affect efficiency for some operations according to
+platform.
+
+* Stream input and output operators are not implemented.
+* A `std::hash` specialization is not implemented.
+* `to_string`, `to_ulong` and `to_ullong` are not implemented; `to_uint64_t` is available.
+
+== `compiler.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/compiler.hpp[`compiler.hpp`]
+provides macros for decorating declarations, which resolve either to keywords or
+to compiler-specific attributes:
+
+* https://en.cppreference.com/w/cpp/language/constinit[`CONSTINIT`]
+* https://en.cppreference.com/w/cpp/language/consteval[`CONSTEVAL`]
+* https://clang.llvm.org/docs/AttributeReference.html#always-inline-force-inline[`ALWAYS_INLINE`]
+* https://clang.llvm.org/docs/AttributeReference.html#noinline[`NEVER_INLINE`]
+* https://clang.llvm.org/docs/AttributeReference.html#musttail[`MUSTTAIL`]
+
+== `concepts.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/concepts.hpp[`concepts.hpp`]
+implements various https://en.cppreference.com/w/cpp/concepts[standard concepts]. In C++17 they are surfaced as compile-time
+boolean values.
+
+* https://en.cppreference.com/w/cpp/concepts/same_as[`same_as`]
+* https://en.cppreference.com/w/cpp/concepts/derived_from[`derived_from`]
+* https://en.cppreference.com/w/cpp/concepts/convertible_to[`convertible_to`]
+* https://en.cppreference.com/w/cpp/concepts/integral[`integral`]
+* https://en.cppreference.com/w/cpp/concepts/signed_integral[`signed_integral`]
+* https://en.cppreference.com/w/cpp/concepts/unsigned_integral[`unsigned_integral`]
+* https://en.cppreference.com/w/cpp/concepts/floating_point[`floating_point`]
+* https://en.cppreference.com/w/cpp/concepts/equality_comparable[`equality_comparable`]
+* https://en.cppreference.com/w/cpp/concepts/totally_ordered[`totally_ordered`]
+* https://en.cppreference.com/w/cpp/concepts/invocable[`invocable`]
+* https://en.cppreference.com/w/cpp/concepts/predicate[`predicate`]
+
+NOTE: For compatibility with the standard and with
+https://en.cppreference.com/w/cpp/types/is_base_of[`std::is_base_of`], a class
+is considered to be `derived_from` itself.
+
+Also one non-standard but useful concept: `callable`. `callable` is modelled by
+functions by and objects with `operator()`. In particular it is true for generic
+lambda expressions, where `operator()` is a function template.
+
+[source,cpp]
+----
+auto f() -> void {}
+static_assert(stdx::callable<decltype(f)>);
+
+auto lambda = [] (int i) { return i + 1; };
+static_assert(stdx::callable<decltype(lambda)>);
+
+auto generic_lambda = [] (auto i) { return i + 1; };
+static_assert(stdx::callable<decltype(generic_lambda)>);
+----
+
+== `ct_string.hpp`
+
+A `ct_string` is a compile-time string that can be used as a non-type template
+parameter (NTTP).
+
+NOTE: `ct_string` is available only in C++20 and later. It requires compiler
+support for https://wg21.link/p0732[using structural types as NTTPs].
+
+Example usage:
+[source,cpp]
+----
+template <ct_string S>
+struct named_thing { ... };
+
+auto my_thing = named_thing<"mine">{};
+----
+Here we declare a `struct` with an NTTP, and instantiate the template with a
+string. When compiled, `"mine"` will create a `ct_string` which is the NTTP
+passed to `named_thing`.
+
+NOTE: `ct_string` is a class template. The declaration of `named_thing` here
+uses `ct_string` as a _placeholder type_ for an NTTP, whose concrete type will
+be deduced. This is new for C++20 - see
+https://en.cppreference.com/w/cpp/language/template_parameters for details.
+
+The `ct_string` interface:
+[source,cpp]
+----
+template <ct_string S>
+struct named_thing {
+  template <ct_string Other>
+  auto f() {
+    // here we can:
+    constexpr std::size_t sz = S.size();  // ask for ct_string's size
+    constexpr bool is_empty = S.empty();  // ask whether a ct_string is empty
+    constexpr bool equal = S == Other;    // compare two ct_strings
+
+    // we can also convert to/from cib string constants
+    constexpr auto cib_sc_string = stdx::ct_string_to_type<S, sc::string_constant>();
+    constexpr auto stdx_ct_string = stdx::ct_string_from_type(cib_sc_string);
+    static_assert(S == stdx_ct_string);
+
+    // and we can split a ct_string at the first occurrence of a character,
+    // optaining a pair of ct_strings
+    constexpr auto p = stdx::split<S, '/'>();
+    // if the character doesn't exist, p.first is equal to S and p.second is empty
+    // otherwise p.first is everything up to (but not including) the character,
+    // and p.second is everything after (also not including)
+  }
+};
+----
+
+See https://github.com/intel/compile-time-init-build/tree/main/include/sc[cib
+documentation] for details about the cib string constant class.
+
+== `function_traits.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/function_traits.hpp[`function_traits.hpp`]
+contains type traits for introspecting function signatures. It works with
+functions, lambda expressions, and classes with `operator()`.
+
+Examples:
+[source,cpp]
+----
+auto f1() -> void {}
+using f1_return = stdx::return_t<decltype(f1)>;         // void
+using f1_args = stdx::args_t<decltype(f1), std::tuple>; // std::tuple<>
+
+auto f2(int) -> int { return 0; }
+using f2_return = stdx::return_t<decltype(f2)>;         // int
+using f2_args = stdx::args_t<decltype(f2), std::tuple>; // std::tuple<int>
+
+auto l = [] (int) -> int { return 0; };
+using l_return = stdx::return_t<decltype(l)>;         // int
+using l_args = stdx::args_t<decltype(l), std::tuple>; // std::tuple<int>
+----
+
+`stdx::args_t` returns a list of the function arguments. `std::decayed_args_t`
+returns the same list, but with `std::decay_t` applied to each element. This is
+useful for example when you need to copy and store a tuple of the arguments.
+
+[source,cpp]
+----
+auto f(int&, std::string&) -> void {}
+using f_args = stdx::decayed_args_t<decltype(f), std::tuple>; // std::tuple<int, std::string>
+----
+
+NOTE: Function traits work on functions (and function objects): not function
+templates or overload sets. For instance therefore, they will not work on generic
+lambda expressions.
+
+== `functional.hpp`
+
+`with_result_of` is a class that can be used for lazy evaluation.
+`with_result_of` wraps a callable (often a lambda expression) and can
+implicitly convert to the return type of the callable. It may be passed to
+functions that perfectly forward their arguments - a good example is an
+`emplace` function on a container - and the conversion happens only when the
+required value is actually used.
+
+[source,cpp]
+----
+// S is a type that is some work to construct
+// so we use a maker function
+struct S { ... };
+auto make_S() -> S;
+
+std::unordered_map<int, S> m;
+
+v.emplace(0, make_S()); // this works, but incurs a temporary construct, move and destruct
+v.emplace(0, stdx::with_result_of{make_S}); // this constructs S in-place thanks to RVO
+----
+
+`with_result_of` can help to achieve in-place construction, effectively by deferring
+evaluation of function arguments.
+
+== `priority.hpp`
+
+`priority_t<N>` is a class that can be used for easily selecting complex
+function overloads. `priority_t<0>` is the lowest priority. `priority<N>` is a
+value of type `priority_t<N>`.
+
+[source,cpp]
+----
+template </*some strong constraint*/ T>
+auto f(T t, stdx::priority_t<2>) {
+  // highest priority: call this function if possible
+}
+
+template </*some weaker/less preferred constraint*/ T>
+auto f(T t, stdx::priority_t<1>) {
+  // call this function if the highest-priority overload can't be called
+}
+
+template <typename /*no constraint*/ T>
+auto f(T t, stdx::priority_t<0>) {
+  // fallback to this function if both higher priority overloads don't fit
+}
+
+// at the call site, use the highest priority
+auto result = f(t, stdx::priority<2>);
+----
+
+== `type_traits.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/type_traits.hpp[`type_traits.hpp`]
+contains a few things from the standard:
+
+* https://en.cppreference.com/w/cpp/types/remove_cvref[`remove_cvref_t`] (from C++20)
+* https://en.cppreference.com/w/cpp/utility/to_underlying[`to_underlying`] (from C++23)
+* https://en.cppreference.com/w/cpp/types/conditional[`conditional_t`]
+  (implemented with fewer template instantiations than a typical standard
+  implementation)
+* https://en.cppreference.com/w/cpp/types/is_function[`is_function_v`] (implemented with Walter Brown's method)
+
+It also contains `always_false_v`, a variable template that can be instantiated
+with any number of type arguments and always evaluates to false at compile-time.
+This is useful for writing `static_assert` where it must depend on types (at
+least before C++23 and https://wg21.link/p2593[P2593]).
+
+[source,cpp]
+----
+template <typename T>
+auto f(T) {
+  if constexpr (std::integral<T>) {
+  } else {
+    // doesn't work before C++23
+    // static_assert(false, "S must be instantiated with an integral type");
+
+    // instead, this works
+    static_assert(stdx::always_false_v<T>, "S must be instantiated with an integral type");
+  }
+};
+----
+
+== `utility.hpp`
+
+`overload` is a struct designed to encapsulate an overload set. It inherits from
+all the lambda expressions used to construct it. As an example, it's useful for
+visiting a variant.
+
+[source,cpp]
+----
+auto f(std::variant<int, float, std::string> const& v) {
+  return std::visit(
+    stdx::overload{
+      [] (std::string const& s) { return s; },
+      [] (auto num) { return std::to_string(num); }
+    }, v);
+}
+----
+
+`utility.hpp` also contains a few handy user-defined literals so that code using
+boolean values can be more expressive at the call site than just using bare
+`true` and `false`. This also makes it safer to use templates with `bool`
+parameters.
+
+[source,cpp]
+----
+using namespace stdx::literals;
+
+template <bool X>
+struct my_type { ... };
+
+using my_type_with_X = my_type<"X"_true>;
+using my_type_without_X = my_type<"X"_false>;
+
+using my_type_with_X_alt = my_type<"X"_b>;
+using my_type_without_X_alt = my_type<not "X"_b>;
+----
