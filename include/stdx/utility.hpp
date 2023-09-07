@@ -25,5 +25,7 @@ CONSTEVAL auto operator""_false(char const *, std::size_t) -> bool {
 }
 } // namespace literals
 
+[[noreturn]] inline auto unreachable() -> void { __builtin_unreachable(); }
+
 } // namespace v1
 } // namespace stdx
