@@ -45,6 +45,7 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ct_string.hpp[`ct_string.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/function_traits.hpp[`function_traits.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/functional.hpp[`functional.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/intrusive_list.hpp[`instrusive_list.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/priority.hpp[`priority.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/type_traits.hpp[`type_traits.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/utility.hpp[`utility.hpp`]
@@ -238,6 +239,36 @@ v.emplace(0, stdx::with_result_of{make_S}); // this constructs S in-place thanks
 
 `with_result_of` can help to achieve in-place construction, effectively by deferring
 evaluation of function arguments.
+
+== `intrusive_list.hpp`
+
+`intrusive_list` is a doubly-linked list designed for use at compile-time or
+with static objects. It supports pushing and popping at the front or back, and
+removal from the middle.
+
+[source,cpp]
+----
+// A node in an intrusive_list must have prev and next pointers
+struct node {
+  node *prev{};
+  node *next{};
+};
+
+stdx::intrusive_list<node> l;
+
+node n1{};
+l.push_front(&n1);
+
+node n2{};
+l.push_back(&n2);
+
+node n3{};
+l.push_back(&n3);
+
+l.remove(&n2); // removal from the middle is constant-time
+l.pop_front();
+l.pop_back();
+----
 
 == `priority.hpp`
 

@@ -10,6 +10,7 @@ add_unit_test(
     conditional.cpp
     ct_string.cpp
     function_traits.cpp
+    intrusive_list.cpp
     overload.cpp
     priority.cpp
     remove_cvref.cpp
