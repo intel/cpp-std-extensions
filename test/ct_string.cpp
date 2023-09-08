@@ -12,6 +12,11 @@ TEST_CASE("construction", "[ct_string]") {
     [[maybe_unused]] constexpr auto s = stdx::ct_string{"ABC"};
 }
 
+TEST_CASE("UDL", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    [[maybe_unused]] constexpr auto s = "ABC"_cts;
+}
+
 TEST_CASE("empty", "[ct_string]") {
     constexpr auto s1 = stdx::ct_string{""};
     static_assert(s1.empty());

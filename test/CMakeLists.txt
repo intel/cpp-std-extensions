@@ -20,3 +20,21 @@ add_unit_test(
     LIBRARIES
     warnings
     stdx)
+
+add_unit_test(
+    default_panic_test
+    CATCH2
+    FILES
+    default_panic.cpp
+    LIBRARIES
+    warnings
+    stdx)
+
+add_unit_test(
+    panic_test
+    CATCH2
+    FILES
+    panic.cpp
+    LIBRARIES
+    warnings
+    stdx)
