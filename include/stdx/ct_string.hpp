@@ -77,6 +77,12 @@ template <ct_string S, char C> [[nodiscard]] consteval auto split() {
             ct_string<suffix_size>{std::next(it), suffix_size - 1U}};
     }
 }
+
+namespace ct_string_literals {
+template <typename T, T... Cs> CONSTEVAL auto operator""_cts() {
+    return ct_string<sizeof...(Cs) + 1U>{{Cs..., 0}};
+}
+} // namespace ct_string_literals
 } // namespace v1
 } // namespace stdx
 

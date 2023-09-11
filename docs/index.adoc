@@ -46,6 +46,7 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/function_traits.hpp[`function_traits.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/functional.hpp[`functional.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/intrusive_list.hpp[`instrusive_list.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/panic.hpp[`panic.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/priority.hpp[`priority.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/type_traits.hpp[`type_traits.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/utility.hpp[`utility.hpp`]
@@ -269,6 +270,49 @@ l.remove(&n2); // removal from the middle is constant-time
 l.pop_front();
 l.pop_back();
 ----
+
+== `panic.hpp`
+
+`panic("reason")` is a function that is used in emergencies: something
+fundamental went wrong (e.g. a precondition was violated) and there is no good
+way to recover. It's like `assert` except that the behaviour of `panic` can be
+overridden.
+
+A `panic_handler` is a `struct` that exposes a `static` `panic` method. That
+method may have two overloads: one that takes a `ct_string` template argument
+(as well as more runtime arguments), and another that takes only runtime
+arguments.
+
+The default panic handler does nothing; to override that behaviour, provide a
+custom panic handler and specialize the variable template `stdx::panic_handler`,
+like this for example:
+
+[source,cpp]
+----
+struct custom_panic_handler {
+  static auto panic(auto&&... args) noexcept -> void {
+    // log args and then...
+    std::terminate();
+  }
+
+template <stdx::ct_string S>
+  static auto panic(auto&&... args) noexcept -> void {
+    // log args (including the compile-time string) and then...
+    std::terminate();
+  }
+};
+
+template <> inline auto stdx::panic_handler<> = custom_panic_handler{};
+----
+
+When something inside `stdx` goes wrong, the panic handler's `panic` function
+will be called.
+
+NOTE: `stdx` will always call `panic` with a compile-time string if
+possible (C++20), or with a single `char const *` if not. You are free to use
+`panic` with a logging framework to provide a "fatal" log function; in that case
+any arguments you pass through will be passed to `panic` and presumably handled
+by your choice of logging.
 
 == `priority.hpp`
 

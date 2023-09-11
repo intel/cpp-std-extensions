@@ -17,6 +17,10 @@ endif()
 add_library(stdx INTERFACE)
 target_include_directories(stdx INTERFACE include)
 target_compile_features(stdx INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
+target_compile_options(
+    stdx
+    INTERFACE
+        $<$<CXX_COMPILER_ID:Clang>:-Wno-gnu-string-literal-operator-template>)
 
 if(PROJECT_IS_TOP_LEVEL)
     add_docs(docs)
