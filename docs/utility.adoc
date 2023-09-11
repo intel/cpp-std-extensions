@@ -45,3 +45,20 @@ using my_type_without_X = my_type<"X"_false>;
 using my_type_with_X_alt = my_type<"X"_b>;
 using my_type_without_X_alt = my_type<not "X"_b>;
 ----
+
+And some UDLs that are useful when specifying sizes in bytes:
+
+[source,cpp]
+----
+using namespace stdx::literals;
+
+// decimal SI prefixes
+constexpr auto a = 1_k;  // 1,000
+constexpr auto b = 1_M;  // 1,000,000
+constexpr auto c = 1_G;  // 1,000,000,000
+
+// binary equivalents
+constexpr auto d = 1_ki; // 1,024
+constexpr auto e = 1_Mi; // 1,048,567
+constexpr auto f = 1_Gi; // 1,073,741,824
+----
