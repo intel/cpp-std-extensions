@@ -1,0 +1,17 @@
+
+== `bitset.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bitset.hpp[`bitset.hpp`]
+provides an implementation that mirrors
+https://en.cppreference.com/w/cpp/utility/bitset[`std::bitset`], but is
+`constexpr` in C++17 and has the following differences:
+
+The underlying type can be specified: `stdx::bitset<8, std::uint16_t>` defines a
+bitset with 8 bits whose storage type is `std::uint16_t`. The storage type must
+be an unsigned integral type. It controls the `value_type` of the underlying
+storage and hence may affect efficiency for some operations according to
+platform.
+
+* Stream input and output operators are not implemented.
+* A `std::hash` specialization is not implemented.
+* `to_string`, `to_ulong` and `to_ullong` are not implemented; `to_uint64_t` is available.

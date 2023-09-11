@@ -28,8 +28,8 @@ template <std::size_t N> struct ct_string {
         }
     }
 
-    [[nodiscard]] constexpr auto size() const -> std::size_t { return N - 1U; }
-    [[nodiscard]] constexpr auto empty() const -> bool { return N == 1U; }
+    constexpr static std::integral_constant<std::size_t, N - 1U> size{};
+    constexpr static std::integral_constant<bool, N == 1U> empty{};
 
     constexpr explicit(true) operator std::string_view() const {
         return std::string_view{std::cbegin(value), size()};

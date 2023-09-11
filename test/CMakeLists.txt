@@ -22,6 +22,51 @@ add_unit_test(
     stdx)
 
 add_unit_test(
+    cx_map_test
+    CATCH2
+    FILES
+    cx_map.cpp
+    LIBRARIES
+    warnings
+    stdx)
+
+add_unit_test(
+    cx_multimap_test
+    CATCH2
+    FILES
+    cx_multimap.cpp
+    LIBRARIES
+    warnings
+    stdx)
+
+add_unit_test(
+    cx_queue_test
+    CATCH2
+    FILES
+    cx_queue.cpp
+    LIBRARIES
+    warnings
+    stdx)
+
+add_unit_test(
+    cx_set_test
+    CATCH2
+    FILES
+    cx_set.cpp
+    LIBRARIES
+    warnings
+    stdx)
+
+add_unit_test(
+    cx_vector_test
+    CATCH2
+    FILES
+    cx_vector.cpp
+    LIBRARIES
+    warnings
+    stdx)
+
+add_unit_test(
     default_panic_test
     CATCH2
     FILES
