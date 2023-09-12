@@ -20,7 +20,8 @@ target_compile_features(stdx INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 target_compile_options(
     stdx
     INTERFACE
-        $<$<CXX_COMPILER_ID:Clang>:-Wno-gnu-string-literal-operator-template>)
+        $<$<CXX_COMPILER_ID:Clang>:-Wno-gnu-string-literal-operator-template>
+        $<$<CXX_COMPILER_ID:Clang>:-Wno-missing-braces>)
 
 if(PROJECT_IS_TOP_LEVEL)
     add_docs(docs)

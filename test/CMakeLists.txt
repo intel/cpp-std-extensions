@@ -102,3 +102,16 @@ add_unit_test(
     LIBRARIES
     warnings
     stdx)
+
+if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
+    add_unit_test(
+        tuple_test
+        CATCH2
+        FILES
+        indexed_tuple.cpp
+        tuple.cpp
+        tuple_algorithms.cpp
+        LIBRARIES
+        warnings
+        stdx)
+endif()
