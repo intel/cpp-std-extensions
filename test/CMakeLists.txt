@@ -8,7 +8,6 @@ add_unit_test(
     callable.cpp
     concepts.cpp
     conditional.cpp
-    ct_string.cpp
     function_traits.cpp
     intrusive_list.cpp
     overload.cpp
@@ -20,6 +19,26 @@ add_unit_test(
     LIBRARIES
     warnings
     stdx)
+
+add_unit_test(
+    ct_conversions_test
+    CATCH2
+    FILES
+    ct_conversions.cpp
+    LIBRARIES
+    warnings
+    stdx)
+
+if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
+    add_unit_test(
+        ct_string_test
+        CATCH2
+        FILES
+        ct_string.cpp
+        LIBRARIES
+        warnings
+        stdx)
+endif()
 
 add_unit_test(
     cx_map_test
@@ -83,3 +102,16 @@ add_unit_test(
     LIBRARIES
     warnings
     stdx)
+
+if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
+    add_unit_test(
+        tuple_test
+        CATCH2
+        FILES
+        indexed_tuple.cpp
+        tuple.cpp
+        tuple_algorithms.cpp
+        LIBRARIES
+        warnings
+        stdx)
+endif()
