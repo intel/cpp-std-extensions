@@ -2,8 +2,6 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#if __cplusplus >= 202002L
-
 namespace {
 template <typename T, T...> struct string_constant {};
 } // namespace
@@ -75,5 +73,3 @@ TEST_CASE("string split (character not present)", "[ct_string]") {
     static_assert(p.first == stdx::ct_string{"A"});
     static_assert(p.second.empty());
 }
-
-#endif
