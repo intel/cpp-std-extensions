@@ -6,7 +6,7 @@ allows the use of structured bindings with `stdx::tuple`.
 
 [source,cpp]
 ----
-auto t = stdx::tuple{1, 2, 3};
+auto t = stdx::tuple{1, 2};
 auto &[x, y] = t;
 ----
 
