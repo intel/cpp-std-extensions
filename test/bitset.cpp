@@ -107,6 +107,15 @@ TEMPLATE_TEST_CASE("construct with a value", "[bitset]", std::uint8_t,
     static_assert(bs2[1]);
 }
 
+TEMPLATE_TEST_CASE("construct with values for bits", "[bitset]", std::uint8_t,
+                   std::uint16_t, std::uint32_t, std::uint64_t) {
+    constexpr auto bs = stdx::bitset<1, TestType>{stdx::place_bits, 1, 3, 5};
+    static_assert(not bs[0]);
+    static_assert(bs[1]);
+    static_assert(bs[3]);
+    static_assert(bs[5]);
+}
+
 TEMPLATE_TEST_CASE("construct with a string_view", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     using namespace std::string_view_literals;

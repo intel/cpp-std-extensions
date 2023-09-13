@@ -1,33 +1,39 @@
-add_unit_test(
-    stdx_test
-    CATCH2
-    FILES
-    always_false.cpp
-    bit.cpp
-    bitset.cpp
-    callable.cpp
-    concepts.cpp
-    conditional.cpp
-    function_traits.cpp
-    intrusive_list.cpp
-    overload.cpp
-    priority.cpp
-    remove_cvref.cpp
-    to_underlying.cpp
-    with_result_of.cpp
-    udls.cpp
-    LIBRARIES
-    warnings
-    stdx)
+function(add_tests)
+    foreach(name ${ARGN})
+        add_unit_test(
+            "${name}_test"
+            CATCH2
+            FILES
+            "${name}.cpp"
+            LIBRARIES
+            warnings
+            stdx)
+    endforeach()
+endfunction()
 
-add_unit_test(
-    ct_conversions_test
-    CATCH2
-    FILES
-    ct_conversions.cpp
-    LIBRARIES
-    warnings
-    stdx)
+add_tests(
+    always_false
+    bit
+    bitset
+    callable
+    concepts
+    conditional
+    ct_conversions
+    cx_map
+    cx_multimap
+    cx_queue
+    cx_set
+    cx_vector
+    default_panic
+    function_traits
+    intrusive_list
+    overload
+    panic
+    priority
+    remove_cvref
+    to_underlying
+    with_result_of
+    udls)
 
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
     add_unit_test(
@@ -38,72 +44,7 @@ if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
         LIBRARIES
         warnings
         stdx)
-endif()
 
-add_unit_test(
-    cx_map_test
-    CATCH2
-    FILES
-    cx_map.cpp
-    LIBRARIES
-    warnings
-    stdx)
-
-add_unit_test(
-    cx_multimap_test
-    CATCH2
-    FILES
-    cx_multimap.cpp
-    LIBRARIES
-    warnings
-    stdx)
-
-add_unit_test(
-    cx_queue_test
-    CATCH2
-    FILES
-    cx_queue.cpp
-    LIBRARIES
-    warnings
-    stdx)
-
-add_unit_test(
-    cx_set_test
-    CATCH2
-    FILES
-    cx_set.cpp
-    LIBRARIES
-    warnings
-    stdx)
-
-add_unit_test(
-    cx_vector_test
-    CATCH2
-    FILES
-    cx_vector.cpp
-    LIBRARIES
-    warnings
-    stdx)
-
-add_unit_test(
-    default_panic_test
-    CATCH2
-    FILES
-    default_panic.cpp
-    LIBRARIES
-    warnings
-    stdx)
-
-add_unit_test(
-    panic_test
-    CATCH2
-    FILES
-    panic.cpp
-    LIBRARIES
-    warnings
-    stdx)
-
-if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
     add_unit_test(
         tuple_test
         CATCH2
