@@ -25,7 +25,7 @@ on ranges, but over a tuple instead.
 [source,cpp]
 ----
 auto t = stdx::tuple{1, 2, 3};
-auto x = stdx::any_of([](auto n) { return n % 2 == 0; }, t)); // true
+auto x = stdx::any_of([](auto n) { return n % 2 == 0; }, t); // true
 ----
 
 === `apply`
