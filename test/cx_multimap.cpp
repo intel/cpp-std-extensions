@@ -45,6 +45,21 @@ TEST_CASE("put multiple values", "[cx_multimap]") {
     CHECK(not t.contains(60, 0));
 }
 
+TEST_CASE("erase values", "[cx_multimap]") {
+    stdx::cx_multimap<int, int, 64> t;
+
+    t.put(60, 1);
+    t.put(60, 2);
+    t.put(60, 3);
+
+    t.erase(60, 2);
+    CHECK(t.size() == 1);
+    CHECK(not t.contains(60, 2));
+
+    t.erase(60);
+    CHECK(t.empty());
+}
+
 TEST_CASE("constexpr populated map", "[cx_multimap]") {
     constexpr auto m = [] {
         stdx::cx_multimap<int, int, 64> t;
