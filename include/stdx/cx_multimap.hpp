@@ -68,9 +68,9 @@ class cx_multimap {
     constexpr auto erase(key_type const &k, mapped_type const &v) -> size_type {
         if (storage.contains(k)) {
             auto &s = storage.get(k);
-            auto const r = s.remove(v);
+            auto const r = s.erase(v);
             if (s.empty()) {
-                storage.remove(k);
+                storage.erase(k);
             }
             return r;
         }
