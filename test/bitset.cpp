@@ -119,15 +119,15 @@ TEMPLATE_TEST_CASE("construct with values for bits", "[bitset]", std::uint8_t,
 TEMPLATE_TEST_CASE("construct with a string_view", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     using namespace std::string_view_literals;
-    static_assert(stdx::bitset<5, TestType>{"10101"sv} ==
-                  stdx::bitset<5, TestType>{0b10101ul});
+    static_assert(stdx::bitset<4, TestType>{"1010"sv} ==
+                  stdx::bitset<4, TestType>{0b1010ul});
 }
 
 TEMPLATE_TEST_CASE("construct with a substring", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     using namespace std::string_view_literals;
-    static_assert(stdx::bitset<3, TestType>{"XOXOX"sv, 2, 3, 'X'} ==
-                  stdx::bitset<3, TestType>{0b101ul});
+    static_assert(stdx::bitset<4, TestType>{"XOXOXO"sv, 2, 4, 'X'} ==
+                  stdx::bitset<4, TestType>{0b1010ul});
 }
 
 TEMPLATE_TEST_CASE("convert to uint64_t", "[bitset]", std::uint8_t,

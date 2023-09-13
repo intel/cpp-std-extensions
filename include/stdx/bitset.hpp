@@ -19,7 +19,7 @@ struct place_bits_t {};
 constexpr inline auto place_bits = place_bits_t{};
 
 namespace detail {
-template <std::size_t N, typename StorageElem = std::uint8_t> class bitset {
+template <std::size_t N, typename StorageElem> class bitset {
     static_assert(std::is_unsigned_v<StorageElem>,
                   "Underlying storage of bitset must be an unsigned type");
     constexpr static auto storage_elem_size =
@@ -134,8 +134,9 @@ template <std::size_t N, typename StorageElem = std::uint8_t> class bitset {
                               char one = '1') {
         auto const len = std::min(n, str.size() - pos);
         auto i = std::size_t{};
-        for (auto c : str.substr(pos, std::min(len, N))) {
-            set(i++, c == one);
+        auto const s = str.substr(pos, std::min(len, N));
+        for (auto it = std::rbegin(s); it != std::rend(s); ++it) {
+            set(i++, *it == one);
         }
     }
 
