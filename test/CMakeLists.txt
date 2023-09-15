@@ -25,6 +25,7 @@ add_tests(
     cx_set
     cx_vector
     default_panic
+    for_each_n_args
     function_traits
     intrusive_list
     is_constant_evaluated
