@@ -10,6 +10,7 @@ contains a few things from the standard:
   (implemented with fewer template instantiations than a typical standard
   implementation)
 * https://en.cppreference.com/w/cpp/types/is_function[`is_function_v`] (implemented with Walter Brown's method)
+* https://en.cppreference.com/w/cpp/types/is_constant_evaluated[`is_constant_evaluated`] (from C++20)
 
 It also contains `always_false_v`, a variable template that can be instantiated
 with any number of type arguments and always evaluates to false at compile-time.

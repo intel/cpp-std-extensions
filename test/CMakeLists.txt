@@ -27,6 +27,7 @@ add_tests(
     default_panic
     function_traits
     intrusive_list
+    is_constant_evaluated
     overload
     panic
     priority
