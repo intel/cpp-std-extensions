@@ -56,5 +56,8 @@ constexpr bool is_function_object_v = detail::is_func_obj<T>;
 template <typename T>
 constexpr bool is_callable_v = is_function_v<T> or is_function_object_v<T>;
 
+constexpr auto is_constant_evaluated() noexcept -> bool {
+    return __builtin_is_constant_evaluated();
+}
 } // namespace v1
 } // namespace stdx

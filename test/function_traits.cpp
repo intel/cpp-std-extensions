@@ -96,6 +96,25 @@ TEST_CASE("lambda decayed args", "[function_traits]") {
                                  std::tuple<int>>);
 }
 
+TEST_CASE("function arity", "[function_traits]") {
+    static_assert(stdx::function_traits<decltype(func_no_args)>::arity::value ==
+                  0u);
+    static_assert(stdx::function_traits<decltype(func_one_arg)>::arity::value ==
+                  1u);
+    static_assert(stdx::arity_t<decltype(func_no_args)>::value == 0u);
+    static_assert(stdx::arity_t<decltype(func_one_arg)>::value == 1u);
+}
+
+TEST_CASE("lambda arity", "[function_traits]") {
+    [[maybe_unused]] auto const x = []() {};
+    [[maybe_unused]] auto const y = [](int) {};
+
+    static_assert(stdx::function_traits<decltype(x)>::arity::value == 0u);
+    static_assert(stdx::function_traits<decltype(y)>::arity::value == 1u);
+    static_assert(stdx::arity_t<decltype(x)>::value == 0u);
+    static_assert(stdx::arity_t<decltype(y)>::value == 1u);
+}
+
 namespace {
 bool called_1{};
 bool called_2{};

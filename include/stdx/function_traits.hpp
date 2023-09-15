@@ -16,6 +16,7 @@ struct function_traits<std::function<R(Args...)>> {
     template <template <typename...> typename List> using args = List<Args...>;
     template <template <typename...> typename List>
     using decayed_args = List<std::decay_t<Args>...>;
+    using arity = std::integral_constant<std::size_t, sizeof...(Args)>;
 };
 } // namespace detail
 
@@ -28,6 +29,7 @@ template <typename F, template <typename...> typename List>
 using args_t = typename function_traits<F>::template args<List>;
 template <typename F, template <typename...> typename List>
 using decayed_args_t = typename function_traits<F>::template decayed_args<List>;
+template <typename F> using arity_t = typename function_traits<F>::arity;
 
 } // namespace v1
 } // namespace stdx
