@@ -166,7 +166,7 @@ template <std::size_t N, typename StorageElem> class bitset {
     constexpr auto set(std::size_t pos, bool value = true) -> bitset & {
         auto const [index, offset] = indices(pos);
         if (value) {
-            storage[index] |= (bit << offset);
+            storage[index] |= static_cast<StorageElem>(bit << offset);
         } else {
             storage[index] &= static_cast<StorageElem>(~(bit << offset));
         }
@@ -195,7 +195,7 @@ template <std::size_t N, typename StorageElem> class bitset {
 
     constexpr auto flip(std::size_t pos) -> bitset & {
         auto const [index, offset] = indices(pos);
-        storage[index] ^= bit << offset;
+        storage[index] ^= static_cast<StorageElem>(bit << offset);
         return *this;
     }
 
@@ -300,13 +300,13 @@ template <std::size_t N, typename StorageElem> class bitset {
         } else {
             auto const borrow_shift = storage_elem_size - pos;
             for (auto i = start; i < storage_size - 1; ++i) {
-                storage[dst] = storage[i] >> pos;
+                storage[dst] = static_cast<StorageElem>(storage[i] >> pos);
                 storage[dst] |=
                     static_cast<StorageElem>(storage[i + 1] << borrow_shift);
                 ++dst;
             }
         }
-        storage[dst++] = storage.back() >> pos;
+        storage[dst++] = static_cast<StorageElem>(storage.back() >> pos);
         while (dst < storage_size) {
             storage[dst++] = 0;
         }
