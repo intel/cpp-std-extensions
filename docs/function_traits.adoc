@@ -31,13 +31,23 @@ using f_args = stdx::decayed_args_t<decltype(f), std::tuple>; // std::tuple<int,
 ----
 
 `stdx::arity_t` returns the arity of a function (as a `std::integral_constant`).
+`stdx::arity_v` provides convenient access to the value.
 [source,cpp]
 ----
 auto f(int&, std::string&) -> void {}
-using f_arity = stdx::arity_t<decltype(f)>; // std::integral_constant<std::size_t, 2>
+using f_arity_t = stdx::arity_t<decltype(f)>; // std::integral_constant<std::size_t, 2>
+constexpr auto f_arity_v = stdx::arity_v<decltype(f)>;
 ----
 
 
 NOTE: Function traits work on functions (and function objects): not function
 templates or overload sets. For instance therefore, they will not work on generic
 lambda expressions.
+
+The one exception to this is `stdx::arity_t` - it works on generic lambdas.
+[source,cpp]
+----
+auto l = [](auto, auto) -> void {};
+using f_arity_t = stdx::arity_t<decltype(l)>; // std::integral_constant<std::size_t, 2>
+constexpr auto f_arity_v = stdx::arity_v<decltype(l)>;
+----

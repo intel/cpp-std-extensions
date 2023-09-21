@@ -103,6 +103,9 @@ TEST_CASE("function arity", "[function_traits]") {
                   1u);
     static_assert(stdx::arity_t<decltype(func_no_args)>::value == 0u);
     static_assert(stdx::arity_t<decltype(func_one_arg)>::value == 1u);
+
+    static_assert(stdx::arity_v<decltype(func_no_args)> == 0u);
+    static_assert(stdx::arity_v<decltype(func_one_arg)> == 1u);
 }
 
 TEST_CASE("lambda arity", "[function_traits]") {
@@ -113,6 +116,19 @@ TEST_CASE("lambda arity", "[function_traits]") {
     static_assert(stdx::function_traits<decltype(y)>::arity::value == 1u);
     static_assert(stdx::arity_t<decltype(x)>::value == 0u);
     static_assert(stdx::arity_t<decltype(y)>::value == 1u);
+
+    static_assert(stdx::arity_v<decltype(x)> == 0u);
+    static_assert(stdx::arity_v<decltype(y)> == 1u);
+}
+
+TEST_CASE("generic lambda arity", "[function_traits]") {
+    [[maybe_unused]] auto const x = [](auto) {};
+    [[maybe_unused]] auto const y = [](auto, auto) {};
+    static_assert(stdx::arity_t<decltype(x)>::value == 1u);
+    static_assert(stdx::arity_t<decltype(y)>::value == 2u);
+
+    static_assert(stdx::arity_v<decltype(x)> == 1u);
+    static_assert(stdx::arity_v<decltype(y)> == 2u);
 }
 
 namespace {
