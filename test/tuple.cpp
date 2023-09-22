@@ -238,7 +238,15 @@ TEST_CASE("equality comparable (tuple of references)", "[tuple]") {
     auto const u = stdx::tuple<int &>{y};
 
     CHECK(t == t);
-    CHECK(t != u);
+    CHECK(t == u);
+}
+
+TEST_CASE("equality comparable (references and non-references)", "[tuple]") {
+    int x{5};
+    auto const t = stdx::tuple<int &>{x};
+    auto const u = stdx::tuple<int>{5};
+    CHECK(t == u);
+    CHECK(u == t);
 }
 
 namespace {
@@ -301,6 +309,15 @@ TEST_CASE("order comparable", "[tuple]") {
     static_assert(not(t >= stdx::tuple{6, 9}));
 }
 
+TEST_CASE("order comparable (references and non-references)", "[tuple]") {
+    int x{6};
+    int y{5};
+    auto const t = stdx::tuple<int &, int &>{x, y};
+    auto const u = stdx::tuple<int, int>{6, 4};
+    CHECK(t > u);
+    CHECK(u < t);
+}
+
 TEST_CASE("spaceship comparable", "[tuple]") {
     constexpr auto t = stdx::tuple{5, 10};
 
@@ -318,6 +335,14 @@ TEST_CASE("spaceship comparable", "[tuple]") {
     static_assert(t <=> stdx::tuple{5, 9} == std::strong_ordering::greater);
     static_assert(t <=> stdx::tuple{4, 10} == std::strong_ordering::greater);
     static_assert(t <=> stdx::tuple{4, 11} == std::strong_ordering::greater);
+}
+
+TEST_CASE("spaceship comparable (references and non-references)", "[tuple]") {
+    int x{5};
+    auto const t = stdx::tuple<int &>{x};
+    auto const u = stdx::tuple<int>{5};
+    CHECK(t <=> u == std::strong_ordering::equal);
+    CHECK(u <=> t == std::strong_ordering::equal);
 }
 
 TEST_CASE("free get is SFINAE-friendly", "[tuple]") {
