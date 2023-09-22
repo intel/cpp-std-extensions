@@ -92,9 +92,11 @@ template <template <typename> typename... Fs, typename Op, typename T,
 constexpr auto transform(Op &&op, T &&t, Ts &&...ts) {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         if constexpr (sizeof...(Fs) == 0) {
-            return stdx::make_tuple(
+            return stdx::tuple<decltype(detail::invoke_at<Is>(
+                std::forward<Op>(op), std::forward<T>(t),
+                std::forward<Ts>(ts)...))...>{
                 detail::invoke_at<Is>(std::forward<Op>(op), std::forward<T>(t),
-                                      std::forward<Ts>(ts)...)...);
+                                      std::forward<Ts>(ts)...)...};
         } else {
             return stdx::make_indexed_tuple<Fs...>(
                 detail::invoke_at<Is>(std::forward<Op>(op), std::forward<T>(t),

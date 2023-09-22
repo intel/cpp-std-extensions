@@ -325,11 +325,35 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     }
 
   private:
-    [[nodiscard]] friend constexpr auto operator==(tuple_impl const &,
-                                                   tuple_impl const &)
-        -> bool = default;
+    template <typename Indices, typename Funcs, typename... Us>
+        requires(... and std::equality_comparable_with<Ts, Us>)
     [[nodiscard]] friend constexpr auto
-    operator<=>(tuple_impl const &, tuple_impl const &) = default;
+    operator==(tuple_impl const &lhs,
+               tuple_impl<Indices, Funcs, Us...> const &rhs) -> bool {
+        return (... and (lhs[index<Is>] == rhs[index<Is>]));
+    }
+
+    template <typename Indices, typename Funcs, typename... Us>
+        requires(... and std::three_way_comparable_with<Ts, Us>)
+    [[nodiscard]] friend constexpr auto
+    operator<=>(tuple_impl const &lhs,
+                tuple_impl<Indices, Funcs, Us...> const &rhs) {
+        if constexpr (sizeof...(Is) == 0) {
+            return std::strong_ordering::equal;
+        } else {
+            using C =
+                std::common_comparison_category_t<decltype(lhs[index<Is>] <=>
+                                                           rhs[index<Is>])...>;
+            C result = lhs[index<0>] <=> rhs[index<0>];
+            auto const compare_at = [&]<std::size_t I>() {
+                result = lhs[index<I>] <=> rhs[index<I>];
+                return result != 0;
+            };
+            [[maybe_unused]] auto b =
+                (compare_at.template operator()<Is>() or ...);
+            return result;
+        }
+    }
 };
 
 template <typename... Ts>

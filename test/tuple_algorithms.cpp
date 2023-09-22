@@ -42,6 +42,17 @@ TEST_CASE("rvalue transform", "[tuple_algorithms]") {
     CHECK(u == stdx::tuple{2, 3, 4});
 }
 
+TEST_CASE("transform preserves references", "[tuple_algorithms]") {
+    int value{1};
+    auto const u = stdx::transform(
+        [&](auto i) -> int & {
+            value += i;
+            return value;
+        },
+        stdx::tuple{1});
+    CHECK(std::addressof(value) == std::addressof(u[stdx::index<0>]));
+}
+
 namespace {
 template <typename Key, typename Value> struct map_entry {
     using key_t = Key;
