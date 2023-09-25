@@ -309,7 +309,8 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
             .value;
     }
 
-    constexpr static auto size() -> std::size_t { return sizeof...(Ts); }
+    constexpr static auto size =
+        std::integral_constant<std::size_t, sizeof...(Ts)>{};
     constexpr static auto ugly_Value(...) -> void;
 
     [[nodiscard]] constexpr static auto fill_inner_indices(index_pair *p)
