@@ -423,6 +423,9 @@ constexpr auto apply_indices(T &&t) {
     }(std::make_index_sequence<tuple_size_v<tuple_t>>{});
 }
 
+template <typename... Ts> auto forward_as_tuple(Ts &&...ts) {
+    return stdx::tuple<Ts &&...>{std::forward<Ts>(ts)...};
+}
 } // namespace v1
 } // namespace stdx
 

@@ -28,16 +28,22 @@ them, but if not, it's quicker to compile just an alias and a variable template.
 
 === Constructing a tuple
 
-A `tuple` can be constructed either with CTAD, or with `make_tuple`.
+A `tuple` can be constructed either with CTAD, or with `make_tuple`, or with
+`forward_as_tuple`.
+
 [source,cpp]
 ----
-auto t = stdx::tuple{1, 2};      // tuple<int, int>
-auto t = stdx::make_tuple(1, 2); // the same
+auto t = stdx::tuple{1, 2};            // tuple<int, int>
+auto t = stdx::make_tuple(1, 2);       // the same
+auto t = stdx::forward_as_tuple(1, 2); // tuple<int&&, int&&>
 ----
 
 `make_tuple` decays its arguments, just like `std::make_tuple`. However,
 `std::make_tuple` also does `std::reference_wrapper`-unwrapping, which
 `stdx::make_tuple` does not.
+
+`forward_as_tuple` creates a tuple of forwarded references, like
+`std::forward_as_tuple`.
 
 === Accessing tuple elements
 

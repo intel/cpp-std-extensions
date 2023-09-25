@@ -399,3 +399,11 @@ TEST_CASE("tuple type-based concat", "[tuple]") {
     static_assert(std::is_same_v<typename detail::concat<T, U>::type,
                                  stdx::tuple<int, float>>);
 }
+
+TEST_CASE("forward_as_tuple", "[tuple]") {
+    auto const x = 42;
+    auto y = 42;
+    auto t = stdx::forward_as_tuple(x, y, 42);
+    static_assert(
+        std::is_same_v<decltype(t), stdx::tuple<int const &, int &, int &&>>);
+}
