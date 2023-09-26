@@ -35,7 +35,7 @@ constexpr auto convertible_to = std::is_convertible_v<From, To>;
 template <typename T, typename U>
 constexpr auto derived_from =
     std::is_base_of_v<U, T> and
-    std::is_convertible_v<const volatile T *, const volatile U *>;
+    std::is_convertible_v<T const volatile *, U const volatile *>;
 
 template <typename T, typename U>
 constexpr auto same_as = std::is_same_v<T, U> and std::is_same_v<U, T>;
@@ -115,7 +115,7 @@ concept convertible_to = std::is_convertible_v<From, To> and
 template <typename T, typename U>
 concept derived_from =
     std::is_base_of_v<U, T> and
-    std::is_convertible_v<const volatile T *, const volatile U *>;
+    std::is_convertible_v<T const volatile *, U const volatile *>;
 
 template <typename T, typename U>
 concept same_as = std::is_same_v<T, U> and std::is_same_v<U, T>;
