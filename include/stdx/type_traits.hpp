@@ -1,6 +1,7 @@
 #pragma once
 
 #include <type_traits>
+#include <utility>
 
 namespace stdx {
 inline namespace v1 {
@@ -59,5 +60,20 @@ constexpr bool is_callable_v = is_function_v<T> or is_function_object_v<T>;
 constexpr auto is_constant_evaluated() noexcept -> bool {
     return __builtin_is_constant_evaluated();
 }
+
+namespace detail {
+template <template <typename...> typename T> struct detect_specialization {
+    template <typename U> constexpr auto operator()(U &&) -> std::false_type;
+
+    template <typename... Us>
+    constexpr auto operator()(T<Us...> &&) -> std::true_type;
+};
+} // namespace detail
+
+template <typename U, template <typename...> typename T>
+constexpr bool is_specialization_of_v =
+    decltype(std::declval<detail::detect_specialization<T>>()(
+        std::declval<U>()))::value;
+
 } // namespace v1
 } // namespace stdx

@@ -34,6 +34,7 @@ add_tests(
     priority
     remove_cvref
     to_underlying
+    type_traits
     with_result_of
     udls)
 
