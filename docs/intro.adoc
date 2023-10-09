@@ -19,6 +19,7 @@ The following compilers are supported:
 * clang 14
 * clang 15
 * clang 16
+* clang 17
 * gcc 12
 * gcc 13
 
