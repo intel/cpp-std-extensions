@@ -156,7 +156,7 @@ template <std::size_t N, typename StorageElem> class bitset {
         }
     }
 
-    [[nodiscard]] constexpr auto size() const -> std::size_t { return N; }
+    constexpr static std::integral_constant<std::size_t, N> size{};
 
     [[nodiscard]] constexpr auto operator[](std::size_t pos) const -> bool {
         auto const [index, offset] = indices(pos);
