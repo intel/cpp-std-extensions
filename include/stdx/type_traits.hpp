@@ -75,5 +75,9 @@ constexpr bool is_specialization_of_v =
     decltype(std::declval<detail::detect_specialization<T>>()(
         std::declval<U>()))::value;
 
+template <typename E>
+constexpr bool is_scoped_enum_v =
+    std::is_enum_v<E> and
+    not std::is_convertible_v<E, std::underlying_type_t<E>>;
 } // namespace v1
 } // namespace stdx

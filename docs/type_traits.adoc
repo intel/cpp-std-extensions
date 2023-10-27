@@ -11,6 +11,7 @@ contains a few things from the standard:
   implementation)
 * https://en.cppreference.com/w/cpp/types/is_function[`is_function_v`] (implemented with Walter Brown's method)
 * https://en.cppreference.com/w/cpp/types/is_constant_evaluated[`is_constant_evaluated`] (from C++20)
+* https://en.cppreference.com/w/cpp/types/is_scoped_enum[`is_scoped_enum_v`] (from C++23)
 
 `always_false_v` is a variable template that can be instantiated
 with any number of type arguments and always evaluates to false at compile-time.
