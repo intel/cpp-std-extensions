@@ -5,3 +5,17 @@ https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bit.hpp[`bit.
 provides an implementation that mirrors
 https://en.cppreference.com/w/cpp/header/bit[`<bit>`], but is
 `constexpr` in C++17. It is mostly based on intrinsics.
+
+`to_le` and `to_be` are variations on `byteswap` that convert unsigned integral
+types to little- or big-endian respectively. On a little-endian machine, `to_le`
+does nothing, and `to_be` is the equivalent of `byteswap`. On a big endian
+machine it is the other way around.
+
+[source,cpp]
+----
+constexpr auto x = std::uint32_t{0x12'34'56'78};
+constexpr auto y = stdx::to_be(x); // 0x78'56'34'12 (on a little-endian machine)
+----
+
+`to_le` and `to_be` are defined for unsigned integral types. Of course for
+`std::uint8_t` they do nothing.
