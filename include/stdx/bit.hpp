@@ -228,5 +228,24 @@ using std::bit_width;
 using std::has_single_bit;
 #endif
 
+template <typename T>
+[[nodiscard]] constexpr auto to_le(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+    if constexpr (stdx::endian::native == stdx::endian::big) {
+        return byteswap(x);
+    } else {
+        return x;
+    }
+}
+
+template <typename T>
+[[nodiscard]] constexpr auto to_be(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+    if constexpr (stdx::endian::native == stdx::endian::little) {
+        return byteswap(x);
+    } else {
+        return x;
+    }
+}
 } // namespace v1
 } // namespace stdx
