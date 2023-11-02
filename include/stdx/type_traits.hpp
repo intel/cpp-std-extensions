@@ -79,5 +79,10 @@ template <typename E>
 constexpr bool is_scoped_enum_v =
     std::is_enum_v<E> and
     not std::is_convertible_v<E, std::underlying_type_t<E>>;
+
+template <typename T> struct type_identity {
+    using type = T;
+};
+template <typename T> using type_identity_t = typename type_identity<T>::type;
 } // namespace v1
 } // namespace stdx
