@@ -28,7 +28,10 @@ template <typename T, std::size_t N> struct span_base {
     constexpr static std::bool_constant<N == 0> empty{};
 };
 
-template <typename T> struct span_base<T, dynamic_extent> {
+template <typename T> class span_base<T, dynamic_extent> {
+    std::size_t sz{};
+
+  public:
     constexpr span_base() = default;
 
     template <typename It, typename SizeOrEnd,
@@ -50,8 +53,6 @@ template <typename T> struct span_base<T, dynamic_extent> {
     [[nodiscard]] constexpr auto empty() const noexcept -> bool {
         return sz == 0u;
     }
-
-    std::size_t sz{};
 };
 } // namespace detail
 
@@ -59,6 +60,8 @@ template <typename T, std::size_t Extent = dynamic_extent>
 class span : public detail::span_base<T, Extent> {
     template <typename> constexpr static inline auto dependent_extent = Extent;
     using base_t = detail::span_base<T, Extent>;
+
+    T *ptr{};
 
   public:
     using element_type = T;
@@ -214,8 +217,6 @@ class span : public detail::span_base<T, Extent> {
         -> span<element_type, dynamic_extent> {
         return {ptr + Offset, std::min(Count, this->size() - Offset)};
     }
-
-    pointer ptr{};
 };
 
 // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
