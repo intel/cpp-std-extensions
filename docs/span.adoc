@@ -1,0 +1,6 @@
+
+== `span.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/span.hpp[`span.hpp`]
+provides an implementation of
+https://en.cppreference.com/w/cpp/container/span[`span`].

@@ -1,0 +1,7 @@
+
+== `memory.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/memory.hpp[`memory.hpp`]
+contains one thing:
+
+* https://en.cppreference.com/w/cpp/memory/to_address[`to_address`] (from C++20)
