@@ -29,3 +29,7 @@ TEST_CASE("is_scoped_enum", "[type_traits]") {
     static_assert(not stdx::is_scoped_enum_v<E1>);
     static_assert(stdx::is_scoped_enum_v<E2>);
 }
+
+TEST_CASE("type_identity", "[type_traits]") {
+    static_assert(std::is_same_v<stdx::type_identity_t<void>, void>);
+}

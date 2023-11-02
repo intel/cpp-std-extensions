@@ -134,7 +134,8 @@ template <typename T>
         return __builtin_rotateleft64(x, s);
     }
 #else
-    return (x << s) | (x >> (std::numeric_limits<T>::digits - s));
+    return static_cast<T>((x << s) |
+                          (x >> (std::numeric_limits<T>::digits - s)));
 #endif
 }
 template <typename T>
@@ -151,7 +152,8 @@ template <typename T>
         return __builtin_rotateright64(x, s);
     }
 #else
-    return (x >> s) | (x << (std::numeric_limits<T>::digits - s));
+    return static_cast<T>((x >> s) |
+                          (x << (std::numeric_limits<T>::digits - s)));
 #endif
 }
 } // namespace detail

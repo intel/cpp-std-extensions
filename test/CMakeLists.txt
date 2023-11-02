@@ -29,10 +29,12 @@ add_tests(
     function_traits
     intrusive_list
     is_constant_evaluated
+    memory
     overload
     panic
     priority
     remove_cvref
+    span
     to_underlying
     type_traits
     with_result_of

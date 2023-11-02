@@ -4,14 +4,15 @@
 https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/type_traits.hpp[`type_traits.hpp`]
 contains a few things from the standard:
 
-* https://en.cppreference.com/w/cpp/types/remove_cvref[`remove_cvref_t`] (from C++20)
-* https://en.cppreference.com/w/cpp/utility/to_underlying[`to_underlying`] (from C++23)
 * https://en.cppreference.com/w/cpp/types/conditional[`conditional_t`]
   (implemented with fewer template instantiations than a typical standard
   implementation)
-* https://en.cppreference.com/w/cpp/types/is_function[`is_function_v`] (implemented with Walter Brown's method)
 * https://en.cppreference.com/w/cpp/types/is_constant_evaluated[`is_constant_evaluated`] (from C++20)
+* https://en.cppreference.com/w/cpp/types/is_function[`is_function_v`] (implemented with Walter Brown's method)
 * https://en.cppreference.com/w/cpp/types/is_scoped_enum[`is_scoped_enum_v`] (from C++23)
+* https://en.cppreference.com/w/cpp/types/remove_cvref[`remove_cvref_t`] (from C++20)
+* https://en.cppreference.com/w/cpp/utility/to_underlying[`to_underlying`] (from C++23)
+* https://en.cppreference.com/w/cpp/types/type_identity[`type_identity`] (from C++20)
 
 `always_false_v` is a variable template that can be instantiated
 with any number of type arguments and always evaluates to false at compile-time.
