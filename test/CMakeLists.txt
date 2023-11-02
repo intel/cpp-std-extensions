@@ -34,6 +34,7 @@ add_tests(
     panic
     priority
     remove_cvref
+    span
     to_underlying
     type_traits
     with_result_of
