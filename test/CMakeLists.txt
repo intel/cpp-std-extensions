@@ -29,6 +29,7 @@ add_tests(
     function_traits
     intrusive_list
     is_constant_evaluated
+    memory
     overload
     panic
     priority
