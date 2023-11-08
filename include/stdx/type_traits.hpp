@@ -30,6 +30,9 @@ template <> struct conditional<false> {
 template <bool B, typename T, typename U>
 using conditional_t = typename detail::conditional<B>::template choice_t<T, U>;
 
+template <template <typename...> typename P, typename X, typename Y = void>
+using type_or_t = conditional_t<P<X>::value, X, Y>;
+
 template <typename...> constexpr bool always_false_v = false;
 
 template <typename T>

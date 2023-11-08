@@ -47,3 +47,16 @@ stdx::is_specialization_of_v<int, std::optional>; // false
 
 NOTE: `is_specialization_of` is suitable for templates with type parameters
 only (not template-template parameters or NTTPs).
+
+`type_or_t` is an alias template that selects a type based on whether or not it
+passes a predicate. If not, a default is returned.
+
+[source,cpp]
+----
+using A = int *;
+using T = stdx::type_or_t<std::is_pointer, A>;        // A
+
+using B = int;
+using X = stdx::type_or_t<std::is_pointer, B>;        // void (implicit default)
+using Y = stdx::type_or_t<std::is_pointer, B, float>; // float (explicit default)
+----

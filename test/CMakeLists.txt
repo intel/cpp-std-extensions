@@ -36,6 +36,7 @@ add_tests(
     remove_cvref
     span
     to_underlying
+    type_map
     type_traits
     with_result_of
     udls)

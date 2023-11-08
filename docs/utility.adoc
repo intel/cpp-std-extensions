@@ -27,6 +27,61 @@ https://en.cppreference.com/w/cpp/utility/unreachable[`std::unreachable`].
 }
 ----
 
+`type_map` is a structure designed to allow compile-time lookups of types or
+values. The basic idea is having a "map" of key-value pairs. Each key-value is a
+`type_pair`, and all the `type_pair`​s form a map. Values in the map can be
+looked up using `type_lookup_t`.
+
+[source,cpp]
+----
+// A, B, C, X, and Y are types - they don't have to be complete
+using M = stdx::type_map<stdx::type_pair<A, X>, stdx::type_pair<B, Y>>;
+using T = stdx::type_lookup_t<M, A>; // X
+using U = stdx::type_lookup_t<M, B>; // Y
+using Z = stdx::type_lookup_t<M, C>; // void, because C is not in the map
+----
+
+`type_lookup_t` takes an optional third argument to be returned as the default
+(`void` above). The most common use case is for `type_map` to holds types, but
+there are convenience aliases for dealing with compile-time values in each of
+the four possibilities:
+
+- `type_lookup_t` - for mapping from types to types
+- `type_lookup_v` - for mapping from types to values
+- `value_lookup_t` - for mapping from values to types
+- `value_lookup_v` - for mapping from values to values
+
+And `type_pair` has corresponding aliases to make the appropriate `type_map`​s:
+
+- `tt_pair` - for type-type maps
+- `tv_pair` - for type-value maps
+- `vt_pair` - for value-type maps
+- `vv_pair` - for value-value maps
+
+[source,cpp]
+----
+// a type-type map that uses type_lookup_t
+using M1 = stdx::type_map<stdx::tt_pair<A, X>, stdx::tt_pair<B, Y>>;
+using T1 = stdx::type_lookup_t<M1, A>; // X
+
+// a type-value map that uses type_lookup_v
+using M2 = stdx::type_map<stdx::tv_pair<A, 0>, stdx::tv_pair<B, 1>>;
+constexpr auto v2 = stdx::type_lookup_v<M2, A>; // 0
+
+// a value-type map that uses value_lookup_t
+using M3 = stdx::type_map<stdx::vt_pair<0, X>, stdx::vt_pair<1, Y>>;
+using T3 = stdx::value_lookup_t<M3, 0>; // X
+
+// a value-value map that uses value_lookup_v
+using M4 = stdx::type_map<stdx::vv_pair<0, 42>, stdx::vv_pair<1, 17>>;
+constexpr auto v4 = stdx::value_lookup_v<M4, 0>; // 42
+----
+
+In the case of mapping to types, the `*_lookup_t` aliases have optional third
+type arguments which are defaults returned when lookup fails. In the case of
+mapping to values, the `*_lookup_v` aliases have optional third NTTP arguments
+in the same role.
+
 `utility.hpp` also contains a few handy user-defined literals so that code using
 boolean values can be more expressive at the call site than just using bare
 `true` and `false`. This also makes it safer to use templates with `bool`
