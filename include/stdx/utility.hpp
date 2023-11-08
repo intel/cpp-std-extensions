@@ -1,8 +1,10 @@
 #pragma once
 
 #include <stdx/compiler.hpp>
+#include <stdx/type_traits.hpp>
 
 #include <cstddef>
+#include <utility>
 
 namespace stdx {
 inline namespace v1 {
@@ -55,5 +57,51 @@ CONSTEVAL auto operator""_Gi(unsigned long long int n)
 
 [[noreturn]] inline auto unreachable() -> void { __builtin_unreachable(); }
 
+namespace detail {
+template <auto V> struct value_t {
+    constexpr static inline auto value = V;
+};
+} // namespace detail
+
+template <typename K, typename V> struct type_pair {};
+template <typename K, typename V> using tt_pair = type_pair<K, V>;
+template <auto K, typename V> using vt_pair = tt_pair<detail::value_t<K>, V>;
+template <typename K, auto V> using tv_pair = tt_pair<K, detail::value_t<V>>;
+template <auto K, auto V>
+using vv_pair = tt_pair<detail::value_t<K>, detail::value_t<V>>;
+
+template <typename... Ts> struct type_map : Ts... {};
+
+namespace detail {
+template <typename K, typename Default>
+constexpr static auto lookup(...) -> Default;
+template <typename K, typename Default, typename V>
+constexpr static auto lookup(type_pair<K, V>) -> V;
+} // namespace detail
+
+template <typename M, typename K, typename Default = void>
+using type_lookup_t = decltype(detail::lookup<K, Default>(std::declval<M>()));
+
+template <typename M, auto K, typename Default = void>
+using value_lookup_t =
+    decltype(detail::lookup<detail::value_t<K>, Default>(std::declval<M>()));
+
+namespace detail {
+template <typename T>
+using is_not_void = std::bool_constant<not std::is_void_v<T>>;
+}
+
+template <typename M, typename K, auto Default = 0>
+constexpr static auto type_lookup_v =
+    type_or_t<detail::is_not_void,
+              decltype(detail::lookup<K, void>(std::declval<M>())),
+              detail::value_t<Default>>::value;
+
+template <typename M, auto K, auto Default = 0>
+constexpr static auto value_lookup_v =
+    type_or_t<detail::is_not_void,
+              decltype(detail::lookup<detail::value_t<K>, void>(
+                  std::declval<M>())),
+              detail::value_t<Default>>::value;
 } // namespace v1
 } // namespace stdx

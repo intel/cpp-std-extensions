@@ -2,6 +2,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <type_traits>
+
 namespace {
 template <typename> struct unary_t {};
 template <typename...> struct variadic_t {};
@@ -32,4 +34,12 @@ TEST_CASE("is_scoped_enum", "[type_traits]") {
 
 TEST_CASE("type_identity", "[type_traits]") {
     static_assert(std::is_same_v<stdx::type_identity_t<void>, void>);
+}
+
+TEST_CASE("type_or_t", "[type_traits]") {
+    static_assert(
+        std::is_same_v<stdx::type_or_t<std::is_void, void, int>, void>);
+    static_assert(
+        std::is_same_v<stdx::type_or_t<std::is_void, int, float>, float>);
+    static_assert(std::is_same_v<stdx::type_or_t<std::is_void, int>, void>);
 }
