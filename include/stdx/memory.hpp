@@ -7,7 +7,8 @@
 namespace stdx {
 inline namespace v1 {
 template <typename T> constexpr auto to_address(T *p) noexcept -> T * {
-    static_assert(not stdx::is_function_v<T>);
+    static_assert(not stdx::is_function_v<T>,
+                  "to_address on a function pointer is ill-formed");
     return p;
 }
 

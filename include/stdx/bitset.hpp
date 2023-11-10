@@ -20,8 +20,6 @@ constexpr inline auto place_bits = place_bits_t{};
 
 namespace detail {
 template <std::size_t N, typename StorageElem> class bitset {
-    static_assert(std::is_unsigned_v<StorageElem>,
-                  "Underlying storage of bitset must be an unsigned type");
     constexpr static auto storage_elem_size =
         std::numeric_limits<StorageElem>::digits;
     constexpr static auto storage_size =
@@ -125,7 +123,8 @@ template <std::size_t N, typename StorageElem> class bitset {
 
     template <typename... Bs>
     constexpr explicit bitset(place_bits_t, Bs... bs) {
-        static_assert((std::is_integral_v<Bs> and ...));
+        static_assert((std::is_integral_v<Bs> and ...),
+                      "Bit places must be integral!");
         (set(static_cast<std::size_t>(bs)), ...);
     }
 
@@ -144,7 +143,8 @@ template <std::size_t N, typename StorageElem> class bitset {
         if constexpr (std::is_same_v<StorageElem, std::uint64_t>) {
             return storage[0] & lastmask;
         } else {
-            static_assert(N <= std::numeric_limits<std::uint64_t>::digits);
+            static_assert(N <= std::numeric_limits<std::uint64_t>::digits,
+                          "Bitset too big for conversion to std::uint64_t");
             std::uint64_t result{};
             for (auto i = std::size_t{}; i < storage_size - 1; ++i) {
                 result <<= storage_elem_size;
