@@ -73,3 +73,21 @@ TEST_CASE("string split (character not present)", "[ct_string]") {
     static_assert(p.first == stdx::ct_string{"A"});
     static_assert(p.second.empty());
 }
+
+TEST_CASE("string concat (lhs empty)", "[ct_string]") {
+    constexpr auto s1 = stdx::ct_string{""};
+    constexpr auto s2 = stdx::ct_string{"def"};
+    static_assert(s1 + s2 == stdx::ct_string{"def"});
+}
+
+TEST_CASE("string concat (rhs empty)", "[ct_string]") {
+    constexpr auto s1 = stdx::ct_string{"abc"};
+    constexpr auto s2 = stdx::ct_string{""};
+    static_assert(s1 + s2 == stdx::ct_string{"abc"});
+}
+
+TEST_CASE("string concat", "[ct_string]") {
+    constexpr auto s1 = stdx::ct_string{"abc"};
+    constexpr auto s2 = stdx::ct_string{"def"};
+    static_assert(s1 + s2 == stdx::ct_string{"abcdef"});
+}
