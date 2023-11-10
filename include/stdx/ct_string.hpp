@@ -13,10 +13,12 @@
 namespace stdx {
 inline namespace v1 {
 template <std::size_t N> struct ct_string {
+    CONSTEVAL ct_string() = default;
+
     // NOLINTNEXTLINE(*-avoid-c-arrays, google-explicit-constructor)
     CONSTEVAL explicit(false) ct_string(char const (&str)[N]) {
         for (auto i = std::size_t{}; i < N; ++i) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-constant-array-index)
+            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-*)
             value[i] = str[i];
         }
     }
@@ -39,19 +41,19 @@ template <std::size_t N> struct ct_string {
 };
 
 template <std::size_t N, std::size_t M>
-constexpr auto operator==(ct_string<N> const &lhs, ct_string<M> const &rhs)
-    -> bool {
+[[nodiscard]] constexpr auto operator==(ct_string<N> const &lhs,
+                                        ct_string<M> const &rhs) -> bool {
     return static_cast<std::string_view>(lhs) ==
            static_cast<std::string_view>(rhs);
 }
 
 template <template <typename, char...> typename T, char... Cs>
-CONSTEVAL auto ct_string_from_type(T<char, Cs...>) {
+[[nodiscard]] CONSTEVAL auto ct_string_from_type(T<char, Cs...>) {
     return ct_string<sizeof...(Cs) + 1U>{{Cs..., 0}};
 }
 
 template <ct_string S, template <typename, char...> typename T>
-CONSTEVAL auto ct_string_to_type() {
+[[nodiscard]] CONSTEVAL auto ct_string_to_type() {
     return [&]<auto... Is>(std::index_sequence<Is...>) {
         return T<char, std::get<Is>(S.value)...>{};
     }(std::make_index_sequence<S.size()>{});
@@ -76,6 +78,22 @@ template <ct_string S, char C> [[nodiscard]] consteval auto split() {
             ct_string<prefix_size + 1U>{std::cbegin(S.value), prefix_size},
             ct_string<suffix_size>{std::next(it), suffix_size - 1U}};
     }
+}
+
+template <std::size_t N, std::size_t M>
+[[nodiscard]] constexpr auto operator+(ct_string<N> const &lhs,
+                                       ct_string<M> const &rhs)
+    -> ct_string<N + M - 1> {
+    ct_string<N + M - 1> ret{};
+    for (auto i = std::size_t{}; i < lhs.size(); ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-*)
+        ret.value[i] = lhs.value[i];
+    }
+    for (auto i = std::size_t{}; i < rhs.size(); ++i) {
+        // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-*)
+        ret.value[i + N - 1] = rhs.value[i];
+    }
+    return ret;
 }
 
 namespace ct_string_literals {
