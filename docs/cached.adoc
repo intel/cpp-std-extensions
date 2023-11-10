@@ -1,0 +1,54 @@
+
+== `cached.hpp`
+
+A `cached` value represents a value that is computed on demand once, and cached
+thereafter. It is constructed with a lambda expression that will compute the
+value when needed.
+
+[source,cpp]
+----
+constexpr auto c = stdx::cached{[] { return expensive_computation(); }};
+----
+
+A `cached` value is something like a `std::optional` and supports some similar
+functionality. Note though that any kind of "dereference" operation
+automatically computes the value if needed.
+
+[source,cpp]
+----
+// check whether the value is present
+auto b = c.has_value();
+
+// or, automatic bool conversion (explicit)
+if (c) {
+  // do something
+}
+
+// use the value (computing where necessary)
+auto value = *c;
+auto alt_value = c.value();
+auto value_member = c->member;
+
+// reset the value
+c.reset();
+----
+
+`reset` means that the next time the value is needed, it will be recomputed.
+However, `refresh` immediately recomputes the value.
+
+[source,cpp]
+----
+// immediate recomputation
+c.refresh();
+----
+
+If needed, the type of the cached value can obtained  with `cached_value_t`.
+
+[source,cpp]
+----
+auto c = stdx::cached{[] { return expensive_computation(); }};
+using V = stdx::cached_value_t<decltype(c)>;
+----
+
+NOTE: You can also use `typename decltype(c)::value_type`, but if the type of `c`
+has cvref qualifiers, `cached_value_t` saves the bother of using `remove_cvref_t`.
