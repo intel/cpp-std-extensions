@@ -9,6 +9,7 @@ add_fail_tests(
     bitset_nonintegral_bit_places
     bitset_to_uint64_over_64_bits
     for_each_n_args_bad_size
+    optional_without_tombstone
     span_larger_prefix
     span_larger_suffix
     subspan_late_start
