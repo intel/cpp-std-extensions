@@ -15,6 +15,7 @@ add_tests(
     always_false
     bit
     bitset
+    cached
     callable
     concepts
     conditional

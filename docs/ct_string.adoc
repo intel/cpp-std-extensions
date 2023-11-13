@@ -41,6 +41,15 @@ struct named_thing {
     constexpr auto stdx_ct_string = stdx::ct_string_from_type(cib_sc_string);
     static_assert(S == stdx_ct_string);
 
+    // we can make a ct_string with a UDL:
+    using namespace stdx::ct_string_literals;
+    constexpr auto s = "Hello"_cts;
+
+    // we can concatenate two ct_strings:
+    constexpr auto s1 = "abc"_cts;
+    constexpr auto s2 = "def"_cts;
+    constexpr auto s3 = s1 + s2; // abcdef
+
     // and we can split a ct_string at the first occurrence of a character,
     // optaining a pair of ct_strings
     constexpr auto p = stdx::split<S, '/'>();

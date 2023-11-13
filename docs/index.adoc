@@ -9,6 +9,7 @@
 include::intro.adoc[]
 include::bit.adoc[]
 include::bitset.adoc[]
+include::cached.adoc[]
 include::compiler.adoc[]
 include::concepts.adoc[]
 include::ct_conversions.adoc[]

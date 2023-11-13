@@ -33,8 +33,9 @@ into headers whose names match the standard.
 
 The following headers are available:
 
-* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bitset.hpp[`bit.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bit.hpp[`bit.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bitset.hpp[`bitset.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/cached.hpp[`cached.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/compiler.hpp[`compiler.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/concepts.hpp[`concepts.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ct_conversions.hpp[`ct_conversions.hpp`]
@@ -44,11 +45,14 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/cx_queue.hpp[`cx_queue.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/cx_set.hpp[`cx_set.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/cx_vector.hpp[`cx_vector.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/for_each_n_args.hpp[`for_each_n_args.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/function_traits.hpp[`function_traits.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/functional.hpp[`functional.hpp`]
-* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/intrusive_list.hpp[`instrusive_list.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/intrusive_list.hpp[`intrusive_list.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/memory.hpp[`memory.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/panic.hpp[`panic.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/priority.hpp[`priority.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/span.hpp[`span.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/tuple.hpp[`tuple.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/tuple_algorithms.hpp[`tuple_algorithms.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/tuple_destructure.hpp[`tuple_destructure.hpp`]
