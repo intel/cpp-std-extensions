@@ -2,6 +2,7 @@
 
 #include <stdx/type_traits.hpp>
 
+#include <limits>
 #include <memory>
 #include <optional>
 #include <type_traits>
@@ -13,6 +14,13 @@ template <typename T, typename = void> struct tombstone_traits {
     static_assert(
         stdx::always_false_v<T>,
         "To use stdx::optional you must specialize stdx::tombstone_traits");
+};
+
+template <typename T>
+struct tombstone_traits<T, std::enable_if_t<std::is_floating_point_v<T>>> {
+    constexpr auto operator()() const {
+        return std::numeric_limits<T>::infinity();
+    }
 };
 
 template <auto V> struct tombstone_value {
@@ -186,7 +194,9 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
 
     [[nodiscard]] friend constexpr auto operator<(optional const &lhs,
                                                   optional const &rhs) -> bool {
-        return lhs.val < rhs.val and rhs.has_value();
+        return lhs.has_value() and rhs.has_value()
+                   ? lhs.val < rhs.val
+                   : not lhs.has_value() and rhs.has_value();
     }
     [[nodiscard]] friend constexpr auto operator<=(optional const &lhs,
                                                    optional const &rhs)

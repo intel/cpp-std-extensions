@@ -84,6 +84,10 @@ CAUTION: Don't specialize `tombstone_traits` for the builtin integral types -
 that's risky if the definition is seen more widely. Instead use a
 `stdx::tombstone_value` where needed.
 
+NOTE: The default `tombstone_traits` for floating-point types have
+https://en.cppreference.com/w/cpp/types/numeric_limits/infinity[infinity] as the
+tombstone value.
+
 === Multi-argument `transform`
 
 `stdx::optional` provides one extra feature over `std::optional`: the ability to
