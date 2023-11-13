@@ -2,6 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <cmath>
 #include <cstdint>
 #include <optional>
 #include <type_traits>
@@ -380,4 +381,12 @@ TEST_CASE("easy tombstone with value", "[optional]") {
     constexpr auto o = stdx::optional<int, stdx::tombstone_value<-1>>{};
     static_assert(not o);
     static_assert(*o == -1);
+}
+
+TEST_CASE("optional floating-point value has default sentinel", "[optional]") {
+    auto const o1 = stdx::optional<float>{};
+    CHECK(not o1);
+    CHECK(std::isinf(*o1));
+    auto const o2 = stdx::optional{1.0f};
+    CHECK(o1 < o2);
 }
