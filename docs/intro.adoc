@@ -50,6 +50,7 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/functional.hpp[`functional.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/intrusive_list.hpp[`intrusive_list.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/memory.hpp[`memory.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/optional.hpp[`optional.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/panic.hpp[`panic.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/priority.hpp[`priority.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/span.hpp[`span.hpp`]

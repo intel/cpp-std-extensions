@@ -31,6 +31,7 @@ add_tests(
     intrusive_list
     is_constant_evaluated
     memory
+    optional
     overload
     panic
     priority

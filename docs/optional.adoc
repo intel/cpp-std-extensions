@@ -1,0 +1,108 @@
+
+== `optional.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/optional.hpp[`optional.hpp`]
+provides an implementation that mirrors
+https://en.cppreference.com/w/cpp/header/optional[`<optional>`], but uses
+`tombstone_traits` instead of a `bool` variable.
+
+Here is a problem with `std::optional`:
+
+[source,cpp]
+----
+enum struct S1 : std::uint8_t { /* ... values ... */ };
+static_assert(sizeof(S1) == 1);
+static_assert(sizeof(std::optional<S1> == 2);
+
+enum struct S2 : std::uint16_t { /* ... values ... */ };
+static_assert(sizeof(S2) == 2);
+static_assert(sizeof(std::optional<S2>) == 4);
+
+enum struct S3 : std::uint32_t { /* ... values ... */ };
+static_assert(sizeof(S3) == 4);
+static_assert(sizeof(std::optional<S3>) == 8);
+----
+
+`std::optional` basically stores a `bool` flag as well as the type. Because of
+size and alignment constraints, `std::optional` of a small type typically ends
+up being double the size of the type. Much of the time, we aren't using all the
+bits in the type - especially if it's an enumeration - so there is probably some
+sentinel value that we can treat as "invalid". AKA a "tombstone".
+
+This is where `tombstone_traits` come in: specializing `stdx::tombstone_traits`
+allows us to specify that sentinel value and avoid storing an extra `bool`.
+
+NOTE: The name "tombstone" arises from use in hash maps where it is used to signal
+a "dead" object.
+
+[source,cpp]
+----
+enum struct S : std::uint8_t { /* ... values ... */ };
+
+template <> struct stdx::tombstone_traits<S> {
+    // "-1" is not a valid value
+    constexpr auto operator()() const {
+        return static_cast<S>(std::uint8_t{0xffu});
+    }
+};
+
+static_assert(sizeof(S) == 1);
+static_assert(sizeof(stdx::optional<S> == 1);
+----
+
+To use `stdx::optional`, specialize `stdx::tombstone_traits` for the required
+type, giving it a call operator that returns the sentinel value. After that,
+`stdx::optional`'s interface mirrors that of
+https://en.cppreference.com/w/cpp/utility/optional[`std::optional`]. The C\+​+23
+monadic operations on `std::optional` are available on `stdx::optional` with
+C++17.
+
+Why a call operator and not just a `static` value? To deal with move-only (and
+even non-movable) types.
+
+NOTE: Like `std::optional`, `stdx::optional` can be constructed with
+https://en.cppreference.com/w/cpp/utility/optional/nullopt_t[`std::nullopt`] or
+with https://en.cppreference.com/w/cpp/utility/in_place[`std::in_place`].
+(`stdx` does not redefine these types.)
+
+NOTE: `stdx::optional` does not use exceptions. There is no
+`stdx::bad_optional_access`. If you access a disengaged `stdx::optional`, you
+will get the tombstone value!
+
+=== Tombstone values
+
+Instead of specializing `stdx::tombstone_traits`, sometimes it's easier
+(especially for integral or enumeration types) to provide the tombstone value
+inline. We can do this with `stdx::tombstone_value`.
+
+[source,cpp]
+----
+auto o = stdx::optional<int, stdx::tombstone_value<-1>>{};
+----
+
+CAUTION: Don't specialize `tombstone_traits` for the builtin integral types -
+that's risky if the definition is seen more widely. Instead use a
+`stdx::tombstone_value` where needed.
+
+=== Multi-argument `transform`
+
+`stdx::optional` provides one extra feature over `std::optional`: the ability to
+call `transform` with multiple arguments.
+https://en.cppreference.com/w/cpp/utility/optional/transform[C++23 `transform`]
+is a member function on `stdx::optional` too, but `stdx::transform` exists also
+as a free function on `stdx::optional`.
+
+[source,cpp]
+----
+// S is a struct with tombstone_traits that contains an integer value
+
+auto opt1 = stdx::optional<S>{17};
+auto opt2 = stdx::optional<S>{42};
+auto opt_sum = transform(
+    [](S const &x, S const &y) { return S{x.value + y.value}; },
+    opt1, opt2);
+----
+
+This flavor of `transform` returns the result of the function only if all of its
+`stdx::optional` arguments are engaged. If any one is not, a disengaged
+`stdx::optional` is returned.
