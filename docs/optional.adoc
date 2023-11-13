@@ -69,6 +69,21 @@ NOTE: `stdx::optional` does not use exceptions. There is no
 `stdx::bad_optional_access`. If you access a disengaged `stdx::optional`, you
 will get the tombstone value!
 
+=== Tombstone values
+
+Instead of specializing `stdx::tombstone_traits`, sometimes it's easier
+(especially for integral or enumeration types) to provide the tombstone value
+inline. We can do this with `stdx::tombstone_value`.
+
+[source,cpp]
+----
+auto o = stdx::optional<int, stdx::tombstone_value<-1>>{};
+----
+
+CAUTION: Don't specialize `tombstone_traits` for the builtin integral types -
+that's risky if the definition is seen more widely. Instead use a
+`stdx::tombstone_value` where needed.
+
 === Multi-argument `transform`
 
 `stdx::optional` provides one extra feature over `std::optional`: the ability to

@@ -9,14 +9,21 @@
 
 namespace stdx {
 inline namespace v1 {
-template <typename T> struct tombstone_traits {
+template <typename T, typename = void> struct tombstone_traits {
     static_assert(
         stdx::always_false_v<T>,
         "To use stdx::optional you must specialize stdx::tombstone_traits");
 };
 
-template <typename T> class optional {
-    constexpr static inline auto traits = tombstone_traits<T>{};
+template <auto V> struct tombstone_value {
+    constexpr auto operator()() const { return V; }
+};
+
+template <typename T, typename TS = tombstone_traits<T>> class optional {
+    static_assert(not std::is_integral_v<T> or
+                      not stdx::is_specialization_of_v<TS, tombstone_traits>,
+                  "Don't define tombstone traits for plain integral types");
+    constexpr static inline auto traits = TS{};
     [[no_unique_address]] T val{traits()};
 
   public:
@@ -58,26 +65,34 @@ template <typename T> class optional {
     }
     constexpr explicit operator bool() const noexcept { return has_value(); }
 
-    [[nodiscard]] auto value() & -> value_type & { return val; }
-    [[nodiscard]] auto value() const & -> value_type const & { return val; }
-    [[nodiscard]] auto value() && -> value_type && { return std::move(val); }
-    [[nodiscard]] auto value() const && -> value_type const && {
+    [[nodiscard]] constexpr auto value() & -> value_type & { return val; }
+    [[nodiscard]] constexpr auto value() const & -> value_type const & {
+        return val;
+    }
+    [[nodiscard]] constexpr auto value() && -> value_type && {
+        return std::move(val);
+    }
+    [[nodiscard]] constexpr auto value() const && -> value_type const && {
         return std::move(val);
     }
 
-    [[nodiscard]] auto operator->() const -> value_type const * {
+    [[nodiscard]] constexpr auto operator->() const -> value_type const * {
         return std::addressof(val);
     }
-    [[nodiscard]] auto operator->() -> value_type * {
+    [[nodiscard]] constexpr auto operator->() -> value_type * {
         return std::addressof(val);
     }
 
-    [[nodiscard]] auto operator*() const & -> decltype(auto) { return value(); }
-    [[nodiscard]] auto operator*() & -> decltype(auto) { return value(); }
-    [[nodiscard]] auto operator*() const && -> decltype(auto) {
+    [[nodiscard]] constexpr auto operator*() const & -> decltype(auto) {
+        return value();
+    }
+    [[nodiscard]] constexpr auto operator*() & -> decltype(auto) {
+        return value();
+    }
+    [[nodiscard]] constexpr auto operator*() const && -> decltype(auto) {
         return std::move(*this).value();
     }
-    [[nodiscard]] auto operator*() && -> decltype(auto) {
+    [[nodiscard]] constexpr auto operator*() && -> decltype(auto) {
         return std::move(*this).value();
     }
 
@@ -98,7 +113,7 @@ template <typename T> class optional {
         return value();
     }
 
-    auto reset() {
+    constexpr auto reset() {
         val.~value_type();
         new (std::addressof(val)) value_type(traits());
     }

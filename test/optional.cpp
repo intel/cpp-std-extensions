@@ -375,3 +375,9 @@ TEST_CASE("CTAD", "[optional]") {
     [[maybe_unused]] auto o = stdx::optional{E::VALUE};
     static_assert(std::is_same_v<decltype(o), stdx::optional<E>>);
 }
+
+TEST_CASE("easy tombstone with value", "[optional]") {
+    constexpr auto o = stdx::optional<int, stdx::tombstone_value<-1>>{};
+    static_assert(not o);
+    static_assert(*o == -1);
+}
