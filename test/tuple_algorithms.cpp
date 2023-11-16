@@ -416,3 +416,66 @@ TEST_CASE("chunk (general case)", "[tuple_algorithms]") {
     CHECK(chunked == stdx::tuple{stdx::tuple{1, 2, 3}, stdx::tuple{1.0, 2.0},
                                  stdx::tuple{true}});
 }
+
+TEST_CASE("cartesian product (no tuples)", "[tuple_algorithms]") {
+    constexpr auto c = stdx::cartesian_product_copy();
+    static_assert(
+        std::is_same_v<decltype(c), stdx::tuple<stdx::tuple<>> const>);
+}
+
+TEST_CASE("cartesian product (one tuple)", "[tuple_algorithms]") {
+    using namespace stdx::literals;
+    constexpr auto c = stdx::cartesian_product_copy(stdx::tuple{1, 2, 3});
+    static_assert(std::is_same_v<decltype(c),
+                                 stdx::tuple<stdx::tuple<int>, stdx::tuple<int>,
+                                             stdx::tuple<int>> const>);
+    static_assert(c[0_idx][0_idx] == 1);
+    static_assert(c[1_idx][0_idx] == 2);
+    static_assert(c[2_idx][0_idx] == 3);
+}
+
+TEST_CASE("cartesian product (two tuples)", "[tuple_algorithms]") {
+    using namespace stdx::literals;
+    constexpr auto c =
+        stdx::cartesian_product_copy(stdx::tuple{1}, stdx::tuple{2});
+    static_assert(
+        std::is_same_v<decltype(c), stdx::tuple<stdx::tuple<int, int>> const>);
+    static_assert(c[0_idx][0_idx] == 1);
+    static_assert(c[0_idx][1_idx] == 2);
+}
+
+TEST_CASE("cartesian product (general case)", "[tuple_algorithms]") {
+    using namespace stdx::literals;
+    constexpr auto c = stdx::cartesian_product_copy(
+        stdx::tuple{1, 2}, stdx::tuple{'a', 'b'}, stdx::tuple{1.1f, 2.2f});
+    static_assert(
+        std::is_same_v<
+            decltype(c),
+            stdx::tuple<
+                stdx::tuple<int, char, float>, stdx::tuple<int, char, float>,
+                stdx::tuple<int, char, float>, stdx::tuple<int, char, float>,
+                stdx::tuple<int, char, float>, stdx::tuple<int, char, float>,
+                stdx::tuple<int, char, float>,
+                stdx::tuple<int, char, float>> const>);
+    static_assert(c[0_idx] == stdx::tuple{1, 'a', 1.1f});
+    static_assert(c[1_idx] == stdx::tuple{1, 'a', 2.2f});
+    static_assert(c[2_idx] == stdx::tuple{1, 'b', 1.1f});
+    static_assert(c[3_idx] == stdx::tuple{1, 'b', 2.2f});
+    static_assert(c[4_idx] == stdx::tuple{2, 'a', 1.1f});
+    static_assert(c[5_idx] == stdx::tuple{2, 'a', 2.2f});
+    static_assert(c[6_idx] == stdx::tuple{2, 'b', 1.1f});
+    static_assert(c[7_idx] == stdx::tuple{2, 'b', 2.2f});
+}
+
+TEST_CASE("cartesian product of references", "[tuple_algorithms]") {
+    using namespace stdx::literals;
+    constexpr static auto t1 = stdx::tuple{1};
+    constexpr static auto t2 = stdx::tuple{2};
+
+    constexpr auto c = stdx::cartesian_product(t1, t2);
+    static_assert(std::is_same_v<
+                  decltype(c),
+                  stdx::tuple<stdx::tuple<int const &, int const &>> const>);
+    static_assert(c[0_idx][0_idx] == 1);
+    static_assert(c[0_idx][1_idx] == 2);
+}
