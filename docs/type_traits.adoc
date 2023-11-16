@@ -34,6 +34,20 @@ auto f(T) {
 };
 ----
 
+`is_function_object_v` is a variable template that detects whether a type is a
+function object, like a lambda. It is true for generic lambdas, too.
+
+[source,cpp]
+----
+auto f() {};
+auto const lam = []{};
+auto const gen_lam = []<typename>(){};
+
+stdx::is_function_object_v<decltype(f)>;         // false
+stdx::is_function_object_v<decltype(lam)>;       // true
+stdx::is_function_object_v<decltype(gen_lam)>;   // true
+----
+
 `is_specialization_of_v` is a variable template that detects whether a type is a
 specialization of a given template.
 

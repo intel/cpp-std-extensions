@@ -8,6 +8,8 @@ contains various (free function) algorithms that work on `stdx::tuple`.
 
 * `all_of`, `any_of`, `none_of` - like the standard versions, but over a tuple
 * `apply` - like `std::apply`, but also a xref:tuple.adoc#_member_functions_on_a_tuple[member function] on `tuple`
+* `cartesian_product` - create a tuple-of-tuples-of-references that is the cartesian product of the inputs
+* `cartesian_product_copy` - create a tuple-of-tuples that is the cartesian product of the inputs
 * `chunk_by` - split a tuple into a tuple-of-tuples according to a type function
 * `contains_type` - a variable template that is true when a tuple contains a given type
 * `filter` - for compile-time filtering
@@ -30,13 +32,38 @@ auto x = stdx::any_of([](auto n) { return n % 2 == 0; }, t); // true
 
 === `apply`
 
-See xref:tuple.adoc#_member_functions_on_a_tuple[member functions]. `stx::apply`
+See xref:tuple.adoc#_member_functions_on_a_tuple[member functions]. `stdx::apply`
 is also available as a free function, for compatibility with `std::apply`.
 [source,cpp]
 ----
 auto t = stdx::tuple{1, 2, 3};
 auto sum = stdx::apply([] (auto... args) { return (args + ... + 0); }, t); // 6
 ----
+
+=== `cartesian_product`
+
+`cartesian_product` takes any number of tuples and returns the tuple-of-tuples
+that is the
+https://en.wikipedia.org/wiki/Cartesian_product#n-ary_Cartesian_product[cartesian
+product] of the members. Each returned tuple is a tuple of references.
+
+[source,cpp]
+----
+auto t1 = stdx::tuple{1, 2};
+auto t2 = stdx::tuple{'a', 'b'};
+auto c = stdx::cartesian_product(t1, t2);
+// produces {{1, 'a'}, {1, 'b'}, {2, 'a'}, {2, 'b'}}
+----
+
+NOTE: The cartesian product of _no_ tuples is a tuple containing an empty tuple.
+
+=== `cartesian_product_copy`
+
+The same as `cartesian_product`, but the returned tuples have values, not
+references.
+
+NOTE: This can be useful for `constexpr` applications: in general one cannot
+take the address of a local `constexpr` variable unless it is `static`.
 
 === `chunk_by`
 

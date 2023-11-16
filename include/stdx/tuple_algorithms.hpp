@@ -244,6 +244,48 @@ template <template <typename> typename Proj = std::type_identity_t,
 template <typename Tuple> [[nodiscard]] constexpr auto chunk(Tuple &&t) {
     return chunk_by(std::forward<Tuple>(t));
 }
+
+template <typename... Ts> constexpr auto cartesian_product_copy(Ts &&...ts) {
+    if constexpr (sizeof...(Ts) == 0) {
+        return make_tuple(tuple{});
+    } else {
+        return []<typename First, typename... Rest>(First &&first,
+                                                    Rest &&...rest) {
+            auto const c = cartesian_product_copy(std::forward<Rest>(rest)...);
+            return std::forward<First>(first).apply(
+                [&]<typename... Elems>(Elems &&...elems) {
+                    const auto prepend = [&]<typename E>(E &&e) {
+                        return c.apply([&](auto... subs) {
+                            return make_tuple(tuple_cat(
+                                make_tuple(std::forward<E>(e)), subs)...);
+                        });
+                    };
+                    return tuple_cat(prepend(std::forward<Elems>(elems))...);
+                });
+        }(std::forward<Ts>(ts)...);
+    }
+}
+
+template <typename... Ts> constexpr auto cartesian_product(Ts &&...ts) {
+    if constexpr (sizeof...(Ts) == 0) {
+        return make_tuple(tuple{});
+    } else {
+        return []<typename First, typename... Rest>(First &&first,
+                                                    Rest &&...rest) {
+            auto const c = cartesian_product(std::forward<Rest>(rest)...);
+            return std::forward<First>(first).apply(
+                [&]<typename... Elems>(Elems &&...elems) {
+                    const auto prepend = [&]<typename E>(E &&e) {
+                        return c.apply([&](auto... subs) {
+                            return make_tuple(tuple_cat(
+                                forward_as_tuple(std::forward<E>(e)), subs)...);
+                        });
+                    };
+                    return tuple_cat(prepend(std::forward<Elems>(elems))...);
+                });
+        }(std::forward<Ts>(ts)...);
+    }
+}
 } // namespace v1
 } // namespace stdx
 
