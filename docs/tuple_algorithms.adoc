@@ -17,8 +17,11 @@ contains various (free function) algorithms that work on `stdx::tuple`.
 * `fold_left` and `fold_right` - xref:tuple.adoc#_member_functions_on_a_tuple[member functions] on `tuple`
 * `join` - a xref:tuple.adoc#_member_functions_on_a_tuple[member function] on `tuple`, like `fold_left` but without an initial value
 * `sort` - sort a tuple by a function on the contained types
+* `to_ordered_set` - produce a tuple of unique types that are sorted
+* `to_unordered_set` - produce a tuple of unique types that are in the order given
 * `transform` - a variadic transform on tuple(s)
 * `tuple_cat` - like `std::tuple_cat`
+* `unique` - produce a tuple where adjacent types that are the same are merged into one element (the first such)
 
 === `all_of`, `any_of`, `none_of`
 
@@ -158,6 +161,29 @@ function (a template of one argument). This will be applied to each type in the
 tuple to obtain a type name that is then sorted alphabetically. By default, this
 type function is `std::type_identity_t`.
 
+=== `to_sorted_set`
+
+`to_sorted_set` is `sort` followed by `unique`: it sorts the types in a tuple,
+then collapses it so that there is only one element of each type.
+
+[source,cpp]
+----
+auto t = stdx::tuple{1, true, 2, false};
+auto u = stdx::to_sorted_set(t); // {true, 1}
+----
+
+=== `to_unsorted_set`
+
+`to_unsorted_set` produces a tuple of unique types in the same order as the
+original tuple. In each case the value of that type is the first one in the
+original tuple.
+
+[source,cpp]
+----
+auto t = stdx::tuple{1, true, 2, false};
+auto u = stdx::to_unsorted_set(t); // {1, true}
+----
+
 === `transform`
 
 `transform` is used to transform the values (and potentially the types) in one
@@ -193,3 +219,15 @@ auto x = get<X>(t).value; // 42
 
 `tuple_cat` works just like
 https://en.cppreference.com/w/cpp/utility/tuple/tuple_cat[`std::tuple_cat`].
+
+=== `unique`
+
+`unique` works like
+https://en.cppreference.com/w/cpp/algorithm/unique[`std::unique`], but on types
+rather than values. i.e. `unique` will collapse adjacent elements whose type is
+the same. The first such element is preserved in the result.
+[source,cpp]
+----
+auto t = stdx::tuple{1, 2, true};
+auto u = stdx::unique(t); // {1, true}
+----
