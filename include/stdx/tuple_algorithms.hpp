@@ -4,6 +4,9 @@
 
 #include <stdx/ct_conversions.hpp>
 #include <stdx/tuple.hpp>
+#include <stdx/type_traits.hpp>
+
+#include <boost/mp11/algorithm.hpp>
 
 #include <algorithm>
 #include <array>
@@ -156,21 +159,23 @@ constexpr auto contains_type =
     decltype(detail::contains_type<T>(std::declval<Tuple>()))::value;
 
 template <template <typename> typename Proj = std::type_identity_t,
-          typename... Ts>
-[[nodiscard]] constexpr auto sort(stdx::tuple<Ts...> t) {
+          typename Tuple>
+[[nodiscard]] constexpr auto sort(Tuple &&t) {
+    using T = stdx::remove_cvref_t<Tuple>;
     using P = std::pair<std::string_view, std::size_t>;
     constexpr auto indices = []<std::size_t... Is>(std::index_sequence<Is...>) {
         auto a = std::array<P, sizeof...(Is)>{
-            P{stdx::type_as_string<Proj<Ts>>(), Is}...};
+            P{stdx::type_as_string<Proj<tuple_element_t<Is, T>>>(), Is}...};
         std::sort(
             std::begin(a), std::end(a),
             [](auto const &p1, auto const &p2) { return p1.first < p2.first; });
         return a;
-    }(std::make_index_sequence<sizeof...(Ts)>{});
+    }(std::make_index_sequence<T::size()>{});
 
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return stdx::tuple{t[index<indices[Is].second>]...};
-    }(std::make_index_sequence<sizeof...(Ts)>{});
+        return stdx::tuple<tuple_element_t<indices[Is].second, T>...>{
+            std::forward<Tuple>(t)[index<indices[Is].second>]...};
+    }(std::make_index_sequence<T::size()>{});
 }
 
 namespace detail {
@@ -234,8 +239,9 @@ template <template <typename> typename Proj = std::type_identity_t,
             return stdx::make_tuple(
                 [&]<std::size_t... Js>(std::index_sequence<Js...>) {
                     constexpr auto offset = chunks[Is].offset;
-                    return stdx::make_tuple(
-                        std::forward<Tuple>(t)[index<offset + Js>]...);
+                    return stdx::tuple<tuple_element_t<
+                        offset + Js, stdx::remove_cvref_t<Tuple>>...>{
+                        std::forward<Tuple>(t)[index<offset + Js>]...};
                 }(std::make_index_sequence<chunks[Is].size>{})...);
         }(std::make_index_sequence<std::size(chunks)>{});
     }
@@ -285,6 +291,26 @@ template <typename... Ts> constexpr auto cartesian_product(Ts &&...ts) {
                 });
         }(std::forward<Ts>(ts)...);
     }
+}
+
+template <typename T> constexpr auto unique(T &&t) {
+    return chunk(std::forward<T>(t)).apply([]<typename... Us>(Us &&...us) {
+        return tuple<tuple_element_t<0, Us>...>{
+            get<0>(std::forward<Us>(us))...};
+    });
+}
+
+template <typename T> constexpr auto to_sorted_set(T &&t) {
+    return unique(sort(std::forward<T>(t)));
+}
+
+template <typename Tuple> constexpr auto to_unsorted_set(Tuple &&t) {
+    using T = stdx::remove_cvref_t<Tuple>;
+    using U = boost::mp11::mp_unique<T>;
+    return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+        return U{get<boost::mp11::mp_find<T, tuple_element_t<Is, U>>::value>(
+            std::forward<Tuple>(t))...};
+    }(std::make_index_sequence<U::size()>{});
 }
 } // namespace v1
 } // namespace stdx

@@ -369,6 +369,26 @@ TEST_CASE("sort", "[tuple_algorithms]") {
     CHECK(sorted == stdx::tuple{true, 1.0, 1});
 }
 
+TEST_CASE("sort preserves references", "[tuple_algorithms]") {
+    int x{1};
+    double d{2.0};
+    auto t = stdx::forward_as_tuple(x, d);
+    static_assert(std::is_same_v<decltype(t), stdx::tuple<int &, double &>>);
+    auto sorted = stdx::sort(t);
+    static_assert(
+        std::is_same_v<decltype(sorted), stdx::tuple<double &, int &>>);
+    CHECK(sorted == stdx::tuple{2.0, 1});
+}
+
+TEST_CASE("sort with move only types", "[tuple_algorithms]") {
+    auto t = stdx::tuple{move_only{1}, 1.0};
+    static_assert(std::is_same_v<decltype(t), stdx::tuple<move_only, double>>);
+    auto sorted = stdx::sort(std::move(t));
+    static_assert(
+        std::is_same_v<decltype(sorted), stdx::tuple<double, move_only>>);
+    CHECK(sorted == stdx::tuple{1, move_only{1}});
+}
+
 TEST_CASE("chunk (empty tuple)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{};
     [[maybe_unused]] constexpr auto chunked = stdx::chunk(t);
@@ -415,6 +435,24 @@ TEST_CASE("chunk (general case)", "[tuple_algorithms]") {
                         stdx::tuple<bool>> const>);
     CHECK(chunked == stdx::tuple{stdx::tuple{1, 2, 3}, stdx::tuple{1.0, 2.0},
                                  stdx::tuple{true}});
+}
+
+TEST_CASE("chunk preserves references", "[tuple_algorithms]") {
+    int x{1};
+    int y{2};
+    auto t = stdx::tuple<int &, int &>{x, y};
+    auto chunked = stdx::chunk(t);
+    static_assert(std::is_same_v<decltype(chunked),
+                                 stdx::tuple<stdx::tuple<int &, int &>>>);
+    CHECK(get<0>(chunked) == stdx::tuple{1, 2});
+}
+
+TEST_CASE("chunk with move only types", "[tuple_algorithms]") {
+    auto t = stdx::tuple{move_only{1}};
+    auto chunked = stdx::chunk(std::move(t));
+    static_assert(
+        std::is_same_v<decltype(chunked), stdx::tuple<stdx::tuple<move_only>>>);
+    CHECK(get<0>(chunked) == stdx::tuple{move_only{1}});
 }
 
 TEST_CASE("cartesian product (no tuples)", "[tuple_algorithms]") {
@@ -478,4 +516,94 @@ TEST_CASE("cartesian product of references", "[tuple_algorithms]") {
                   stdx::tuple<stdx::tuple<int const &, int const &>> const>);
     static_assert(c[0_idx][0_idx] == 1);
     static_assert(c[0_idx][1_idx] == 2);
+}
+
+TEST_CASE("unique", "[tuple_algorithms]") {
+    constexpr auto t = stdx::tuple{1, 1.0, 2.0, true, false};
+    static_assert(
+        std::is_same_v<decltype(t),
+                       stdx::tuple<int, double, double, bool, bool> const>);
+    constexpr auto u = stdx::unique(t);
+    static_assert(
+        std::is_same_v<decltype(u), stdx::tuple<int, double, bool> const>);
+    CHECK(u == stdx::tuple{1, 1.0, true});
+}
+
+TEST_CASE("unique preserves references", "[tuple_algorithms]") {
+    int x{1};
+    int y{2};
+    auto t = stdx::forward_as_tuple(x, y);
+    static_assert(std::is_same_v<decltype(t), stdx::tuple<int &, int &>>);
+    auto u = stdx::unique(t);
+    static_assert(std::is_same_v<decltype(u), stdx::tuple<int &>>);
+    CHECK(u == stdx::tuple{1});
+}
+
+TEST_CASE("unique with move only types", "[tuple_algorithms]") {
+    auto t = stdx::tuple{move_only{1}, move_only{2}};
+    static_assert(
+        std::is_same_v<decltype(t), stdx::tuple<move_only, move_only>>);
+    auto u = stdx::unique(std::move(t));
+    static_assert(std::is_same_v<decltype(u), stdx::tuple<move_only>>);
+    CHECK(u == stdx::tuple{move_only{1}});
+}
+
+TEST_CASE("to_sorted_set", "[tuple_algorithms]") {
+    constexpr auto t = stdx::tuple{1, 1.0, true, 2.0, false};
+    constexpr auto u = stdx::to_sorted_set(t);
+    static_assert(
+        std::is_same_v<decltype(u), stdx::tuple<bool, double, int> const>);
+    CHECK(u == stdx::tuple{true, 1.0, 1});
+}
+
+TEST_CASE("to_sorted_set with move only types", "[tuple_algorithms]") {
+    auto t = stdx::tuple{1, move_only{1}, true, move_only{2}, false};
+    auto u = stdx::to_sorted_set(std::move(t));
+    static_assert(
+        std::is_same_v<decltype(u), stdx::tuple<bool, int, move_only>>);
+    CHECK(u == stdx::tuple{true, 1, move_only{1}});
+}
+
+TEST_CASE("to_sorted_set preserves references", "[tuple_algorithms]") {
+    int x{1};
+    int y{2};
+    double a{3.0};
+    double b{4.0};
+    auto t = stdx::forward_as_tuple(x, y, a, b);
+    static_assert(
+        std::is_same_v<decltype(t),
+                       stdx::tuple<int &, int &, double &, double &>>);
+    auto u = stdx::to_sorted_set(t);
+    static_assert(std::is_same_v<decltype(u), stdx::tuple<double &, int &>>);
+    CHECK(u == stdx::tuple{3.0, 1});
+}
+
+TEST_CASE("to_unsorted_set", "[tuple_algorithms]") {
+    constexpr auto t = stdx::tuple{1, 1.0, true, 2.0, false};
+    constexpr auto u = stdx::to_unsorted_set(t);
+    static_assert(
+        std::is_same_v<decltype(u), stdx::tuple<int, double, bool> const>);
+    CHECK(u == stdx::tuple{1, 1.0, true});
+}
+
+TEST_CASE("to_unsorted_set preserves references", "[tuple_algorithms]") {
+    int x{1};
+    int y{2};
+    double a{3.0};
+    double b{4.0};
+    auto t = stdx::forward_as_tuple(x, y, a, b);
+    static_assert(
+        std::is_same_v<decltype(t),
+                       stdx::tuple<int &, int &, double &, double &>>);
+    auto u = stdx::to_unsorted_set(t);
+    static_assert(std::is_same_v<decltype(u), stdx::tuple<int &, double &>>);
+    CHECK(u == stdx::tuple{1, 3.0});
+}
+
+TEST_CASE("to_unsorted_set with move only types", "[tuple_algorithms]") {
+    auto t = stdx::tuple{1, move_only{1}, true, move_only{2}, false};
+    auto u = stdx::to_unsorted_set(std::move(t));
+    static_assert(
+        std::is_same_v<decltype(u), stdx::tuple<int, move_only, bool>>);
+    CHECK(u == stdx::tuple{1, move_only{1}, true});
 }
