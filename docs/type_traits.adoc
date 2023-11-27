@@ -14,6 +14,8 @@ contains a few things from the standard:
 * https://en.cppreference.com/w/cpp/utility/to_underlying[`to_underlying`] (from C++23)
 * https://en.cppreference.com/w/cpp/types/type_identity[`type_identity`] (from C++20)
 
+=== `always_false_v`
+
 `always_false_v` is a variable template that can be instantiated
 with any number of type arguments and always evaluates to false at compile-time.
 This is useful for writing `static_assert` where it must depend on types (at
@@ -34,6 +36,8 @@ auto f(T) {
 };
 ----
 
+=== `is_function_object_v`
+
 `is_function_object_v` is a variable template that detects whether a type is a
 function object, like a lambda. It is true for generic lambdas, too.
 
@@ -47,6 +51,8 @@ stdx::is_function_object_v<decltype(f)>;         // false
 stdx::is_function_object_v<decltype(lam)>;       // true
 stdx::is_function_object_v<decltype(gen_lam)>;   // true
 ----
+
+=== `is_specialization_of_v`
 
 `is_specialization_of_v` is a variable template that detects whether a type is a
 specialization of a given template.
@@ -62,6 +68,8 @@ stdx::is_specialization_of_v<int, std::optional>; // false
 NOTE: `is_specialization_of` is suitable for templates with type parameters
 only (not template-template parameters or NTTPs).
 
+=== `type_or_t`
+
 `type_or_t` is an alias template that selects a type based on whether or not it
 passes a predicate. If not, a default is returned.
 
@@ -74,3 +82,31 @@ using B = int;
 using X = stdx::type_or_t<std::is_pointer, B>;        // void (implicit default)
 using Y = stdx::type_or_t<std::is_pointer, B, float>; // float (explicit default)
 ----
+
+=== `type_list` and `value_list`
+
+`type_list` is an empty `struct` templated over any number of types.
+`value_list` is an empty `struct` templated over any number of NTTPs.
+
+=== `template_for_each`
+
+A `type_list` or a `value_list` can be iterated with `template_for_each`. A
+function object whose call operator is a unary function template with no runtime
+arguments is passed to each of these functions.
+
+[source,cpp]
+----
+using L1 = stdx::type_list<std::integral_constant<int, 1>,
+                           std::integral_constant<int, 2>>;
+int x{};
+stdx::template_for_each<L1>([&] <typename T> () { x += T::value; });
+// x is now 3
+
+using L2 = stdx::value_list<1, 2>;
+int y{};
+stdx::template_for_each<L2>([&] <auto V> () { y += V; });
+// y is now 3
+----
+
+NOTE: A primary use case of `template_for_each` is to be able to use a list of
+tag types without those types having to be complete.
