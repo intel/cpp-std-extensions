@@ -87,5 +87,29 @@ template <typename T> struct type_identity {
     using type = T;
 };
 template <typename T> using type_identity_t = typename type_identity<T>::type;
+
+template <typename...> struct type_list;
+template <auto...> struct value_list;
+
+template <typename L> struct for_each_t {
+    static_assert(
+        always_false_v<L>,
+        "template_for_each must be called with a type list (or value list)");
+};
+
+template <template <typename...> typename L, typename... Ts>
+struct for_each_t<L<Ts...>> {
+    template <typename F> constexpr auto operator()(F &&f) const {
+        (f.template operator()<Ts>(), ...);
+    }
+};
+template <template <auto...> typename L, auto... Vs>
+struct for_each_t<L<Vs...>> {
+    template <typename F> constexpr auto operator()(F &&f) const {
+        (f.template operator()<Vs>(), ...);
+    }
+};
+
+template <typename L> constexpr static auto template_for_each = for_each_t<L>{};
 } // namespace v1
 } // namespace stdx

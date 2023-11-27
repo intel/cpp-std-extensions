@@ -18,6 +18,7 @@ add_fail_tests(
     subspan_late_end
     subspan_too_big
     subspan_wrapping
+    template_for_each_not_list
     to_address_undefined_on_function)
 
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)

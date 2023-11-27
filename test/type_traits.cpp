@@ -43,3 +43,42 @@ TEST_CASE("type_or_t", "[type_traits]") {
         std::is_same_v<stdx::type_or_t<std::is_void, int, float>, float>);
     static_assert(std::is_same_v<stdx::type_or_t<std::is_void, int>, void>);
 }
+
+namespace {
+int value{};
+struct add_value {
+    template <typename T> constexpr auto operator()() const -> void {
+        value += T::value;
+    }
+    template <auto T> constexpr auto operator()() const -> void { value += T; }
+};
+} // namespace
+
+TEST_CASE("template_for_each with type list", "[type_traits]") {
+    value = 0;
+    using L = stdx::type_list<std::integral_constant<int, 1>,
+                              std::integral_constant<int, 2>>;
+    stdx::template_for_each<L>(add_value{});
+    CHECK(value == 3);
+}
+
+TEST_CASE("template_for_each with empty type list", "[type_traits]") {
+    value = 42;
+    using L = stdx::type_list<>;
+    stdx::template_for_each<L>(add_value{});
+    CHECK(value == 42);
+}
+
+TEST_CASE("template_for_each with value list", "[type_traits]") {
+    value = 0;
+    using L = stdx::value_list<1, 2>;
+    stdx::template_for_each<L>(add_value{});
+    CHECK(value == 3);
+}
+
+TEST_CASE("template_for_each with empty value list", "[type_traits]") {
+    value = 17;
+    using L = stdx::value_list<>;
+    stdx::template_for_each<L>(add_value{});
+    CHECK(value == 17);
+}
