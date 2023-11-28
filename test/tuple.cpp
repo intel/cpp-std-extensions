@@ -249,6 +249,11 @@ TEST_CASE("equality comparable (references and non-references)", "[tuple]") {
     CHECK(u == t);
 }
 
+TEST_CASE("equality comparable (conversions)", "[tuple]") {
+    constexpr auto t = stdx::tuple{1};
+    static_assert(t == stdx::tuple{1.0});
+}
+
 namespace {
 struct eq {
     [[nodiscard]] friend constexpr auto operator==(eq lhs, eq rhs) -> bool {
@@ -256,6 +261,8 @@ struct eq {
     }
     int x;
 };
+
+struct eq_derived : eq {};
 } // namespace
 
 TEST_CASE("equality comparable (user-defined)", "[tuple]") {
@@ -263,6 +270,11 @@ TEST_CASE("equality comparable (user-defined)", "[tuple]") {
 
     static_assert(t == stdx::tuple{eq{1}});
     static_assert(t != stdx::tuple{eq{2}});
+}
+
+TEST_CASE("equality comparable (conversions, user-defined)", "[tuple]") {
+    constexpr auto t = stdx::tuple{eq{1}};
+    static_assert(t == stdx::tuple{eq_derived{1}});
 }
 
 TEST_CASE("order comparable", "[tuple]") {

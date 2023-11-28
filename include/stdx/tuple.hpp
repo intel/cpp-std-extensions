@@ -83,15 +83,9 @@ struct element<Index, T, Ts...> {
     T value;
 
   private:
-    [[nodiscard]] friend constexpr auto operator==(element x, element y) -> bool
-        requires(std::is_reference_v<T>)
-    {
-        return std::addressof(x.value) == std::addressof(y.value);
-    }
     [[nodiscard]] friend constexpr auto operator==(element const &,
-                                                   element const &) -> bool
-        requires(not std::is_reference_v<T>)
-    = default;
+                                                   element const &)
+        -> bool = default;
     [[nodiscard]] friend constexpr auto operator<=>(element const &,
                                                     element const &) = default;
 };
@@ -326,19 +320,20 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     }
 
   private:
-    template <typename Indices, typename Funcs, typename... Us>
+    template <typename Funcs, typename... Us>
         requires(... and std::equality_comparable_with<Ts, Us>)
     [[nodiscard]] friend constexpr auto
     operator==(tuple_impl const &lhs,
-               tuple_impl<Indices, Funcs, Us...> const &rhs) -> bool {
+               tuple_impl<std::index_sequence<Is...>, Funcs, Us...> const &rhs)
+        -> bool {
         return (... and (lhs[index<Is>] == rhs[index<Is>]));
     }
 
-    template <typename Indices, typename Funcs, typename... Us>
+    template <typename Funcs, typename... Us>
         requires(... and std::three_way_comparable_with<Ts, Us>)
-    [[nodiscard]] friend constexpr auto
-    operator<=>(tuple_impl const &lhs,
-                tuple_impl<Indices, Funcs, Us...> const &rhs) {
+    [[nodiscard]] friend constexpr auto operator<=>(
+        tuple_impl const &lhs,
+        tuple_impl<std::index_sequence<Is...>, Funcs, Us...> const &rhs) {
         if constexpr (sizeof...(Is) == 0) {
             return std::strong_ordering::equal;
         } else {
@@ -367,26 +362,42 @@ template <typename T> constexpr auto tuple_size_v = T::size();
 template <std::size_t I, typename T>
 using tuple_element_t = decltype(T::ugly_Value(index<I>));
 
+template <typename T>
+concept tuple_comparable = requires { typename T::common_tuple_comparable; };
+
 template <typename... Ts>
 struct tuple : detail::tuple_impl<std::index_sequence_for<Ts...>,
                                   detail::index_function_list<>, Ts...> {
+    using common_tuple_comparable = void;
+
   private:
-    [[nodiscard]] friend constexpr auto operator==(tuple const &, tuple const &)
-        -> bool = default;
+    template <typename U>
+        requires(not tuple_comparable<U>)
+    [[nodiscard]] friend constexpr auto operator==(tuple const &, U const &)
+        -> bool = delete;
+
+    template <typename U>
+        requires(not tuple_comparable<U>)
     [[nodiscard]] friend constexpr auto operator<=>(tuple const &,
-                                                    tuple const &) = default;
+                                                    U const &) = delete;
 };
 template <typename... Ts> tuple(Ts...) -> tuple<Ts...>;
 
 template <typename IndexList, typename... Ts>
 struct indexed_tuple
     : detail::tuple_impl<std::index_sequence_for<Ts...>, IndexList, Ts...> {
+    using common_tuple_comparable = void;
+
   private:
+    template <typename U>
+        requires(not tuple_comparable<U>)
     [[nodiscard]] friend constexpr auto operator==(indexed_tuple const &,
-                                                   indexed_tuple const &)
-        -> bool = default;
-    [[nodiscard]] friend constexpr auto
-    operator<=>(indexed_tuple const &, indexed_tuple const &) = default;
+                                                   U const &) -> bool = delete;
+
+    template <typename U>
+        requires(not tuple_comparable<U>)
+    [[nodiscard]] friend constexpr auto operator<=>(indexed_tuple const &,
+                                                    U const &) = delete;
 };
 
 template <typename... Ts>

@@ -400,7 +400,7 @@ TEST_CASE("chunk (1-element tuple)", "[tuple_algorithms]") {
     constexpr auto chunked = stdx::chunk(t);
     static_assert(
         std::is_same_v<decltype(chunked), stdx::tuple<stdx::tuple<int>> const>);
-    CHECK(chunked == stdx::tuple{stdx::tuple{1}});
+    CHECK(chunked == stdx::make_tuple(stdx::tuple{1}));
 }
 
 TEST_CASE("count chunks", "[tuple_algorithms]") {
