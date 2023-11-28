@@ -17,19 +17,24 @@ template <typename Key, typename Value> struct map_entry {
 template <typename T> using key_for = typename T::key_t;
 } // namespace
 
-TEST_CASE("make_indexed_tuple", "[tuple]") {
-    static_assert(stdx::make_indexed_tuple<>() == stdx::tuple{});
-    static_assert(stdx::make_indexed_tuple<>(1, 2, 3) == stdx::tuple{1, 2, 3});
+TEST_CASE("make_indexed_tuple", "[indexed_tuple]") {
+    static_assert(stdx::make_indexed_tuple<>() == stdx::indexed_tuple{});
+    static_assert(stdx::make_indexed_tuple<>(1, 2, 3) ==
+                  stdx::indexed_tuple{1, 2, 3});
 }
 
-TEST_CASE("indexed_tuple destructuring", "[tuple]") {
+TEST_CASE("comparable with regular tuple", "[indexed_tuple]") {
+    static_assert(stdx::indexed_tuple{} == stdx::tuple{});
+}
+
+TEST_CASE("indexed_tuple destructuring", "[indexed_tuple]") {
     auto const t = stdx::make_indexed_tuple<>(1, 3.14f);
     auto const [i, f] = t;
     CHECK(i == 1);
     CHECK(f == 3.14f);
 }
 
-TEST_CASE("tuple with user index", "[tuple]") {
+TEST_CASE("tuple with user index", "[indexed_tuple]") {
     struct X;
     struct Y;
     constexpr auto t = stdx::make_indexed_tuple<key_for>(map_entry<X, int>{42},
@@ -45,7 +50,7 @@ TEST_CASE("tuple with user index", "[tuple]") {
     static_assert(T::size() == 2);
 }
 
-TEST_CASE("indexed_tuple ADL get", "[tuple]") {
+TEST_CASE("indexed_tuple ADL get", "[indexed_tuple]") {
     struct X;
     struct Y;
     constexpr auto t = stdx::make_indexed_tuple<key_for>(map_entry<X, int>{42},
@@ -67,7 +72,7 @@ template <typename T> using key1_for = typename T::key1_t;
 template <typename T> using key2_for = typename T::key2_t;
 } // namespace
 
-TEST_CASE("tuple with multiple user indices", "[tuple]") {
+TEST_CASE("tuple with multiple user indices", "[indexed_tuple]") {
     struct M;
     struct N;
     struct X;
@@ -80,7 +85,7 @@ TEST_CASE("tuple with multiple user indices", "[tuple]") {
     static_assert(stdx::get<Y>(t).value == 17);
 }
 
-TEST_CASE("apply indices", "[tuple]") {
+TEST_CASE("apply indices", "[indexed_tuple]") {
     struct X;
     constexpr auto t = stdx::tuple{map_entry<X, int>{42}};
     constexpr auto u = stdx::apply_indices<key_for>(t);

@@ -88,8 +88,8 @@ template <typename T> struct type_identity {
 };
 template <typename T> using type_identity_t = typename type_identity<T>::type;
 
-template <typename...> struct type_list;
-template <auto...> struct value_list;
+template <typename...> struct type_list {};
+template <auto...> struct value_list {};
 
 template <typename L> struct for_each_t {
     static_assert(
