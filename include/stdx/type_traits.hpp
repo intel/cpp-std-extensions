@@ -64,29 +64,51 @@ constexpr auto is_constant_evaluated() noexcept -> bool {
     return __builtin_is_constant_evaluated();
 }
 
-namespace detail {
-template <template <typename...> typename T> struct detect_specialization {
-    template <typename U> constexpr auto operator()(U &&) -> std::false_type;
-
-    template <typename... Us>
-    constexpr auto operator()(T<Us...> &&) -> std::true_type;
+template <typename T> struct type_identity {
+    using type = T;
 };
+template <typename T> using type_identity_t = typename type_identity<T>::type;
+
+namespace detail {
+template <template <typename...> typename T>
+constexpr auto detect_spec(...) -> std::false_type;
+template <template <auto...> typename T>
+constexpr auto detect_spec(...) -> std::false_type;
+
+template <template <typename...> typename T, typename... Us>
+constexpr auto detect_spec(type_identity<T<Us...>> &&) -> std::true_type;
+template <template <auto...> typename T, auto... Us>
+constexpr auto detect_spec(type_identity<T<Us...>> &&) -> std::true_type;
 } // namespace detail
 
 template <typename U, template <typename...> typename T>
 constexpr bool is_specialization_of_v =
-    decltype(std::declval<detail::detect_specialization<T>>()(
-        std::declval<U>()))::value;
+    decltype(detail::detect_spec<T>(std::declval<type_identity<U>>()))::value;
+
+template <typename U, template <typename...> typename T>
+constexpr bool is_type_specialization_of_v =
+    decltype(detail::detect_spec<T>(std::declval<type_identity<U>>()))::value;
+
+template <typename U, template <auto...> typename T>
+constexpr bool is_value_specialization_of_v =
+    decltype(detail::detect_spec<T>(std::declval<type_identity<U>>()))::value;
+
+template <typename U, template <typename...> typename T>
+constexpr auto is_specialization_of()
+    -> decltype(detail::detect_spec<T>(std::declval<type_identity<U>>())) {
+    return {};
+}
+
+template <typename U, template <auto...> typename T>
+constexpr auto is_specialization_of()
+    -> decltype(detail::detect_spec<T>(std::declval<type_identity<U>>())) {
+    return {};
+}
 
 template <typename E>
 constexpr bool is_scoped_enum_v =
     std::is_enum_v<E> and
     not std::is_convertible_v<E, std::underlying_type_t<E>>;
-
-template <typename T> struct type_identity {
-    using type = T;
-};
-template <typename T> using type_identity_t = typename type_identity<T>::type;
 
 template <typename...> struct type_list {};
 template <auto...> struct value_list {};

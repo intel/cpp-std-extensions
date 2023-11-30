@@ -65,8 +65,36 @@ stdx::is_specialization_of_v<O, std::optional>;   // true
 stdx::is_specialization_of_v<int, std::optional>; // false
 ----
 
-NOTE: `is_specialization_of` is suitable for templates with type parameters
-only (not template-template parameters or NTTPs).
+`is_specialization_of_v` is suitable for templates with type parameters only
+(not template-template parameters or NTTPs). For templates with value parameters,
+use `is_value_specialization_of_v`.
+
+[source,cpp]
+----
+template <auto N> struct S;
+using T = S<0>;
+
+stdx::is_value_specialization_of_v<T, S>; // true
+----
+
+NOTE: `is_type_specialization_of_v` is a synonym for `is_specialization_of_v`.
+
+`is_specialization_of` is a function that can be used either way.
+
+[source,cpp]
+----
+using O = std::optional<int>;
+template <auto N> struct S;
+using T = S<0>;
+
+stdx::is_specialization_of<O, std::optional>(); // true
+stdx::is_specialization_of<T, S>();             // true
+----
+
+NOTE: Perhaps until C++ has universal template parameters, there is no easy way
+to write this function where the template takes a mixture of type, value, and
+template parameters. So this is useful for templates whose parameters are all
+types or all values.
 
 === `type_or_t`
 
