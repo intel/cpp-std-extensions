@@ -12,14 +12,60 @@ template <typename T> struct derived_t : unary_t<T> {};
 
 TEST_CASE("detect specializations", "[type_traits]") {
     static_assert(stdx::is_specialization_of_v<unary_t<int>, unary_t>);
+    static_assert(stdx::is_type_specialization_of_v<unary_t<int>, unary_t>);
+    static_assert(stdx::is_specialization_of<unary_t<int>, unary_t>());
+
     static_assert(not stdx::is_specialization_of_v<int, unary_t>);
+    static_assert(not stdx::is_type_specialization_of_v<int, unary_t>);
+    static_assert(not stdx::is_specialization_of<int, unary_t>());
 
     static_assert(stdx::is_specialization_of_v<variadic_t<>, variadic_t>);
+    static_assert(stdx::is_type_specialization_of_v<variadic_t<>, variadic_t>);
+    static_assert(stdx::is_specialization_of<variadic_t<>, variadic_t>());
+
     static_assert(not stdx::is_specialization_of_v<int, variadic_t>);
+    static_assert(not stdx::is_type_specialization_of_v<int, variadic_t>);
+    static_assert(not stdx::is_specialization_of<int, variadic_t>());
 }
 
 TEST_CASE("derived types are not specializations", "[type_traits]") {
     static_assert(not stdx::is_specialization_of_v<derived_t<int>, unary_t>);
+    static_assert(
+        not stdx::is_type_specialization_of_v<derived_t<int>, unary_t>);
+    static_assert(not stdx::is_specialization_of<derived_t<int>, unary_t>());
+}
+
+namespace {
+template <auto> struct value_unary_t {};
+template <auto...> struct value_variadic_t {};
+template <auto V> struct value_derived_t : value_unary_t<V> {};
+} // namespace
+
+TEST_CASE("detect specializations (value templates)", "[type_traits]") {
+    static_assert(
+        stdx::is_value_specialization_of_v<value_unary_t<0>, value_unary_t>);
+    static_assert(
+        stdx::is_specialization_of<value_unary_t<0>, value_unary_t>());
+
+    static_assert(not stdx::is_value_specialization_of_v<int, value_unary_t>);
+    static_assert(not stdx::is_specialization_of<int, value_unary_t>());
+
+    static_assert(stdx::is_value_specialization_of_v<value_variadic_t<>,
+                                                     value_variadic_t>);
+    static_assert(
+        stdx::is_specialization_of<value_variadic_t<>, value_variadic_t>());
+
+    static_assert(
+        not stdx::is_value_specialization_of_v<int, value_variadic_t>);
+    static_assert(not stdx::is_specialization_of<int, value_variadic_t>());
+}
+
+TEST_CASE("derived types are not specializations (value templates)",
+          "[type_traits]") {
+    static_assert(not stdx::is_value_specialization_of_v<value_derived_t<0>,
+                                                         value_unary_t>);
+    static_assert(
+        not stdx::is_specialization_of<value_derived_t<0>, value_unary_t>());
 }
 
 namespace {
