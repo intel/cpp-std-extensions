@@ -136,3 +136,8 @@ TEST_CASE("callable", "[concepts]") {
     static_assert(stdx::callable<decltype(l_callable_int)>);
     static_assert(stdx::callable<decltype(l_callable_generic)>);
 }
+
+TEST_CASE("models_trait", "[concepts]") {
+    static_assert(stdx::has_trait<int *, std::is_pointer>);
+    static_assert(not stdx::has_trait<int, std::is_pointer>);
+}

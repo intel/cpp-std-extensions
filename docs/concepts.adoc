@@ -21,9 +21,13 @@ NOTE: For compatibility with the standard and with
 https://en.cppreference.com/w/cpp/types/is_base_of[`std::is_base_of`], a class
 is considered to be `derived_from` itself.
 
-Also one non-standard but useful concept: `callable`. `callable` is modelled by
-functions by and objects with `operator()`. In particular it is true for generic
-lambda expressions, where `operator()` is a function template.
+`concepts.hpp` also has a couple of non-standard but useful concepts.
+
+=== `callable`
+
+`callable` is modelled by functions by and objects with `operator()`. In
+particular it is true for generic lambda expressions, where `operator()` is a
+function template.
 
 [source,cpp]
 ----
@@ -36,3 +40,21 @@ static_assert(stdx::callable<decltype(lambda)>);
 auto generic_lambda = [] (auto i) { return i + 1; };
 static_assert(stdx::callable<decltype(generic_lambda)>);
 ----
+
+=== `has_trait`
+
+`has_trait` is used to turn a type trait (standard or otherwise) into a concept.
+There are many type traits and comparatively few standard concepts; this concept
+helps bridge the gap more easily and concisely than writing out boilerplate
+concepts for type traits.
+
+[source,cpp]
+----
+template <stdx::has_trait<std::is_class> T>
+auto f(T) -> void {
+  // can only be called with class types
+}
+----
+
+For the purposes of `has_trait`, a type trait is a class template with one
+parameter that has a `constexpr static bool value` member.
