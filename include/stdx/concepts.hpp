@@ -92,6 +92,9 @@ constexpr auto predicate =
 
 template <typename T> constexpr auto callable = is_callable_v<T>;
 
+template <typename T, template <typename> typename TypeTrait>
+constexpr auto has_trait = TypeTrait<T>::value;
+
 #else
 
 // After C++20, we can define concepts that are lacking in the library
@@ -163,6 +166,9 @@ concept predicate = invocable<F, Args> and
 template <typename T>
 concept callable = is_callable_v<T>;
 
+template <typename T, template <typename> typename TypeTrait>
+concept has_trait = TypeTrait<T>::value;
+
 #endif
 
 } // namespace v1
@@ -192,6 +198,9 @@ using std::predicate;
 
 template <typename T>
 concept callable = is_callable_v<T>;
+
+template <typename T, template <typename> typename TypeTrait>
+concept has_trait = TypeTrait<T>::value;
 
 } // namespace v1
 } // namespace stdx
