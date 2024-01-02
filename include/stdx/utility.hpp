@@ -105,3 +105,7 @@ constexpr static auto value_lookup_v =
               detail::value_t<Default>>::value;
 } // namespace v1
 } // namespace stdx
+
+#ifndef FWD
+#define FWD(x) std::forward<decltype(x)>(x)
+#endif
