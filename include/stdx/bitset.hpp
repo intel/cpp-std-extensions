@@ -191,22 +191,25 @@ template <std::size_t N, typename StorageElem> class bitset {
         auto [l_index, l_offset] = indices(l);
         auto const [m_index, m_offset] = indices(m);
 
-        auto l_mask = std::numeric_limits<StorageElem>::max() << l_offset;
-        while (l_index != m_index) {
+        using setfn = auto (*)(StorageElem *, StorageElem)->void;
+        auto const fn = [&]() -> setfn {
             if (value) {
-                storage[l_index++] |= static_cast<StorageElem>(l_mask);
-            } else {
-                storage[l_index++] &= static_cast<StorageElem>(~(l_mask));
+                return [](StorageElem *ptr, StorageElem val) { *ptr |= val; };
             }
+            return [](StorageElem *ptr, StorageElem val) { *ptr &= ~val; };
+        }();
+
+        auto l_mask = std::numeric_limits<StorageElem>::max() << l_offset;
+        if (l_index != m_index) {
+            fn(&storage[l_index++], static_cast<StorageElem>(l_mask));
             l_mask = std::numeric_limits<StorageElem>::max();
+        }
+        while (l_index != m_index) {
+            fn(&storage[l_index++], static_cast<StorageElem>(l_mask));
         }
         auto const m_mask = std::numeric_limits<StorageElem>::max() >>
                             (storage_elem_size - m_offset - 1);
-        if (value) {
-            storage[l_index] |= static_cast<StorageElem>(l_mask & m_mask);
-        } else {
-            storage[l_index] &= static_cast<StorageElem>(~(l_mask & m_mask));
-        }
+        fn(&storage[l_index], static_cast<StorageElem>(l_mask & m_mask));
         return *this;
     }
 
