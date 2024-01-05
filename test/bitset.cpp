@@ -358,3 +358,20 @@ TEMPLATE_TEST_CASE("reset range of bits (lsb, msb)", "[bitset]", std::uint8_t,
     CHECK(not bs[9]);
     CHECK(bs.count() == 60);
 }
+
+TEMPLATE_TEST_CASE("set/reset all bits with size at type capacity", "[bitset]",
+                   std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
+    constexpr auto sz = std::numeric_limits<TestType>::digits;
+    constexpr auto expected = std::numeric_limits<TestType>::max();
+
+    constexpr auto bs1 = stdx::bitset<sz, TestType>{stdx::all_bits};
+    static_assert(bs1.all());
+    static_assert(bs1.to_uint64_t() == expected);
+
+    auto bs2 = stdx::bitset<sz, TestType>{};
+    bs2.set();
+    CHECK(bs2.all());
+    CHECK(bs2.to_uint64_t() == expected);
+    bs2.reset();
+    CHECK(bs2.none());
+}
