@@ -17,6 +17,12 @@ namespace stdx {
 inline namespace v1 {
 struct place_bits_t {};
 constexpr inline auto place_bits = place_bits_t{};
+struct all_bits_t {};
+constexpr inline auto all_bits = all_bits_t{};
+
+enum struct lsb_t : std::size_t {};
+enum struct msb_t : std::size_t {};
+enum struct length_t : std::size_t {};
 
 namespace detail {
 template <std::size_t N, typename StorageElem> class bitset {
@@ -128,6 +134,12 @@ template <std::size_t N, typename StorageElem> class bitset {
         (set(static_cast<std::size_t>(bs)), ...);
     }
 
+    constexpr explicit bitset(all_bits_t) {
+        for (auto &elem : storage) {
+            elem = allbits;
+        }
+    }
+
     constexpr explicit bitset(std::string_view str, std::size_t pos = 0,
                               std::size_t n = std::string_view::npos,
                               char one = '1') {
@@ -173,6 +185,37 @@ template <std::size_t N, typename StorageElem> class bitset {
         return *this;
     }
 
+    constexpr auto set(lsb_t lsb, msb_t msb, bool value = true) -> bitset & {
+        auto const l = to_underlying(lsb);
+        auto const m = to_underlying(msb);
+        auto [l_index, l_offset] = indices(l);
+        auto const [m_index, m_offset] = indices(m);
+
+        auto l_mask = std::numeric_limits<StorageElem>::max() << l_offset;
+        while (l_index != m_index) {
+            if (value) {
+                storage[l_index++] |= static_cast<StorageElem>(l_mask);
+            } else {
+                storage[l_index++] &= static_cast<StorageElem>(~(l_mask));
+            }
+            l_mask = std::numeric_limits<StorageElem>::max();
+        }
+        auto const m_mask = std::numeric_limits<StorageElem>::max() >>
+                            (storage_elem_size - m_offset - 1);
+        if (value) {
+            storage[l_index] |= static_cast<StorageElem>(l_mask & m_mask);
+        } else {
+            storage[l_index] &= static_cast<StorageElem>(~(l_mask & m_mask));
+        }
+        return *this;
+    }
+
+    constexpr auto set(lsb_t lsb, length_t len, bool value = true) -> bitset & {
+        auto const l = to_underlying(lsb);
+        auto const length = to_underlying(len);
+        return set(lsb, static_cast<msb_t>(l + length - 1), value);
+    }
+
     constexpr auto set() -> bitset & {
         for (auto &elem : storage) {
             elem = allbits;
@@ -191,6 +234,14 @@ template <std::size_t N, typename StorageElem> class bitset {
             elem = {};
         }
         return *this;
+    }
+
+    constexpr auto reset(lsb_t lsb, msb_t msb) -> bitset & {
+        return set(lsb, msb, false);
+    }
+
+    constexpr auto reset(lsb_t lsb, length_t len) -> bitset & {
+        return set(lsb, len, false);
     }
 
     constexpr auto flip(std::size_t pos) -> bitset & {
@@ -345,5 +396,18 @@ template <std::size_t N, typename StorageElem = void>
 using bitset =
     detail::bitset<N, decltype(detail::select_storage<N, StorageElem>())>;
 
+namespace literals {
+// NOLINTBEGIN(google-runtime-int)
+CONSTEVAL auto operator""_lsb(unsigned long long int n) -> lsb_t {
+    return static_cast<lsb_t>(n);
+}
+CONSTEVAL auto operator""_msb(unsigned long long int n) -> msb_t {
+    return static_cast<msb_t>(n);
+}
+CONSTEVAL auto operator""_len(unsigned long long int n) -> length_t {
+    return static_cast<length_t>(n);
+}
+// NOLINTEND(google-runtime-int)
+} // namespace literals
 } // namespace v1
 } // namespace stdx

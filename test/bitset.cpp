@@ -304,3 +304,57 @@ TEMPLATE_TEST_CASE("for_each iterates in order lsb to msb", "[bitset]",
         bs);
     CHECK(result == bs);
 }
+
+TEMPLATE_TEST_CASE("set range of bits (lsb, length)", "[bitset]", std::uint8_t,
+                   std::uint16_t, std::uint32_t, std::uint64_t) {
+    using namespace stdx::literals;
+    auto bs = stdx::bitset<64, TestType>{};
+    bs.set(6_lsb, 4_len);
+    CHECK(bs[6]);
+    CHECK(bs[7]);
+    CHECK(bs[8]);
+    CHECK(bs[9]);
+    CHECK(bs.count() == 4u);
+}
+
+TEMPLATE_TEST_CASE("set range of bits (lsb, msb)", "[bitset]", std::uint8_t,
+                   std::uint16_t, std::uint32_t, std::uint64_t) {
+    using namespace stdx::literals;
+    auto bs = stdx::bitset<64, TestType>{};
+    bs.set(6_lsb, 9_msb);
+    CHECK(bs[6]);
+    CHECK(bs[7]);
+    CHECK(bs[8]);
+    CHECK(bs[9]);
+    CHECK(bs.count() == 4u);
+}
+
+TEMPLATE_TEST_CASE("construct with all bits set", "[bitset]", std::uint8_t,
+                   std::uint16_t, std::uint32_t, std::uint64_t) {
+    constexpr auto bs = stdx::bitset<9, TestType>{stdx::all_bits};
+    static_assert(bs.all());
+}
+
+TEMPLATE_TEST_CASE("reset range of bits (lsb, length)", "[bitset]",
+                   std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
+    using namespace stdx::literals;
+    auto bs = stdx::bitset<64, TestType>{stdx::all_bits};
+    bs.reset(6_lsb, 4_len);
+    CHECK(not bs[6]);
+    CHECK(not bs[7]);
+    CHECK(not bs[8]);
+    CHECK(not bs[9]);
+    CHECK(bs.count() == 60);
+}
+
+TEMPLATE_TEST_CASE("reset range of bits (lsb, msb)", "[bitset]", std::uint8_t,
+                   std::uint16_t, std::uint32_t, std::uint64_t) {
+    using namespace stdx::literals;
+    auto bs = stdx::bitset<64, TestType>{stdx::all_bits};
+    bs.reset(6_lsb, 9_msb);
+    CHECK(not bs[6]);
+    CHECK(not bs[7]);
+    CHECK(not bs[8]);
+    CHECK(not bs[9]);
+    CHECK(bs.count() == 60);
+}
