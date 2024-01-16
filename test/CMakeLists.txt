@@ -28,6 +28,7 @@ add_tests(
     default_panic
     for_each_n_args
     function_traits
+    intrusive_forward_list
     intrusive_list
     is_constant_evaluated
     memory

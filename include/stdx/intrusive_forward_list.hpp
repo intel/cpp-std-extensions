@@ -12,26 +12,23 @@ inline namespace v1 {
 #if __cpp_concepts >= 201907L
 namespace detail {
 template <typename T>
-concept base_double_linkable = requires(T node) {
+concept base_single_linkable = requires(T node) {
     { node->next } -> same_as<T &>;
-    { node->prev } -> same_as<T &>;
 };
 } // namespace detail
 
 template <typename T>
-concept double_linkable = requires(T *node) {
-    requires detail::base_double_linkable<
+concept single_linkable = requires(T *node) {
+    requires detail::base_single_linkable<
         std::remove_cvref_t<decltype(node->next)>>;
-    requires detail::base_double_linkable<
-        std::remove_cvref_t<decltype(node->prev)>>;
 };
 
-#define STDX_DOUBLE_LINKABLE double_linkable
+#define STDX_SINGLE_LINKABLE single_linkable
 #else
-#define STDX_DOUBLE_LINKABLE typename
+#define STDX_SINGLE_LINKABLE typename
 #endif
 
-template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
+template <STDX_SINGLE_LINKABLE NodeType> class intrusive_forward_list {
     template <typename N> struct iterator_t {
         using difference_type = std::ptrdiff_t;
         using value_type = N;
@@ -103,12 +100,8 @@ template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
     constexpr auto cend() -> const_iterator { return {}; }
 
     constexpr auto push_front(pointer n) -> void {
-        if (head != nullptr) {
-            head->prev = n;
-        }
         n->next = head;
         head = n;
-        n->prev = nullptr;
         if (tail == nullptr) {
             tail = n;
         }
@@ -118,7 +111,6 @@ template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
         if (tail != nullptr) {
             tail->next = n;
         }
-        n->prev = tail;
         tail = n;
         n->next = nullptr;
         if (head == nullptr) {
@@ -132,21 +124,6 @@ template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
 
         if (head == nullptr) {
             tail = nullptr;
-        } else {
-            head->prev = nullptr;
-        }
-
-        return poppedNode;
-    }
-
-    constexpr auto pop_back() -> pointer {
-        pointer poppedNode = tail;
-        tail = tail->prev;
-
-        if (tail == nullptr) {
-            head = nullptr;
-        } else {
-            tail->next = nullptr;
         }
 
         return poppedNode;
@@ -160,25 +137,8 @@ template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
         head = nullptr;
         tail = nullptr;
     }
-
-    constexpr auto remove(pointer n) -> void {
-        pointer nextNode = n->next;
-        pointer prevNode = n->prev;
-
-        if (prevNode == nullptr) {
-            head = nextNode;
-        } else {
-            prevNode->next = nextNode;
-        }
-
-        if (nextNode == nullptr) {
-            tail = prevNode;
-        } else {
-            nextNode->prev = prevNode;
-        }
-    }
 };
 
-#undef STDX_DOUBLE_LINKABLE
+#undef STDX_SINGLE_LINKABLE
 } // namespace v1
 } // namespace stdx
