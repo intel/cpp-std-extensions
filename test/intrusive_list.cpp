@@ -178,6 +178,20 @@ TEST_CASE("begin", "[intrusive_list]") {
     CHECK(std::cbegin(list)->value == 1);
 }
 
+TEST_CASE("front and back", "[intrusive_list]") {
+    stdx::intrusive_list<int_node> list{};
+    int_node n1{1};
+    int_node n2{2};
+    int_node n3{3};
+
+    list.push_back(&n1);
+    list.push_back(&n2);
+    list.push_back(&n3);
+
+    CHECK(list.front().value == 1);
+    CHECK(list.back().value == 3);
+}
+
 TEST_CASE("iterator preincrement", "[intrusive_list]") {
     stdx::intrusive_list<int_node> list{};
     int_node n1{1};

@@ -102,6 +102,9 @@ template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
     constexpr auto end() const -> const_iterator { return {}; }
     constexpr auto cend() -> const_iterator { return {}; }
 
+    constexpr auto front() const -> reference { return *head; }
+    constexpr auto back() const -> reference { return *tail; }
+
     constexpr auto push_front(pointer n) -> void {
         if (head != nullptr) {
             head->prev = n;
