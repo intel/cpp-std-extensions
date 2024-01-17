@@ -99,6 +99,9 @@ template <STDX_SINGLE_LINKABLE NodeType> class intrusive_forward_list {
     constexpr auto end() const -> const_iterator { return {}; }
     constexpr auto cend() -> const_iterator { return {}; }
 
+    constexpr auto front() const -> reference { return *head; }
+    constexpr auto back() const -> reference { return *tail; }
+
     constexpr auto push_front(pointer n) -> void {
         n->next = head;
         head = n;
