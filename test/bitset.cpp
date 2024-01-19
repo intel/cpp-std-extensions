@@ -109,7 +109,7 @@ TEMPLATE_TEST_CASE("construct with a value", "[bitset]", std::uint8_t,
 
 TEMPLATE_TEST_CASE("construct with values for bits", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
-    constexpr auto bs = stdx::bitset<1, TestType>{stdx::place_bits, 1, 3, 5};
+    constexpr auto bs = stdx::bitset<8, TestType>{stdx::place_bits, 1, 3, 5};
     static_assert(not bs[0]);
     static_assert(bs[1]);
     static_assert(bs[3]);
@@ -374,4 +374,25 @@ TEMPLATE_TEST_CASE("set/reset all bits with size at type capacity", "[bitset]",
     CHECK(bs2.to_uint64_t() == expected);
     bs2.reset();
     CHECK(bs2.none());
+}
+
+TEMPLATE_TEST_CASE("find lowest unset bit (element 0)", "[bitset]",
+                   std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
+    constexpr auto bs = stdx::bitset<4, TestType>{stdx::place_bits, 0, 1, 3};
+    static_assert(bs.lowest_unset() == 2);
+}
+
+TEMPLATE_TEST_CASE("find lowest unset bit (element > 0)", "[bitset]",
+                   std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
+    constexpr auto sz = std::numeric_limits<TestType>::digits * 2;
+    auto bs = stdx::bitset<sz, TestType>{stdx::all_bits};
+    bs.reset(sz - 3);
+    CHECK(bs.lowest_unset() == sz - 3);
+}
+
+TEMPLATE_TEST_CASE("find lowest unset bit (full)", "[bitset]", std::uint8_t,
+                   std::uint16_t, std::uint32_t, std::uint64_t) {
+    constexpr auto sz = std::numeric_limits<TestType>::digits;
+    constexpr auto bs = stdx::bitset<sz, TestType>{stdx::all_bits};
+    static_assert(bs.lowest_unset() == sz);
 }

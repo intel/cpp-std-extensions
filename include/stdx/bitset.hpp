@@ -138,6 +138,7 @@ template <std::size_t N, typename StorageElem> class bitset {
         for (auto &elem : storage) {
             elem = allbits;
         }
+        storage.back() &= lastmask;
     }
 
     constexpr explicit bitset(std::string_view str, std::size_t pos = 0,
@@ -286,6 +287,18 @@ template <std::size_t N, typename StorageElem> class bitset {
             n += static_cast<std::size_t>(popcount(storage[i]));
         }
         return n + static_cast<std::size_t>(popcount(highbits()));
+    }
+
+    [[nodiscard]] constexpr auto lowest_unset() const -> std::size_t {
+        std::size_t i = 0;
+        for (auto e : storage) {
+            if (auto offset = static_cast<std::size_t>(countr_one(e));
+                offset != std::numeric_limits<StorageElem>::digits) {
+                return i + offset;
+            }
+            i += std::numeric_limits<StorageElem>::digits;
+        }
+        return i;
     }
 
     [[nodiscard]] constexpr auto operator~() const -> bitset {
