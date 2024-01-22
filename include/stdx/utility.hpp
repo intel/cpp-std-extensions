@@ -103,6 +103,32 @@ constexpr static auto value_lookup_v =
               decltype(detail::lookup<detail::value_t<K>, void>(
                   std::declval<M>())),
               detail::value_t<Default>>::value;
+
+#if __cpp_lib_forward_like < 202207L
+template <typename T, typename U>
+[[nodiscard]] constexpr auto forward_like(U &&u) noexcept -> decltype(auto) {
+    constexpr auto t_is_const = std::is_const_v<std::remove_reference_t<T>>;
+
+    if constexpr (std::is_lvalue_reference_v<T &&>) {
+        if constexpr (t_is_const) {
+            return std::as_const(u);
+        } else {
+            return static_cast<U &>(u);
+        }
+    } else {
+        if constexpr (t_is_const) {
+            return std::move(std::as_const(u));
+        } else {
+            return static_cast<U &&>(u);
+        }
+    }
+}
+#else
+using std::forward_like;
+#endif
+template <typename T, typename U>
+using forward_like_t = decltype(forward_like<T>(std::declval<U>()));
+
 } // namespace v1
 } // namespace stdx
 

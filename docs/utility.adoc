@@ -1,6 +1,15 @@
 
 == `utility.hpp`
 
+`forward_like` is an implementation of
+https://en.cppreference.com/w/cpp/utility/forward_like[`std::forward_like`].
+`forward_like_t` is also provided.
+
+[source,cpp]
+----
+static_assert(stdx::same_as<stdx::forward_like_t<int &, float>, float &>);
+----
+
 `overload` is a struct designed to encapsulate an overload set. It inherits from
 all the lambda expressions used to construct it. As an example, it's useful for
 visiting a variant.
