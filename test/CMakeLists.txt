@@ -42,6 +42,7 @@ add_tests(
     type_map
     type_traits
     with_result_of
+    utility
     udls)
 
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
