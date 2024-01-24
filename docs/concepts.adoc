@@ -58,3 +58,35 @@ auto f(T) -> void {
 
 For the purposes of `has_trait`, a type trait is a class template with one
 parameter that has a `constexpr static bool value` member.
+
+=== `same_as_unqualified`
+
+`same_as_unqualified` is true when two types are the same are removing top-level
+cv-qualifications and references, if any. It's useful for constraining hidden
+friends -- particularly when member functions would need to be replicated with
+different reference qualifiers before C++23.
+
+[source,cpp]
+----
+struct S {
+  // before C++20
+  auto f() & { /* ... */ }
+  auto f() const & { /* ... */ }
+  auto f() && { /* ... */ }
+  auto f() const && { /* ... */ }
+  // (and 4 more for volatile qualifiers!)
+
+  // with C++23's explicit object parameter ("deducing this")
+  template <typename Self>
+  auto f(this Self&& s) {
+    // Self is perfectly-forwarded
+  }
+
+private:
+  // hidden friend alternative
+  template <same_as_unqualified<S> Self>
+  friend auto f(Self&& s) {
+    // Self is perfectly-forwarded
+  }
+};
+----

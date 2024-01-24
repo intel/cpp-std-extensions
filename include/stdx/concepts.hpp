@@ -40,6 +40,10 @@ constexpr auto derived_from =
 template <typename T, typename U>
 constexpr auto same_as = std::is_same_v<T, U> and std::is_same_v<U, T>;
 
+template <typename T, typename U>
+constexpr auto same_as_unqualified =
+    is_same_unqualified_v<T, U> and is_same_unqualified_v<U, T>;
+
 // NOLINTBEGIN(bugprone-macro-parentheses, cppcoreguidelines-macro-usage)
 #define DETECTOR(name, expr)                                                   \
     namespace detail::detect {                                                 \
@@ -123,6 +127,10 @@ concept derived_from =
 template <typename T, typename U>
 concept same_as = std::is_same_v<T, U> and std::is_same_v<U, T>;
 
+template <typename T, typename U>
+concept same_as_unqualified =
+    is_same_unqualified_v<T, U> and is_same_unqualified_v<U, T>;
+
 template <typename T>
 concept equality_comparable = requires(T const &t) {
     { t == t } -> same_as<bool>;
@@ -201,6 +209,10 @@ concept callable = is_callable_v<T>;
 
 template <typename T, template <typename> typename TypeTrait>
 concept has_trait = TypeTrait<T>::value;
+
+template <typename T, typename U>
+concept same_as_unqualified =
+    is_same_unqualified_v<T, U> and is_same_unqualified_v<U, T>;
 
 } // namespace v1
 } // namespace stdx

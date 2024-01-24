@@ -138,3 +138,14 @@ stdx::template_for_each<L2>([&] <auto V> () { y += V; });
 
 NOTE: A primary use case of `template_for_each` is to be able to use a list of
 tag types without those types having to be complete.
+
+=== `is_same_unqualified_v`
+
+`is_same_unqualified_v` is a variable template that detects whether a two types
+are the same are removing top-level cv-qualifications and references, if any.
+
+[source,cpp]
+----
+stdx::is_same_unqualified_v<int, int const&>; // true
+stdx::is_same_unqualified_v<int, void>;       // false
+----
