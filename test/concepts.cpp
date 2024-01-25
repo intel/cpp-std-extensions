@@ -19,7 +19,7 @@ TEST_CASE("signed_integral", "[concepts]") {
     static_assert(not stdx::signed_integral<unsigned int>);
 }
 
-TEST_CASE("unsgined_integral", "[concepts]") {
+TEST_CASE("unsigned_integral", "[concepts]") {
     static_assert(stdx::unsigned_integral<unsigned int>);
     static_assert(not stdx::unsigned_integral<int>);
 }
@@ -27,6 +27,19 @@ TEST_CASE("unsgined_integral", "[concepts]") {
 TEST_CASE("same_as", "[concepts]") {
     static_assert(stdx::same_as<int, int>);
     static_assert(not stdx::same_as<float, int>);
+}
+
+TEST_CASE("same_as_unqualified", "[concepts]") {
+    static_assert(stdx::same_as_unqualified<int, int>);
+    static_assert(not stdx::same_as_unqualified<int, void>);
+    static_assert(stdx::same_as_unqualified<int, int &>);
+    static_assert(stdx::same_as_unqualified<int, int const &>);
+    static_assert(stdx::same_as_unqualified<int, int &&>);
+    static_assert(stdx::same_as_unqualified<int, int const &&>);
+    static_assert(stdx::same_as_unqualified<int &, int>);
+    static_assert(stdx::same_as_unqualified<int const &, int>);
+    static_assert(stdx::same_as_unqualified<int &&, int>);
+    static_assert(stdx::same_as_unqualified<int const &&, int>);
 }
 
 TEST_CASE("convertible_to", "[concepts]") {

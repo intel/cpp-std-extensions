@@ -133,5 +133,9 @@ struct for_each_t<L<Vs...>> {
 };
 
 template <typename L> constexpr static auto template_for_each = for_each_t<L>{};
+
+template <typename T, typename U>
+constexpr bool is_same_unqualified_v =
+    std::is_same_v<remove_cvref_t<T>, remove_cvref_t<U>>;
 } // namespace v1
 } // namespace stdx

@@ -128,3 +128,16 @@ TEST_CASE("template_for_each with empty value list", "[type_traits]") {
     stdx::template_for_each<L>(add_value{});
     CHECK(value == 17);
 }
+
+TEST_CASE("is_same_unqualified", "[type_traits]") {
+    static_assert(stdx::is_same_unqualified_v<int, int>);
+    static_assert(not stdx::is_same_unqualified_v<int, void>);
+    static_assert(stdx::is_same_unqualified_v<int, int &>);
+    static_assert(stdx::is_same_unqualified_v<int, int const &>);
+    static_assert(stdx::is_same_unqualified_v<int, int &&>);
+    static_assert(stdx::is_same_unqualified_v<int, int const &&>);
+    static_assert(stdx::is_same_unqualified_v<int &, int>);
+    static_assert(stdx::is_same_unqualified_v<int const &, int>);
+    static_assert(stdx::is_same_unqualified_v<int &&, int>);
+    static_assert(stdx::is_same_unqualified_v<int const &&, int>);
+}
