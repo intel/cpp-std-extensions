@@ -30,6 +30,7 @@ add_tests(
     function_traits
     intrusive_forward_list
     intrusive_list
+    intrusive_list_properties
     is_constant_evaluated
     memory
     optional
