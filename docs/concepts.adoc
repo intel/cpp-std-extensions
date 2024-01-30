@@ -16,10 +16,15 @@ boolean values.
 * https://en.cppreference.com/w/cpp/concepts/totally_ordered[`totally_ordered`]
 * https://en.cppreference.com/w/cpp/concepts/invocable[`invocable`]
 * https://en.cppreference.com/w/cpp/concepts/predicate[`predicate`]
+* https://en.cppreference.com/w/cpp/ranges/range[`range`]
 
 NOTE: For compatibility with the standard and with
 https://en.cppreference.com/w/cpp/types/is_base_of[`std::is_base_of`], a class
 is considered to be `derived_from` itself.
+
+NOTE: `range` is in the `stdx` namespace, and is defined in terms of
+`std::begin` and `std::end`, unlike the standard which has `std::ranges::range`
+defined in terms of `std::ranges::begin` and `std::ranges::end`.
 
 `concepts.hpp` also has a couple of non-standard but useful concepts.
 
