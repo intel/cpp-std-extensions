@@ -2,6 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <array>
 #include <type_traits>
 
 TEST_CASE("integral", "[concepts]") {
@@ -153,4 +154,9 @@ TEST_CASE("callable", "[concepts]") {
 TEST_CASE("models_trait", "[concepts]") {
     static_assert(stdx::has_trait<int *, std::is_pointer>);
     static_assert(not stdx::has_trait<int, std::is_pointer>);
+}
+
+TEST_CASE("range", "[concepts]") {
+    static_assert(not stdx::range<int>);
+    static_assert(stdx::range<std::array<int, 4>>);
 }
