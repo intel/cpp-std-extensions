@@ -60,6 +60,25 @@ TEST_CASE("function decayed args", "[function_traits]") {
                        std::tuple<int>>);
 }
 
+TEST_CASE("function nth arg", "[function_traits]") {
+    static_assert(
+        std::is_same_v<typename stdx::function_traits<
+                           decltype(func_one_arg)>::template nth_arg<0>,
+                       int>);
+    static_assert(
+        std::is_same_v<stdx::nth_arg_t<decltype(func_one_arg), 0>, int>);
+}
+
+TEST_CASE("function decayed nth arg", "[function_traits]") {
+    static_assert(
+        std::is_same_v<typename stdx::function_traits<
+                           decltype(func_ref_arg)>::template decayed_nth_arg<0>,
+                       int>);
+    static_assert(
+        std::is_same_v<stdx::decayed_nth_arg_t<decltype(func_ref_arg), 0>,
+                       int>);
+}
+
 TEST_CASE("lambda args", "[function_traits]") {
     [[maybe_unused]] auto const x = [](int) {};
     [[maybe_unused]] auto const y = [](int) mutable {};
@@ -94,6 +113,25 @@ TEST_CASE("lambda decayed args", "[function_traits]") {
                        std::tuple<int>>);
     static_assert(std::is_same_v<stdx::decayed_args_t<decltype(y), std::tuple>,
                                  std::tuple<int>>);
+}
+
+TEST_CASE("lambda nth arg", "[function_traits]") {
+    [[maybe_unused]] auto const x = [](int) {};
+
+    static_assert(
+        std::is_same_v<
+            typename stdx::function_traits<decltype(x)>::template nth_arg<0>,
+            int>);
+    static_assert(std::is_same_v<stdx::nth_arg_t<decltype(x), 0>, int>);
+}
+
+TEST_CASE("lambda decayed nth arg", "[function_traits]") {
+    [[maybe_unused]] auto const x = [](int &) {};
+
+    static_assert(std::is_same_v<typename stdx::function_traits<
+                                     decltype(x)>::template decayed_nth_arg<0>,
+                                 int>);
+    static_assert(std::is_same_v<stdx::decayed_nth_arg_t<decltype(x), 0>, int>);
 }
 
 TEST_CASE("function arity", "[function_traits]") {
