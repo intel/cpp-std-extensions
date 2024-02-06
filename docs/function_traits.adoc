@@ -39,6 +39,14 @@ using f_arity_t = stdx::arity_t<decltype(f)>; // std::integral_constant<std::siz
 constexpr auto f_arity_v = stdx::arity_v<decltype(f)>;
 ----
 
+`stdx::nth_arg_t` returns a function parameter type at a given index.
+`stdx::decayed_nth_arg_t` is the equivalent with `std::decay_t` applied.
+[source,cpp]
+----
+auto f(int&) -> void {}
+using first_arg_t = stdx::nth_arg_t<decltype(f), 0>; // int&
+using first_decayed_arg_t = stdx::decayed_nth_arg_t<decltype(f), 0>; // int
+----
 
 NOTE: Function traits work on functions (and function objects): not function
 templates or overload sets. For instance therefore, they will not work on generic
