@@ -25,6 +25,11 @@ struct tombstone_traits<T, std::enable_if_t<std::is_floating_point_v<T>>> {
     }
 };
 
+template <typename T>
+struct tombstone_traits<T, std::enable_if_t<std::is_pointer_v<T>>> {
+    constexpr auto operator()() const { return nullptr; }
+};
+
 template <auto V> struct tombstone_value {
     constexpr auto operator()() const { return V; }
 };

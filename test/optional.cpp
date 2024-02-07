@@ -390,6 +390,15 @@ TEST_CASE("optional floating-point value has default sentinel", "[optional]") {
     CHECK(o1 < o2);
 }
 
+TEST_CASE("optional pointer value has default sentinel", "[optional]") {
+    auto const o1 = stdx::optional<float *>{};
+    CHECK(not o1);
+    CHECK(*o1 == nullptr);
+    float f{1.0f};
+    auto const o2 = stdx::optional<float *>{&f};
+    CHECK(o1 < o2);
+}
+
 TEST_CASE("transform (non-movable)", "[optional]") {
     auto o1 = stdx::optional<non_movable>{17};
     auto o2 = o1.transform([](auto &x) { return non_movable{x.value + 42}; });
