@@ -1,6 +1,8 @@
 #pragma once
 
+#include <stdx/functional.hpp>
 #include <stdx/type_traits.hpp>
+#include <stdx/utility.hpp>
 
 #include <limits>
 #include <memory>
@@ -23,6 +25,11 @@ struct tombstone_traits<T, std::enable_if_t<std::is_floating_point_v<T>>> {
     }
 };
 
+template <typename T>
+struct tombstone_traits<T, std::enable_if_t<std::is_pointer_v<T>>> {
+    constexpr auto operator()() const { return nullptr; }
+};
+
 template <auto V> struct tombstone_value {
     constexpr auto operator()() const { return V; }
 };
@@ -32,7 +39,7 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
                       not stdx::is_specialization_of_v<TS, tombstone_traits>,
                   "Don't define tombstone traits for plain integral types");
     constexpr static inline auto traits = TS{};
-    [[no_unique_address]] T val{traits()};
+    T val{traits()};
 
   public:
     using value_type = T;
@@ -129,23 +136,29 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
     template <typename F> constexpr auto transform(F &&f) & {
         using func_t = stdx::remove_cvref_t<F>;
         using U = std::invoke_result_t<func_t, value_type &>;
-        return *this ? optional<U>{std::forward<F>(f)(val)} : optional<U>{};
+        return *this ? optional<U>{with_result_of{
+                           [&] { return std::forward<F>(f)(val); }}}
+                     : optional<U>{};
     }
     template <typename F> constexpr auto transform(F &&f) const & {
         using func_t = stdx::remove_cvref_t<F>;
         using U = std::invoke_result_t<func_t, value_type const &>;
-        return *this ? optional<U>{std::forward<F>(f)(val)} : optional<U>{};
+        return *this ? optional<U>{with_result_of{
+                           [&] { return std::forward<F>(f)(val); }}}
+                     : optional<U>{};
     }
     template <typename F> constexpr auto transform(F &&f) && {
         using func_t = stdx::remove_cvref_t<F>;
         using U = std::invoke_result_t<func_t, value_type &&>;
-        return *this ? optional<U>{std::forward<F>(f)(std::move(val))}
+        return *this ? optional<U>{with_result_of{
+                           [&] { return std::forward<F>(f)(std::move(val)); }}}
                      : optional<U>{};
     }
     template <typename F> constexpr auto transform(F &&f) const && {
         using func_t = stdx::remove_cvref_t<F>;
-        using U = std::invoke_result_t<func_t, value_type &&>;
-        return *this ? optional<U>{std::forward<F>(f)(std::move(val))}
+        using U = std::invoke_result_t<func_t, value_type const &&>;
+        return *this ? optional<U>{with_result_of{
+                           [&] { return std::forward<F>(f)(std::move(val)); }}}
                      : optional<U>{};
     }
 
@@ -222,12 +235,15 @@ template <typename F, typename... Ts,
                                                     optional>)>>
 constexpr auto transform(F &&f, Ts &&...ts) {
     using func_t = stdx::remove_cvref_t<F>;
-    using U =
-        std::invoke_result_t<func_t, decltype(std::forward<Ts>(ts).value())...>;
+    using R = std::invoke_result_t<
+        func_t,
+        forward_like_t<Ts, typename stdx::remove_cvref_t<Ts>::value_type>...>;
     if ((... and ts.has_value())) {
-        return std::forward<F>(f)(std::forward<Ts>(ts).value()...);
+        return optional<R>{with_result_of{[&] {
+            return std::forward<F>(f)(std::forward<Ts>(ts).value()...);
+        }}};
     }
-    return U{};
+    return optional<R>{};
 }
 } // namespace v1
 } // namespace stdx
