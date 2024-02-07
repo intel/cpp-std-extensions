@@ -319,9 +319,8 @@ TEST_CASE("and_then (const rvalue ref)", "[optional]") {
 TEST_CASE("transform (multi-arg)", "[optional]") {
     auto o1 = stdx::optional<S>{17};
     auto o2 = stdx::optional<S>{42};
-    auto o3 = transform(
-        [](S &x, S &y) { return stdx::optional<S>{x.value + y.value}; }, o1,
-        o2);
+    auto o3 =
+        transform([](S &x, S &y) { return S{x.value + y.value}; }, o1, o2);
     CHECK(o3->value == 59);
 }
 
@@ -389,4 +388,19 @@ TEST_CASE("optional floating-point value has default sentinel", "[optional]") {
     CHECK(std::isinf(*o1));
     auto const o2 = stdx::optional{1.0f};
     CHECK(o1 < o2);
+}
+
+TEST_CASE("transform (non-movable)", "[optional]") {
+    auto o1 = stdx::optional<non_movable>{17};
+    auto o2 = o1.transform([](auto &x) { return non_movable{x.value + 42}; });
+    CHECK(o2->value == 59);
+}
+
+TEST_CASE("transform (multi-arg nonmovable)", "[optional]") {
+    auto o1 = stdx::optional<non_movable>{17};
+    auto o2 = stdx::optional<non_movable>{42};
+    auto o3 = transform(
+        [](auto &x, auto &y) { return non_movable{x.value + y.value}; }, o1,
+        o2);
+    CHECK(o3->value == 59);
 }
