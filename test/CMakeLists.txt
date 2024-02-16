@@ -32,6 +32,7 @@ add_tests(
     intrusive_list
     intrusive_list_properties
     is_constant_evaluated
+    iterator
     memory
     optional
     overload
