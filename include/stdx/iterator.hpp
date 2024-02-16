@@ -20,6 +20,8 @@ constexpr auto ct_capacity_v = detail::ct_capacity_fail<T>{};
 template <typename T, std::size_t N>
 constexpr auto ct_capacity_v<std::array<T, N>> = N;
 
+template <typename T> constexpr auto ct_capacity_v<T const> = ct_capacity_v<T>;
+
 template <typename T> constexpr auto ct_capacity(T &&) -> std::size_t {
     return ct_capacity_v<remove_cvref_t<T>>;
 }

@@ -57,3 +57,13 @@ TEST_CASE("compile-time capacity (stdx::cx_vector)", "[iterator]") {
     stdx::cx_vector<int, 4> v{};
     static_assert(stdx::ct_capacity(v) == 4u);
 }
+
+TEST_CASE("compile-time capacity variable template", "[iterator]") {
+    std::array a{1, 2, 3, 4};
+    static_assert(stdx::ct_capacity_v<decltype(a)> == 4u);
+}
+
+TEST_CASE("compile-time capacity variable template (const)", "[iterator]") {
+    std::array const a{1, 2, 3, 4};
+    static_assert(stdx::ct_capacity_v<decltype(a)> == 4u);
+}
