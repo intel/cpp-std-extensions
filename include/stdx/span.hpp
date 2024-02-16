@@ -94,17 +94,25 @@ class span : public detail::span_base<T, Extent> {
 
     template <typename U, std::size_t N>
     // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr span(std::array<U, N> &arr) noexcept : ptr{std::data(arr)} {}
+    constexpr span(std::array<U, N> &arr) noexcept : ptr{std::data(arr)} {
+        static_assert(Extent == dynamic_extent or Extent <= N,
+                      "Span extends beyond available storage");
+    }
 
     template <typename U, std::size_t N>
     // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr span(std::array<U, N> const &arr) noexcept
-        : ptr{std::data(arr)} {}
+    constexpr span(std::array<U, N> const &arr) noexcept : ptr{std::data(arr)} {
+        static_assert(Extent == dynamic_extent or Extent <= N,
+                      "Span extends beyond available storage");
+    }
 
     template <std::size_t N>
     // NOLINTNEXTLINE(google-explicit-constructor, *-avoid-c-arrays)
     constexpr span(stdx::type_identity_t<element_type> (&arr)[N]) noexcept
-        : ptr{std::data(arr)} {}
+        : ptr{std::data(arr)} {
+        static_assert(Extent == dynamic_extent or Extent <= N,
+                      "Span extends beyond available storage");
+    }
 
     template <typename R,
               std::enable_if_t<dependent_extent<R> != dynamic_extent, int> = 0>

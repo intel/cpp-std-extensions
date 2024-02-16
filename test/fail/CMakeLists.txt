@@ -11,6 +11,7 @@ add_fail_tests(
     for_each_n_args_bad_size
     optional_without_tombstone
     optional_integral_with_tombstone_traits
+    span_insufficient_storage
     span_larger_prefix
     span_larger_suffix
     subspan_late_start
