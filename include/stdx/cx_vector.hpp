@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdx/concepts.hpp>
+#include <stdx/iterator.hpp>
 
 #include <array>
 #include <cstddef>
@@ -167,5 +168,8 @@ template <std::size_t I, typename T, std::size_t N>
 auto get(cx_vector<T, N> const &v) -> decltype(auto) {
     return v.template get<I>();
 }
+
+template <typename T, std::size_t N>
+constexpr auto ct_capacity_v<cx_vector<T, N>> = N;
 } // namespace v1
 } // namespace stdx

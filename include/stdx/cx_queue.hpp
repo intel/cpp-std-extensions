@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/iterator.hpp>
 #include <stdx/panic.hpp>
 
 #include <array>
@@ -104,5 +105,8 @@ class cx_queue {
         return entry;
     }
 };
+
+template <typename T, std::size_t N, typename OP>
+constexpr auto ct_capacity_v<cx_queue<T, N, OP>> = N;
 } // namespace v1
 } // namespace stdx

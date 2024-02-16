@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdx/concepts.hpp>
+#include <stdx/iterator.hpp>
 #include <stdx/utility.hpp>
 
 #include <array>
@@ -126,5 +127,8 @@ template <typename Key, typename Value, std::size_t N> class cx_map {
         return 0u;
     }
 };
+
+template <typename K, typename V, std::size_t N>
+constexpr auto ct_capacity_v<cx_map<K, V, N>> = N;
 } // namespace v1
 } // namespace stdx

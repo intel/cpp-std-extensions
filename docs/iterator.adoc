@@ -1,0 +1,25 @@
+
+== `iterator.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/iterator.hpp[`iterator.hpp`]
+contains `ct_capacity`, a `constexpr` function that returns the capacity of a
+container which is known at compile-time.
+
+[source,cpp]
+----
+auto const a = std::array{1, 2, 3, 4};
+constexpr auto c = stdx::ct_capacity(a); // std::size_t{4}
+----
+
+`ct_capacity` can be called with:
+
+* `std::array`
+* `std::span` (unless it has `std::dynamic_extent`)
+* `stdx::span` (unless it has `stdx::dynamic_extent`)
+* `stdx::cx_map`
+* `stdx::cx_multimap`
+* `stdx::cx_queue`
+* `stdx::cx_set`
+* `stdx::cx_vector`
+
+`ct_capacity_v` is a corresponding variable template of type `std::size_t`.

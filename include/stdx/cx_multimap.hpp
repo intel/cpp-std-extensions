@@ -2,6 +2,7 @@
 
 #include <stdx/cx_map.hpp>
 #include <stdx/cx_set.hpp>
+#include <stdx/iterator.hpp>
 
 #include <cstddef>
 #include <iterator>
@@ -99,5 +100,8 @@ class cx_multimap {
 
     constexpr auto clear() -> void { storage.clear(); }
 };
+
+template <typename K, typename V, std::size_t N, std::size_t M>
+constexpr auto ct_capacity_v<cx_multimap<K, V, N, M>> = N;
 } // namespace v1
 } // namespace stdx

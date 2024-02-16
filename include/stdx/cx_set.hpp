@@ -2,6 +2,7 @@
 
 #include <stdx/concepts.hpp>
 #include <stdx/cx_map.hpp>
+#include <stdx/iterator.hpp>
 
 #include <cstddef>
 
@@ -107,5 +108,8 @@ template <typename Key, std::size_t N> class cx_set {
 
 template <typename T, typename... Ts>
 cx_set(T, Ts...) -> cx_set<T, 1 + sizeof...(Ts)>;
+
+template <typename T, std::size_t N>
+constexpr auto ct_capacity_v<cx_set<T, N>> = N;
 } // namespace v1
 } // namespace stdx

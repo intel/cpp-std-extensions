@@ -23,7 +23,12 @@ add_fail_tests(
 
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
     add_fail_tests(
-        tuple_index_out_of_bounds tuple_equality_mismatch
-        tuple_equality_with_element tuple_spaceship_mismatch
-        tuple_spaceship_with_element tuple_type_not_found)
+        dynamic_span_no_ct_capacity
+        dynamic_container_no_ct_capacity
+        tuple_index_out_of_bounds
+        tuple_equality_mismatch
+        tuple_equality_with_element
+        tuple_spaceship_mismatch
+        tuple_spaceship_with_element
+        tuple_type_not_found)
 endif()

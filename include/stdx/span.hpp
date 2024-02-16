@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdx/bit.hpp>
+#include <stdx/iterator.hpp>
 #include <stdx/memory.hpp>
 #include <stdx/type_traits.hpp>
 
@@ -262,5 +263,7 @@ span(std::array<T, N> const &) -> span<T const, N>;
 template <typename R>
 span(R &&) -> span<std::remove_reference_t<detail::range_reference_t<R>>>;
 
+template <typename T, std::size_t N>
+constexpr auto ct_capacity_v<span<T, N>> = N;
 } // namespace v1
 } // namespace stdx
