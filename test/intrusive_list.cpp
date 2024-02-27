@@ -301,3 +301,125 @@ TEST_CASE("remove from empty list", "[intrusive_list]") {
     list.remove(&n1);
     CHECK(list.empty());
 }
+
+TEST_CASE("checked operation clears pointers on pop", "[intrusive_list]") {
+    stdx::intrusive_list<int_node> list{};
+    int_node n1{1};
+    int_node n2{2};
+    list.push_back(&n1);
+    list.push_back(&n2);
+
+    CHECK(n2.prev != nullptr);
+    CHECK(list.pop_back() == &n2);
+    CHECK(n2.prev == nullptr);
+
+    list.push_back(&n2);
+
+    CHECK(n1.next != nullptr);
+    CHECK(list.pop_front() == &n1);
+    CHECK(n1.next == nullptr);
+}
+
+TEST_CASE("checked operation clears pointers on remove", "[intrusive_list]") {
+    stdx::intrusive_list<int_node> list{};
+    int_node n1{1};
+    int_node n2{2};
+    list.push_back(&n1);
+    list.push_back(&n2);
+
+    CHECK(n2.prev != nullptr);
+    list.remove(&n2);
+    CHECK(n2.prev == nullptr);
+}
+
+TEST_CASE("checked operation clears pointers on clear", "[intrusive_list]") {
+    stdx::intrusive_list<int_node> list{};
+    int_node n1{1};
+    int_node n2{2};
+    list.push_back(&n1);
+    list.push_back(&n2);
+
+    CHECK(n1.next != nullptr);
+    CHECK(n2.prev != nullptr);
+    list.clear();
+    CHECK(n1.next == nullptr);
+    CHECK(n2.prev == nullptr);
+}
+
+namespace {
+#if __cplusplus >= 202002L
+bool compile_time_call{};
+#else
+bool runtime_call{};
+#endif
+
+struct injected_handler {
+#if __cplusplus >= 202002L
+    template <stdx::ct_string Why, typename... Ts>
+    static auto panic(Ts &&...) noexcept -> void {
+        static_assert(std::string_view{Why} == "bad list node!");
+        compile_time_call = true;
+    }
+#else
+    template <typename Why, typename... Ts>
+    static auto panic(Why why, Ts &&...) noexcept -> void {
+        CHECK(std::string_view{why} == "bad list node!");
+        runtime_call = true;
+    }
+#endif
+};
+} // namespace
+
+template <> inline auto stdx::panic_handler<> = injected_handler{};
+
+#if __cplusplus >= 202002L
+TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
+    stdx::intrusive_list<int_node> list{};
+    int_node n{5};
+
+    n.prev = &n;
+    compile_time_call = false;
+    list.push_back(&n);
+    CHECK(compile_time_call);
+    list.pop_back();
+
+    n.prev = &n;
+    compile_time_call = false;
+    list.push_front(&n);
+    CHECK(compile_time_call);
+}
+#else
+TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
+    stdx::intrusive_list<int_node> list{};
+    int_node n{5};
+
+    n.prev = &n;
+    runtime_call = false;
+    list.push_back(&n);
+    CHECK(runtime_call);
+    list.pop_back();
+
+    n.prev = &n;
+    runtime_call = false;
+    list.push_front(&n);
+    CHECK(runtime_call);
+}
+#endif
+
+TEST_CASE("unchecked operation doesn't clear pointers", "[intrusive_list]") {
+    stdx::intrusive_list<int_node, stdx::node_policy::unchecked> list{};
+    int_node n1{1};
+    int_node n2{2};
+    list.push_back(&n1);
+    list.push_back(&n2);
+
+    auto before = n2.prev;
+    CHECK(list.pop_back() == &n2);
+    CHECK(n2.prev == before);
+
+    list.push_back(&n2);
+
+    before = n1.next;
+    CHECK(list.pop_front() == &n1);
+    CHECK(n1.next == before);
+}
