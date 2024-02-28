@@ -1,6 +1,6 @@
 #pragma once
 
-#include <stdx/concepts.hpp>
+#include <stdx/detail/list_common.hpp>
 
 #include <cstddef>
 #include <iterator>
@@ -8,27 +8,11 @@
 
 namespace stdx {
 inline namespace v1 {
+template <STDX_SINGLE_LINKABLE NodeType,
+          template <typename> typename P = node_policy::checked>
+class intrusive_forward_list {
+    friend P<NodeType>;
 
-#if __cpp_concepts >= 201907L
-namespace detail {
-template <typename T>
-concept base_single_linkable = requires(T node) {
-    { node->next } -> same_as<T &>;
-};
-} // namespace detail
-
-template <typename T>
-concept single_linkable = requires(T *node) {
-    requires detail::base_single_linkable<
-        std::remove_cvref_t<decltype(node->next)>>;
-};
-
-#define STDX_SINGLE_LINKABLE single_linkable
-#else
-#define STDX_SINGLE_LINKABLE typename
-#endif
-
-template <STDX_SINGLE_LINKABLE NodeType> class intrusive_forward_list {
     template <typename N> struct iterator_t {
         using difference_type = std::ptrdiff_t;
         using value_type = N;
@@ -87,6 +71,25 @@ template <STDX_SINGLE_LINKABLE NodeType> class intrusive_forward_list {
     pointer head{};
     pointer tail{};
 
+    constexpr auto unchecked_push_front(pointer n) -> void {
+        n->next = head;
+        head = n;
+        if (tail == nullptr) {
+            tail = n;
+        }
+    }
+
+    constexpr auto unchecked_push_back(pointer n) -> void {
+        if (tail != nullptr) {
+            tail->next = n;
+        }
+        tail = n;
+        n->next = nullptr;
+        if (head == nullptr) {
+            head = n;
+        }
+    }
+
   public:
     constexpr auto begin() -> iterator { return iterator{head}; }
     constexpr auto begin() const -> const_iterator {
@@ -103,22 +106,10 @@ template <STDX_SINGLE_LINKABLE NodeType> class intrusive_forward_list {
     constexpr auto back() const -> reference { return *tail; }
 
     constexpr auto push_front(pointer n) -> void {
-        n->next = head;
-        head = n;
-        if (tail == nullptr) {
-            tail = n;
-        }
+        P<NodeType>::push_front(*this, n);
     }
-
     constexpr auto push_back(pointer n) -> void {
-        if (tail != nullptr) {
-            tail->next = n;
-        }
-        tail = n;
-        n->next = nullptr;
-        if (head == nullptr) {
-            head = n;
-        }
+        P<NodeType>::push_back(*this, n);
     }
 
     constexpr auto pop_front() -> pointer {
@@ -129,6 +120,7 @@ template <STDX_SINGLE_LINKABLE NodeType> class intrusive_forward_list {
             tail = nullptr;
         }
 
+        P<NodeType>::on_pop(poppedNode);
         return poppedNode;
     }
 
@@ -137,11 +129,10 @@ template <STDX_SINGLE_LINKABLE NodeType> class intrusive_forward_list {
     }
 
     constexpr auto clear() -> void {
+        P<NodeType>::on_clear(head);
         head = nullptr;
         tail = nullptr;
     }
 };
-
-#undef STDX_SINGLE_LINKABLE
 } // namespace v1
 } // namespace stdx

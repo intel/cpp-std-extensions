@@ -1,37 +1,19 @@
 #pragma once
 
-#include <stdx/concepts.hpp>
+#include <stdx/detail/list_common.hpp>
 
 #include <cstddef>
 #include <iterator>
 #include <type_traits>
+#include <utility>
 
 namespace stdx {
 inline namespace v1 {
+template <STDX_DOUBLE_LINKABLE NodeType,
+          template <typename> typename P = node_policy::checked>
+class intrusive_list {
+    friend P<NodeType>;
 
-#if __cpp_concepts >= 201907L
-namespace detail {
-template <typename T>
-concept base_double_linkable = requires(T node) {
-    { node->next } -> same_as<T &>;
-    { node->prev } -> same_as<T &>;
-};
-} // namespace detail
-
-template <typename T>
-concept double_linkable = requires(T *node) {
-    requires detail::base_double_linkable<
-        std::remove_cvref_t<decltype(node->next)>>;
-    requires detail::base_double_linkable<
-        std::remove_cvref_t<decltype(node->prev)>>;
-};
-
-#define STDX_DOUBLE_LINKABLE double_linkable
-#else
-#define STDX_DOUBLE_LINKABLE typename
-#endif
-
-template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
     template <typename N> struct iterator_t {
         using difference_type = std::ptrdiff_t;
         using value_type = N;
@@ -90,6 +72,47 @@ template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
     pointer head{};
     pointer tail{};
 
+    constexpr auto unchecked_push_front(pointer n) -> void {
+        if (head != nullptr) {
+            head->prev = n;
+        }
+        n->next = head;
+        head = n;
+        n->prev = nullptr;
+        if (tail == nullptr) {
+            tail = n;
+        }
+    }
+
+    constexpr auto unchecked_push_back(pointer n) -> void {
+        if (tail != nullptr) {
+            tail->next = n;
+        }
+        n->prev = tail;
+        tail = n;
+        n->next = nullptr;
+        if (head == nullptr) {
+            head = n;
+        }
+    }
+
+    constexpr auto unchecked_insert(iterator it, pointer n) -> void {
+        if (it != end()) {
+            auto p = std::addressof(*it);
+            n->next = p;
+            n->prev = p->prev;
+            p->prev = n;
+        } else {
+            n->prev = tail;
+            tail = n;
+        }
+        if (n->prev) {
+            n->prev->next = n;
+        } else {
+            head = n;
+        }
+    }
+
   public:
     constexpr auto begin() -> iterator { return iterator{head}; }
     constexpr auto begin() const -> const_iterator {
@@ -106,26 +129,16 @@ template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
     constexpr auto back() const -> reference { return *tail; }
 
     constexpr auto push_front(pointer n) -> void {
-        if (head != nullptr) {
-            head->prev = n;
-        }
-        n->next = head;
-        head = n;
-        n->prev = nullptr;
-        if (tail == nullptr) {
-            tail = n;
-        }
+        P<NodeType>::push_front(*this, n);
     }
-
     constexpr auto push_back(pointer n) -> void {
-        if (tail != nullptr) {
-            tail->next = n;
-        }
-        n->prev = tail;
-        tail = n;
-        n->next = nullptr;
-        if (head == nullptr) {
-            head = n;
+        P<NodeType>::push_back(*this, n);
+    }
+    constexpr auto insert(iterator it, pointer n) -> void {
+        if (empty()) {
+            push_back(n);
+        } else {
+            P<NodeType>::insert(*this, it, n);
         }
     }
 
@@ -139,6 +152,7 @@ template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
             head->prev = nullptr;
         }
 
+        P<NodeType>::on_pop(poppedNode);
         return poppedNode;
     }
 
@@ -152,6 +166,7 @@ template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
             tail->next = nullptr;
         }
 
+        P<NodeType>::on_pop(poppedNode);
         return poppedNode;
     }
 
@@ -160,6 +175,7 @@ template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
     }
 
     constexpr auto clear() -> void {
+        P<NodeType>::on_clear(head);
         head = nullptr;
         tail = nullptr;
     }
@@ -179,6 +195,7 @@ template <STDX_DOUBLE_LINKABLE NodeType> class intrusive_list {
         } else {
             nextNode->prev = prevNode;
         }
+        P<NodeType>::on_pop(n);
     }
 };
 

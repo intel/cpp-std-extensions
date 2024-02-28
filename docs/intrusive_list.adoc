@@ -2,8 +2,8 @@
 == `intrusive_list.hpp`
 
 `intrusive_list` is a doubly-linked list designed for use at compile-time or
-with static objects. It supports pushing and popping at the front or back, and
-removal from the middle.
+with static objects. It supports pushing and popping at the front or back,
+forward iteration, and insertion and removal from the middle.
 
 [source,cpp]
 ----
@@ -22,7 +22,8 @@ node n2{};
 l.push_back(&n2);
 
 node n3{};
-l.push_back(&n3);
+auto i = std::find_if(std::begin(l), std::end(l), /* some predicate */);
+l.insert(i, &n3); // insertion into the middle is constant-time
 
 l.remove(&n2); // removal from the middle is constant-time
 node* nf = l.pop_front();
@@ -31,3 +32,27 @@ node* nb = l.pop_back();
 l.clear();
 bool b = l.empty();
 ----
+
+=== node validity checking
+
+An `intrusive_list` has a second template parameter which is whether to operate
+with or without node validity checking. The default is
+`stdx::node_policy::checked`.
+
+[source,cpp]
+----
+// The second template argument here is the default
+stdx::intrusive_list<node, stdx::node_policy::checked> l;
+----
+
+This means that:
+
+- nodes to be inserted/pushed must have `prev` and `next` pointers equal to `nullptr`
+- node `prev` and `next` pointers are cleared on removal/pop
+
+NOTE: The second item here means that `clear` is a linear-time operation with
+`stdx::node_policy::checked`. For faster but less safe operation,
+`stdx::node_policy::unchecked` is available.
+
+If the validity policy is violated (for example by attempting to push a node
+whose pointers are already populated) the result is a xref:panic.adoc#_panic_hpp[panic].
