@@ -96,6 +96,23 @@ class intrusive_list {
         }
     }
 
+    constexpr auto unchecked_insert(iterator it, pointer n) -> void {
+        if (it != end()) {
+            auto p = std::addressof(*it);
+            n->next = p;
+            n->prev = p->prev;
+            p->prev = n;
+        } else {
+            n->prev = tail;
+            tail = n;
+        }
+        if (n->prev) {
+            n->prev->next = n;
+        } else {
+            head = n;
+        }
+    }
+
   public:
     constexpr auto begin() -> iterator { return iterator{head}; }
     constexpr auto begin() const -> const_iterator {
@@ -116,6 +133,13 @@ class intrusive_list {
     }
     constexpr auto push_back(pointer n) -> void {
         P<NodeType>::push_back(*this, n);
+    }
+    constexpr auto insert(iterator it, pointer n) -> void {
+        if (empty()) {
+            push_back(n);
+        } else {
+            P<NodeType>::insert(*this, it, n);
+        }
     }
 
     constexpr auto pop_front() -> pointer {

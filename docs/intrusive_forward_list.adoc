@@ -28,3 +28,7 @@ node* nf = l.pop_front();
 l.clear();
 bool b = l.empty();
 ----
+
+`intrusive_forward_list` supports the same
+xref:intrusive_list.adoc#_node_validity_checking[node validation policy]
+arguments as `intrusive_list`.

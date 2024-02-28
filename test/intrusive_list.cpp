@@ -2,6 +2,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
+#include <iterator>
+#include <string_view>
+
 namespace {
 struct int_node {
     int value{};
@@ -422,4 +426,91 @@ TEST_CASE("unchecked operation doesn't clear pointers", "[intrusive_list]") {
     before = n1.next;
     CHECK(list.pop_front() == &n1);
     CHECK(n1.next == before);
+}
+
+TEST_CASE("insert into empty list", "[intrusive_list]") {
+    stdx::intrusive_list<int_node> list{};
+    int_node n1{1};
+    list.insert(std::begin(list), &n1);
+
+    CHECK(list.front().value == 1);
+    CHECK(list.back().value == 1);
+    CHECK(list.front().next == nullptr);
+    CHECK(list.front().prev == nullptr);
+}
+
+TEST_CASE("insert at begin", "[intrusive_list]") {
+    stdx::intrusive_list<int_node> list{};
+    int_node n1{1};
+    int_node n2{2};
+
+    list.push_back(&n1);
+    list.insert(std::begin(list), &n2);
+
+    CHECK(list.front().value == 2);
+    CHECK(list.back().value == 1);
+
+    CHECK(list.front().next == &n1);
+    CHECK(n1.prev == &list.front());
+}
+
+TEST_CASE("insert at end", "[intrusive_list]") {
+    stdx::intrusive_list<int_node> list{};
+    int_node n1{1};
+    int_node n2{2};
+
+    list.push_back(&n1);
+    list.insert(std::end(list), &n2);
+
+    CHECK(list.front().value == 1);
+    CHECK(list.back().value == 2);
+
+    CHECK(list.back().prev == &n1);
+    CHECK(n1.next == &list.back());
+}
+
+TEST_CASE("insert in middle", "[intrusive_list]") {
+    stdx::intrusive_list<int_node> list{};
+    int_node n1{1};
+    int_node n2{2};
+    int_node n3{3};
+
+    list.push_back(&n1);
+    list.push_back(&n3);
+    list.insert(std::next(std::begin(list)), &n2);
+
+    CHECK(list.front().value == 1);
+    CHECK(list.back().value == 3);
+
+    CHECK(list.front().next == &n2);
+    CHECK(n2.prev == &list.front());
+
+    CHECK(list.back().prev == &n2);
+    CHECK(n2.next == &list.back());
+}
+
+TEST_CASE("insert use case", "[intrusive_list]") {
+    stdx::intrusive_list<int_node> list{};
+    int_node n1{1};
+    int_node n3{3};
+
+    list.push_back(&n1);
+    list.push_back(&n3);
+
+    int_node n2{2};
+    {
+        auto it =
+            std::find_if(std::begin(list), std::end(list),
+                         [&](auto &node) { return node.value >= n2.value; });
+        list.insert(it, &n2);
+    }
+
+    auto it = std::cbegin(list);
+    CHECK(it->value == 1);
+    ++it;
+    CHECK(it->value == 2);
+    ++it;
+    CHECK(it->value == 3);
+    ++it;
+    CHECK(it == std::cend(list));
 }

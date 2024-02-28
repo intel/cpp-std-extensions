@@ -79,6 +79,14 @@ template <typename Node> class checked {
         list.unchecked_push_back(node);
     }
 
+    template <typename L, typename It>
+    constexpr static auto insert(L &list, It it, Node *node) -> void {
+        if (not valid_for_push(node)) {
+            STDX_PANIC("bad list node!");
+        }
+        list.unchecked_insert(it, node);
+    }
+
     constexpr static auto on_pop(Node *node) {
         if constexpr (detail::detect::has_prev_pointer<Node>) {
             node->prev = nullptr;
@@ -104,6 +112,10 @@ template <typename Node> struct unchecked {
     template <typename L>
     constexpr static auto push_back(L &list, Node *node) -> void {
         list.unchecked_push_back(node);
+    }
+    template <typename L, typename It>
+    constexpr static auto insert(L &list, It it, Node *node) -> void {
+        list.unchecked_insert(it, node);
     }
     constexpr static auto on_pop(Node *) {}
     constexpr static auto on_clear(Node *) {}
