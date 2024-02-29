@@ -33,7 +33,7 @@ l.clear();
 bool b = l.empty();
 ----
 
-=== node validity checking
+=== Node validity checking
 
 An `intrusive_list` has a second template parameter which is whether to operate
 with or without node validity checking. The default is
