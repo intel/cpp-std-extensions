@@ -13,6 +13,7 @@ endfunction()
 
 add_tests(
     always_false
+    bind
     bit
     bitset
     cached

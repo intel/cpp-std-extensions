@@ -1,6 +1,17 @@
 
 == `functional.hpp`
 
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/functional.hpp[`functional.hpp`]
+contains
+https://en.cppreference.com/w/cpp/utility/functional/bind_front[bind_front] and
+https://en.cppreference.com/w/cpp/utility/functional/bind_front[bind_back].
+
+NOTE: https://wg21.link/P2714[P2714] added the ability (in C\\++26) to use a
+non-type template parameter for the bound function; this works for function
+pointers in C++17, and also for lambda expressions in C++20 and beyond.
+
+=== `with_result_of`
+
 `with_result_of` is a class that can be used for lazy evaluation.
 `with_result_of` wraps a callable (often a lambda expression) and can
 implicitly convert to the return type of the callable. It may be passed to
