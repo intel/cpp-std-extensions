@@ -36,6 +36,7 @@ add_tests(
     is_constant_evaluated
     iterator
     memory
+    numeric
     optional
     overload
     panic

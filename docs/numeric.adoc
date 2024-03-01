@@ -1,0 +1,48 @@
+
+== `numeric.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/numeric.hpp[`numeric.hpp`]
+provides an implementation of some numeric algorithms.
+
+=== `transform_reduce` and `transform_reduce_n`
+
+`stdx::transform_reduce` is similar to
+https://en.cppreference.com/w/cpp/algorithm/transform_reduce[`std::transform_reduce`], but
+variadic in its inputs.
+
+[source,cpp]
+----
+template <typename T, typename InputIt, typename ROp, typename TOp,
+          typename... InputItN>
+constexpr auto transform_reduce(InputIt first, InputIt last, T init,
+                                ROp rop, TOp top, InputItN... first_n) -> T;
+----
+
+`stdx::transform_reduce` is to `std::transform_reduce` as xref:algorithm.adoc#_transform_and_transform_n[`stdx::transform`] is
+to `std::transform`.
+
+NOTE: The return type of `stdx::transform_reduce` is the first template
+parameter, which allows it to be manifestly fixed more conveniently to avoid a
+common pitfall with accumulation algorithms, viz. summing a range of `double`​s
+and passing `0` - an `int` - as the initial value.
+
+CAUTION: Unlike `stdx::transform`, the return type here does not include the
+iterators: this means `stdx::transform_reduce` violates the Law of Useful Return
+(just like `std::transform_reduce`). However, it is probably true that
+`stdx::transform_reduce` is mostly used just for the accumulation result, where
+`stdx::transform` writes to an output iterator.
+
+NOTE: Like `stdx::transform`, `stdx::transform_reduce` is `constexpr` in C++20
+and later, because it uses
+https://en.cppreference.com/w/cpp/utility/functional/invoke[`std::invoke`].
+
+`stdx::transform_reduce_n` is just like `stdx::transform_reduce`, but instead of
+taking two iterators to delimit the input range, it takes an iterator and size.
+
+[source,cpp]
+----
+template <typename T, typename InputIt, typename Size, typename ROp,
+          typename TOp, typename... InputItN>
+constexpr auto transform_reduce_n(InputIt first, Size n, T init, ROp rop,
+                                  TOp top, InputItN... first_n) -> T;
+----
