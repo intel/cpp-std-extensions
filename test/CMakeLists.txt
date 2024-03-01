@@ -12,6 +12,7 @@ function(add_tests)
 endfunction()
 
 add_tests(
+    algorithm
     always_false
     bind
     bit
