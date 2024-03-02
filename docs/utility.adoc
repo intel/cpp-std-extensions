@@ -1,6 +1,22 @@
 
 == `utility.hpp`
 
+=== `as_unsigned` and `as_signed`
+
+`as_unsigned` and `as_signed` are useful functions for converting integral types
+to their opposite-signed type. Under the hood, it's a `static_cast` to the
+appropriate
+https://en.cppreference.com/w/cpp/types/make_unsigned[`std::make_unsigned_t`] or
+https://en.cppreference.com/w/cpp/types/make_signed[`std::make_signed_t`].
+
+[source,cpp]
+----
+auto x = 1729;                   // int
+auto y = stdx::make_unsigned(x); // unsigned int
+----
+
+=== `forward_like`
+
 `forward_like` is an implementation of
 https://en.cppreference.com/w/cpp/utility/forward_like[`std::forward_like`].
 `forward_like_t` is also provided.
@@ -9,6 +25,8 @@ https://en.cppreference.com/w/cpp/utility/forward_like[`std::forward_like`].
 ----
 static_assert(stdx::same_as<stdx::forward_like_t<int &, float>, float &>);
 ----
+
+=== `overload`
 
 `overload` is a struct designed to encapsulate an overload set. It inherits from
 all the lambda expressions used to construct it. As an example, it's useful for
@@ -25,6 +43,8 @@ auto f(std::variant<int, float, std::string> const& v) {
 }
 ----
 
+=== `unreachable`
+
 `unreachable` is an implementation of
 https://en.cppreference.com/w/cpp/utility/unreachable[`std::unreachable`].
 
@@ -35,6 +55,8 @@ https://en.cppreference.com/w/cpp/utility/unreachable[`std::unreachable`].
   // undefined behaviour
 }
 ----
+
+=== `type_map`
 
 `type_map` is a structure designed to allow compile-time lookups of types or
 values. The basic idea is having a "map" of key-value pairs. Each key-value is a
@@ -90,6 +112,8 @@ In the case of mapping to types, the `*_lookup_t` aliases have optional third
 type arguments which are defaults returned when lookup fails. In the case of
 mapping to values, the `*_lookup_v` aliases have optional third NTTP arguments
 in the same role.
+
+=== User-defined literals
 
 `utility.hpp` also contains a few handy user-defined literals so that code using
 boolean values can be more expressive at the call site than just using bare

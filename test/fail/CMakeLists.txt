@@ -5,6 +5,8 @@ function(add_fail_tests)
 endfunction()
 
 add_fail_tests(
+    as_signed_bool
+    as_unsigned_bool
     bitset_signed_storage
     bitset_nonintegral_bit_places
     bitset_to_uint64_over_64_bits
