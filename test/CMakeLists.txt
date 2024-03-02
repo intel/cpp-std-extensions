@@ -12,6 +12,7 @@ function(add_tests)
 endfunction()
 
 add_tests(
+    algorithm
     always_false
     bind
     bit
@@ -35,6 +36,7 @@ add_tests(
     is_constant_evaluated
     iterator
     memory
+    numeric
     optional
     overload
     panic

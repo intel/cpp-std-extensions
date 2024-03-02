@@ -1,0 +1,43 @@
+
+== `algorithm.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/algorithm.hpp[`algorithm.hpp`]
+provides an implementation of some algorithms.
+
+=== `transform` and `transform_n`
+
+`stdx::transform` is similar to
+https://en.cppreference.com/w/cpp/algorithm/transform[`std::transform`], but
+variadic in its inputs.
+
+[source,cpp]
+----
+template <typename InputIt, typename OutputIt, typename Operation, typename... InputItN>
+constexpr auto transform(InputIt first, InputIt last, OutputIt d_first,
+                         Operation op, InputItN... first_n)
+    -> transform_result<OutputIt, InputIt, InputItN...>;
+----
+
+Without the variadic pack `InputItN...` here, a call site looks like regular unary
+`std::transform`. But with the addition of the pack, `stdx::transform` becomes
+more like
+https://en.cppreference.com/w/cpp/ranges/zip_transform_view[`std::ranges::views::zip_transform`].
+It can transform using an n-ary function and n sequences.
+
+NOTE: The return value is equivalent to a `tuple<OutputIt, InputIt, InputItN...>`.
+In C\\++20 and later this is a `stdx::tuple`, in C++17 a `std::tuple`.
+
+NOTE: `stdx::transform` is `constexpr` in C++20 and later, because it uses
+https://en.cppreference.com/w/cpp/utility/functional/invoke[`std::invoke`].
+
+`stdx::transform_n` is just like `stdx::transform`, but instead of taking two
+iterators to delimit the input range, it takes an iterator and size.
+
+[source,cpp]
+----
+template <typename InputIt, typename Size, typename OutputIt, typename Operation,
+          typename... InputItN>
+constexpr auto transform(InputIt first, Size n, OutputIt d_first,
+                         Operation op, InputItN... first_n)
+    -> transform_result<OutputIt, InputIt, InputItN...>;
+----

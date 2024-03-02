@@ -7,6 +7,7 @@
 :toc: left
 
 include::intro.adoc[]
+include::algorithm.adoc[]
 include::bit.adoc[]
 include::bitset.adoc[]
 include::cached.adoc[]
@@ -26,6 +27,7 @@ include::intrusive_forward_list.adoc[]
 include::intrusive_list.adoc[]
 include::iterator.adoc[]
 include::memory.adoc[]
+include::numeric.adoc[]
 include::optional.adoc[]
 include::panic.adoc[]
 include::priority.adoc[]
