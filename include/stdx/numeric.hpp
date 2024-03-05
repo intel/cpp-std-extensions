@@ -1,6 +1,9 @@
 #pragma once
 
+#include <algorithm>
 #include <functional>
+#include <limits>
+#include <type_traits>
 #include <utility>
 
 namespace stdx {
@@ -35,7 +38,34 @@ CONSTEXPR_INVOKE auto transform_reduce_n(InputIt first, Size n, T init, ROp rop,
     }
     return init;
 }
-
 #undef CONSTEXPR_INVOKE
+
+template <typename To, typename From>
+constexpr auto saturate_cast(From from) -> To {
+    constexpr auto to_min = std::numeric_limits<To>::min();
+    constexpr auto to_max = std::numeric_limits<To>::max();
+
+    if constexpr (sizeof(From) > sizeof(To)) {
+        auto const clamped = std::clamp<From>(from, to_min, to_max);
+        return static_cast<To>(clamped);
+    }
+
+    if constexpr (sizeof(From) == sizeof(To)) {
+        if constexpr (std::is_unsigned_v<From> and std::is_signed_v<To>) {
+            if (from > to_max) {
+                return to_max;
+            }
+        }
+
+        if constexpr (std::is_signed_v<From> and std::is_unsigned_v<To>) {
+            if (from < 0) {
+                return static_cast<To>(0);
+            }
+        }
+    }
+
+    return static_cast<To>(from);
+}
+
 } // namespace v1
 } // namespace stdx
