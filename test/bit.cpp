@@ -151,3 +151,32 @@ TEMPLATE_TEST_CASE("rotr", "[bit]", std::uint8_t, std::uint16_t, std::uint32_t,
     static_assert(stdx::rotr(TestType{2u}, 1) == TestType{1u});
     static_assert(stdx::rotr(TestType{1u}, 1) == TestType{1u} << (d - 1));
 }
+
+TEST_CASE("bit_pack 2x8 -> 16", "[bit]") {
+    static_assert(stdx::bit_pack<std::uint16_t>(0x12, 0x34) == 0x1234);
+}
+
+TEST_CASE("bit_pack 2x16 -> 32", "[bit]") {
+    static_assert(stdx::bit_pack<std::uint32_t>(0x1234, 0x5678) == 0x1234'5678);
+}
+
+TEST_CASE("bit_pack 4x8 -> 32", "[bit]") {
+    static_assert(stdx::bit_pack<std::uint32_t>(0x12, 0x34, 0x56, 0x78) ==
+                  0x1234'5678);
+}
+
+TEST_CASE("bit_pack 2x32 -> 64", "[bit]") {
+    static_assert(stdx::bit_pack<std::uint64_t>(0x1234'5678, 0x9abc'def0) ==
+                  0x1234'5678'9abc'def0);
+}
+
+TEST_CASE("bit_pack 4x16 -> 64", "[bit]") {
+    static_assert(stdx::bit_pack<std::uint64_t>(
+                      0x1234, 0x5678, 0x9abc, 0xdef0) == 0x1234'5678'9abc'def0);
+}
+
+TEST_CASE("bit_pack 8x8 -> 64", "[bit]") {
+    static_assert(stdx::bit_pack<std::uint64_t>(0x12, 0x34, 0x56, 0x78, 0x9a,
+                                                0xbc, 0xde,
+                                                0xf0) == 0x1234'5678'9abc'def0);
+}
