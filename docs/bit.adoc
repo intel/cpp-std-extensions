@@ -6,6 +6,8 @@ provides an implementation that mirrors
 https://en.cppreference.com/w/cpp/header/bit[`<bit>`], but is
 `constexpr` in C++17. It is mostly based on intrinsics.
 
+=== `to_le` and `to_be`
+
 `to_le` and `to_be` are variations on `byteswap` that convert unsigned integral
 types to little- or big-endian respectively. On a little-endian machine, `to_le`
 does nothing, and `to_be` is the equivalent of `byteswap`. On a big endian
@@ -19,3 +21,29 @@ constexpr auto y = stdx::to_be(x); // 0x78'56'34'12 (on a little-endian machine)
 
 `to_le` and `to_be` are defined for unsigned integral types. Of course for
 `std::uint8_t` they do nothing.
+
+=== `bit_pack`
+
+`bit_pack` is a handy function for packing multiple unsigned integral values
+into a larger bit width value.
+
+[source,cpp]
+----
+constexpr auto x = stdx::bit_pack<std::uint32_t>(0x12, 0x34, 0x56, 0x78);
+static_assert(x == 0x1234'5678);
+constexpr auto y = stdx::bit_pack<std::uint32_t>(0x1234, 0x5678);
+static_assert(y == x);
+----
+
+`bit_pack` can be used:
+
+- to pack 2 `std::uint8_t`​s into a `std::uint16_t`
+- to pack 2 `std::uint16_t`​s into a `std::uint32_t`
+- to pack 2 `std::uint32_t`​s into a `std::uint64_t`
+- to pack 4 `std::uint8_t`​s into a `std::uint32_t`
+- to pack 4 `std::uint16_t`​s into a `std::uint64_t`
+- to pack 8 `std::uint8_t`​s into a `std::uint64_t`
+
+The arguments are listed in order of significance, i.e. for the binary
+overloads, the first argument is the high bits, and the second argument the low
+bits.

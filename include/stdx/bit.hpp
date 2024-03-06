@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stdx/concepts.hpp>
+#include <stdx/type_traits.hpp>
+#include <stdx/utility.hpp>
+
 #include <cstdint>
 #include <limits>
 #include <type_traits>
@@ -249,5 +253,53 @@ template <typename T>
         return x;
     }
 }
+
+template <typename To>
+constexpr auto bit_pack = [](auto... args) {
+    static_assert(stdx::always_false_v<To, decltype(args)...>,
+                  "bit_pack is undefined for those types");
+};
+
+template <>
+constexpr auto bit_pack<std::uint16_t> =
+    [](std::uint8_t hi, std::uint8_t lo) -> std::uint16_t {
+    return static_cast<std::uint16_t>((static_cast<std::uint32_t>(hi) << 8u) |
+                                      lo);
+};
+
+template <>
+constexpr auto bit_pack<std::uint32_t> =
+    stdx::overload{[](std::uint16_t hi, std::uint16_t lo) -> std::uint32_t {
+                       return (static_cast<std::uint32_t>(hi) << 16u) | lo;
+                   },
+                   [](std::uint8_t b0, std::uint8_t b1, std::uint8_t b2,
+                      std::uint8_t b3) -> std::uint32_t {
+                       return (static_cast<std::uint32_t>(b0) << 24u) |
+                              (static_cast<std::uint32_t>(b1) << 16u) |
+                              (static_cast<std::uint32_t>(b2) << 8u) | b3;
+                   }};
+
+template <>
+constexpr auto bit_pack<std::uint64_t> =
+    stdx::overload{[](std::uint32_t hi, std::uint32_t lo) -> std::uint64_t {
+                       return (static_cast<std::uint64_t>(hi) << 32u) | lo;
+                   },
+                   [](std::uint16_t w0, std::uint16_t w1, std::uint16_t w2,
+                      std::uint16_t w3) -> std::uint64_t {
+                       return (static_cast<std::uint64_t>(w0) << 48u) |
+                              (static_cast<std::uint64_t>(w1) << 32u) |
+                              (static_cast<std::uint64_t>(w2) << 16u) | w3;
+                   },
+                   [](std::uint8_t b0, std::uint8_t b1, std::uint8_t b2,
+                      std::uint8_t b3, std::uint8_t b4, std::uint8_t b5,
+                      std::uint8_t b6, std::uint8_t b7) -> std::uint64_t {
+                       return (static_cast<std::uint64_t>(b0) << 56u) |
+                              (static_cast<std::uint64_t>(b1) << 48u) |
+                              (static_cast<std::uint64_t>(b2) << 40u) |
+                              (static_cast<std::uint64_t>(b3) << 32u) |
+                              (static_cast<std::uint64_t>(b4) << 24u) |
+                              (static_cast<std::uint64_t>(b5) << 16u) |
+                              (static_cast<std::uint64_t>(b6) << 8u) | b7;
+                   }};
 } // namespace v1
 } // namespace stdx
