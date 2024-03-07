@@ -607,3 +607,12 @@ TEST_CASE("to_unsorted_set with move only types", "[tuple_algorithms]") {
         std::is_same_v<decltype(u), stdx::tuple<int, move_only, bool>>);
     CHECK(u == stdx::tuple{1, move_only{1}, true});
 }
+
+TEST_CASE("enumerate", "[tuple_algorithms]") {
+    auto const t = stdx::tuple{1, 2, 3};
+    auto sum = 0;
+    stdx::enumerate(
+        [&]<auto Idx>(auto x, auto y) { sum += static_cast<int>(Idx) + x + y; },
+        t, t);
+    CHECK(sum == (0 + 1 + 2) + (2 + 4 + 6));
+}

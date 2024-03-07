@@ -12,6 +12,7 @@ contains various (free function) algorithms that work on `stdx::tuple`.
 * `cartesian_product_copy` - create a tuple-of-tuples that is the cartesian product of the inputs
 * `chunk_by` - split a tuple into a tuple-of-tuples according to a type function
 * `contains_type` - a variable template that is true when a tuple contains a given type
+* `enumerate` - like `for_each`, but including a compile-time index
 * `filter` - for compile-time filtering
 * `for_each` - like the standard version, but over a tuple
 * `fold_left` and `fold_right` - xref:tuple.adoc#_member_functions_on_a_tuple[member functions] on `tuple`
@@ -113,6 +114,20 @@ static_assert(stdx::contains_type<T, X>);
 If `contains_type<Tuple, Type>` is `true`, then you can use `get<Type>` to
 retrieve the appropriate member (assuming the type is contained exactly once).
 
+=== `enumerate`
+
+`enumerate` runs a given function object on each element of a tuple in order.
+Like `for_each`, it is variadic, taking an n-ary function and n tuples. The
+`operator()` of the given function object takes the `std::size_t` index
+(zero-based, of course) as an NTTP.
+
+[source,cpp]
+----
+auto t = stdx::tuple{1, 2, 3};
+stdx::enumerate([] <auto Idx> (auto x) { std::cout << Idx << ':' << x << '\n'; }, t);
+----
+NOTE: Like `for_each`, `enumerate` returns the function object passed to it.
+
 === `filter`
 
 `filter` allows compile-time filtering of a tuple based on the types contained.
@@ -140,7 +155,7 @@ the values within the tuple are also preserved.
 [source,cpp]
 ----
 auto t = stdx::tuple{1, 2, 3};
-stdx::for_each([] (auto x) { std::cout << x << '\n'; });
+stdx::for_each([] (auto x) { std::cout << x << '\n'; }, t);
 ----
 NOTE: Like
 https://en.cppreference.com/w/cpp/algorithm/for_each[`std::for_each`],

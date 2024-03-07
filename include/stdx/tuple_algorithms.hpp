@@ -122,6 +122,23 @@ constexpr auto for_each(Op &&op, T &&t, Ts &&...ts) -> Op {
     return op;
 }
 
+namespace detail {
+template <std::size_t I, typename... Ts>
+constexpr auto invoke_with_idx_at(auto &&op, Ts &&...ts) -> decltype(auto) {
+    return op.template operator()<I>(std::forward<Ts>(ts)[index<I>]...);
+}
+} // namespace detail
+
+template <typename Op, typename T, typename... Ts>
+constexpr auto enumerate(Op &&op, T &&t, Ts &&...ts) -> Op {
+    [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+        (detail::invoke_with_idx_at<Is>(op, std::forward<T>(t),
+                                        std::forward<Ts>(ts)...),
+         ...);
+    }(std::make_index_sequence<stdx::tuple_size_v<std::remove_cvref_t<T>>>{});
+    return op;
+}
+
 template <typename F, typename T, typename... Ts>
 constexpr auto all_of(F &&f, T &&t, Ts &&...ts) -> bool {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
