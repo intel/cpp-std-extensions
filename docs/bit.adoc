@@ -6,26 +6,32 @@ provides an implementation that mirrors
 https://en.cppreference.com/w/cpp/header/bit[`<bit>`], but is
 `constexpr` in C++17. It is mostly based on intrinsics.
 
-=== `to_le` and `to_be`
+=== `bit_mask`
 
-`to_le` and `to_be` are variations on `byteswap` that convert unsigned integral
-types to little- or big-endian respectively. On a little-endian machine, `to_le`
-does nothing, and `to_be` is the equivalent of `byteswap`. On a big endian
-machine it is the other way around.
+`bit_mask` is a function for constructing a bit mask between most-significant
+and least-significant bits.
 
 [source,cpp]
 ----
-constexpr auto x = std::uint32_t{0x12'34'56'78};
-constexpr auto y = stdx::to_be(x); // 0x78'56'34'12 (on a little-endian machine)
+constexpr auto x = stdx::bit_mask<std::uint8_t, 5, 3>();
+static_assert(x == std::uint8_t{0b0011'1000};
+
+// Lsb may be omitted (meaning it's 0)
+constexpr auto y = stdx::bit_mask<std::uint8_t, 5>();
+static_assert(y == std::uint8_t{0b0011'1111};
+
+// omitting both Msb and Lsb means the entire range of the type
+constexpr auto z = stdx::bit_mask<std::uint8_t>();
+static_assert(z == std::uint8_t{0b1111'1111};
 ----
 
-`to_le` and `to_be` are defined for unsigned integral types. Of course for
-`std::uint8_t` they do nothing.
+`Msb` and `Lsb` denote a closed (inclusive) range where `Msb >= Lsb`. The first
+template argument must be an unsigned integral type.
 
 === `bit_pack`
 
-`bit_pack` is a handy function for packing multiple unsigned integral values
-into a larger bit width value.
+`bit_pack` is a function for packing multiple unsigned integral values into a
+larger bit width value.
 
 [source,cpp]
 ----
@@ -47,3 +53,19 @@ static_assert(y == x);
 The arguments are listed in order of significance, i.e. for the binary
 overloads, the first argument is the high bits, and the second argument the low
 bits.
+
+=== `to_le` and `to_be`
+
+`to_le` and `to_be` are variations on `byteswap` that convert unsigned integral
+types to little- or big-endian respectively. On a little-endian machine, `to_le`
+does nothing, and `to_be` is the equivalent of `byteswap`. On a big endian
+machine it is the other way around.
+
+[source,cpp]
+----
+constexpr auto x = std::uint32_t{0x12'34'56'78};
+constexpr auto y = stdx::to_be(x); // 0x78'56'34'12 (on a little-endian machine)
+----
+
+`to_le` and `to_be` are defined for unsigned integral types. Of course for
+`std::uint8_t` they do nothing.
