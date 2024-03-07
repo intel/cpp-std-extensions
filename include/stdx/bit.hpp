@@ -301,5 +301,25 @@ constexpr auto bit_pack<std::uint64_t> =
                               (static_cast<std::uint64_t>(b5) << 16u) |
                               (static_cast<std::uint64_t>(b6) << 8u) | b7;
                    }};
+
+namespace detail {
+template <typename T, std::size_t Bit>
+constexpr auto mask_bits()
+    -> std::enable_if_t<Bit <= std::numeric_limits<T>::digits, T> {
+    if constexpr (Bit == std::numeric_limits<T>::digits) {
+        return std::numeric_limits<T>::max();
+    } else {
+        return (T{1} << Bit) - T{1};
+    }
+}
+} // namespace detail
+
+template <typename T, std::size_t Msb = std::numeric_limits<T>::digits - 1,
+          std::size_t Lsb = 0>
+[[nodiscard]] constexpr auto bit_mask() noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T> and Msb >= Lsb, T> {
+    static_assert(Msb < std::numeric_limits<T>::digits);
+    return detail::mask_bits<T, Msb + 1>() - detail::mask_bits<T, Lsb>();
+}
 } // namespace v1
 } // namespace stdx
