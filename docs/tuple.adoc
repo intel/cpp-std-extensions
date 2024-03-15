@@ -120,7 +120,7 @@ auto t = stdx::tuple{1, 2, 3};
 auto sum1 = t.fold_left(0, std::plus{});  // 6
 auto sum2 = t.fold_right(0, std::plus{}); // also 6
 ----
-Here, `fold_left` computes a _left-fold_, i.e. `(((0 + 1) + 2) + 3)`. `fold_right`
+Here, `fold_left` computes a _left-fold_, i.e. `(​(​(0 + 1) + 2) + 3)`. `fold_right`
 computes the _right-fold_ `(0 + (1 + (2 + 3)))`.
 
 Both forms of fold can perform computations in type-space as well as
