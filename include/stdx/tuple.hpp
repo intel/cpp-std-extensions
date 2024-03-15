@@ -468,6 +468,26 @@ constexpr auto apply_indices(T &&t) {
 template <typename... Ts> constexpr auto forward_as_tuple(Ts &&...ts) {
     return stdx::tuple<Ts &&...>{std::forward<Ts>(ts)...};
 }
+
+template <typename Op, typename T>
+constexpr auto apply(Op &&op, T &&t) -> decltype(auto) {
+    return std::forward<T>(t).apply(std::forward<Op>(op));
+}
+
+template <typename Op, typename T> constexpr auto transform(Op &&op, T &&t) {
+    return std::forward<T>(t).apply([&]<typename... Ts>(Ts &&...ts) {
+        return stdx::tuple<decltype(op(std::forward<Ts>(ts)))...>{
+            op(std::forward<Ts>(ts))...};
+    });
+}
+
+template <typename Op, typename T>
+constexpr auto for_each(Op &&op, T &&t) -> Op {
+    return std::forward<T>(t).apply([&]<typename... Ts>(Ts &&...ts) {
+        (op(std::forward<Ts>(ts)), ...);
+        return op;
+    });
+}
 } // namespace v1
 } // namespace stdx
 
