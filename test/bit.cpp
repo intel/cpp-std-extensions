@@ -5,6 +5,7 @@
 
 #include <cstdint>
 #include <limits>
+#include <type_traits>
 
 TEST_CASE("byteswap", "[bit]") {
     static_assert(stdx::byteswap(std::uint8_t{1u}) == 1u);
@@ -210,4 +211,11 @@ TEST_CASE("bit_mask (single bit)", "[bit]") {
     constexpr auto m = stdx::bit_mask<std::uint8_t, 5, 5>();
     static_assert(m == 0b0010'0000);
     static_assert(std::is_same_v<decltype(m), std::uint8_t const>);
+}
+
+TEMPLATE_TEST_CASE("bit_size", "[bit]", std::uint8_t, std::uint16_t,
+                   std::uint32_t, std::uint64_t, std::int8_t, std::int16_t,
+                   std::int32_t, std::int64_t) {
+    static_assert(stdx::bit_size<TestType>() ==
+                  std::numeric_limits<std::make_unsigned_t<TestType>>::digits);
 }

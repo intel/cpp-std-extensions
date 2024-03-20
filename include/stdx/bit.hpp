@@ -4,6 +4,7 @@
 #include <stdx/type_traits.hpp>
 #include <stdx/utility.hpp>
 
+#include <climits>
 #include <cstdint>
 #include <limits>
 #include <type_traits>
@@ -320,6 +321,10 @@ template <typename T, std::size_t Msb = std::numeric_limits<T>::digits - 1,
     -> std::enable_if_t<std::is_unsigned_v<T> and Msb >= Lsb, T> {
     static_assert(Msb < std::numeric_limits<T>::digits);
     return detail::mask_bits<T, Msb + 1>() - detail::mask_bits<T, Lsb>();
+}
+
+template <typename T> constexpr auto bit_size() -> std::size_t {
+    return sizeof(T) * CHAR_BIT;
 }
 } // namespace v1
 } // namespace stdx

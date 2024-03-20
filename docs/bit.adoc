@@ -14,15 +14,15 @@ and least-significant bits.
 [source,cpp]
 ----
 constexpr auto x = stdx::bit_mask<std::uint8_t, 5, 3>();
-static_assert(x == std::uint8_t{0b0011'1000};
+static_assert(x == std::uint8_t{0b0011'1000});
 
 // Lsb may be omitted (meaning it's 0)
 constexpr auto y = stdx::bit_mask<std::uint8_t, 5>();
-static_assert(y == std::uint8_t{0b0011'1111};
+static_assert(y == std::uint8_t{0b0011'1111});
 
 // omitting both Msb and Lsb means the entire range of the type
 constexpr auto z = stdx::bit_mask<std::uint8_t>();
-static_assert(z == std::uint8_t{0b1111'1111};
+static_assert(z == std::uint8_t{0b1111'1111});
 ----
 
 `Msb` and `Lsb` denote a closed (inclusive) range where `Msb >= Lsb`. The first
@@ -53,6 +53,18 @@ static_assert(y == x);
 The arguments are listed in order of significance, i.e. for the binary
 overloads, the first argument is the high bits, and the second argument the low
 bits.
+
+=== `bit_size`
+
+`bit_size` returns a `std::size_t`: the size of its type argument in bits. For
+unsigned integral types, this is equivalent to
+https://en.cppreference.com/w/cpp/types/numeric_limits/digits[`std::numeric_limits<T>::digits`].
+
+[source,cpp]
+----
+constexpr std::size_t x = stdx::bit_size<std::uint8_t>();
+static_assert(x == 8);
+----
 
 === `to_le` and `to_be`
 
