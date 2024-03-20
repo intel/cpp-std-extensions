@@ -86,7 +86,9 @@ that's risky if the definition is seen more widely. Instead use a
 
 NOTE: The default `tombstone_traits` for floating-point types have
 https://en.cppreference.com/w/cpp/types/numeric_limits/infinity[infinity] as the
-tombstone value.
+tombstone value. At first thought,
+https://en.cppreference.com/w/cpp/numeric/math/isnan[NaN] is the obvious
+tombstone, but NaNs never compare equal to anything, not even themselves.
 
 === Multi-argument `transform`
 
