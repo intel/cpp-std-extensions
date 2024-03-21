@@ -11,8 +11,8 @@ https://en.cppreference.com/w/cpp/types/make_signed[`std::make_signed_t`].
 
 [source,cpp]
 ----
-auto x = 1729;                   // int
-auto y = stdx::make_unsigned(x); // unsigned int
+auto x = 1729;                 // int
+auto y = stdx::as_unsigned(x); // unsigned int
 ----
 
 === `forward_like`
