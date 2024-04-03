@@ -286,6 +286,22 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
         }
     }
 
+    template <std::size_t I>
+    [[nodiscard]] constexpr auto operator[](
+        std::integral_constant<std::size_t, I>) const & -> decltype(auto) {
+        return this->operator[](index<I>);
+    }
+    template <std::size_t I>
+    [[nodiscard]] constexpr auto
+    operator[](std::integral_constant<std::size_t, I>) & -> decltype(auto) {
+        return this->operator[](index<I>);
+    }
+    template <std::size_t I>
+    [[nodiscard]] constexpr auto
+    operator[](std::integral_constant<std::size_t, I>) && -> decltype(auto) {
+        return std::move(*this).operator[](index<I>);
+    }
+
     constexpr auto ugly_tGet_clvr(auto idx) const & -> void {
         error::type_not_found<decltype(idx), Ts...>();
     }

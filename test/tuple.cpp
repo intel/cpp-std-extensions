@@ -2,6 +2,7 @@
 
 #include <stdx/tuple.hpp>
 #include <stdx/tuple_destructure.hpp>
+#include <stdx/utility.hpp>
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -115,6 +116,18 @@ TEST_CASE("indexing", "[tuple]") {
     auto u = stdx::tuple{1};
     static_assert(std::is_same_v<decltype(u[0_idx]), int &>);
     static_assert(std::is_same_v<decltype(stdx::tuple{1}[0_idx]), int &&>);
+}
+
+TEST_CASE("indexing with small literals", "[tuple]") {
+    using namespace stdx::literals;
+
+    constexpr auto t = stdx::tuple{5, true, 10l};
+    CHECK(get<"index"_0>(t) == 5);
+    CHECK(get<"index"_1>(t));
+    CHECK(get<"index"_2>(t) == 10);
+    static_assert(t["index"_0] == 5);
+    static_assert(t["index"_1]);
+    static_assert(t["index"_2] == 10l);
 }
 
 TEST_CASE("tuple of lvalue references", "[tuple]") {
