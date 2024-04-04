@@ -2,6 +2,7 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <cstddef>
 #include <type_traits>
 
 namespace {
@@ -140,4 +141,70 @@ TEST_CASE("is_same_unqualified", "[type_traits]") {
     static_assert(stdx::is_same_unqualified_v<int const &, int>);
     static_assert(stdx::is_same_unqualified_v<int &&, int>);
     static_assert(stdx::is_same_unqualified_v<int const &&, int>);
+}
+
+// for a taxonomy of structural types below, see
+// https://en.cppreference.com/w/cpp/language/template_parameters#Non-type_template_parameter
+
+namespace structural {
+struct base_t {
+    int x;
+    auto f() { return 42; }
+};
+using pmd_t = decltype(&base_t::x);
+using pmf_t = decltype(&base_t::f);
+
+struct derived_t : base_t {
+    constexpr derived_t(int _x, int _y) : base_t{_x}, y{_y} {}
+    int y;
+};
+
+struct class_t : base_t {
+    constexpr class_t(int _x, int _y) : base_t{_x}, d{_x, _y}, y{_y} {}
+    derived_t d;
+    int y;
+};
+
+enum struct enum_t {};
+
+constexpr auto l = [](int) { return 42; };
+using lambda_t = decltype(l);
+
+using union_t = union {
+    int x;
+    int y;
+};
+} // namespace structural
+
+TEST_CASE("structural types", "[type_traits]") {
+    static_assert(stdx::is_structural_v<int &>);
+    static_assert(stdx::is_structural_v<int>);
+    static_assert(stdx::is_structural_v<int *>);
+    static_assert(stdx::is_structural_v<structural::pmd_t>);
+    static_assert(stdx::is_structural_v<structural::pmf_t>);
+    static_assert(stdx::is_structural_v<structural::enum_t>);
+    static_assert(stdx::is_structural_v<std::nullptr_t>);
+
+#if __cpp_nontype_template_args >= 201911L
+    static_assert(stdx::is_structural_v<structural::base_t>);
+    static_assert(stdx::is_structural_v<structural::derived_t>);
+    static_assert(stdx::is_structural_v<structural::class_t>);
+    static_assert(stdx::is_structural_v<structural::lambda_t>);
+    static_assert(stdx::is_structural_v<structural::union_t>);
+    static_assert(stdx::is_structural_v<float>);
+#endif
+}
+
+namespace non_structural {
+struct S {
+    ~S() {} // nontrivial destructor
+};
+} // namespace non_structural
+
+TEST_CASE("non-structural types", "[type_traits]") {
+    static_assert(not stdx::is_structural_v<non_structural::S>);
+
+#if __cpp_nontype_template_args < 201911L
+    static_assert(not stdx::is_structural_v<float>);
+#endif
 }

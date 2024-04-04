@@ -137,5 +137,40 @@ template <typename L> constexpr static auto template_for_each = for_each_t<L>{};
 template <typename T, typename U>
 constexpr bool is_same_unqualified_v =
     std::is_same_v<remove_cvref_t<T>, remove_cvref_t<U>>;
+
+namespace detail {
+template <typename T> struct any_t;
+
+template <typename T, typename... Ts> constexpr auto try_construct() -> T {
+    if constexpr (std::is_constructible_v<T, Ts...>) {
+        return T{Ts{}...};
+    } else if constexpr (sizeof...(Ts) < 10) {
+        return try_construct<T, Ts..., any_t<T>>();
+    } else {
+        throw;
+    }
+}
+
+template <typename T> struct any_t {
+    template <typename U, std::enable_if_t<not std::is_same_v<T, U>, int> = 0>
+    // NOLINTNEXTLINE(google-explicit-constructor)
+    constexpr operator U() {
+        return try_construct<U>();
+    }
+};
+
+template <auto> using void_v = void;
+template <typename T, typename = void> constexpr auto detect_structural = false;
+template <typename T> constexpr auto detect_structural<T &, void> = true;
+template <typename T>
+constexpr auto detect_structural<T, void_v<try_construct<T>()>> = true;
+} // namespace detail
+
+template <typename T>
+constexpr bool is_structural_v = detail::detect_structural<T>;
+
+template <typename T, typename = void> constexpr auto is_cx_value_v = false;
+template <typename T>
+constexpr auto is_cx_value_v<T, std::void_t<typename T::cx_value_t>> = true;
 } // namespace v1
 } // namespace stdx

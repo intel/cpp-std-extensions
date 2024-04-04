@@ -15,6 +15,29 @@ auto x = 1729;                 // int
 auto y = stdx::as_unsigned(x); // unsigned int
 ----
 
+=== `CX_VALUE`
+
+`CX_VALUE` is a macro that wraps its argument in a constexpr callable, which can
+be used as a
+https://en.cppreference.com/w/cpp/language/template_parameters#Non-type_template_parameter[non-type
+template argument]. The compile-time value can be retrieved by calling the
+callable. This is useful for passing non-structural types as template arguments.
+
+[source,cpp]
+----
+// A std::string_view value cannot be a template argument,
+// so wrap it in CX_VALUE
+constexpr auto ts_value = CX_VALUE(std::string_view{});
+auto o = stdx::optional<std:string_view,
+                        stdx::tombstone_value<ts_value>>;
+----
+
+NOTE: This is supported for C++20 and later: it still requires the ability to
+pass lambda expressions as non-type template arguments. The type must still be a
+https://en.cppreference.com/w/cpp/named_req/LiteralType[literal type] to be used
+at compile time, but need not necessarily be a structural type. (The usual
+difference is that structural types cannot have private members.)
+
 === `forward_like`
 
 `forward_like` is an implementation of
@@ -24,6 +47,24 @@ https://en.cppreference.com/w/cpp/utility/forward_like[`std::forward_like`].
 [source,cpp]
 ----
 static_assert(stdx::same_as<stdx::forward_like_t<int &, float>, float &>);
+----
+
+=== `FWD`
+
+`FWD` is a macro that perfectly forwards its argument. It's useful for C++17
+lambdas which can't have a template head to name their types.
+
+[source,cpp]
+----
+// C++20 and later possibility
+auto l = [] <typename Arg> (auto&& arg) {
+  return f(std::forward<Arg>(arg));
+};
+
+// equivalent
+auto l = [] (auto&& arg) {
+  return f(FWD(arg));
+};
 ----
 
 === `overload`

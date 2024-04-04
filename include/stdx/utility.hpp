@@ -148,3 +148,14 @@ auto as_signed(T t) {
 #ifndef FWD
 #define FWD(x) std::forward<decltype(x)>(x)
 #endif
+
+#ifndef CX_VALUE
+#define CX_VALUE(...)                                                          \
+    [] {                                                                       \
+        struct {                                                               \
+            constexpr auto operator()() const noexcept { return __VA_ARGS__; } \
+            using cx_value_t [[maybe_unused]] = void;                          \
+        } val;                                                                 \
+        return val;                                                            \
+    }()
+#endif

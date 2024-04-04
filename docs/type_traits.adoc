@@ -96,6 +96,22 @@ to write this function where the template takes a mixture of type, value, and
 template parameters. So this is useful for templates whose parameters are all
 types or all values.
 
+=== `is_structural_v`
+
+`is_structural_v<T>` is `true` when `T` is a
+https://en.cppreference.com/w/cpp/language/template_parameters#Non-type_template_parameter[structural
+type] suitable for use as a non-type template parameter.
+
+[source,cpp]
+----
+static_assert(stdx::is_structural_v<int>);
+static_assert(not stdx::is_structural_v<std::string>);
+----
+
+NOTE: Detecting structurality of a type is not yet possible in the general case,
+so there are certain structural types for which this trait will be `false`. In
+practice those types should be rare, and there should be no false positives.
+
 === `type_or_t`
 
 `type_or_t` is an alias template that selects a type based on whether or not it

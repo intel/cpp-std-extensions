@@ -31,7 +31,13 @@ struct tombstone_traits<T, std::enable_if_t<std::is_pointer_v<T>>> {
 };
 
 template <auto V> struct tombstone_value {
-    constexpr auto operator()() const { return V; }
+    constexpr auto operator()() const {
+        if constexpr (stdx::is_cx_value_v<decltype(V)>) {
+            return V();
+        } else {
+            return V;
+        }
+    }
 };
 
 template <typename T, typename TS = tombstone_traits<T>> class optional {

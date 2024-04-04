@@ -160,3 +160,14 @@ TEST_CASE("range", "[concepts]") {
     static_assert(not stdx::range<int>);
     static_assert(stdx::range<std::array<int, 4>>);
 }
+
+namespace {
+struct non_structural {
+    ~non_structural() {} // nontrivial destructor
+};
+} // namespace
+
+TEST_CASE("structural", "[type_traits]") {
+    static_assert(stdx::structural<int>);
+    static_assert(not stdx::structural<non_structural>);
+}
