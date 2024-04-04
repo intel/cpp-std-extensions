@@ -5,6 +5,7 @@
 #include <cmath>
 #include <cstdint>
 #include <optional>
+#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -413,3 +414,13 @@ TEST_CASE("transform (multi-arg nonmovable)", "[optional]") {
         o2);
     CHECK(o3->value == 59);
 }
+
+#if __cpp_nontype_template_args >= 201911L
+TEST_CASE("tombstone with non-structural value", "[optional]") {
+    constexpr auto ts_value = CX_VALUE(std::string_view{});
+    auto const o =
+        stdx::optional<std::string_view, stdx::tombstone_value<ts_value>>{};
+    CHECK(not o);
+    CHECK(*o == std::string_view{});
+}
+#endif

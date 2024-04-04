@@ -107,6 +107,8 @@ constexpr auto range =
 
 #undef DETECTOR
 
+template <typename T> constexpr auto structural = is_structural_v<T>;
+
 #else
 
 // After C++20, we can define concepts that are lacking in the library
@@ -191,6 +193,9 @@ concept range = requires(T &t) {
     std::end(t);
 };
 
+template <typename T>
+concept structural = is_structural_v<T>;
+
 #endif
 
 } // namespace v1
@@ -233,6 +238,9 @@ concept range = requires(T &t) {
     std::begin(t);
     std::end(t);
 };
+
+template <typename T>
+concept structural = is_structural_v<T>;
 
 } // namespace v1
 } // namespace stdx
