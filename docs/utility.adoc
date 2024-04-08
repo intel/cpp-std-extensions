@@ -84,18 +84,44 @@ auto f(std::variant<int, float, std::string> const& v) {
 }
 ----
 
-=== `unreachable`
+=== `sized`
 
-`unreachable` is an implementation of
-https://en.cppreference.com/w/cpp/utility/unreachable[`std::unreachable`].
+`sized` offers an easy way to convert array extents between arrays of different
+integral types.
 
+How many times have you written something like this?
 [source,cpp]
 ----
-[[noreturn]] inline auto unreachable() -> void {
-  // if this function is ever called, it's
-  // undefined behaviour
-}
+// I have N bytes, and I need to compute the number of uint32_ts to store them
+const auto dword_size = (N + sizeof(std::uint32_t) - 1) / sizeof(std::uint32_t);
 ----
+
+Or perhaps more likely and less portably:
+[source,cpp]
+----
+const auto dword_size = (N + 3) / 4;
+----
+
+`sized` allows this conversion to be safer, more expressive, and more portable.
+[source,cpp]
+----
+// I have N bytes, and I need to compute the number of uint32_ts to store them
+const auto dword_size = stdx::sized8{N}.in<std::uint32_t>();
+
+// I have M std::uint16_ts, and I need to compute the number of uint64_ts to store them
+const auto qword_size = stdx::sized16{M}.in<std::uint64_t>();
+
+// generally, I have K things of type T, I need to compute the number of Us to store them
+const auto sz = stdx::sized<T>{K}.template in<U>();
+----
+
+- `sized8` is an alias for `sized<std::uint8_t>`
+- `sized16` is an alias for `sized<std::uint16_t>`
+- `sized32` is an alias for `sized<std::uint32_t>`
+- `sized64` is an alias for `sized<std::uint64_t>`
+
+The `sized` conversion works either from larger type to smaller type, or the
+other way around. Or even where the source and destination types are the same.
 
 === `type_map`
 
@@ -154,12 +180,25 @@ type arguments which are defaults returned when lookup fails. In the case of
 mapping to values, the `*_lookup_v` aliases have optional third NTTP arguments
 in the same role.
 
+=== `unreachable`
+
+`unreachable` is an implementation of
+https://en.cppreference.com/w/cpp/utility/unreachable[`std::unreachable`].
+
+[source,cpp]
+----
+[[noreturn]] inline auto unreachable() -> void {
+  // if this function is ever called, it's
+  // undefined behaviour
+}
+----
+
 === User-defined literals
 
 `utility.hpp` also contains a few handy user-defined literals so that code using
-boolean values can be more expressive at the call site than just using bare
-`true` and `false`. This also makes it safer to use templates with `bool`
-parameters.
+boolean or small index values can be more expressive at the call site than just
+using bare `true`, `false`, or `0` through `9`. This also makes it safer to use
+templates with `bool` or integral parameters.
 
 [source,cpp]
 ----
@@ -173,9 +212,15 @@ using my_type_without_X = my_type<"X"_false>;
 
 using my_type_with_X_alt = my_type<"X"_b>;
 using my_type_without_X_alt = my_type<not "X"_b>;
+
+auto t = stdx::tuple{1, true, 3.14f};
+auto value = get<"X"_1>(t); // true
 ----
 
-And some UDLs that are useful when specifying sizes in bytes:
+NOTE: The `_N` literals each return a `std::integral_constant<std::size_t, N>`.
+This is implicitly convertible to a `std::size_t`.
+
+There are also some UDLs that are useful when specifying sizes in bytes:
 
 [source,cpp]
 ----

@@ -4,6 +4,8 @@
 #include <stdx/type_traits.hpp>
 
 #include <cstddef>
+#include <cstdint>
+#include <type_traits>
 #include <utility>
 
 namespace stdx {
@@ -52,6 +54,26 @@ CONSTEVAL auto operator""_Gi(unsigned long long int n)
     -> unsigned long long int {
     return n * 1'024ull * 1'024ull * 1'024ull;
 }
+
+#define STDX_SMALL_INT_LITERAL_DEF(x)                                          \
+    CONSTEVAL auto operator""_##x(char const *, std::size_t)                   \
+        -> std::integral_constant<std::size_t, x##u> {                         \
+        return {};                                                             \
+    }
+
+STDX_SMALL_INT_LITERAL_DEF(0)
+STDX_SMALL_INT_LITERAL_DEF(1)
+STDX_SMALL_INT_LITERAL_DEF(2)
+STDX_SMALL_INT_LITERAL_DEF(3)
+STDX_SMALL_INT_LITERAL_DEF(4)
+STDX_SMALL_INT_LITERAL_DEF(5)
+STDX_SMALL_INT_LITERAL_DEF(6)
+STDX_SMALL_INT_LITERAL_DEF(7)
+STDX_SMALL_INT_LITERAL_DEF(8)
+STDX_SMALL_INT_LITERAL_DEF(9)
+
+#undef STDX_SMALL_INT_LITERAL_DEF
+
 // NOLINTEND(google-runtime-int)
 } // namespace literals
 
@@ -130,18 +152,45 @@ template <typename T, typename U>
 using forward_like_t = decltype(forward_like<T>(std::declval<U>()));
 
 template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
-auto as_unsigned(T t) {
+[[nodiscard]] auto as_unsigned(T t) {
     static_assert(not std::is_same_v<T, bool>,
                   "as_unsigned is not applicable to bool");
     return static_cast<std::make_unsigned_t<T>>(t);
 }
 
 template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
-auto as_signed(T t) {
+[[nodiscard]] auto as_signed(T t) {
     static_assert(not std::is_same_v<T, bool>,
                   "as_signed is not applicable to bool");
     return static_cast<std::make_signed_t<T>>(t);
 }
+
+namespace detail {
+template <typename T, typename U>
+[[nodiscard]] constexpr auto size_conversion(std::size_t sz) -> std::size_t {
+    if constexpr (sizeof(T) == sizeof(U)) {
+        return sz;
+    } else if constexpr (sizeof(T) > sizeof(U)) {
+        return sz * (sizeof(T) / sizeof(U));
+    } else {
+        return (sz * sizeof(T) + sizeof(U) - 1) / sizeof(U);
+    }
+}
+} // namespace detail
+
+template <typename T> struct sized {
+    template <typename U = std::uint8_t>
+    [[nodiscard]] constexpr auto in() -> std::size_t {
+        return detail::size_conversion<T, U>(sz);
+    }
+
+    std::size_t sz;
+};
+
+using sized8 = sized<std::uint8_t>;
+using sized16 = sized<std::uint16_t>;
+using sized32 = sized<std::uint32_t>;
+using sized64 = sized<std::uint64_t>;
 } // namespace v1
 } // namespace stdx
 
