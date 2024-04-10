@@ -30,6 +30,15 @@ template <std::size_t N> struct ct_string {
         }
     }
 
+    [[nodiscard]] constexpr auto begin() const { return std::begin(value); }
+    [[nodiscard]] constexpr auto end() const {
+        return std::prev(std::end(value));
+    }
+    [[nodiscard]] constexpr auto rbegin() const {
+        return std::next(std::rbegin(value));
+    }
+    [[nodiscard]] constexpr auto rend() const { return std::rend(value); }
+
     constexpr static std::integral_constant<std::size_t, N - 1U> size{};
     constexpr static std::integral_constant<bool, N == 1U> empty{};
 

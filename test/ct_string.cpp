@@ -2,6 +2,10 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <iterator>
+#include <string_view>
+#include <type_traits>
+
 namespace {
 template <typename T, T...> struct string_constant {};
 } // namespace
@@ -90,4 +94,26 @@ TEST_CASE("string concat", "[ct_string]") {
     constexpr auto s1 = stdx::ct_string{"abc"};
     constexpr auto s2 = stdx::ct_string{"def"};
     static_assert(s1 + s2 == stdx::ct_string{"abcdef"});
+}
+
+TEST_CASE("ct_string as iterable", "[ct_string]") {
+    constexpr auto s = stdx::ct_string{"abc"};
+    static_assert(std::next(std::begin(s), std::size(s)) == std::end(s));
+
+    auto it = std::cbegin(s);
+    CHECK(*it++ == 'a');
+    CHECK(*it++ == 'b');
+    CHECK(*it++ == 'c');
+    CHECK(it == std::cend(s));
+}
+
+TEST_CASE("ct_string as reverse iterable", "[ct_string]") {
+    constexpr auto s = stdx::ct_string{"abc"};
+    static_assert(std::next(std::rbegin(s), std::size(s)) == std::rend(s));
+
+    auto it = std::crbegin(s);
+    CHECK(*it++ == 'c');
+    CHECK(*it++ == 'b');
+    CHECK(*it++ == 'a');
+    CHECK(it == std::crend(s));
 }
