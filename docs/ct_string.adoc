@@ -56,11 +56,27 @@ struct named_thing {
     // if the character doesn't exist, p.first is equal to S and p.second is empty
     // otherwise p.first is everything up to (but not including) the character,
     // and p.second is everything after (also not including)
+
+    // we can also iterate over a ct_string
+    for (auto c : S) { ... }
+
+    // a ct_string can also explicitly convert to a std::string_view
+    constexpr auto sv = static_cast<std::string_view>(S);
+
+    // when required, we can access the underlying array of chars,
+    // which includes the null terminator
+    const auto& char_array = S.value;
   }
 };
 ----
 
 NOTE: `size` and `empty` are always available as `constexpr`.
+
+CAUTION: `ct_string` stores an internal array (`value`) which includes the null
+terminator for the string. The `size` reported by the `ct_string` is one less
+than the size of the internal array. Thus the `begin`, `end` and `size` of a
+`ct_string` all represent the string of characters without the null terminator.
+However, for interfacing with legacy functions, a null terminator can be useful.
 
 See https://github.com/intel/compile-time-init-build/tree/main/include/sc[cib
 documentation] for details about the cib string constant class.
