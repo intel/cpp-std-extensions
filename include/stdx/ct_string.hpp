@@ -105,11 +105,14 @@ template <std::size_t N, std::size_t M>
     return ret;
 }
 
-namespace ct_string_literals {
+inline namespace literals {
+inline namespace ct_string_literals {
 template <typename T, T... Cs> CONSTEVAL auto operator""_cts() {
     return ct_string<sizeof...(Cs) + 1U>{{Cs..., 0}};
 }
 } // namespace ct_string_literals
+} // namespace literals
+
 } // namespace v1
 } // namespace stdx
 

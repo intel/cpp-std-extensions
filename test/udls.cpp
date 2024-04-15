@@ -1,4 +1,4 @@
-#include <stdx/utility.hpp>
+#include <stdx/udls.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -39,4 +39,31 @@ TEST_CASE("compile-time named small indices", "[units]") {
     static_assert("index"_7 == 7u);
     static_assert("index"_8 == 8u);
     static_assert("index"_9 == 9u);
+}
+
+TEST_CASE("compile-time constant", "[units]") {
+    using namespace stdx;
+    static_assert(
+        std::is_same_v<decltype(_c<0>), std::integral_constant<int, 0> const>);
+    static_assert(
+        std::is_same_v<decltype(_c<0u>),
+                       std::integral_constant<unsigned int, 0> const>);
+    static_assert(std::is_same_v<decltype(0_c),
+                                 std::integral_constant<std::uint32_t, 0>>);
+}
+
+namespace {
+enum UnscopedEnum { Value3 = 3 };
+enum struct ScopedEnum : char { Value5 = 5 };
+} // namespace
+
+TEST_CASE("compile-time enum constant", "[units]") {
+    using namespace stdx;
+    static_assert(
+        std::is_same_v<decltype(_c<Value3>),
+                       std::integral_constant<UnscopedEnum, Value3> const>);
+    static_assert(
+        std::is_same_v<
+            decltype(_c<ScopedEnum::Value5>),
+            std::integral_constant<ScopedEnum, ScopedEnum::Value5> const>);
 }
