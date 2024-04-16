@@ -2,6 +2,8 @@
 
 #if __cplusplus >= 202002L
 
+#include <stdx/udls.hpp>
+
 #include <array>
 #include <concepts>
 #include <cstddef>
@@ -13,8 +15,16 @@
 namespace stdx {
 inline namespace v1 {
 
-template <std::size_t> struct index_constant;
-template <std::size_t I> constexpr static index_constant<I> *index{};
+template <std::size_t I>
+using index_constant = std::integral_constant<std::size_t, I>;
+template <std::size_t I> constexpr static index_constant<I> index{};
+
+inline namespace literals {
+template <char... Chars> CONSTEVAL auto operator""_idx() {
+    return index<detail::decimal<std::size_t, Chars...>()>;
+}
+} // namespace literals
+
 template <typename> struct tag_constant;
 template <typename T> constexpr static tag_constant<T> *tag{};
 
@@ -44,19 +54,6 @@ template <auto I, typename... Ts> constexpr auto index_out_of_bounds() {
 }
 } // namespace error
 
-namespace literals {
-template <char... Chars>
-    requires(... and (Chars >= '0' and Chars <= '9'))
-constexpr auto operator""_idx() {
-    constexpr auto n = [] {
-        auto x = std::size_t{};
-        ((x *= 10, x += Chars - '0'), ...);
-        return x;
-    }();
-    return index<n>;
-}
-} // namespace literals
-
 namespace detail {
 template <std::size_t, typename...> struct element;
 
@@ -68,15 +65,15 @@ concept nonderivable = not std::is_class_v<T>;
 template <std::size_t Index, nonderivable T, typename... Ts>
 struct element<Index, T, Ts...> {
     [[nodiscard]] constexpr auto
-    ugly_iGet_clvr(index_constant<Index> *) const & noexcept -> T const & {
+    ugly_iGet_clvr(index_constant<Index>) const & noexcept -> T const & {
+        return value;
+    }
+    [[nodiscard]] constexpr auto ugly_iGet_lvr(index_constant<Index>) & noexcept
+        -> T & {
         return value;
     }
     [[nodiscard]] constexpr auto
-    ugly_iGet_lvr(index_constant<Index> *) & noexcept -> T & {
-        return value;
-    }
-    [[nodiscard]] constexpr auto
-    ugly_iGet_rvr(index_constant<Index> *) && noexcept -> T && {
+    ugly_iGet_rvr(index_constant<Index>) && noexcept -> T && {
         return std::forward<T>(value);
     }
 
@@ -99,7 +96,7 @@ struct element<Index, T, Ts...> {
         return std::forward<T>(value);
     }
 
-    constexpr static auto ugly_Value(index_constant<Index> *) -> T;
+    constexpr static auto ugly_Value(index_constant<Index>) -> T;
     constexpr auto ugly_Value_clvr() const & -> T const & { return value; }
     constexpr auto ugly_Value_lvr() & -> T & { return value; }
     constexpr auto ugly_Value_rvr() && -> T && {
@@ -121,15 +118,15 @@ struct element<Index, T, Ts...> : T {
     constexpr static auto ugly_Index = Index;
 
     [[nodiscard]] constexpr auto
-    ugly_iGet_clvr(index_constant<Index> *) const & noexcept -> T const & {
+    ugly_iGet_clvr(index_constant<Index>) const & noexcept -> T const & {
+        return *this;
+    }
+    [[nodiscard]] constexpr auto ugly_iGet_lvr(index_constant<Index>) & noexcept
+        -> T & {
         return *this;
     }
     [[nodiscard]] constexpr auto
-    ugly_iGet_lvr(index_constant<Index> *) & noexcept -> T & {
-        return *this;
-    }
-    [[nodiscard]] constexpr auto
-    ugly_iGet_rvr(index_constant<Index> *) && noexcept -> T && {
+    ugly_iGet_rvr(index_constant<Index>) && noexcept -> T && {
         return std::move(*this);
     }
 
@@ -152,7 +149,7 @@ struct element<Index, T, Ts...> : T {
         return std::move(*this);
     }
 
-    constexpr static auto ugly_Value(index_constant<Index> *) -> T;
+    constexpr static auto ugly_Value(index_constant<Index>) -> T;
     constexpr auto ugly_Value_clvr() const & -> T const & { return *this; }
     constexpr auto ugly_Value_lvr() & -> T & { return *this; }
     constexpr auto ugly_Value_rvr() && -> T && { return std::move(*this); }
@@ -260,7 +257,7 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
 
     template <std::size_t I>
     [[nodiscard]] constexpr auto
-    operator[](index_constant<I> *i) const & -> decltype(auto) {
+    operator[](index_constant<I> i) const & -> decltype(auto) {
         if constexpr (I >= sizeof...(Ts)) {
             error::index_out_of_bounds<I, Ts...>();
         } else {
@@ -269,7 +266,7 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     }
     template <std::size_t I>
     [[nodiscard]] constexpr auto
-    operator[](index_constant<I> *i) & -> decltype(auto) {
+    operator[](index_constant<I> i) & -> decltype(auto) {
         if constexpr (I >= sizeof...(Ts)) {
             error::index_out_of_bounds<I, Ts...>();
         } else {
@@ -278,28 +275,12 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     }
     template <std::size_t I>
     [[nodiscard]] constexpr auto
-    operator[](index_constant<I> *i) && -> decltype(auto) {
+    operator[](index_constant<I> i) && -> decltype(auto) {
         if constexpr (I >= sizeof...(Ts)) {
             error::index_out_of_bounds<I, Ts...>();
         } else {
             return std::move(*this).ugly_iGet_rvr(i);
         }
-    }
-
-    template <std::size_t I>
-    [[nodiscard]] constexpr auto operator[](
-        std::integral_constant<std::size_t, I>) const & -> decltype(auto) {
-        return this->operator[](index<I>);
-    }
-    template <std::size_t I>
-    [[nodiscard]] constexpr auto
-    operator[](std::integral_constant<std::size_t, I>) & -> decltype(auto) {
-        return this->operator[](index<I>);
-    }
-    template <std::size_t I>
-    [[nodiscard]] constexpr auto
-    operator[](std::integral_constant<std::size_t, I>) && -> decltype(auto) {
-        return std::move(*this).operator[](index<I>);
     }
 
     constexpr auto ugly_tGet_clvr(auto idx) const & -> void {

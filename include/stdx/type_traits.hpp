@@ -6,9 +6,12 @@
 namespace stdx {
 inline namespace v1 {
 
-template <typename E>
-constexpr auto to_underlying(E e) noexcept -> std::underlying_type_t<E> {
-    return static_cast<std::underlying_type_t<E>>(e);
+template <typename E> constexpr auto to_underlying(E e) noexcept {
+    if constexpr (std::is_enum_v<E>) {
+        return static_cast<std::underlying_type_t<E>>(e);
+    } else {
+        return e;
+    }
 }
 
 template <typename T> struct remove_cvref {

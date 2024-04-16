@@ -62,4 +62,5 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/tuple_algorithms.hpp[`tuple_algorithms.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/tuple_destructure.hpp[`tuple_destructure.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/type_traits.hpp[`type_traits.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/udls.hpp[`udls.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/utility.hpp[`utility.hpp`]

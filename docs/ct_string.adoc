@@ -72,6 +72,10 @@ struct named_thing {
 
 NOTE: `size` and `empty` are always available as `constexpr`.
 
+NOTE: `_cts` is a user-defined literal declared in
+`stdx::literals::ct_string_literals`, where both `literals` and
+`ct_string_literals` are inline namespaces.
+
 CAUTION: `ct_string` stores an internal array (`value`) which includes the null
 terminator for the string. The `size` reported by the `ct_string` is one less
 than the size of the internal array. Thus the `begin`, `end` and `size` of a

@@ -19,64 +19,6 @@ template <typename... Fs> struct overload : Fs... {
 template <typename... Fs> overload(Fs...) -> overload<Fs...>;
 #endif
 
-namespace literals {
-CONSTEVAL auto operator""_b(char const *, std::size_t) -> bool { return true; }
-CONSTEVAL auto operator""_true(char const *, std::size_t) -> bool {
-    return true;
-}
-CONSTEVAL auto operator""_false(char const *, std::size_t) -> bool {
-    return false;
-}
-
-// NOLINTBEGIN(google-runtime-int)
-CONSTEVAL auto operator""_k(unsigned long long int n)
-    -> unsigned long long int {
-    return n * 1'000u;
-}
-CONSTEVAL auto operator""_M(unsigned long long int n)
-    -> unsigned long long int {
-    return n * 1'000'000u;
-}
-CONSTEVAL auto operator""_G(unsigned long long int n)
-    -> unsigned long long int {
-    return n * 1'000'000'000u;
-}
-
-CONSTEVAL auto operator""_ki(unsigned long long int n)
-    -> unsigned long long int {
-    return n * 1'024u;
-}
-CONSTEVAL auto operator""_Mi(unsigned long long int n)
-    -> unsigned long long int {
-    return n * 1'024ull * 1'024ull;
-}
-CONSTEVAL auto operator""_Gi(unsigned long long int n)
-    -> unsigned long long int {
-    return n * 1'024ull * 1'024ull * 1'024ull;
-}
-
-#define STDX_SMALL_INT_LITERAL_DEF(x)                                          \
-    CONSTEVAL auto operator""_##x(char const *, std::size_t)                   \
-        -> std::integral_constant<std::size_t, x##u> {                         \
-        return {};                                                             \
-    }
-
-STDX_SMALL_INT_LITERAL_DEF(0)
-STDX_SMALL_INT_LITERAL_DEF(1)
-STDX_SMALL_INT_LITERAL_DEF(2)
-STDX_SMALL_INT_LITERAL_DEF(3)
-STDX_SMALL_INT_LITERAL_DEF(4)
-STDX_SMALL_INT_LITERAL_DEF(5)
-STDX_SMALL_INT_LITERAL_DEF(6)
-STDX_SMALL_INT_LITERAL_DEF(7)
-STDX_SMALL_INT_LITERAL_DEF(8)
-STDX_SMALL_INT_LITERAL_DEF(9)
-
-#undef STDX_SMALL_INT_LITERAL_DEF
-
-// NOLINTEND(google-runtime-int)
-} // namespace literals
-
 [[noreturn]] inline auto unreachable() -> void { __builtin_unreachable(); }
 
 namespace detail {
@@ -191,6 +133,7 @@ using sized8 = sized<std::uint8_t>;
 using sized16 = sized<std::uint16_t>;
 using sized32 = sized<std::uint32_t>;
 using sized64 = sized<std::uint64_t>;
+
 } // namespace v1
 } // namespace stdx
 

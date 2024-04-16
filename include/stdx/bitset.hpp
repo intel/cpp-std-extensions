@@ -3,6 +3,7 @@
 #include <stdx/bit.hpp>
 #include <stdx/compiler.hpp>
 #include <stdx/type_traits.hpp>
+#include <stdx/udls.hpp>
 
 #include <algorithm>
 #include <array>
@@ -19,10 +20,6 @@ struct place_bits_t {};
 constexpr inline auto place_bits = place_bits_t{};
 struct all_bits_t {};
 constexpr inline auto all_bits = all_bits_t{};
-
-enum struct lsb_t : std::size_t {};
-enum struct msb_t : std::size_t {};
-enum struct length_t : std::size_t {};
 
 namespace detail {
 template <std::size_t N, typename StorageElem> class bitset {
@@ -412,18 +409,5 @@ template <std::size_t N, typename StorageElem = void>
 using bitset =
     detail::bitset<N, decltype(detail::select_storage<N, StorageElem>())>;
 
-namespace literals {
-// NOLINTBEGIN(google-runtime-int)
-CONSTEVAL auto operator""_lsb(unsigned long long int n) -> lsb_t {
-    return static_cast<lsb_t>(n);
-}
-CONSTEVAL auto operator""_msb(unsigned long long int n) -> msb_t {
-    return static_cast<msb_t>(n);
-}
-CONSTEVAL auto operator""_len(unsigned long long int n) -> length_t {
-    return static_cast<length_t>(n);
-}
-// NOLINTEND(google-runtime-int)
-} // namespace literals
 } // namespace v1
 } // namespace stdx

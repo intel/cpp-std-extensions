@@ -1,0 +1,70 @@
+
+== `udls.hpp`
+
+NOTE: Taking a cue from the standard, all UDLs in `stdx` are declared in inline
+namespaces - typically `stdx::literals`.
+
+=== Useful user-defined literals
+
+`udls.hpp` contains a few handy user-defined literals so that code using boolean
+or small index values can be more expressive at the call site than just using
+bare `true`, `false`, or `0` through `9`. This also makes it safer to use
+templates with `bool` or integral parameters.
+
+[source,cpp]
+----
+using namespace stdx::literals;
+
+template <bool X>
+struct my_type { ... };
+
+using my_type_with_X = my_type<"X"_true>;
+using my_type_without_X = my_type<"X"_false>;
+
+using my_type_with_X_alt = my_type<"X"_b>;
+using my_type_without_X_alt = my_type<not "X"_b>;
+
+auto t = stdx::tuple{1, true, 3.14f};
+auto value = get<"X"_1>(t); // true
+----
+
+NOTE: The `_N` literals each return a `std::integral_constant<std::size_t, N>`.
+This is implicitly convertible to a `std::size_t`.
+
+There are also some UDLs that are useful when specifying sizes in bytes:
+
+[source,cpp]
+----
+using namespace stdx::literals;
+
+// decimal SI prefixes
+constexpr auto a = 1_k;  // 1,000
+constexpr auto b = 1_M;  // 1,000,000
+constexpr auto c = 1_G;  // 1,000,000,000
+
+// binary equivalents
+constexpr auto d = 1_ki; // 1,024
+constexpr auto e = 1_Mi; // 1,048,567
+constexpr auto f = 1_Gi; // 1,073,741,824
+----
+
+=== Integral and enum values
+
+`_c` is a variable template whose value is a `std::integral_constant` with inferred type.
+
+[source,cpp]
+----
+constexpr auto i = stdx::_c<1>;        // std::integral_constant<int, 1>
+
+enum struct E { value = 1 };
+constexpr auto e = stdx::_c<E::value>; // std::integral_constant<E, E::value>
+----
+
+`_c` is also a user-defined literal that can be used to make a `std::integral_constant<std::uint32_t, N>`.
+
+[source,cpp]
+----
+using namespace stdx::literals;
+
+constexpr auto i = 1_c; // std::integral_constant<std::uint32_t, 1>
+----
