@@ -130,12 +130,31 @@ TEMPLATE_TEST_CASE("construct with a substring", "[bitset]", std::uint8_t,
                   stdx::bitset<4, TestType>{0b1010ul});
 }
 
-TEMPLATE_TEST_CASE("convert to uint64_t", "[bitset]", std::uint8_t,
-                   std::uint16_t, std::uint32_t, std::uint64_t) {
+TEMPLATE_TEST_CASE("convert to unsigned integral type (same underlying type)",
+                   "[bitset]", std::uint8_t, std::uint16_t, std::uint32_t,
+                   std::uint64_t) {
     constexpr auto bs = stdx::bitset<3, TestType>{255ul};
-    constexpr auto val = bs.to_uint64_t();
-    static_assert(std::is_same_v<decltype(val), std::uint64_t const>);
-    static_assert(val == 7ul);
+    constexpr auto val = bs.template to<TestType>();
+    static_assert(std::is_same_v<decltype(val), TestType const>);
+    static_assert(val == 7u);
+}
+
+TEMPLATE_TEST_CASE(
+    "convert to unsigned integral type (different underlying type)", "[bitset]",
+    std::uint16_t, std::uint32_t, std::uint64_t) {
+    constexpr auto bs =
+        stdx::bitset<11, std::uint8_t>{stdx::place_bits, 3, 7, 10};
+    constexpr auto val = bs.to<TestType>();
+    static_assert(std::is_same_v<decltype(val), TestType const>);
+    static_assert(val == 0b100'1000'1000u);
+}
+
+TEST_CASE("convert to type that fits", "[bitset]") {
+    constexpr auto bs =
+        stdx::bitset<11, std::uint8_t>{stdx::place_bits, 3, 7, 10};
+    constexpr auto val = bs.to_natural();
+    static_assert(std::is_same_v<decltype(val), std::uint16_t const>);
+    static_assert(val == 0b100'1000'1000u);
 }
 
 TEMPLATE_TEST_CASE("all", "[bitset]", std::uint8_t, std::uint16_t,
@@ -366,12 +385,12 @@ TEMPLATE_TEST_CASE("set/reset all bits with size at type capacity", "[bitset]",
 
     constexpr auto bs1 = stdx::bitset<sz, TestType>{stdx::all_bits};
     static_assert(bs1.all());
-    static_assert(bs1.to_uint64_t() == expected);
+    static_assert(bs1.template to<TestType>() == expected);
 
     auto bs2 = stdx::bitset<sz, TestType>{};
     bs2.set();
     CHECK(bs2.all());
-    CHECK(bs2.to_uint64_t() == expected);
+    CHECK(bs2.template to<TestType>() == expected);
     bs2.reset();
     CHECK(bs2.none());
 }
