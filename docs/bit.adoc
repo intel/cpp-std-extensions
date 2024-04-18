@@ -28,6 +28,19 @@ static_assert(z == std::uint8_t{0b1111'1111});
 `Msb` and `Lsb` denote a closed (inclusive) range where `Msb >= Lsb`. The first
 template argument must be an unsigned integral type.
 
+`bit_mask` is also available for use with "normal" value arguments rather than
+template arguments:
+
+[source,cpp]
+----
+constexpr auto x = stdx::bit_mask<std::uint8_t>(5, 3);
+static_assert(x == std::uint8_t{0b0011'1000});
+
+// Lsb may be omitted (meaning it's 0)
+constexpr auto y = stdx::bit_mask<std::uint8_t>(5);
+static_assert(y == std::uint8_t{0b0011'1111});
+----
+
 === `bit_pack`
 
 `bit_pack` is a function for packing multiple unsigned integral values into a
