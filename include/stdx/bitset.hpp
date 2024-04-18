@@ -2,6 +2,7 @@
 
 #include <stdx/bit.hpp>
 #include <stdx/compiler.hpp>
+#include <stdx/concepts.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/udls.hpp>
 
@@ -22,6 +23,22 @@ struct all_bits_t {};
 constexpr inline auto all_bits = all_bits_t{};
 
 namespace detail {
+template <std::size_t N, typename S> CONSTEVAL auto select_storage() {
+    if constexpr (not std::is_same_v<S, void>) {
+        static_assert(std::is_unsigned_v<S>,
+                      "Underlying storage of bitset must be an unsigned type");
+        return S{};
+    } else if constexpr (N <= std::numeric_limits<std::uint8_t>::digits) {
+        return std::uint8_t{};
+    } else if constexpr (N <= std::numeric_limits<std::uint16_t>::digits) {
+        return std::uint16_t{};
+    } else if constexpr (N <= std::numeric_limits<std::uint32_t>::digits) {
+        return std::uint32_t{};
+    } else {
+        return std::uint64_t{};
+    }
+}
+
 template <std::size_t N, typename StorageElem> class bitset {
     constexpr static auto storage_elem_size =
         std::numeric_limits<StorageElem>::digits;
@@ -149,21 +166,29 @@ template <std::size_t N, typename StorageElem> class bitset {
         }
     }
 
-    [[nodiscard]] constexpr auto to_uint64_t() const -> std::uint64_t {
-        if constexpr (std::is_same_v<StorageElem, std::uint64_t>) {
+    template <typename T> [[nodiscard]] constexpr auto to() const -> T {
+        static_assert(unsigned_integral<T>,
+                      "Conversion must be to an unsigned integral type!");
+        static_assert(N <= std::numeric_limits<T>::digits,
+                      "Bitset too big for conversion to T");
+        if constexpr (std::is_same_v<StorageElem, T>) {
             return storage[0] & lastmask;
         } else {
-            static_assert(N <= std::numeric_limits<std::uint64_t>::digits,
-                          "Bitset too big for conversion to std::uint64_t");
-            std::uint64_t result{};
-            for (auto i = std::size_t{}; i < storage_size - 1; ++i) {
-                result <<= storage_elem_size;
+
+            T result{highbits()};
+            for (auto i = storage_size - 2u; i < storage_size; --i) {
+                result = static_cast<T>(result << storage_elem_size);
                 result |= storage[i];
             }
-            result <<= storage_elem_size;
-            result |= highbits();
             return result;
         }
+    }
+
+    [[nodiscard]] constexpr auto to_natural() const {
+        using T = decltype(select_storage<N, void>());
+        static_assert(N <= std::numeric_limits<T>::digits,
+                      "Bitset too big for conversion to T");
+        return to<T>();
     }
 
     constexpr static std::integral_constant<std::size_t, N> size{};
@@ -385,22 +410,6 @@ constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F {
     } else {
         static_assert(stdx::always_false_v<F>, "unimplemented");
         return f;
-    }
-}
-
-template <std::size_t N, typename S> CONSTEVAL auto select_storage() {
-    if constexpr (not std::is_same_v<S, void>) {
-        static_assert(std::is_unsigned_v<S>,
-                      "Underlying storage of bitset must be an unsigned type");
-        return S{};
-    } else if constexpr (N <= std::numeric_limits<std::uint8_t>::digits) {
-        return std::uint8_t{};
-    } else if constexpr (N <= std::numeric_limits<std::uint16_t>::digits) {
-        return std::uint16_t{};
-    } else if constexpr (N <= std::numeric_limits<std::uint32_t>::digits) {
-        return std::uint32_t{};
-    } else {
-        return std::uint64_t{};
     }
 }
 } // namespace detail
