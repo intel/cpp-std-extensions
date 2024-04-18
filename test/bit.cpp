@@ -182,33 +182,63 @@ TEST_CASE("bit_pack 8x8 -> 64", "[bit]") {
                                                 0xf0) == 0x1234'5678'9abc'def0);
 }
 
-TEST_CASE("bit_mask (whole range)", "[bit]") {
+TEST_CASE("template bit_mask (whole range)", "[bit]") {
     constexpr auto m = stdx::bit_mask<std::uint64_t>();
     static_assert(m == std::numeric_limits<std::uint64_t>::max());
     static_assert(m == stdx::bit_mask<std::uint64_t, 63>());
     static_assert(m == stdx::bit_mask<std::uint64_t, 63, 0>());
 }
 
-TEST_CASE("bit_mask (low bits)", "[bit]") {
+TEST_CASE("template bit_mask (low bits)", "[bit]") {
     constexpr auto m = stdx::bit_mask<std::uint8_t, 1, 0>();
     static_assert(m == 0b0000'0011);
     static_assert(std::is_same_v<decltype(m), std::uint8_t const>);
 }
 
-TEST_CASE("bit_mask (mid bits)", "[bit]") {
+TEST_CASE("template bit_mask (mid bits)", "[bit]") {
     constexpr auto m = stdx::bit_mask<std::uint8_t, 4, 3>();
     static_assert(m == 0b0001'1000);
     static_assert(std::is_same_v<decltype(m), std::uint8_t const>);
 }
 
-TEST_CASE("bit_mask (high bits)", "[bit]") {
+TEST_CASE("template bit_mask (high bits)", "[bit]") {
     constexpr auto m = stdx::bit_mask<std::uint8_t, 7, 6>();
     static_assert(m == 0b1100'0000);
     static_assert(std::is_same_v<decltype(m), std::uint8_t const>);
 }
 
-TEST_CASE("bit_mask (single bit)", "[bit]") {
+TEST_CASE("template bit_mask (single bit)", "[bit]") {
     constexpr auto m = stdx::bit_mask<std::uint8_t, 5, 5>();
+    static_assert(m == 0b0010'0000);
+    static_assert(std::is_same_v<decltype(m), std::uint8_t const>);
+}
+
+TEST_CASE("arg bit_mask (whole range)", "[bit]") {
+    constexpr auto m = stdx::bit_mask<std::uint64_t>(63);
+    static_assert(m == std::numeric_limits<std::uint64_t>::max());
+    static_assert(m == stdx::bit_mask<std::uint64_t>(63, 0));
+}
+
+TEST_CASE("arg bit_mask (low bits)", "[bit]") {
+    constexpr auto m = stdx::bit_mask<std::uint8_t>(1, 0);
+    static_assert(m == 0b0000'0011);
+    static_assert(std::is_same_v<decltype(m), std::uint8_t const>);
+}
+
+TEST_CASE("arg bit_mask (mid bits)", "[bit]") {
+    constexpr auto m = stdx::bit_mask<std::uint8_t>(4, 3);
+    static_assert(m == 0b0001'1000);
+    static_assert(std::is_same_v<decltype(m), std::uint8_t const>);
+}
+
+TEST_CASE("arg bit_mask (high bits)", "[bit]") {
+    constexpr auto m = stdx::bit_mask<std::uint8_t>(7, 6);
+    static_assert(m == 0b1100'0000);
+    static_assert(std::is_same_v<decltype(m), std::uint8_t const>);
+}
+
+TEST_CASE("arg bit_mask (single bit)", "[bit]") {
+    constexpr auto m = stdx::bit_mask<std::uint8_t>(5, 5);
     static_assert(m == 0b0010'0000);
     static_assert(std::is_same_v<decltype(m), std::uint8_t const>);
 }

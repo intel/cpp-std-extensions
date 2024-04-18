@@ -310,8 +310,15 @@ constexpr auto mask_bits()
     if constexpr (Bit == std::numeric_limits<T>::digits) {
         return std::numeric_limits<T>::max();
     } else {
-        return (T{1} << Bit) - T{1};
+        return static_cast<T>(T{1} << Bit) - T{1};
     }
+}
+
+template <typename T> constexpr auto mask_bits(std::size_t Bit) -> T {
+    if (Bit == std::numeric_limits<T>::digits) {
+        return std::numeric_limits<T>::max();
+    }
+    return static_cast<T>(T{1} << Bit) - T{1};
 }
 } // namespace detail
 
@@ -321,6 +328,13 @@ template <typename T, std::size_t Msb = std::numeric_limits<T>::digits - 1,
     -> std::enable_if_t<std::is_unsigned_v<T> and Msb >= Lsb, T> {
     static_assert(Msb < std::numeric_limits<T>::digits);
     return detail::mask_bits<T, Msb + 1>() - detail::mask_bits<T, Lsb>();
+}
+
+template <typename T>
+[[nodiscard]] constexpr auto bit_mask(std::size_t Msb,
+                                      std::size_t Lsb = 0) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+    return detail::mask_bits<T>(Msb + 1) - detail::mask_bits<T>(Lsb);
 }
 
 template <typename T> constexpr auto bit_size() -> std::size_t {
