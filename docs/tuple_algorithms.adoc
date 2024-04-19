@@ -128,6 +128,13 @@ stdx::enumerate([] <auto Idx> (auto x) { std::cout << Idx << ':' << x << '\n'; }
 ----
 NOTE: Like `for_each`, `enumerate` returns the function object passed to it.
 
+`enumerate` is also available for `std::array`, but to be explicit it is called `unrolled_enumerate`:
+[source,cpp]
+----
+auto a = std::array{1, 2, 3};
+stdx::unrolled_enumerate([] <auto Idx> (auto x) { std::cout << Idx << ':' << x << '\n'; }, a);
+----
+
 === `filter`
 
 `filter` allows compile-time filtering of a tuple based on the types contained.
@@ -161,6 +168,13 @@ NOTE: Like
 https://en.cppreference.com/w/cpp/algorithm/for_each[`std::for_each`],
 `stdx::for_each` returns the function object passed to it. This can be useful
 for stateful function objects.
+
+`for_each` is also available for `std::array`, but to be explicit it is called `unrolled_for_each`:
+[source,cpp]
+----
+auto a = std::array{1, 2, 3};
+stdx::unrolled_for_each([] (auto x) { std::cout << x << '\n'; }, a);
+----
 
 === `sort`
 

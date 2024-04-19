@@ -130,10 +130,10 @@ TEST_CASE("for_each", "[tuple_algorithms]") {
     }
 }
 
-TEST_CASE("for_each on arrays", "[tuple_algorithms]") {
+TEST_CASE("unrolled_for_each on arrays", "[tuple_algorithms]") {
     auto a = std::array{1, 2, 3};
     auto sum = 0;
-    stdx::for_each(
+    stdx::unrolled_for_each(
         [&](auto &x, auto y) {
             sum += x + y;
             x--;
@@ -627,5 +627,14 @@ TEST_CASE("enumerate", "[tuple_algorithms]") {
     stdx::enumerate(
         [&]<auto Idx>(auto x, auto y) { sum += static_cast<int>(Idx) + x + y; },
         t, t);
+    CHECK(sum == (0 + 1 + 2) + (2 + 4 + 6));
+}
+
+TEST_CASE("unrolled enumerate on arrays", "[tuple_algorithms]") {
+    auto const a = std::array{1, 2, 3};
+    auto sum = 0;
+    stdx::unrolled_enumerate(
+        [&]<auto Idx>(auto x, auto y) { sum += static_cast<int>(Idx) + x + y; },
+        a, a);
     CHECK(sum == (0 + 1 + 2) + (2 + 4 + 6));
 }
