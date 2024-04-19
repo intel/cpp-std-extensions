@@ -385,6 +385,8 @@ tuple_impl(Ts...)
 } // namespace detail
 
 template <typename T> constexpr auto tuple_size_v = T::size();
+template <typename T, std::size_t N>
+constexpr auto tuple_size_v<std::array<T, N>> = N;
 
 template <std::size_t I, typename T>
 using tuple_element_t = decltype(T::ugly_Value(index<I>));

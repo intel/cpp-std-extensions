@@ -130,6 +130,19 @@ TEST_CASE("for_each", "[tuple_algorithms]") {
     }
 }
 
+TEST_CASE("for_each on arrays", "[tuple_algorithms]") {
+    auto a = std::array{1, 2, 3};
+    auto sum = 0;
+    stdx::for_each(
+        [&](auto &x, auto y) {
+            sum += x + y;
+            x--;
+        },
+        a, a);
+    CHECK(sum == 12);
+    CHECK(a == std::array{0, 1, 2});
+}
+
 TEST_CASE("tuple_cat", "[tuple_algorithms]") {
     static_assert(stdx::tuple_cat() == stdx::tuple{});
     static_assert(stdx::tuple_cat(stdx::tuple{}, stdx::tuple{}) ==
