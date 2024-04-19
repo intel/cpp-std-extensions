@@ -219,6 +219,9 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     using base_t = typename element_helper<Fs...>::template element_t<I, T>;
 
   public:
+    using common_tuple_comparable = void;
+    using is_tuple = void;
+
     using base_t<Is, Ts>::ugly_iGet_clvr...;
     using base_t<Is, Ts>::ugly_iGet_lvr...;
     using base_t<Is, Ts>::ugly_iGet_rvr...;
@@ -394,12 +397,12 @@ using tuple_element_t = decltype(T::ugly_Value(index<I>));
 template <typename T>
 concept tuple_comparable = requires { typename T::common_tuple_comparable; };
 
-template <typename... Ts>
-struct tuple : detail::tuple_impl<std::index_sequence_for<Ts...>,
-                                  detail::index_function_list<>, Ts...> {
-    using common_tuple_comparable = void;
+template <typename T>
+concept tuplelike = requires { typename remove_cvref_t<T>::is_tuple; };
 
-  private:
+template <typename... Ts>
+class tuple : public detail::tuple_impl<std::index_sequence_for<Ts...>,
+                                        detail::index_function_list<>, Ts...> {
     template <typename U>
         requires(not tuple_comparable<U>)
     [[nodiscard]] friend constexpr auto operator==(tuple const &, U const &)
@@ -413,11 +416,8 @@ struct tuple : detail::tuple_impl<std::index_sequence_for<Ts...>,
 template <typename... Ts> tuple(Ts...) -> tuple<Ts...>;
 
 template <typename IndexList, typename... Ts>
-struct indexed_tuple
-    : detail::tuple_impl<std::index_sequence_for<Ts...>, IndexList, Ts...> {
-    using common_tuple_comparable = void;
-
-  private:
+class indexed_tuple : public detail::tuple_impl<std::index_sequence_for<Ts...>,
+                                                IndexList, Ts...> {
     template <typename U>
         requires(not tuple_comparable<U>)
     [[nodiscard]] friend constexpr auto operator==(indexed_tuple const &,
@@ -432,13 +432,13 @@ struct indexed_tuple
 template <typename... Ts>
 indexed_tuple(Ts...) -> indexed_tuple<detail::index_function_list<>, Ts...>;
 
-template <std::size_t I, typename Tuple>
+template <std::size_t I, tuplelike Tuple>
 [[nodiscard]] constexpr auto get(Tuple &&t)
     -> decltype(std::forward<Tuple>(t)[index<I>]) {
     return std::forward<Tuple>(t)[index<I>];
 }
 
-template <typename T, typename Tuple>
+template <typename T, tuplelike Tuple>
 [[nodiscard]] constexpr auto get(Tuple &&t)
     -> decltype(std::forward<Tuple>(t).get(tag<T>)) {
     return std::forward<Tuple>(t).get(tag<T>);
@@ -454,7 +454,7 @@ constexpr auto make_indexed_tuple = []<typename... Ts>(Ts &&...ts) {
                          std::remove_cvref_t<Ts>...>{std::forward<Ts>(ts)...};
 };
 
-template <template <typename> typename... Fs, typename T>
+template <template <typename> typename... Fs, tuplelike T>
 constexpr auto apply_indices(T &&t) {
     using tuple_t = std::remove_cvref_t<T>;
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
@@ -468,19 +468,19 @@ template <typename... Ts> constexpr auto forward_as_tuple(Ts &&...ts) {
     return stdx::tuple<Ts &&...>{std::forward<Ts>(ts)...};
 }
 
-template <typename Op, typename T>
+template <typename Op, tuplelike T>
 constexpr auto apply(Op &&op, T &&t) -> decltype(auto) {
     return std::forward<T>(t).apply(std::forward<Op>(op));
 }
 
-template <typename Op, typename T> constexpr auto transform(Op &&op, T &&t) {
+template <typename Op, tuplelike T> constexpr auto transform(Op &&op, T &&t) {
     return std::forward<T>(t).apply([&]<typename... Ts>(Ts &&...ts) {
         return stdx::tuple<decltype(op(std::forward<Ts>(ts)))...>{
             op(std::forward<Ts>(ts))...};
     });
 }
 
-template <typename Op, typename T>
+template <typename Op, tuplelike T>
 constexpr auto for_each(Op &&op, T &&t) -> Op {
     return std::forward<T>(t).apply([&]<typename... Ts>(Ts &&...ts) {
         (op(std::forward<Ts>(ts)), ...);

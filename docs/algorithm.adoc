@@ -4,6 +4,34 @@
 https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/algorithm.hpp[`algorithm.hpp`]
 provides an implementation of some algorithms.
 
+=== `for_each` and `for_each_n`
+
+`stdx::for_each` is similar to
+https://en.cppreference.com/w/cpp/algorithm/for_each[`std::for_each`], but
+variadic in its inputs.
+
+[source,cpp]
+----
+template <typename InputIt, typename Operation, typename... InputItN>
+constexpr auto for_each(InputIt first, InputIt last,
+                        Operation op, InputItN... first_n) -> Operation;
+----
+
+NOTE: `stdx::for_each` is `constexpr` in C++20 and later, because it uses
+https://en.cppreference.com/w/cpp/utility/functional/invoke[`std::invoke`].
+
+`stdx::for_each_n` is just like `stdx::for_each`, but instead of taking two
+iterators to delimit the input range, it takes an iterator and size.
+
+[source,cpp]
+----
+template <typename InputIt, typename Size, typename Operation,
+          typename... InputItN>
+constexpr auto for_each_n(InputIt first, Size n,
+                          Operation op, InputItN... first_n) -> Operation;
+----
+
+
 === `transform` and `transform_n`
 
 `stdx::transform` is similar to

@@ -1,4 +1,5 @@
 #include <stdx/algorithm.hpp>
+#include <stdx/tuple_algorithms.hpp>
 #include <stdx/tuple_destructure.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -43,4 +44,22 @@ TEST_CASE("n-ary transform_n", "[algorithm]") {
         [](auto... ns) { return (0 + ... + ns); }, std::cbegin(input),
         std::cbegin(input), std::cbegin(input));
     CHECK(output == std::array{4, 8, 12, 16});
+}
+
+TEST_CASE("n-ary for_each", "[algorithm]") {
+    auto const input = std::array{1, 2, 3, 4};
+    auto output = decltype(input){};
+    stdx::for_each(
+        std::cbegin(input), std::cend(input),
+        [it = std::begin(output)](auto n) mutable { *it++ = n + 1; });
+    CHECK(output == std::array{2, 3, 4, 5});
+}
+
+TEST_CASE("n-ary for_each_n", "[algorithm]") {
+    auto const input = std::array{1, 2, 3, 4};
+    auto output = decltype(input){};
+    stdx::for_each_n(
+        std::cbegin(input), std::size(input),
+        [it = std::begin(output)](auto n) mutable { *it++ = n + 1; });
+    CHECK(output == std::array{2, 3, 4, 5});
 }

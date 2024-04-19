@@ -48,6 +48,27 @@ CONSTEXPR_INVOKE auto transform_n(InputIt first, Size n, OutputIt d_first,
     return {d_first, first, first_n...};
 }
 
+template <typename InputIt, typename Operation, typename... InputItN>
+CONSTEXPR_INVOKE auto for_each(InputIt first, InputIt last, Operation op,
+                               InputItN... first_n) -> Operation {
+    while (first != last) {
+        std::invoke(op, *first, *first_n...);
+        static_cast<void>(++first), (static_cast<void>(++first_n), ...);
+    }
+    return op;
+}
+
+template <typename InputIt, typename Size, typename Operation,
+          typename... InputItN>
+CONSTEXPR_INVOKE auto for_each_n(InputIt first, Size n, Operation op,
+                                 InputItN... first_n) -> Operation {
+    while (n-- > 0) {
+        std::invoke(op, *first, *first_n...);
+        static_cast<void>(++first), (static_cast<void>(++first_n), ...);
+    }
+    return op;
+}
+
 #undef CONSTEXPR_INVOKE
 } // namespace v1
 } // namespace stdx

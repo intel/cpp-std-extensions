@@ -17,7 +17,7 @@
 
 namespace stdx {
 inline namespace v1 {
-template <typename... Ts> [[nodiscard]] constexpr auto tuple_cat(Ts &&...ts) {
+template <tuplelike... Ts> [[nodiscard]] constexpr auto tuple_cat(Ts &&...ts) {
     if constexpr (sizeof...(Ts) == 0) {
         return stdx::tuple<>{};
     } else if constexpr (sizeof...(Ts) == 1) {
@@ -52,7 +52,7 @@ template <typename... Ts> [[nodiscard]] constexpr auto tuple_cat(Ts &&...ts) {
     }
 }
 
-template <template <typename T> typename Pred, typename T>
+template <template <typename T> typename Pred, tuplelike T>
 [[nodiscard]] constexpr auto filter(T &&t) {
     using tuple_t = std::remove_cvref_t<T>;
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
@@ -90,8 +90,8 @@ constexpr auto invoke_at(auto &&op, Ts &&...ts) -> decltype(auto) {
 }
 } // namespace detail
 
-template <template <typename> typename... Fs, typename Op, typename T,
-          typename... Ts>
+template <template <typename> typename... Fs, typename Op, tuplelike T,
+          tuplelike... Ts>
 constexpr auto transform(Op &&op, T &&t, Ts &&...ts) {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         if constexpr (sizeof...(Fs) == 0) {
@@ -109,12 +109,18 @@ constexpr auto transform(Op &&op, T &&t, Ts &&...ts) {
 }
 
 template <typename Op, typename T, typename... Ts>
-constexpr auto for_each(Op &&op, T &&t, Ts &&...ts) -> Op {
+constexpr auto unrolled_for_each(Op &&op, T &&t, Ts &&...ts) -> Op {
     [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         (detail::invoke_at<Is>(op, std::forward<T>(t), std::forward<Ts>(ts)...),
          ...);
     }(std::make_index_sequence<stdx::tuple_size_v<std::remove_cvref_t<T>>>{});
     return op;
+}
+
+template <typename Op, tuplelike T, tuplelike... Ts>
+constexpr auto for_each(Op &&op, T &&t, Ts &&...ts) -> Op {
+    return unrolled_for_each(std::forward<Op>(op), std::forward<T>(t),
+                             std::forward<Ts>(ts)...);
 }
 
 namespace detail {
@@ -125,7 +131,7 @@ constexpr auto invoke_with_idx_at(auto &&op, Ts &&...ts) -> decltype(auto) {
 } // namespace detail
 
 template <typename Op, typename T, typename... Ts>
-constexpr auto enumerate(Op &&op, T &&t, Ts &&...ts) -> Op {
+constexpr auto unrolled_enumerate(Op &&op, T &&t, Ts &&...ts) -> Op {
     [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         (detail::invoke_with_idx_at<Is>(op, std::forward<T>(t),
                                         std::forward<Ts>(ts)...),
@@ -134,7 +140,13 @@ constexpr auto enumerate(Op &&op, T &&t, Ts &&...ts) -> Op {
     return op;
 }
 
-template <typename F, typename T, typename... Ts>
+template <typename Op, tuplelike T, tuplelike... Ts>
+constexpr auto enumerate(Op &&op, T &&t, Ts &&...ts) -> Op {
+    return unrolled_enumerate(std::forward<Op>(op), std::forward<T>(t),
+                              std::forward<Ts>(ts)...);
+}
+
+template <typename F, tuplelike T, tuplelike... Ts>
 constexpr auto all_of(F &&f, T &&t, Ts &&...ts) -> bool {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         return (... and detail::invoke_at<Is>(f, std::forward<T>(t),
@@ -142,7 +154,7 @@ constexpr auto all_of(F &&f, T &&t, Ts &&...ts) -> bool {
     }(std::make_index_sequence<stdx::tuple_size_v<std::remove_cvref_t<T>>>{});
 }
 
-template <typename F, typename T, typename... Ts>
+template <typename F, tuplelike T, tuplelike... Ts>
 constexpr auto any_of(F &&f, T &&t, Ts &&...ts) -> bool {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         return (... or detail::invoke_at<Is>(f, std::forward<T>(t),
@@ -166,12 +178,12 @@ constexpr auto contains_type(
                                  (std::is_same_v<T, Us> or ...)>;
 } // namespace detail
 
-template <typename Tuple, typename T>
+template <tuplelike Tuple, typename T>
 constexpr auto contains_type =
     decltype(detail::contains_type<T>(std::declval<Tuple>()))::value;
 
 template <template <typename> typename Proj = std::type_identity_t,
-          typename Tuple>
+          tuplelike Tuple>
 [[nodiscard]] constexpr auto sort(Tuple &&t) {
     using T = stdx::remove_cvref_t<Tuple>;
     using P = std::pair<std::string_view, std::size_t>;
@@ -191,13 +203,13 @@ template <template <typename> typename Proj = std::type_identity_t,
 }
 
 namespace detail {
-template <typename T, template <typename> typename Proj, std::size_t I>
+template <tuplelike T, template <typename> typename Proj, std::size_t I>
 [[nodiscard]] constexpr auto test_adjacent() -> bool {
     return stdx::type_as_string<Proj<stdx::tuple_element_t<I, T>>>() ==
            stdx::type_as_string<Proj<stdx::tuple_element_t<I + 1, T>>>();
 }
 
-template <typename T, template <typename> typename Proj = std::type_identity_t>
+template <tuplelike T, template <typename> typename Proj = std::type_identity_t>
     requires(tuple_size_v<T> > 1)
 [[nodiscard]] constexpr auto count_chunks() {
     auto count = std::size_t{1};
@@ -216,7 +228,7 @@ struct chunk {
         -> bool = default;
 };
 
-template <typename T, template <typename> typename Proj = std::type_identity_t>
+template <tuplelike T, template <typename> typename Proj = std::type_identity_t>
     requires(tuple_size_v<T> > 1)
 [[nodiscard]] constexpr auto create_chunks() {
     auto index = std::size_t{};
@@ -238,7 +250,7 @@ template <typename T, template <typename> typename Proj = std::type_identity_t>
 } // namespace detail
 
 template <template <typename> typename Proj = std::type_identity_t,
-          typename Tuple>
+          tuplelike Tuple>
 [[nodiscard]] constexpr auto chunk_by(Tuple &&t) {
     using tuple_t = std::remove_cvref_t<Tuple>;
     if constexpr (tuple_size_v<tuple_t> == 0) {
@@ -259,11 +271,11 @@ template <template <typename> typename Proj = std::type_identity_t,
     }
 }
 
-template <typename Tuple> [[nodiscard]] constexpr auto chunk(Tuple &&t) {
+template <tuplelike Tuple> [[nodiscard]] constexpr auto chunk(Tuple &&t) {
     return chunk_by(std::forward<Tuple>(t));
 }
 
-template <typename... Ts> constexpr auto cartesian_product_copy(Ts &&...ts) {
+template <tuplelike... Ts> constexpr auto cartesian_product_copy(Ts &&...ts) {
     if constexpr (sizeof...(Ts) == 0) {
         return make_tuple(tuple{});
     } else {
@@ -284,7 +296,7 @@ template <typename... Ts> constexpr auto cartesian_product_copy(Ts &&...ts) {
     }
 }
 
-template <typename... Ts> constexpr auto cartesian_product(Ts &&...ts) {
+template <tuplelike... Ts> constexpr auto cartesian_product(Ts &&...ts) {
     if constexpr (sizeof...(Ts) == 0) {
         return make_tuple(tuple{});
     } else {
@@ -305,18 +317,18 @@ template <typename... Ts> constexpr auto cartesian_product(Ts &&...ts) {
     }
 }
 
-template <typename T> constexpr auto unique(T &&t) {
+template <tuplelike T> constexpr auto unique(T &&t) {
     return chunk(std::forward<T>(t)).apply([]<typename... Us>(Us &&...us) {
         return tuple<tuple_element_t<0, Us>...>{
             get<0>(std::forward<Us>(us))...};
     });
 }
 
-template <typename T> constexpr auto to_sorted_set(T &&t) {
+template <tuplelike T> constexpr auto to_sorted_set(T &&t) {
     return unique(sort(std::forward<T>(t)));
 }
 
-template <typename Tuple> constexpr auto to_unsorted_set(Tuple &&t) {
+template <tuplelike Tuple> constexpr auto to_unsorted_set(Tuple &&t) {
     using T = stdx::remove_cvref_t<Tuple>;
     using U = boost::mp11::mp_unique<T>;
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
