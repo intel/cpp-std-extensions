@@ -73,38 +73,40 @@ template <typename T> struct type_identity {
 template <typename T> using type_identity_t = typename type_identity<T>::type;
 
 namespace detail {
-template <template <typename...> typename T>
-constexpr auto detect_spec(...) -> std::false_type;
-template <template <auto...> typename T>
-constexpr auto detect_spec(...) -> std::false_type;
+template <typename T, template <typename...> typename U>
+constexpr bool is_type_specialization_of_v = false;
+template <typename... Ts, template <typename...> typename U>
+constexpr bool is_type_specialization_of_v<U<Ts...> &, U> = true;
+template <typename... Ts, template <typename...> typename U>
+constexpr bool is_type_specialization_of_v<U<Ts...> const &, U> = true;
 
-template <template <typename...> typename T, typename... Us>
-constexpr auto detect_spec(type_identity<T<Us...>> &&) -> std::true_type;
-template <template <auto...> typename T, auto... Us>
-constexpr auto detect_spec(type_identity<T<Us...>> &&) -> std::true_type;
+template <typename T, template <auto...> typename U>
+constexpr bool is_value_specialization_of_v = false;
+template <auto... Vs, template <auto...> typename U>
+constexpr bool is_value_specialization_of_v<U<Vs...> &, U> = true;
+template <auto... Vs, template <auto...> typename U>
+constexpr bool is_value_specialization_of_v<U<Vs...> const &, U> = true;
 } // namespace detail
 
 template <typename U, template <typename...> typename T>
 constexpr bool is_specialization_of_v =
-    decltype(detail::detect_spec<T>(std::declval<type_identity<U>>()))::value;
-
+    detail::is_type_specialization_of_v<U &, T>;
 template <typename U, template <typename...> typename T>
 constexpr bool is_type_specialization_of_v =
-    decltype(detail::detect_spec<T>(std::declval<type_identity<U>>()))::value;
-
+    detail::is_type_specialization_of_v<U &, T>;
 template <typename U, template <auto...> typename T>
 constexpr bool is_value_specialization_of_v =
-    decltype(detail::detect_spec<T>(std::declval<type_identity<U>>()))::value;
+    detail::is_value_specialization_of_v<U &, T>;
 
 template <typename U, template <typename...> typename T>
 constexpr auto is_specialization_of()
-    -> decltype(detail::detect_spec<T>(std::declval<type_identity<U>>())) {
+    -> std::bool_constant<is_specialization_of_v<U, T>> {
     return {};
 }
 
 template <typename U, template <auto...> typename T>
 constexpr auto is_specialization_of()
-    -> decltype(detail::detect_spec<T>(std::declval<type_identity<U>>())) {
+    -> std::bool_constant<is_value_specialization_of_v<U, T>> {
     return {};
 }
 
