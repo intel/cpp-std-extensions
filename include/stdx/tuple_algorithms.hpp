@@ -11,7 +11,6 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
-#include <iterator>
 #include <type_traits>
 #include <utility>
 
@@ -28,9 +27,9 @@ template <tuplelike... Ts> [[nodiscard]] constexpr auto tuple_cat(Ts &&...ts) {
 
         [[maybe_unused]] constexpr auto element_indices = [&] {
             std::array<detail::index_pair, total_num_elements> indices{};
-            auto p = std::data(indices);
+            auto p = indices.data();
             ((p = std::remove_cvref_t<Ts>::fill_inner_indices(p)), ...);
-            auto q = std::data(indices);
+            auto q = indices.data();
             std::size_t n{};
             ((q = std::remove_cvref_t<Ts>::fill_outer_indices(q, n++)), ...);
             return indices;
@@ -62,7 +61,7 @@ template <template <typename T> typename Pred, tuplelike T>
                                                               : std::size_t{}));
         constexpr auto indices = [] {
             auto a = std::array<std::size_t, num_matches>{};
-            [[maybe_unused]] auto it = std::begin(a);
+            [[maybe_unused]] auto it = a.begin();
             [[maybe_unused]] auto copy_index =
                 [&]<std::size_t I, typename Elem> {
                     if constexpr (Pred<Elem>::value) {
@@ -190,9 +189,9 @@ template <template <typename> typename Proj = std::type_identity_t,
     constexpr auto indices = []<std::size_t... Is>(std::index_sequence<Is...>) {
         auto a = std::array<P, sizeof...(Is)>{
             P{stdx::type_as_string<Proj<tuple_element_t<Is, T>>>(), Is}...};
-        std::sort(
-            std::begin(a), std::end(a),
-            [](auto const &p1, auto const &p2) { return p1.first < p2.first; });
+        std::sort(a.begin(), a.end(), [](auto const &p1, auto const &p2) {
+            return p1.first < p2.first;
+        });
         return a;
     }(std::make_index_sequence<T::size()>{});
 
@@ -267,7 +266,7 @@ template <template <typename> typename Proj = std::type_identity_t,
                         offset + Js, stdx::remove_cvref_t<Tuple>>...>{
                         std::forward<Tuple>(t)[index<offset + Js>]...};
                 }(std::make_index_sequence<chunks[Is].size>{})...);
-        }(std::make_index_sequence<std::size(chunks)>{});
+        }(std::make_index_sequence<chunks.size()>{});
     }
 }
 

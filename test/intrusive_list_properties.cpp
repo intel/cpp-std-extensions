@@ -153,8 +153,7 @@ template <typename ListSut> struct IntrusiveListCommands {
         void apply(ListModel &m) const override {
             auto wrapped_index = index % static_cast<int>(m.size());
 
-            auto iter = m.begin();
-            std::advance(iter, wrapped_index);
+            auto iter = std::next(m.begin(), wrapped_index);
             m.erase(iter);
         }
 
@@ -163,8 +162,7 @@ template <typename ListSut> struct IntrusiveListCommands {
 
             auto wrapped_index = index % static_cast<int>(m.size());
 
-            auto iter = sut.list.begin();
-            std::advance(iter, wrapped_index);
+            auto iter = std::next(sut.list.begin(), wrapped_index);
             auto p = &(*iter);
 
             sut.list.remove(p);
