@@ -5,7 +5,6 @@
 #if __has_include(<concepts>)
 #include <concepts>
 #endif
-#include <iterator>
 
 #if __cpp_lib_concepts < 202002L
 
@@ -98,13 +97,6 @@ template <typename T> constexpr auto callable = is_callable_v<T>;
 template <typename T, template <typename> typename TypeTrait>
 constexpr auto has_trait = TypeTrait<T>::value;
 
-DETECTOR(range_begin, (std::begin(std::declval<T &>())))
-DETECTOR(range_end, (std::end(std::declval<T &>())))
-
-template <typename T>
-constexpr auto range =
-    detail::detect::range_begin<T> and detail::detect::range_end<T>;
-
 #undef DETECTOR
 
 template <typename T> constexpr auto structural = is_structural_v<T>;
@@ -188,12 +180,6 @@ template <typename T, template <typename> typename TypeTrait>
 concept has_trait = TypeTrait<T>::value;
 
 template <typename T>
-concept range = requires(T &t) {
-    std::begin(t);
-    std::end(t);
-};
-
-template <typename T>
 concept structural = is_structural_v<T>;
 
 #endif
@@ -232,12 +218,6 @@ concept has_trait = TypeTrait<T>::value;
 template <typename T, typename U>
 concept same_as_unqualified =
     is_same_unqualified_v<T, U> and is_same_unqualified_v<U, T>;
-
-template <typename T>
-concept range = requires(T &t) {
-    std::begin(t);
-    std::end(t);
-};
 
 template <typename T>
 concept structural = is_structural_v<T>;

@@ -156,11 +156,6 @@ TEST_CASE("models_trait", "[concepts]") {
     static_assert(not stdx::has_trait<int, std::is_pointer>);
 }
 
-TEST_CASE("range", "[concepts]") {
-    static_assert(not stdx::range<int>);
-    static_assert(stdx::range<std::array<int, 4>>);
-}
-
 namespace {
 struct non_structural {
     ~non_structural() {} // nontrivial destructor

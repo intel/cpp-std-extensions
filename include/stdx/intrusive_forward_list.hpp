@@ -3,8 +3,9 @@
 #include <stdx/detail/list_common.hpp>
 
 #include <cstddef>
+#if __cplusplus < 202002L
 #include <iterator>
-#include <type_traits>
+#endif
 
 namespace stdx {
 inline namespace v1 {
@@ -18,7 +19,9 @@ class intrusive_forward_list {
         using value_type = N;
         using pointer = value_type *;
         using reference = value_type &;
+#if __cplusplus < 202002L
         using iterator_category = std::forward_iterator_tag;
+#endif
 
         constexpr iterator_t() = default;
         constexpr explicit iterator_t(pointer n) : node{n} {}

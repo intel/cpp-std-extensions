@@ -41,6 +41,7 @@ add_tests(
     overload
     panic
     priority
+    ranges
     remove_cvref
     span
     to_underlying

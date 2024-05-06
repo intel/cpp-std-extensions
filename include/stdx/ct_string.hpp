@@ -6,7 +6,6 @@
 
 #include <array>
 #include <cstddef>
-#include <iterator>
 #include <string_view>
 #include <utility>
 
@@ -30,20 +29,16 @@ template <std::size_t N> struct ct_string {
         }
     }
 
-    [[nodiscard]] constexpr auto begin() const { return std::begin(value); }
-    [[nodiscard]] constexpr auto end() const {
-        return std::prev(std::end(value));
-    }
-    [[nodiscard]] constexpr auto rbegin() const {
-        return std::next(std::rbegin(value));
-    }
-    [[nodiscard]] constexpr auto rend() const { return std::rend(value); }
+    [[nodiscard]] constexpr auto begin() const { return value.begin(); }
+    [[nodiscard]] constexpr auto end() const { return value.end() - 1; }
+    [[nodiscard]] constexpr auto rbegin() const { return ++value.rbegin(); }
+    [[nodiscard]] constexpr auto rend() const { return value.rend(); }
 
     constexpr static std::integral_constant<std::size_t, N - 1U> size{};
     constexpr static std::integral_constant<bool, N == 1U> empty{};
 
     constexpr explicit(true) operator std::string_view() const {
-        return std::string_view{std::cbegin(value), size()};
+        return std::string_view{value.cbegin(), size()};
     }
 
     std::array<char, N> value{};
@@ -70,22 +65,22 @@ template <ct_string S, template <typename, char...> typename T>
 
 template <ct_string S, char C> [[nodiscard]] consteval auto split() {
     constexpr auto it = [] {
-        for (auto i = std::cbegin(S.value); i != std::cend(S.value); ++i) {
+        for (auto i = S.value.cbegin(); i != S.value.cend(); ++i) {
             if (*i == C) {
                 return i;
             }
         }
-        return std::cend(S.value);
+        return S.value.cend();
     }();
-    if constexpr (it == std::cend(S.value)) {
+    if constexpr (it == S.value.cend()) {
         return std::pair{S, ct_string{""}};
     } else {
         constexpr auto prefix_size =
-            static_cast<std::size_t>(std::distance(std::cbegin(S.value), it));
+            static_cast<std::size_t>(it - S.value.cbegin());
         constexpr auto suffix_size = S.size() - prefix_size;
         return std::pair{
-            ct_string<prefix_size + 1U>{std::cbegin(S.value), prefix_size},
-            ct_string<suffix_size>{std::next(it), suffix_size - 1U}};
+            ct_string<prefix_size + 1U>{S.value.cbegin(), prefix_size},
+            ct_string<suffix_size>{it + 1, suffix_size - 1U}};
     }
 }
 
