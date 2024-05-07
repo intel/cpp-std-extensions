@@ -23,22 +23,6 @@ struct all_bits_t {};
 constexpr inline auto all_bits = all_bits_t{};
 
 namespace detail {
-template <std::size_t N, typename S> CONSTEVAL auto select_storage() {
-    if constexpr (not std::is_same_v<S, void>) {
-        static_assert(std::is_unsigned_v<S>,
-                      "Underlying storage of bitset must be an unsigned type");
-        return S{};
-    } else if constexpr (N <= std::numeric_limits<std::uint8_t>::digits) {
-        return std::uint8_t{};
-    } else if constexpr (N <= std::numeric_limits<std::uint16_t>::digits) {
-        return std::uint16_t{};
-    } else if constexpr (N <= std::numeric_limits<std::uint32_t>::digits) {
-        return std::uint32_t{};
-    } else {
-        return std::uint64_t{};
-    }
-}
-
 template <std::size_t N, typename StorageElem> class bitset {
     constexpr static auto storage_elem_size =
         std::numeric_limits<StorageElem>::digits;
@@ -185,7 +169,7 @@ template <std::size_t N, typename StorageElem> class bitset {
     }
 
     [[nodiscard]] constexpr auto to_natural() const {
-        using T = decltype(select_storage<N, void>());
+        using T = smallest_uint_t<N>;
         static_assert(N <= std::numeric_limits<T>::digits,
                       "Bitset too big for conversion to T");
         return to<T>();
@@ -415,8 +399,7 @@ constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F {
 } // namespace detail
 
 template <std::size_t N, typename StorageElem = void>
-using bitset =
-    detail::bitset<N, decltype(detail::select_storage<N, StorageElem>())>;
+using bitset = detail::bitset<N, decltype(smallest_uint<N, StorageElem>())>;
 
 } // namespace v1
 } // namespace stdx
