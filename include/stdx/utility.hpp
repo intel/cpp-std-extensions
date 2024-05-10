@@ -181,6 +181,9 @@ template <typename T> constexpr auto type_of() -> typename typer<T>::type;
 #ifndef CX_VALUE
 #define CX_VALUE(...)                                                          \
     [] {                                                                       \
+        STDX_PRAGMA(diagnostic push)                                           \
+        STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
+        STDX_PRAGMA(diagnostic ignored "-Wunused-value")                       \
         if constexpr (decltype(stdx::detail::is_type<stdx::detail::from_any(   \
                                    __VA_ARGS__)>())::value) {                  \
             [[maybe_unused]] struct {                                          \
@@ -195,15 +198,12 @@ template <typename T> constexpr auto type_of() -> typename typer<T>::type;
         } else {                                                               \
             [[maybe_unused]] struct {                                          \
                 constexpr auto operator()() const {                            \
-                    STDX_PRAGMA(diagnostic push)                               \
-                    STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")         \
-                    STDX_PRAGMA(diagnostic ignored "-Wunused-value")           \
                     return (__VA_ARGS__) + stdx::detail::type_val{};           \
-                    STDX_PRAGMA(diagnostic pop)                                \
                 }                                                              \
                 using cx_value_t [[maybe_unused]] = void;                      \
             } val;                                                             \
             return val;                                                        \
         }                                                                      \
+        STDX_PRAGMA(diagnostic pop)                                            \
     }()
 #endif

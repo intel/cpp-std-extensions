@@ -1,4 +1,5 @@
 #include <stdx/ct_string.hpp>
+#include <stdx/utility.hpp>
 
 #include <catch2/catch_test_macros.hpp>
 
@@ -116,4 +117,16 @@ TEST_CASE("ct_string as reverse iterable", "[ct_string]") {
     CHECK(*it++ == 'b');
     CHECK(*it++ == 'a');
     CHECK(it == std::crend(s));
+}
+
+namespace {
+template <stdx::ct_string S> constexpr auto to_cx_value() {
+    return CX_VALUE(S);
+}
+} // namespace
+
+TEST_CASE("template argument as CX_VALUE", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    constexpr auto s = to_cx_value<"Hello">();
+    static_assert(s() == "Hello"_cts);
 }

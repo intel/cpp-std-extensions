@@ -52,7 +52,7 @@ add_tests(
     udls)
 
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
-    add_tests(ct_string indexed_tuple tuple tuple_algorithms)
+    add_tests(ct_format ct_string indexed_tuple tuple tuple_algorithms)
 endif()
 
 add_subdirectory(fail)
