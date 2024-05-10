@@ -68,9 +68,29 @@ TEST_CASE("saturate_cast cppreference example", "[numeric]") {
 }
 
 TEST_CASE("saturate_cast signed large From, small To", "[numeric]") {
-    static_assert(stdx::saturate_cast<std::int8_t>(std::int32_t{42}) == 42);
-    static_assert(stdx::saturate_cast<std::int8_t>(std::int32_t{1000}) == 127);
-    static_assert(stdx::saturate_cast<std::int8_t>(std::int32_t{-200}) == -128);
+    SECTION("std::int8_t from std::int32_t") {
+        static_assert(stdx::saturate_cast<std::int8_t>(std::int32_t{42}) == 42);
+        static_assert(stdx::saturate_cast<std::int8_t>(std::int32_t{1000}) ==
+                      127);
+        static_assert(stdx::saturate_cast<std::int8_t>(std::int32_t{-200}) ==
+                      -128);
+    }
+
+    SECTION("Conversions from uint and int to smaller types") {
+        static_assert(stdx::saturate_cast<std::uint8_t>(999) == 255);
+        static_assert(stdx::saturate_cast<std::int8_t>(999) == 127);
+        static_assert(stdx::saturate_cast<std::uint16_t>(999) == 999);
+        static_assert(stdx::saturate_cast<std::int16_t>(999) == 999);
+    }
+
+    SECTION("Max value conversions") {
+        static_assert(stdx::saturate_cast<std::int16_t>(
+                          std::numeric_limits<std::int32_t>::max()) ==
+                      std::numeric_limits<std::int16_t>::max());
+        static_assert(stdx::saturate_cast<std::int32_t>(
+                          std::numeric_limits<std::int32_t>::max()) ==
+                      std::numeric_limits<std::int32_t>::max());
+    }
 }
 
 TEST_CASE("saturate_cast signed small From, large To", "[numeric]") {
@@ -78,16 +98,49 @@ TEST_CASE("saturate_cast signed small From, large To", "[numeric]") {
 }
 
 TEST_CASE("saturate_cast unsigned From, signed To", "[numeric]") {
-    static_assert(stdx::saturate_cast<std::int8_t>(std::uint8_t{255u}) == 127);
-    static_assert(stdx::saturate_cast<std::int8_t>(std::uint8_t{42u}) == 42);
-    static_assert(stdx::saturate_cast<std::int8_t>(std::uint8_t{0u}) == 0);
+    SECTION("Conversions from uint to int") {
+        static_assert(stdx::saturate_cast<std::int8_t>(std::uint8_t{255u}) ==
+                      127);
+        static_assert(stdx::saturate_cast<std::int8_t>(std::uint8_t{42u}) ==
+                      42);
+        static_assert(stdx::saturate_cast<std::int8_t>(std::uint8_t{0u}) == 0);
+    }
+
+    SECTION("Max value conversions") {
+        static_assert(stdx::saturate_cast<std::int16_t>(
+                          std::numeric_limits<std::uint32_t>::max()) ==
+                      std::numeric_limits<std::int16_t>::max());
+        static_assert(stdx::saturate_cast<std::int32_t>(
+                          std::numeric_limits<std::uint32_t>::max()) ==
+                      std::numeric_limits<std::int32_t>::max());
+    }
+
+    SECTION("Min and max value conversions") {
+        static_assert(stdx::saturate_cast<std::uint32_t>(
+                          std::numeric_limits<std::uint32_t>::min()) == 0);
+        static_assert(stdx::saturate_cast<std::uint32_t>(
+                          std::numeric_limits<std::uint32_t>::max()) ==
+                      std::numeric_limits<std::uint32_t>::max());
+        static_assert(stdx::saturate_cast<std::uint32_t>(
+                          std::numeric_limits<std::uint64_t>::max()) ==
+                      std::numeric_limits<std::uint32_t>::max());
+    }
 }
 
 TEST_CASE("saturate_cast signed From, unsigned To", "[numeric]") {
-    static_assert(stdx::saturate_cast<std::uint8_t>(std::int8_t{-1}) == 0);
-    static_assert(stdx::saturate_cast<std::uint8_t>(
-                      std::numeric_limits<std::int8_t>::min()) == 0);
-    static_assert(stdx::saturate_cast<std::uint8_t>(
-                      std::numeric_limits<std::int8_t>::max()) ==
-                  std::numeric_limits<std::int8_t>::max());
+    SECTION("Negative value conversion") {
+        static_assert(stdx::saturate_cast<std::uint8_t>(std::int8_t{-1}) == 0);
+        static_assert(stdx::saturate_cast<std::uint8_t>(
+                          std::numeric_limits<std::int8_t>::min()) == 0);
+        static_assert(stdx::saturate_cast<std::uint8_t>(
+                          std::numeric_limits<std::int8_t>::max()) ==
+                      std::numeric_limits<std::int8_t>::max());
+    }
+
+    SECTION("Max value conversions") {
+        static_assert(stdx::saturate_cast<std::uint32_t>(-1) == 0);
+        static_assert(stdx::saturate_cast<std::uint32_t>(
+                          std::numeric_limits<std::int64_t>::max()) ==
+                      std::numeric_limits<std::uint32_t>::max());
+    }
 }

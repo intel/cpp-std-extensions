@@ -40,30 +40,41 @@ CONSTEXPR_INVOKE auto transform_reduce_n(InputIt first, Size n, T init, ROp rop,
 }
 #undef CONSTEXPR_INVOKE
 
-template <typename To, typename From>
-constexpr auto saturate_cast(From from) -> To {
-    constexpr auto to_min = std::numeric_limits<To>::min();
-    constexpr auto to_max = std::numeric_limits<To>::max();
+template <typename To, typename From,
+          typename = std::enable_if_t<std::is_integral_v<To> &&
+                                      std::is_integral_v<From>>>
+constexpr auto saturate_cast(From from) noexcept -> To {
+    [[maybe_unused]] constexpr int digits_to = std::numeric_limits<To>::digits;
+    [[maybe_unused]] constexpr int _digits_from =
+        std::numeric_limits<From>::digits;
+    [[maybe_unused]] constexpr To max_to = std::numeric_limits<To>::max();
 
-    if constexpr (sizeof(From) > sizeof(To)) {
-        auto const clamped = std::clamp<From>(from, to_min, to_max);
-        return static_cast<To>(clamped);
-    }
+    if constexpr (std::is_signed_v<To> == std::is_signed_v<From>) {
+        if constexpr (digits_to < _digits_from) {
+            [[maybe_unused]] constexpr To min_to =
+                std::numeric_limits<To>::min();
 
-    if constexpr (sizeof(From) == sizeof(To)) {
-        if constexpr (std::is_unsigned_v<From> and std::is_signed_v<To>) {
-            if (from > to_max) {
-                return to_max;
+            if (from < static_cast<From>(min_to)) {
+                return min_to;
+            }
+            if (from > static_cast<From>(max_to)) {
+                return max_to;
             }
         }
-
-        if constexpr (std::is_signed_v<From> and std::is_unsigned_v<To>) {
-            if (from < 0) {
-                return static_cast<To>(0);
-            }
+    } else if constexpr (std::is_signed_v<From>) // To is unsigned
+    {
+        if (from < 0) {
+            return 0;
+        }
+        if (std::make_unsigned_t<From>(from) > max_to) {
+            return std::numeric_limits<To>::max();
+        }
+    } else // From is unsigned, To is signed
+    {
+        if (from > std::make_unsigned_t<To>(max_to)) {
+            return max_to;
         }
     }
-
     return static_cast<To>(from);
 }
 
