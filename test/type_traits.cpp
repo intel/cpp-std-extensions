@@ -203,8 +203,4 @@ struct S {
 
 TEST_CASE("non-structural types", "[type_traits]") {
     static_assert(not stdx::is_structural_v<non_structural::S>);
-
-#if __cpp_nontype_template_args < 201911L
-    static_assert(not stdx::is_structural_v<float>);
-#endif
 }

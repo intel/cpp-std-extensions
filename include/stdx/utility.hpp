@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdx/compiler.hpp>
+#include <stdx/concepts.hpp>
 #include <stdx/type_traits.hpp>
 
 #include <cstddef>
@@ -134,6 +135,35 @@ using sized16 = sized<std::uint16_t>;
 using sized32 = sized<std::uint32_t>;
 using sized64 = sized<std::uint64_t>;
 
+namespace detail {
+struct from_any {
+    // NOLINTNEXTLINE(google-explicit-constructor)
+    template <typename... Ts> constexpr from_any(Ts const &...) {}
+    // NOLINTNEXTLINE(google-explicit-constructor)
+    constexpr operator int() const { return 0; }
+};
+
+struct type_val {
+    template <typename T>
+    friend constexpr auto operator+(T const &t, type_val const &) -> T {
+        return t;
+    }
+    friend constexpr auto operator+(type_val const &f) -> type_val;
+    // NOLINTNEXTLINE(google-explicit-constructor)
+    template <typename T> constexpr operator T() const;
+};
+
+template <int> constexpr auto is_type() -> std::false_type;
+template <typename> constexpr auto is_type() -> std::true_type;
+
+template <typename> struct typer;
+template <typename T> struct typer<from_any(T)> {
+    using type = T;
+};
+
+template <int> constexpr auto type_of() -> void;
+template <typename T> constexpr auto type_of() -> typename typer<T>::type;
+} // namespace detail
 } // namespace v1
 } // namespace stdx
 
@@ -141,13 +171,39 @@ using sized64 = sized<std::uint64_t>;
 #define FWD(x) std::forward<decltype(x)>(x)
 #endif
 
+#define STDX_DO_PRAGMA(X) _Pragma(#X)
+#ifdef __clang__
+#define STDX_PRAGMA(X) STDX_DO_PRAGMA(clang X)
+#else
+#define STDX_PRAGMA(X) STDX_DO_PRAGMA(GCC X)
+#endif
+
 #ifndef CX_VALUE
 #define CX_VALUE(...)                                                          \
     [] {                                                                       \
-        struct {                                                               \
-            constexpr auto operator()() const noexcept { return __VA_ARGS__; } \
-            using cx_value_t [[maybe_unused]] = void;                          \
-        } val;                                                                 \
-        return val;                                                            \
+        if constexpr (decltype(stdx::detail::is_type<stdx::detail::from_any(   \
+                                   __VA_ARGS__)>())::value) {                  \
+            [[maybe_unused]] struct {                                          \
+                constexpr auto operator()() const noexcept {                   \
+                    return stdx::type_identity<                                \
+                        decltype(stdx::detail::type_of<stdx::detail::from_any( \
+                                     __VA_ARGS__)>())>{};                      \
+                }                                                              \
+                using cx_value_t [[maybe_unused]] = void;                      \
+            } val;                                                             \
+            return val;                                                        \
+        } else {                                                               \
+            [[maybe_unused]] struct {                                          \
+                constexpr auto operator()() const {                            \
+                    STDX_PRAGMA(diagnostic push)                               \
+                    STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")         \
+                    STDX_PRAGMA(diagnostic ignored "-Wunused-value")           \
+                    return (__VA_ARGS__) + stdx::detail::type_val{};           \
+                    STDX_PRAGMA(diagnostic pop)                                \
+                }                                                              \
+                using cx_value_t [[maybe_unused]] = void;                      \
+            } val;                                                             \
+            return val;                                                        \
+        }                                                                      \
     }()
 #endif
