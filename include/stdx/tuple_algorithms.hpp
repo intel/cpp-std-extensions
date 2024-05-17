@@ -223,8 +223,8 @@ template <tuplelike T, template <typename> typename Proj = std::type_identity_t>
 struct chunk {
     std::size_t offset{};
     std::size_t size{};
-    friend constexpr auto operator==(chunk const &, chunk const &)
-        -> bool = default;
+    friend constexpr auto operator==(chunk const &,
+                                     chunk const &) -> bool = default;
 };
 
 template <tuplelike T, template <typename> typename Proj = std::type_identity_t>
@@ -283,7 +283,7 @@ template <tuplelike... Ts> constexpr auto cartesian_product_copy(Ts &&...ts) {
             auto const c = cartesian_product_copy(std::forward<Rest>(rest)...);
             return std::forward<First>(first).apply(
                 [&]<typename... Elems>(Elems &&...elems) {
-                    const auto prepend = [&]<typename E>(E &&e) {
+                    auto const prepend = [&]<typename E>(E &&e) {
                         return c.apply([&](auto... subs) {
                             return make_tuple(tuple_cat(
                                 make_tuple(std::forward<E>(e)), subs)...);
@@ -304,7 +304,7 @@ template <tuplelike... Ts> constexpr auto cartesian_product(Ts &&...ts) {
             auto const c = cartesian_product(std::forward<Rest>(rest)...);
             return std::forward<First>(first).apply(
                 [&]<typename... Elems>(Elems &&...elems) {
-                    const auto prepend = [&]<typename E>(E &&e) {
+                    auto const prepend = [&]<typename E>(E &&e) {
                         return c.apply([&](auto... subs) {
                             return make_tuple(tuple_cat(
                                 forward_as_tuple(std::forward<E>(e)), subs)...);

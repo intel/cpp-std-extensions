@@ -85,9 +85,9 @@ template <ct_string S, char C> [[nodiscard]] consteval auto split() {
 }
 
 template <std::size_t N, std::size_t M>
-[[nodiscard]] constexpr auto operator+(ct_string<N> const &lhs,
-                                       ct_string<M> const &rhs)
-    -> ct_string<N + M - 1> {
+[[nodiscard]] constexpr auto
+operator+(ct_string<N> const &lhs,
+          ct_string<M> const &rhs) -> ct_string<N + M - 1> {
     ct_string<N + M - 1> ret{};
     for (auto i = std::size_t{}; i < lhs.size(); ++i) {
         // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-*)

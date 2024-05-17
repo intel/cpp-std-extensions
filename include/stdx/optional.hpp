@@ -197,16 +197,14 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
     }
 
   private:
-    [[nodiscard]] friend constexpr auto operator==(optional const &lhs,
-                                                   optional const &rhs)
-        -> bool {
+    [[nodiscard]] friend constexpr auto
+    operator==(optional const &lhs, optional const &rhs) -> bool {
         return lhs.val == rhs.val;
     }
 
 #if __cpp_impl_three_way_comparison < 201907L
-    [[nodiscard]] friend constexpr auto operator!=(optional const &lhs,
-                                                   optional const &rhs)
-        -> bool {
+    [[nodiscard]] friend constexpr auto
+    operator!=(optional const &lhs, optional const &rhs) -> bool {
         return not(lhs == rhs);
     }
 #endif
@@ -217,18 +215,16 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
                    ? lhs.val < rhs.val
                    : not lhs.has_value() and rhs.has_value();
     }
-    [[nodiscard]] friend constexpr auto operator<=(optional const &lhs,
-                                                   optional const &rhs)
-        -> bool {
+    [[nodiscard]] friend constexpr auto
+    operator<=(optional const &lhs, optional const &rhs) -> bool {
         return not(rhs < lhs);
     }
     [[nodiscard]] friend constexpr auto operator>(optional const &lhs,
                                                   optional const &rhs) -> bool {
         return rhs < lhs;
     }
-    [[nodiscard]] friend constexpr auto operator>=(optional const &lhs,
-                                                   optional const &rhs)
-        -> bool {
+    [[nodiscard]] friend constexpr auto
+    operator>=(optional const &lhs, optional const &rhs) -> bool {
         return not(lhs < rhs);
     }
 };
