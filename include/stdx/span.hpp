@@ -152,8 +152,8 @@ class span : public detail::span_base<T, Extent> {
     [[nodiscard]] constexpr auto rbegin() const noexcept -> reverse_iterator {
         return std::reverse_iterator{end()};
     }
-    [[nodiscard]] constexpr auto crbegin() const noexcept
-        -> const_reverse_iterator {
+    [[nodiscard]] constexpr auto
+    crbegin() const noexcept -> const_reverse_iterator {
         return std::reverse_iterator{cend()};
     }
 
@@ -166,8 +166,8 @@ class span : public detail::span_base<T, Extent> {
     [[nodiscard]] constexpr auto rend() const noexcept -> reverse_iterator {
         return std::reverse_iterator{begin()};
     }
-    [[nodiscard]] constexpr auto crend() const noexcept
-        -> const_reverse_iterator {
+    [[nodiscard]] constexpr auto
+    crend() const noexcept -> const_reverse_iterator {
         return std::reverse_iterator{cbegin()};
     }
 
@@ -185,8 +185,8 @@ class span : public detail::span_base<T, Extent> {
         static_assert(Count <= Extent, "first cannot form a larger span!");
         return span<element_type, Count>{ptr, Count};
     }
-    [[nodiscard]] constexpr auto first(size_type count) const
-        -> span<element_type, dynamic_extent> {
+    [[nodiscard]] constexpr auto
+    first(size_type count) const -> span<element_type, dynamic_extent> {
         return {ptr, count};
     }
 
@@ -195,8 +195,8 @@ class span : public detail::span_base<T, Extent> {
         static_assert(Count <= Extent, "last cannot form a larger span!");
         return span<element_type, Count>{ptr + this->size() - Count, Count};
     }
-    [[nodiscard]] constexpr auto last(size_type count) const
-        -> span<element_type, dynamic_extent> {
+    [[nodiscard]] constexpr auto
+    last(size_type count) const -> span<element_type, dynamic_extent> {
         return {ptr + this->size() - count, count};
     }
 
@@ -261,8 +261,8 @@ template <typename R> using range_reference_t = iter_reference_t<iterator_t<R>>;
 } // namespace detail
 
 template <typename It, typename EndOrSize>
-span(It, EndOrSize)
-    -> span<std::remove_reference_t<detail::iter_reference_t<It>>>;
+span(It,
+     EndOrSize) -> span<std::remove_reference_t<detail::iter_reference_t<It>>>;
 // NOLINTNEXTLINE(*-avoid-c-arrays)
 template <typename T, std::size_t N> span(T (&)[N]) -> span<T, N>;
 template <typename T, std::size_t N> span(std::array<T, N> &) -> span<T, N>;

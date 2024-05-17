@@ -81,8 +81,8 @@ class cx_multimap {
     [[nodiscard]] constexpr auto get(key_type const &key) -> set_t & {
         return storage.get(key);
     }
-    [[nodiscard]] constexpr auto get(key_type const &key) const
-        -> set_t const & {
+    [[nodiscard]] constexpr auto
+    get(key_type const &key) const -> set_t const & {
         return storage.get(key);
     }
 

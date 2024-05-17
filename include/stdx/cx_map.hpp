@@ -83,8 +83,8 @@ template <typename Key, typename Value, std::size_t N> class cx_map {
         }
         unreachable();
     }
-    [[nodiscard]] constexpr auto get(key_type const &key) const
-        -> mapped_type const & {
+    [[nodiscard]] constexpr auto
+    get(key_type const &key) const -> mapped_type const & {
         for (auto const &[k, v] : *this) {
             if (k == key) {
                 return v;

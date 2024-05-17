@@ -147,7 +147,7 @@ concept partially_ordered = requires(T const &t) {
     { t > t } -> same_as<bool>;
     { t >= t } -> same_as<bool>;
 };
-}
+} // namespace detail
 
 template <typename T>
 concept totally_ordered =

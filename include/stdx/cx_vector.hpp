@@ -92,8 +92,8 @@ template <typename T, std::size_t N> class cx_vector {
     [[nodiscard]] constexpr auto operator[](std::size_t index) -> reference {
         return storage[index];
     }
-    [[nodiscard]] constexpr auto operator[](std::size_t index) const
-        -> const_reference {
+    [[nodiscard]] constexpr auto
+    operator[](std::size_t index) const -> const_reference {
         return storage[index];
     }
 
@@ -133,9 +133,8 @@ template <typename T, std::size_t N> class cx_vector {
             std::forward<F>(f)(std::data(v.storage), std::size(v.storage));
     }
 
-    [[nodiscard]] friend constexpr auto operator==(cx_vector const &lhs,
-                                                   cx_vector const &rhs)
-        -> bool {
+    [[nodiscard]] friend constexpr auto
+    operator==(cx_vector const &lhs, cx_vector const &rhs) -> bool {
         if (lhs.size() != rhs.size()) {
             return false;
         }
@@ -148,9 +147,8 @@ template <typename T, std::size_t N> class cx_vector {
     }
 
 #if __cpp_impl_three_way_comparison < 201907L
-    [[nodiscard]] friend constexpr auto operator!=(cx_vector const &lhs,
-                                                   cx_vector const &rhs)
-        -> bool {
+    [[nodiscard]] friend constexpr auto
+    operator!=(cx_vector const &lhs, cx_vector const &rhs) -> bool {
         return not(lhs == rhs);
     }
 #endif

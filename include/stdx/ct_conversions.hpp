@@ -36,7 +36,7 @@ CONSTEVAL static auto enum_as_string() -> std::basic_string_view<char> {
 #endif
 
     constexpr auto lhs = [&]() -> std::string_view::size_type {
-        if (const auto colon_pos = value_string.find_last_of(':');
+        if (auto const colon_pos = value_string.find_last_of(':');
             colon_pos != std::string_view::npos) {
             return colon_pos + 1;
         }
