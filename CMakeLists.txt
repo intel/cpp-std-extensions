@@ -11,16 +11,7 @@ include(cmake/get_cpm.cmake)
 cpmaddpackage("gh:intel/cicd-repo-infrastructure#main")
 
 add_versioned_package("gh:boostorg/mp11#boost-1.83.0")
-add_versioned_package(
-    NAME
-    fmt
-    GIT_TAG
-    10.2.1
-    GITHUB_REPOSITORY
-    fmtlib/fmt
-    OPTIONS
-    "FMT_INSTALL OFF"
-    "FMT_OS OFF")
+fmt_recipe(10.2.1)
 
 if(NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 20)
