@@ -29,11 +29,17 @@ template <std::size_t N> struct ct_string {
         }
     }
 
+    CONSTEVAL explicit(true) ct_string(std::string_view str)
+        : ct_string{str.data(), str.size()} {}
+
+    [[nodiscard]] constexpr auto begin() { return value.begin(); }
+    [[nodiscard]] constexpr auto end() { return value.end() - 1; }
     [[nodiscard]] constexpr auto begin() const { return value.begin(); }
     [[nodiscard]] constexpr auto end() const { return value.end() - 1; }
     [[nodiscard]] constexpr auto rbegin() const { return ++value.rbegin(); }
     [[nodiscard]] constexpr auto rend() const { return value.rend(); }
 
+    constexpr static std::integral_constant<std::size_t, N> capacity{};
     constexpr static std::integral_constant<std::size_t, N - 1U> size{};
     constexpr static std::integral_constant<bool, N == 1U> empty{};
 
@@ -51,12 +57,12 @@ template <std::size_t N, std::size_t M>
            static_cast<std::string_view>(rhs);
 }
 
-template <template <typename, char...> typename T, char... Cs>
+template <template <typename C, C...> typename T, char... Cs>
 [[nodiscard]] CONSTEVAL auto ct_string_from_type(T<char, Cs...>) {
     return ct_string<sizeof...(Cs) + 1U>{{Cs..., 0}};
 }
 
-template <ct_string S, template <typename, char...> typename T>
+template <ct_string S, template <typename C, C...> typename T>
 [[nodiscard]] CONSTEVAL auto ct_string_to_type() {
     return [&]<auto... Is>(std::index_sequence<Is...>) {
         return T<char, std::get<Is>(S.value)...>{};

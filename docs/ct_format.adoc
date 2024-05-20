@@ -1,0 +1,60 @@
+
+== `ct_format.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ct_format.hpp[`ct_format.hpp`]
+provides `ct_format`, a compile-time function for formatting strings.
+
+NOTE: Like xref:ct_string.adoc#_ct_string_hpp[`ct_string`], `ct_format` is
+available only in C++20 and later.
+
+The format string is provided as a template argument, and the arguments to be
+formatted as regular function arguments.
+
+The result type is a `stdx::format_result` containing two members: the
+xref:ct_string.adoc#_ct_string_hpp[`ct_string`] and a
+xref:tuple.adoc#_tuple_hpp[`tuple`] of the format arguments.
+[source,cpp]
+----
+auto s = stdx::ct_format<"Hello {} {}">(42, 17);
+// s is stdx::format_result{"Hello {} {}"_cts, stdx::tuple{42, 17}}
+----
+
+When format arguments are available at compile-time, wrapping them in
+`CX_VALUE(...)` means they will get compile-time formatted.
+[source,cpp]
+----
+auto s = stdx::ct_format<"Hello {} {}">(CX_VALUE(42), 17);
+// s is stdx::format_result{"Hello 42 {}"_cts, stdx::tuple{17}}
+----
+
+If there are no runtime arguments, the result is just a `stdx::ct_string`:
+[source,cpp]
+----
+auto s = stdx::ct_format<"Hello {} {}">(CX_VALUE(42), CX_VALUE(17));
+// s is "Hello 42 17"_cts
+----
+
+Types and compile-time enumeration values are stringified thus:
+[source,cpp]
+----
+enum struct E { value };
+auto s = stdx::ct_format<"Hello {} {}">(CX_VALUE(int), CX_VALUE(E::value));
+// s is "Hello int value"_cts
+----
+
+NOTE: Compile-time formatting is done with https://github.com/fmtlib/fmt[fmtlib]
+and supports the same formatting DSL. Positional arguments are not supported.
+
+`ct_format` is designed for use with a logging backend like the one in
+https://github.com/intel/compile-time-init-build. Hence `stdx::format_result`
+allows lazy runtime formatting. For the same reason, compile-time formatting can
+output string information in a
+https://github.com/intel/compile-time-init-build/tree/main/include/sc[suitable
+type] rather than as a value. This is done by passing the template as a second
+template argument to `ct_format`.
+
+[source,cpp]
+----
+auto s = stdx::ct_format<"{}", sc::string_constant>(CX_VALUE(42));
+// s is sc::string_constant<char, '4', '2'>{}
+----
