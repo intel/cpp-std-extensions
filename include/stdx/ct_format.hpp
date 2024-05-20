@@ -87,7 +87,8 @@ template <std::size_t N> CONSTEVAL auto split_specifiers(std::string_view fmt) {
 }
 
 template <typename T>
-concept cx_value = requires { typename T::cx_value_t; };
+concept cx_value = requires { typename T::cx_value_t; } or
+                   requires(T t) { ct_string_from_type(t); };
 
 CONSTEVAL auto arg_value(auto a) { return a; }
 
@@ -96,7 +97,9 @@ template <typename T> CONSTEVAL auto arg_value(type_identity<T>) {
 }
 
 CONSTEVAL auto arg_value(cx_value auto a) {
-    if constexpr (std::is_enum_v<decltype(a())>) {
+    if constexpr (requires { ct_string_from_type(a); }) {
+        return ct_string_from_type(a);
+    } else if constexpr (std::is_enum_v<decltype(a())>) {
         return enum_as_string<a()>();
     } else {
         return arg_value(a());
@@ -109,6 +112,7 @@ CONSTEVAL auto operator+(format_result<T, U> r, S s) {
 }
 
 template <typename S, typename T, typename U>
+    requires(is_specialization_of<S, ct_string>().value)
 CONSTEVAL auto operator+(S s, format_result<T, U> r) {
     return format_result{s + r.str, r.args};
 }
@@ -122,6 +126,14 @@ template <typename T, T...> struct null_output;
 
 template <std::size_t Sz> CONSTEVAL auto to_ct_string(std::string_view s) {
     return ct_string<Sz + 1>{s.data(), s.size()};
+}
+
+CONSTEVAL auto convert_input(auto s) {
+    if constexpr (requires { ct_string_from_type(s); }) {
+        return ct_string_from_type(s);
+    } else {
+        return s;
+    }
 }
 
 template <ct_string S,
@@ -139,15 +151,30 @@ template <ct_string Fmt,
           typename Arg>
 CONSTEVAL auto format1(Arg arg) {
     if constexpr (cx_value<Arg>) {
-        constexpr auto str = [&] {
-            constexpr auto a = arg_value(arg);
+        constexpr auto result = [&] {
             constexpr auto fmtstr = FMT_COMPILE(std::string_view{Fmt});
-            constexpr auto sz = fmt::formatted_size(fmtstr, a);
-            ct_string<sz + 1> cts{};
-            fmt::format_to(cts.begin(), fmtstr, a);
-            return cts;
+            constexpr auto a = arg_value(arg);
+            if constexpr (is_specialization_of_v<std::remove_cv_t<decltype(a)>,
+                                                 format_result>) {
+                constexpr auto s = convert_input(a.str);
+                constexpr auto sz = fmt::formatted_size(fmtstr, s);
+                ct_string<sz + 1> cts{};
+                fmt::format_to(cts.begin(), fmtstr, s);
+                return format_result{cts, a.args};
+            } else {
+                constexpr auto sz = fmt::formatted_size(fmtstr, a);
+                ct_string<sz + 1> cts{};
+                fmt::format_to(cts.begin(), fmtstr, a);
+                return cts;
+            }
         }();
-        return convert_output<str, Output>();
+        if constexpr (is_specialization_of_v<std::remove_cv_t<decltype(result)>,
+                                             format_result>) {
+            return format_result{convert_output<result.str, Output>(),
+                                 result.args};
+        } else {
+            return convert_output<result, Output>();
+        }
     } else {
         return format_result{convert_output<Fmt, Output>(), tuple{arg}};
     }

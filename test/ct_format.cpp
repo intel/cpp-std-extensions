@@ -103,6 +103,19 @@ TEST_CASE("format multiple mixed arguments", "[ct_format]") {
                                       stdx::make_tuple(42, "B"sv)});
 }
 
+TEST_CASE("format a formatted string", "[ct_format]") {
+    static_assert(stdx::ct_format<"The value is {}.">(
+                      CX_VALUE(stdx::ct_format<"(year={})">(2022))) ==
+                  stdx::format_result{"The value is (year={})."_cts,
+                                      stdx::make_tuple(2022)});
+}
+
+TEST_CASE("format a ct-formatted string", "[ct_format]") {
+    constexpr static auto cts = stdx::ct_format<"(year={})">(CX_VALUE(2024));
+    static_assert(stdx::ct_format<"The value is {}.">(CX_VALUE(cts)) ==
+                  "The value is (year=2024)."_cts);
+}
+
 namespace {
 template <typename T, T...> struct string_constant {
   private:
@@ -126,4 +139,25 @@ TEST_CASE("format_to a different type", "[ct_format]") {
     static_assert(stdx::ct_format<"{}", string_constant>(42) ==
                   stdx::format_result{string_constant<char, '{', '}'>{},
                                       stdx::make_tuple(42)});
+}
+
+TEST_CASE("format a string-type argument", "[ct_format]") {
+    static_assert(stdx::ct_format<"Hello {}!">(string_constant<char, 'A'>{}) ==
+                  "Hello A!"_cts);
+}
+
+TEST_CASE("format a formatted string with different type", "[ct_format]") {
+    static_assert(stdx::ct_format<"A{}D", string_constant>(CX_VALUE(
+                      stdx::ct_format<"B{}C", string_constant>(2022))) ==
+                  stdx::format_result{
+                      string_constant<char, 'A', 'B', '{', '}', 'C', 'D'>{},
+                      stdx::make_tuple(2022)});
+}
+
+TEST_CASE("format a ct-formatted string with different type", "[ct_format]") {
+    constexpr static auto cts =
+        stdx::ct_format<"B{}C", string_constant>(CX_VALUE(2024));
+    static_assert(
+        stdx::ct_format<"A{}D", string_constant>(CX_VALUE(cts)) ==
+        string_constant<char, 'A', 'B', '2', '0', '2', '4', 'C', 'D'>{});
 }
