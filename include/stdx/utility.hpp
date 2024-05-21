@@ -135,7 +135,7 @@ using sized16 = sized<std::uint16_t>;
 using sized32 = sized<std::uint32_t>;
 using sized64 = sized<std::uint64_t>;
 
-namespace detail {
+namespace cxv_detail {
 struct from_any {
     // NOLINTNEXTLINE(google-explicit-constructor)
     template <typename... Ts> constexpr from_any(Ts const &...) {}
@@ -144,8 +144,9 @@ struct from_any {
 };
 
 struct type_val {
-    template <typename T>
-    friend constexpr auto operator+(T const &t, type_val const &) -> T {
+    template <typename T, typename U,
+              typename = std::enable_if_t<same_as_unqualified<type_val, U>>>
+    friend constexpr auto operator+(T &&t, U &&) -> T {
         return t;
     }
     friend constexpr auto operator+(type_val const &f) -> type_val;
@@ -163,7 +164,7 @@ template <typename T> struct typer<from_any(T)> {
 
 template <int> constexpr auto type_of() -> void;
 template <typename T> constexpr auto type_of() -> typename typer<T>::type;
-} // namespace detail
+} // namespace cxv_detail
 } // namespace v1
 } // namespace stdx
 
@@ -184,12 +185,14 @@ template <typename T> constexpr auto type_of() -> typename typer<T>::type;
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
         STDX_PRAGMA(diagnostic ignored "-Wunused-value")                       \
-        if constexpr (decltype(stdx::detail::is_type<stdx::detail::from_any(   \
+        if constexpr (decltype(stdx::cxv_detail::is_type<                      \
+                               stdx::cxv_detail::from_any(                     \
                                    __VA_ARGS__)>())::value) {                  \
             [[maybe_unused]] struct {                                          \
                 constexpr auto operator()() const noexcept {                   \
                     return stdx::type_identity<                                \
-                        decltype(stdx::detail::type_of<stdx::detail::from_any( \
+                        decltype(stdx::cxv_detail::type_of<                    \
+                                 stdx::cxv_detail::from_any(                   \
                                      __VA_ARGS__)>())>{};                      \
                 }                                                              \
                 using cx_value_t [[maybe_unused]] = void;                      \
@@ -198,7 +201,7 @@ template <typename T> constexpr auto type_of() -> typename typer<T>::type;
         } else {                                                               \
             [[maybe_unused]] struct {                                          \
                 constexpr auto operator()() const {                            \
-                    return (__VA_ARGS__) + stdx::detail::type_val{};           \
+                    return (__VA_ARGS__) + stdx::cxv_detail::type_val{};       \
                 }                                                              \
                 using cx_value_t [[maybe_unused]] = void;                      \
             } val;                                                             \
