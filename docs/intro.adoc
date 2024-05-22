@@ -19,7 +19,7 @@ The following compilers are supported:
 * clang 14
 * clang 15
 * clang 16
-* clang 17
+* clang 18
 * gcc 12
 * gcc 13
 
@@ -40,6 +40,7 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/compiler.hpp[`compiler.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/concepts.hpp[`concepts.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ct_conversions.hpp[`ct_conversions.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ct_format.hpp[`ct_format.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ct_string.hpp[`ct_string.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/cx_map.hpp[`cx_map.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/cx_multimap.hpp[`cx_multimap.hpp`]
