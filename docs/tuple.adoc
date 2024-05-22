@@ -4,7 +4,7 @@
 https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/tuple.hpp[`tuple.hpp`]
 provides a tuple implementation that mirrors
 https://en.cppreference.com/w/cpp/utility/tuple[`std::tuple`]. Mostly,
-`stdx::tuple` works the same way as `std::tuple`, with some extra functonality
+`stdx::tuple` works the same way as `std::tuple`, with some extra functionality
 and faster compilation times. All functions on tuples are `constexpr`-capable.
 
 NOTE: `tuple` is available only in C++20 and later.

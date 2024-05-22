@@ -11,7 +11,7 @@ Some of the extras are available only with C++20 or later.
  
 *stdx* supports:
  
-- clang 14 through 17
+- clang 14 through 18
 - gcc 12 through 13
 
 See the [full documentation](https://intel.github.io/cpp-std-extensions/).

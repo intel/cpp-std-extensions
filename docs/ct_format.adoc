@@ -58,3 +58,15 @@ template argument to `ct_format`.
 auto s = stdx::ct_format<"{}", sc::string_constant>(CX_VALUE(42));
 // s is sc::string_constant<char, '4', '2'>{}
 ----
+
+When formatting a compile-time `stdx::format_result`, the strings and argument
+tuples are collapsed to a single `stdx::format_result`:
+
+[source,cpp]
+----
+constexpr static auto a = stdx::ct_format<"The answer is {}">(42);
+// a is stdx::format_result{"The answer is {}", stdx::tuple{42}}
+
+constexpr static auto q = stdx::ct_format<"{}. But what is the question?">(CX_VALUE(a));
+// q is stdx::format_result{"The answer is {}. But what is the question?", stdx::tuple{42}}
+----
