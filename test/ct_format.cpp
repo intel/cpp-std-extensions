@@ -155,3 +155,14 @@ TEST_CASE("format a ct-formatted string with different type", "[ct_format]") {
         stdx::ct_format<"A{}D", string_constant>(CX_VALUE(cts)) ==
         string_constant<char, 'A', 'B', '2', '0', '2', '4', 'C', 'D'>{});
 }
+
+TEST_CASE("format multiple mixed arguments with different type",
+          "[ct_format]") {
+    using namespace std::string_view_literals;
+    static_assert(stdx::ct_format<"Hello {} {} {} {} world", string_constant>(
+                      42, CX_VALUE("A"sv), "B"sv, CX_VALUE(int)) ==
+                  stdx::format_result{
+                      stdx::ct_string_to_type<"Hello {} A {} int world"_cts,
+                                              string_constant>(),
+                      stdx::make_tuple(42, "B"sv)});
+}

@@ -112,7 +112,6 @@ CONSTEVAL auto operator+(format_result<T, U> r, S s) {
 }
 
 template <typename S, typename T, typename U>
-    requires(is_specialization_of<S, ct_string>().value)
 CONSTEVAL auto operator+(S s, format_result<T, U> r) {
     return format_result{s + r.str, r.args};
 }
