@@ -40,21 +40,20 @@ TEST_CASE("format a compile-time stringish argument", "[ct_format]") {
                   "Hello world"_cts);
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE("world"_cts)) ==
                   "Hello world"_cts);
+    static_assert(stdx::ct_format<"Hello {}">(CX_VALUE("world")) ==
+                  "Hello world"_cts);
 }
 
 TEST_CASE("format a compile-time integral argument", "[ct_format]") {
-    using namespace std::string_view_literals;
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE(42)) == "Hello 42"_cts);
 }
 
 TEST_CASE("format a type argument", "[ct_format]") {
-    using namespace std::string_view_literals;
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE(int)) ==
                   "Hello int"_cts);
 }
 
 TEST_CASE("format a compile-time argument with fmt spec", "[ct_format]") {
-    using namespace std::string_view_literals;
     static_assert(stdx::ct_format<"Hello {:*>#6x}">(CX_VALUE(42)) ==
                   "Hello **0x2a"_cts);
 }
@@ -64,32 +63,27 @@ enum struct E { A };
 }
 
 TEST_CASE("format a compile-time enum argument", "[ct_format]") {
-    using namespace std::string_view_literals;
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE(E::A)) == "Hello A"_cts);
 }
 
 TEST_CASE("format a runtime argument", "[ct_format]") {
-    using namespace std::string_view_literals;
     static_assert(stdx::ct_format<"Hello {}">(42) ==
                   stdx::format_result{"Hello {}"_cts, stdx::make_tuple(42)});
 }
 
 TEST_CASE("format a compile-time and a runtime argument (1)", "[ct_format]") {
-    using namespace std::string_view_literals;
     static_assert(
         stdx::ct_format<"Hello {} {}">(CX_VALUE(int), 42) ==
         stdx::format_result{"Hello int {}"_cts, stdx::make_tuple(42)});
 }
 
 TEST_CASE("format a compile-time and a runtime argument (2)", "[ct_format]") {
-    using namespace std::string_view_literals;
     static_assert(
         stdx::ct_format<"Hello {} {}">(42, CX_VALUE(int)) ==
         stdx::format_result{"Hello {} int"_cts, stdx::make_tuple(42)});
 }
 
 TEST_CASE("format multiple runtime arguments", "[ct_format]") {
-    using namespace std::string_view_literals;
     static_assert(
         stdx::ct_format<"Hello {} {}">(42, 17) ==
         stdx::format_result{"Hello {} {}"_cts, stdx::make_tuple(42, 17)});
