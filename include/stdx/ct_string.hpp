@@ -32,12 +32,20 @@ template <std::size_t N> struct ct_string {
     CONSTEVAL explicit(true) ct_string(std::string_view str)
         : ct_string{str.data(), str.size()} {}
 
-    [[nodiscard]] constexpr auto begin() { return value.begin(); }
-    [[nodiscard]] constexpr auto end() { return value.end() - 1; }
-    [[nodiscard]] constexpr auto begin() const { return value.begin(); }
-    [[nodiscard]] constexpr auto end() const { return value.end() - 1; }
-    [[nodiscard]] constexpr auto rbegin() const { return ++value.rbegin(); }
-    [[nodiscard]] constexpr auto rend() const { return value.rend(); }
+    [[nodiscard]] constexpr auto begin() LIFETIMEBOUND { return value.begin(); }
+    [[nodiscard]] constexpr auto end() LIFETIMEBOUND { return value.end() - 1; }
+    [[nodiscard]] constexpr auto begin() const LIFETIMEBOUND {
+        return value.begin();
+    }
+    [[nodiscard]] constexpr auto end() const LIFETIMEBOUND {
+        return value.end() - 1;
+    }
+    [[nodiscard]] constexpr auto rbegin() const LIFETIMEBOUND {
+        return ++value.rbegin();
+    }
+    [[nodiscard]] constexpr auto rend() const LIFETIMEBOUND {
+        return value.rend();
+    }
 
     constexpr static std::integral_constant<std::size_t, N> capacity{};
     constexpr static std::integral_constant<std::size_t, N - 1U> size{};

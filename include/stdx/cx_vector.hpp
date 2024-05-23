@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
 #include <stdx/iterator.hpp>
 
@@ -37,50 +38,62 @@ template <typename T, std::size_t N> class cx_vector {
         : storage{static_cast<value_type>(ts)...}, current_size{sizeof...(Ts)} {
     }
 
-    [[nodiscard]] constexpr auto begin() -> iterator {
+    [[nodiscard]] constexpr auto begin() LIFETIMEBOUND -> iterator {
         return std::begin(storage);
     }
-    [[nodiscard]] constexpr auto begin() const -> const_iterator {
+    [[nodiscard]] constexpr auto begin() const LIFETIMEBOUND -> const_iterator {
         return std::begin(storage);
     }
-    [[nodiscard]] constexpr auto cbegin() const -> const_iterator {
+    [[nodiscard]] constexpr auto
+    cbegin() const LIFETIMEBOUND -> const_iterator {
         return std::cbegin(storage);
     }
 
-    [[nodiscard]] constexpr auto end() -> iterator {
+    [[nodiscard]] constexpr auto end() LIFETIMEBOUND -> iterator {
         return std::begin(storage) + current_size;
     }
-    [[nodiscard]] constexpr auto end() const -> const_iterator {
+    [[nodiscard]] constexpr auto end() const LIFETIMEBOUND -> const_iterator {
         return std::begin(storage) + current_size;
     }
-    [[nodiscard]] constexpr auto cend() const -> const_iterator {
+    [[nodiscard]] constexpr auto cend() const LIFETIMEBOUND -> const_iterator {
         return std::cbegin(storage) + current_size;
     }
 
-    [[nodiscard]] constexpr auto rbegin() -> reverse_iterator { return end(); }
-    [[nodiscard]] constexpr auto rbegin() const -> const_reverse_iterator {
+    [[nodiscard]] constexpr auto rbegin() LIFETIMEBOUND -> reverse_iterator {
         return end();
     }
-    [[nodiscard]] constexpr auto crbegin() const -> const_reverse_iterator {
+    [[nodiscard]] constexpr auto
+    rbegin() const LIFETIMEBOUND -> const_reverse_iterator {
+        return end();
+    }
+    [[nodiscard]] constexpr auto
+    crbegin() const LIFETIMEBOUND -> const_reverse_iterator {
         return cend();
     }
 
-    [[nodiscard]] constexpr auto rend() -> reverse_iterator { return begin(); }
-    [[nodiscard]] constexpr auto rend() const -> const_reverse_iterator {
+    [[nodiscard]] constexpr auto rend() LIFETIMEBOUND -> reverse_iterator {
         return begin();
     }
-    [[nodiscard]] constexpr auto crend() const -> const_reverse_iterator {
+    [[nodiscard]] constexpr auto
+    rend() const LIFETIMEBOUND -> const_reverse_iterator {
+        return begin();
+    }
+    [[nodiscard]] constexpr auto
+    crend() const LIFETIMEBOUND -> const_reverse_iterator {
         return cbegin();
     }
 
-    [[nodiscard]] constexpr auto front() -> reference { return storage[0]; }
-    [[nodiscard]] constexpr auto front() const -> const_reference {
+    [[nodiscard]] constexpr auto front() LIFETIMEBOUND -> reference {
         return storage[0];
     }
-    [[nodiscard]] constexpr auto back() -> reference {
+    [[nodiscard]] constexpr auto
+    front() const LIFETIMEBOUND -> const_reference {
+        return storage[0];
+    }
+    [[nodiscard]] constexpr auto back() LIFETIMEBOUND -> reference {
         return storage[current_size - 1];
     }
-    [[nodiscard]] constexpr auto back() const -> const_reference {
+    [[nodiscard]] constexpr auto back() const LIFETIMEBOUND -> const_reference {
         return storage[current_size - 1];
     }
 
@@ -89,20 +102,21 @@ template <typename T, std::size_t N> class cx_vector {
     }
     constexpr static std::integral_constant<size_type, N> capacity{};
 
-    [[nodiscard]] constexpr auto operator[](std::size_t index) -> reference {
+    [[nodiscard]] constexpr auto
+    operator[](std::size_t index) LIFETIMEBOUND->reference {
         return storage[index];
     }
     [[nodiscard]] constexpr auto
-    operator[](std::size_t index) const -> const_reference {
+    operator[](std::size_t index) const LIFETIMEBOUND->const_reference {
         return storage[index];
     }
 
     template <std::size_t Index>
-    [[nodiscard]] constexpr auto get() -> reference {
+    [[nodiscard]] constexpr auto get() LIFETIMEBOUND -> reference {
         return std::get<Index>(storage);
     }
     template <std::size_t Index>
-    [[nodiscard]] constexpr auto get() const -> const_reference {
+    [[nodiscard]] constexpr auto get() const LIFETIMEBOUND -> const_reference {
         return std::get<Index>(storage);
     }
 
@@ -115,10 +129,11 @@ template <typename T, std::size_t N> class cx_vector {
 
     constexpr auto clear() -> void { current_size = 0; }
 
-    constexpr auto push_back(value_type const &value) -> reference {
+    constexpr auto
+    push_back(value_type const &value) LIFETIMEBOUND -> reference {
         return storage[current_size++] = value;
     }
-    constexpr auto push_back(value_type &&value) -> reference {
+    constexpr auto push_back(value_type &&value) LIFETIMEBOUND -> reference {
         return storage[current_size++] = std::move(value);
     }
 
@@ -158,12 +173,12 @@ template <typename T, typename... Ts>
 cx_vector(T, Ts...) -> cx_vector<T, 1 + sizeof...(Ts)>;
 
 template <std::size_t I, typename T, std::size_t N>
-auto get(cx_vector<T, N> &v) -> decltype(auto) {
+auto get(cx_vector<T, N> &v LIFETIMEBOUND) -> decltype(auto) {
     return v.template get<I>();
 }
 
 template <std::size_t I, typename T, std::size_t N>
-auto get(cx_vector<T, N> const &v) -> decltype(auto) {
+auto get(cx_vector<T, N> const &v LIFETIMEBOUND) -> decltype(auto) {
     return v.template get<I>();
 }
 

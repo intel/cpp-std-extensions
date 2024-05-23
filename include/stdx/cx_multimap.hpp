@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/compiler.hpp>
 #include <stdx/cx_map.hpp>
 #include <stdx/cx_set.hpp>
 #include <stdx/iterator.hpp>
@@ -24,21 +25,24 @@ class cx_multimap {
     using iterator = typename storage_t::iterator;
     using const_iterator = typename storage_t::const_iterator;
 
-    [[nodiscard]] constexpr auto begin() -> iterator {
+    [[nodiscard]] constexpr auto begin() LIFETIMEBOUND -> iterator {
         return std::begin(storage);
     }
-    [[nodiscard]] constexpr auto begin() const -> const_iterator {
+    [[nodiscard]] constexpr auto begin() const LIFETIMEBOUND -> const_iterator {
         return std::begin(storage);
     }
-    [[nodiscard]] constexpr auto cbegin() const -> const_iterator {
+    [[nodiscard]] constexpr auto
+    cbegin() const LIFETIMEBOUND -> const_iterator {
         return std::cbegin(storage);
     }
 
-    [[nodiscard]] constexpr auto end() -> iterator { return std::end(storage); }
-    [[nodiscard]] constexpr auto end() const -> const_iterator {
+    [[nodiscard]] constexpr auto end() LIFETIMEBOUND -> iterator {
         return std::end(storage);
     }
-    [[nodiscard]] constexpr auto cend() const -> const_iterator {
+    [[nodiscard]] constexpr auto end() const LIFETIMEBOUND -> const_iterator {
+        return std::end(storage);
+    }
+    [[nodiscard]] constexpr auto cend() const LIFETIMEBOUND -> const_iterator {
         return std::cend(storage);
     }
 
@@ -78,11 +82,12 @@ class cx_multimap {
         return 0;
     }
 
-    [[nodiscard]] constexpr auto get(key_type const &key) -> set_t & {
+    [[nodiscard]] constexpr auto
+    get(key_type const &key) LIFETIMEBOUND -> set_t & {
         return storage.get(key);
     }
     [[nodiscard]] constexpr auto
-    get(key_type const &key) const -> set_t const & {
+    get(key_type const &key) const LIFETIMEBOUND -> set_t const & {
         return storage.get(key);
     }
 

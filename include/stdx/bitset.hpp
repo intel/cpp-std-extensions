@@ -182,7 +182,8 @@ template <std::size_t N, typename StorageElem> class bitset {
         return (storage[index] & (bit << offset)) != 0;
     }
 
-    constexpr auto set(std::size_t pos, bool value = true) -> bitset & {
+    constexpr auto set(std::size_t pos,
+                       bool value = true) LIFETIMEBOUND -> bitset & {
         auto const [index, offset] = indices(pos);
         if (value) {
             storage[index] |= static_cast<StorageElem>(bit << offset);
@@ -192,7 +193,8 @@ template <std::size_t N, typename StorageElem> class bitset {
         return *this;
     }
 
-    constexpr auto set(lsb_t lsb, msb_t msb, bool value = true) -> bitset & {
+    constexpr auto set(lsb_t lsb, msb_t msb,
+                       bool value = true) LIFETIMEBOUND -> bitset & {
         auto const l = to_underlying(lsb);
         auto const m = to_underlying(msb);
         auto [l_index, l_offset] = indices(l);
@@ -220,47 +222,48 @@ template <std::size_t N, typename StorageElem> class bitset {
         return *this;
     }
 
-    constexpr auto set(lsb_t lsb, length_t len, bool value = true) -> bitset & {
+    constexpr auto set(lsb_t lsb, length_t len,
+                       bool value = true) LIFETIMEBOUND -> bitset & {
         auto const l = to_underlying(lsb);
         auto const length = to_underlying(len);
         return set(lsb, static_cast<msb_t>(l + length - 1), value);
     }
 
-    constexpr auto set() -> bitset & {
+    constexpr auto set() LIFETIMEBOUND -> bitset & {
         for (auto &elem : storage) {
             elem = allbits;
         }
         return *this;
     }
 
-    constexpr auto reset(std::size_t pos) -> bitset & {
+    constexpr auto reset(std::size_t pos) LIFETIMEBOUND -> bitset & {
         auto const [index, offset] = indices(pos);
         storage[index] &= static_cast<StorageElem>(~(bit << offset));
         return *this;
     }
 
-    constexpr auto reset() -> bitset & {
+    constexpr auto reset() LIFETIMEBOUND -> bitset & {
         for (auto &elem : storage) {
             elem = {};
         }
         return *this;
     }
 
-    constexpr auto reset(lsb_t lsb, msb_t msb) -> bitset & {
+    constexpr auto reset(lsb_t lsb, msb_t msb) LIFETIMEBOUND -> bitset & {
         return set(lsb, msb, false);
     }
 
-    constexpr auto reset(lsb_t lsb, length_t len) -> bitset & {
+    constexpr auto reset(lsb_t lsb, length_t len) LIFETIMEBOUND -> bitset & {
         return set(lsb, len, false);
     }
 
-    constexpr auto flip(std::size_t pos) -> bitset & {
+    constexpr auto flip(std::size_t pos) LIFETIMEBOUND -> bitset & {
         auto const [index, offset] = indices(pos);
         storage[index] ^= static_cast<StorageElem>(bit << offset);
         return *this;
     }
 
-    constexpr auto flip() -> bitset & {
+    constexpr auto flip() LIFETIMEBOUND -> bitset & {
         for (auto &elem : storage) {
             elem ^= allbits;
         }
@@ -315,26 +318,26 @@ template <std::size_t N, typename StorageElem> class bitset {
         return result;
     }
 
-    constexpr auto operator|=(bitset const &rhs) -> bitset & {
+    constexpr auto operator|=(bitset const &rhs) LIFETIMEBOUND->bitset & {
         for (auto i = std::size_t{}; i < storage_size; ++i) {
             storage[i] |= rhs.storage[i];
         }
         return *this;
     }
-    constexpr auto operator&=(bitset const &rhs) -> bitset & {
+    constexpr auto operator&=(bitset const &rhs) LIFETIMEBOUND->bitset & {
         for (auto i = std::size_t{}; i < storage_size; ++i) {
             storage[i] &= rhs.storage[i];
         }
         return *this;
     }
-    constexpr auto operator^=(bitset const &rhs) -> bitset & {
+    constexpr auto operator^=(bitset const &rhs) LIFETIMEBOUND->bitset & {
         for (auto i = std::size_t{}; i < storage_size; ++i) {
             storage[i] ^= rhs.storage[i];
         }
         return *this;
     }
 
-    constexpr auto operator<<=(std::size_t pos) -> bitset & {
+    constexpr auto operator<<=(std::size_t pos) LIFETIMEBOUND->bitset & {
         auto dst = storage_size - 1;
         auto const start = dst - pos / storage_elem_size;
         pos %= storage_elem_size;
@@ -360,7 +363,7 @@ template <std::size_t N, typename StorageElem> class bitset {
         return *this;
     }
 
-    constexpr auto operator>>=(std::size_t pos) -> bitset & {
+    constexpr auto operator>>=(std::size_t pos) LIFETIMEBOUND->bitset & {
         auto dst = std::size_t{};
         auto const start = pos / storage_elem_size;
         pos %= storage_elem_size;

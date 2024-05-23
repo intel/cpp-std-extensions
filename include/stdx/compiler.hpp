@@ -35,3 +35,11 @@
 #define MUSTTAIL
 #endif
 #endif
+
+#ifndef LIFETIMEBOUND
+#if defined(__clang__)
+#define LIFETIMEBOUND [[clang::lifetimebound]]
+#else
+#define LIFETIMEBOUND
+#endif
+#endif
