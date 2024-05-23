@@ -67,11 +67,17 @@ TEST_CASE("format a compile-time enum argument", "[ct_format]") {
 }
 
 TEST_CASE("format a runtime argument", "[ct_format]") {
+    auto x = 42;
+    CHECK(stdx::ct_format<"Hello {}">(x) ==
+          stdx::format_result{"Hello {}"_cts, stdx::make_tuple(42)});
     static_assert(stdx::ct_format<"Hello {}">(42) ==
                   stdx::format_result{"Hello {}"_cts, stdx::make_tuple(42)});
 }
 
 TEST_CASE("format a compile-time and a runtime argument (1)", "[ct_format]") {
+    auto x = 42;
+    CHECK(stdx::ct_format<"Hello {} {}">(CX_VALUE(int), x) ==
+          stdx::format_result{"Hello int {}"_cts, stdx::make_tuple(42)});
     static_assert(
         stdx::ct_format<"Hello {} {}">(CX_VALUE(int), 42) ==
         stdx::format_result{"Hello int {}"_cts, stdx::make_tuple(42)});
@@ -91,6 +97,11 @@ TEST_CASE("format multiple runtime arguments", "[ct_format]") {
 
 TEST_CASE("format multiple mixed arguments", "[ct_format]") {
     using namespace std::string_view_literals;
+    auto b = "B"sv;
+    CHECK(stdx::ct_format<"Hello {} {} {} {} world">(42, CX_VALUE("A"sv), b,
+                                                     CX_VALUE(int)) ==
+          stdx::format_result{"Hello {} A {} int world"_cts,
+                              stdx::make_tuple(42, "B"sv)});
     static_assert(stdx::ct_format<"Hello {} {} {} {} world">(
                       42, CX_VALUE("A"sv), "B"sv, CX_VALUE(int)) ==
                   stdx::format_result{"Hello {} A {} int world"_cts,
@@ -130,6 +141,10 @@ TEST_CASE("format_to a different type", "[ct_format]") {
     static_assert(stdx::ct_format<"{}", string_constant>(CX_VALUE("A"sv)) ==
                   string_constant<char, 'A'>{});
 
+    auto x = 42;
+    CHECK(stdx::ct_format<"{}", string_constant>(x) ==
+          stdx::format_result{string_constant<char, '{', '}'>{},
+                              stdx::make_tuple(42)});
     static_assert(stdx::ct_format<"{}", string_constant>(42) ==
                   stdx::format_result{string_constant<char, '{', '}'>{},
                                       stdx::make_tuple(42)});
@@ -159,6 +174,13 @@ TEST_CASE("format a ct-formatted string with different type", "[ct_format]") {
 TEST_CASE("format multiple mixed arguments with different type",
           "[ct_format]") {
     using namespace std::string_view_literals;
+    auto b = "B"sv;
+    CHECK(stdx::ct_format<"Hello {} {} {} {} world", string_constant>(
+              42, CX_VALUE("A"sv), b, CX_VALUE(int)) ==
+          stdx::format_result{
+              stdx::ct_string_to_type<"Hello {} A {} int world"_cts,
+                                      string_constant>(),
+              stdx::make_tuple(42, "B"sv)});
     static_assert(stdx::ct_format<"Hello {} {} {} {} world", string_constant>(
                       42, CX_VALUE("A"sv), "B"sv, CX_VALUE(int)) ==
                   stdx::format_result{
