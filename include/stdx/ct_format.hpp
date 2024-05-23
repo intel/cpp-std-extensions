@@ -107,17 +107,17 @@ CONSTEVAL auto arg_value(cx_value auto a) {
 }
 
 template <typename T, typename U, typename S>
-CONSTEVAL auto operator+(format_result<T, U> r, S s) {
+constexpr auto operator+(format_result<T, U> r, S s) {
     return format_result{r.str + s, r.args};
 }
 
 template <typename S, typename T, typename U>
-CONSTEVAL auto operator+(S s, format_result<T, U> r) {
+constexpr auto operator+(S s, format_result<T, U> r) {
     return format_result{s + r.str, r.args};
 }
 
 template <typename A, typename B, typename T, typename U>
-CONSTEVAL auto operator+(format_result<A, B> r1, format_result<T, U> r2) {
+constexpr auto operator+(format_result<A, B> r1, format_result<T, U> r2) {
     return format_result{r1.str + r2.str, tuple_cat(r1.args, r2.args)};
 }
 
@@ -148,7 +148,7 @@ CONSTEVAL auto convert_output() {
 template <ct_string Fmt,
           template <typename T, T...> typename Output = detail::null_output,
           typename Arg>
-CONSTEVAL auto format1(Arg arg) {
+constexpr auto format1(Arg arg) {
     if constexpr (cx_value<Arg>) {
         constexpr auto result = [&] {
             constexpr auto fmtstr = FMT_COMPILE(std::string_view{Fmt});
@@ -185,29 +185,35 @@ concept ct_format_compatible = requires {
         Output<char, 'A'>{} + Output<char, 'B'>{}
     } -> same_as<Output<char, 'A', 'B'>>;
 };
+
+template <ct_string Fmt> struct fmt_data {
+    constexpr static auto fmt = std::string_view{Fmt};
+    constexpr static auto N = detail::count_specifiers(fmt);
+    constexpr static auto splits = detail::split_specifiers<N + 1>(fmt);
+    constexpr static auto last_cts =
+        detail::to_ct_string<splits[N].size()>(splits[N]);
+};
 } // namespace detail
 
 template <ct_string Fmt,
           template <typename T, T...> typename Output = detail::null_output>
-constexpr auto ct_format = [](auto &&...args) CONSTEVAL {
+constexpr auto ct_format = [](auto &&...args) {
     if constexpr (not same_as<Output<char>, detail::null_output<char>>) {
         static_assert(detail::ct_format_compatible<Output>);
     }
 
-    constexpr auto fmt = std::string_view{Fmt};
-    constexpr auto N = detail::count_specifiers(fmt);
-    constexpr auto splits = detail::split_specifiers<N + 1>(fmt);
+    using data = detail::fmt_data<Fmt>;
 
-    auto const format1 = [&]<std::size_t I>(auto &&arg) CONSTEVAL {
-        constexpr auto cts = detail::to_ct_string<splits[I].size()>(splits[I]);
+    [[maybe_unused]] auto const format1 = [&]<std::size_t I>(auto &&arg) {
+        constexpr auto cts =
+            detail::to_ct_string<data::splits[I].size()>(data::splits[I]);
         return detail::format1<cts, Output>(FWD(arg));
     };
 
-    constexpr auto last_cts = detail::to_ct_string<splits[N].size()>(splits[N]);
-    return [&]<std::size_t... Is>(std::index_sequence<Is...>) CONSTEVAL {
+    return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         return (format1.template operator()<Is>(FWD(args)) + ... +
-                detail::convert_output<last_cts, Output>());
-    }(std::make_index_sequence<N>{});
+                detail::convert_output<data::last_cts, Output>());
+    }(std::make_index_sequence<data::N>{});
 };
 } // namespace v1
 } // namespace stdx
