@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdx/bit.hpp>
+#include <stdx/compiler.hpp>
 #include <stdx/iterator.hpp>
 #include <stdx/memory.hpp>
 #include <stdx/type_traits.hpp>
@@ -94,21 +95,24 @@ class span : public detail::span_base<T, Extent> {
 
     template <typename U, std::size_t N>
     // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr span(std::array<U, N> &arr) noexcept : ptr{std::data(arr)} {
+    constexpr span(std::array<U, N> &arr LIFETIMEBOUND) noexcept
+        : ptr{std::data(arr)} {
         static_assert(Extent == dynamic_extent or Extent <= N,
                       "Span extends beyond available storage");
     }
 
     template <typename U, std::size_t N>
     // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr span(std::array<U, N> const &arr) noexcept : ptr{std::data(arr)} {
+    constexpr span(std::array<U, N> const &arr LIFETIMEBOUND) noexcept
+        : ptr{std::data(arr)} {
         static_assert(Extent == dynamic_extent or Extent <= N,
                       "Span extends beyond available storage");
     }
 
     template <std::size_t N>
     // NOLINTNEXTLINE(google-explicit-constructor, *-avoid-c-arrays)
-    constexpr span(stdx::type_identity_t<element_type> (&arr)[N]) noexcept
+    constexpr span(
+        stdx::type_identity_t<element_type> (&arr)[N] LIFETIMEBOUND) noexcept
         : ptr{std::data(arr)} {
         static_assert(Extent == dynamic_extent or Extent <= N,
                       "Span extends beyond available storage");
@@ -116,12 +120,12 @@ class span : public detail::span_base<T, Extent> {
 
     template <typename R,
               std::enable_if_t<dependent_extent<R> != dynamic_extent, int> = 0>
-    explicit constexpr span(R &&r)
+    explicit constexpr span(R &&r LIFETIMEBOUND)
         : ptr{stdx::to_address(std::begin(std::forward<R>(r)))} {}
 
     template <typename R,
               std::enable_if_t<dependent_extent<R> == dynamic_extent, int> = 0>
-    explicit constexpr span(R &&r)
+    explicit constexpr span(R &&r LIFETIMEBOUND)
         : base_t{std::begin(std::forward<R>(r)), std::end(std::forward<R>(r))},
           ptr{stdx::to_address(std::begin(std::forward<R>(r)))} {}
 

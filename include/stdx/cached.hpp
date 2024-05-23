@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/compiler.hpp>
 #include <stdx/functional.hpp>
 #include <stdx/type_traits.hpp>
 
@@ -22,38 +23,40 @@ template <typename F> class cached : with_result_of<F> {
     explicit operator bool() const noexcept { return opt.has_value(); }
     explicit operator bool() noexcept { return opt.has_value(); }
 
-    auto value() & -> value_type & {
+    auto value() & LIFETIMEBOUND -> value_type & {
         populate();
         return *opt;
     }
-    auto value() const & -> value_type const & {
+    auto value() const & LIFETIMEBOUND -> value_type const & {
         populate();
         return *opt;
     }
-    auto value() && -> value_type && {
+    auto value() && LIFETIMEBOUND -> value_type && {
         populate();
         return *std::move(opt);
     }
-    auto value() const && -> value_type const && {
+    auto value() const && LIFETIMEBOUND -> value_type const && {
         populate();
         return *std::move(opt);
     }
 
-    auto operator->() const -> value_type const * {
+    auto operator->() const LIFETIMEBOUND->value_type const * {
         populate();
         return opt.operator->();
     }
-    auto operator->() -> value_type * {
+    auto operator->() LIFETIMEBOUND->value_type * {
         populate();
         return opt.operator->();
     }
 
-    auto operator*() const & -> decltype(auto) { return value(); }
-    auto operator*() & -> decltype(auto) { return value(); }
-    auto operator*() const && -> decltype(auto) {
+    auto operator*() const & LIFETIMEBOUND->decltype(auto) { return value(); }
+    auto operator*() & LIFETIMEBOUND->decltype(auto) { return value(); }
+    auto operator*() const && LIFETIMEBOUND->decltype(auto) {
         return std::move(*this).value();
     }
-    auto operator*() && -> decltype(auto) { return std::move(*this).value(); }
+    auto operator*() && LIFETIMEBOUND->decltype(auto) {
+        return std::move(*this).value();
+    }
 
     auto reset() { opt.reset(); }
     auto refresh() {

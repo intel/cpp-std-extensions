@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
 #include <stdx/iterator.hpp>
 #include <stdx/utility.hpp>
@@ -11,14 +12,19 @@
 
 namespace stdx {
 inline namespace v1 {
-template <typename Key, typename Value, std::size_t N> class cx_map {
-  public:
+template <typename Key, typename Value> struct cx_map_value {
     using key_type = Key;
     using mapped_type = Value;
-    struct value_type {
-        key_type key{};
-        mapped_type value{};
-    };
+    key_type key{};
+    mapped_type value{};
+};
+template <typename K, typename V> cx_map_value(K, V) -> cx_map_value<K, V>;
+
+template <typename Key, typename Value, std::size_t N> class cx_map {
+  public:
+    using value_type = cx_map_value<Key, Value>;
+    using key_type = typename value_type::key_type;
+    using mapped_type = typename value_type::mapped_type;
     using size_type = std::size_t;
     using reference = value_type &;
     using const_reference = value_type const &;
@@ -37,23 +43,24 @@ template <typename Key, typename Value, std::size_t N> class cx_map {
     constexpr explicit cx_map(Vs const &...vs)
         : storage{vs...}, current_size{sizeof...(Vs)} {}
 
-    [[nodiscard]] constexpr auto begin() -> iterator {
+    [[nodiscard]] constexpr auto begin() LIFETIMEBOUND -> iterator {
         return std::begin(storage);
     }
-    [[nodiscard]] constexpr auto begin() const -> const_iterator {
+    [[nodiscard]] constexpr auto begin() const LIFETIMEBOUND -> const_iterator {
         return std::begin(storage);
     }
-    [[nodiscard]] constexpr auto cbegin() const -> const_iterator {
+    [[nodiscard]] constexpr auto
+    cbegin() const LIFETIMEBOUND -> const_iterator {
         return std::cbegin(storage);
     }
 
-    [[nodiscard]] constexpr auto end() -> iterator {
+    [[nodiscard]] constexpr auto end() LIFETIMEBOUND -> iterator {
         return std::begin(storage) + current_size;
     }
-    [[nodiscard]] constexpr auto end() const -> const_iterator {
+    [[nodiscard]] constexpr auto end() const LIFETIMEBOUND -> const_iterator {
         return std::begin(storage) + current_size;
     }
-    [[nodiscard]] constexpr auto cend() const -> const_iterator {
+    [[nodiscard]] constexpr auto cend() const LIFETIMEBOUND -> const_iterator {
         return std::cbegin(storage) + current_size;
     }
 
@@ -75,7 +82,8 @@ template <typename Key, typename Value, std::size_t N> class cx_map {
         return storage[--current_size];
     }
 
-    [[nodiscard]] constexpr auto get(key_type const &key) -> mapped_type & {
+    [[nodiscard]] constexpr auto
+    get(key_type const &key) LIFETIMEBOUND -> mapped_type & {
         for (auto &[k, v] : *this) {
             if (k == key) {
                 return v;
@@ -84,7 +92,7 @@ template <typename Key, typename Value, std::size_t N> class cx_map {
         unreachable();
     }
     [[nodiscard]] constexpr auto
-    get(key_type const &key) const -> mapped_type const & {
+    get(key_type const &key) const LIFETIMEBOUND -> mapped_type const & {
         for (auto const &[k, v] : *this) {
             if (k == key) {
                 return v;

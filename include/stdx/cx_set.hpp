@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
 #include <stdx/cx_map.hpp>
 #include <stdx/iterator.hpp>
@@ -30,23 +31,24 @@ template <typename Key, std::size_t N> class cx_set {
         : storage{static_cast<value_type>(ts)...}, current_size{sizeof...(Ts)} {
     }
 
-    [[nodiscard]] constexpr auto begin() -> iterator {
+    [[nodiscard]] constexpr auto begin() LIFETIMEBOUND -> iterator {
         return std::begin(storage);
     }
-    [[nodiscard]] constexpr auto begin() const -> const_iterator {
+    [[nodiscard]] constexpr auto begin() const LIFETIMEBOUND -> const_iterator {
         return std::begin(storage);
     }
-    [[nodiscard]] constexpr auto cbegin() const -> const_iterator {
+    [[nodiscard]] constexpr auto
+    cbegin() const LIFETIMEBOUND -> const_iterator {
         return std::cbegin(storage);
     }
 
-    [[nodiscard]] constexpr auto end() -> iterator {
+    [[nodiscard]] constexpr auto end() LIFETIMEBOUND -> iterator {
         return std::begin(storage) + current_size;
     }
-    [[nodiscard]] constexpr auto end() const -> const_iterator {
+    [[nodiscard]] constexpr auto end() const LIFETIMEBOUND -> const_iterator {
         return std::begin(storage) + current_size;
     }
-    [[nodiscard]] constexpr auto cend() const -> const_iterator {
+    [[nodiscard]] constexpr auto cend() const LIFETIMEBOUND -> const_iterator {
         return std::cbegin(storage) + current_size;
     }
 

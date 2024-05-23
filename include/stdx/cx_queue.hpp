@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/compiler.hpp>
 #include <stdx/iterator.hpp>
 #include <stdx/panic.hpp>
 
@@ -61,24 +62,26 @@ class cx_queue {
         current_size = 0;
     }
 
-    [[nodiscard]] constexpr auto front() & -> reference {
+    [[nodiscard]] constexpr auto front() & LIFETIMEBOUND -> reference {
         OverflowPolicy::check_pop(current_size);
         return storage[pop_index];
     }
-    [[nodiscard]] constexpr auto front() const & -> const_reference {
+    [[nodiscard]] constexpr auto front() const
+        & LIFETIMEBOUND -> const_reference {
         OverflowPolicy::check_pop(current_size);
         return storage[pop_index];
     }
-    [[nodiscard]] constexpr auto back() & -> reference {
+    [[nodiscard]] constexpr auto back() & LIFETIMEBOUND -> reference {
         OverflowPolicy::check_pop(current_size);
         return storage[push_index];
     }
-    [[nodiscard]] constexpr auto back() const & -> const_reference {
+    [[nodiscard]] constexpr auto back() const
+        & LIFETIMEBOUND -> const_reference {
         OverflowPolicy::check_pop(current_size);
         return storage[push_index];
     }
 
-    constexpr auto push(value_type const &value) -> reference {
+    constexpr auto push(value_type const &value) LIFETIMEBOUND -> reference {
         OverflowPolicy::check_push(current_size, N);
         if (++push_index == N) {
             push_index = 0;
@@ -86,7 +89,7 @@ class cx_queue {
         ++current_size;
         return storage[push_index] = value;
     }
-    constexpr auto push(value_type &&value) -> reference {
+    constexpr auto push(value_type &&value) LIFETIMEBOUND -> reference {
         OverflowPolicy::check_push(current_size, N);
         if (++push_index == N) {
             push_index = 0;

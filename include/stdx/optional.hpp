@@ -86,34 +86,41 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
     }
     constexpr explicit operator bool() const noexcept { return has_value(); }
 
-    [[nodiscard]] constexpr auto value() & -> value_type & { return val; }
-    [[nodiscard]] constexpr auto value() const & -> value_type const & {
+    [[nodiscard]] constexpr auto value() & LIFETIMEBOUND -> value_type & {
         return val;
     }
-    [[nodiscard]] constexpr auto value() && -> value_type && {
+    [[nodiscard]] constexpr auto value() const
+        & LIFETIMEBOUND -> value_type const & {
+        return val;
+    }
+    [[nodiscard]] constexpr auto value() && LIFETIMEBOUND -> value_type && {
         return std::move(val);
     }
-    [[nodiscard]] constexpr auto value() const && -> value_type const && {
+    [[nodiscard]] constexpr auto value() const
+        && LIFETIMEBOUND -> value_type const && {
         return std::move(val);
     }
 
-    [[nodiscard]] constexpr auto operator->() const -> value_type const * {
+    [[nodiscard]] constexpr auto
+    operator->() const LIFETIMEBOUND->value_type const * {
         return std::addressof(val);
     }
-    [[nodiscard]] constexpr auto operator->() -> value_type * {
+    [[nodiscard]] constexpr auto operator->() LIFETIMEBOUND->value_type * {
         return std::addressof(val);
     }
 
-    [[nodiscard]] constexpr auto operator*() const & -> decltype(auto) {
+    [[nodiscard]] constexpr auto operator*() const
+        & LIFETIMEBOUND->decltype(auto) {
         return value();
     }
-    [[nodiscard]] constexpr auto operator*() & -> decltype(auto) {
+    [[nodiscard]] constexpr auto operator*() & LIFETIMEBOUND->decltype(auto) {
         return value();
     }
-    [[nodiscard]] constexpr auto operator*() const && -> decltype(auto) {
+    [[nodiscard]] constexpr auto operator*() const
+        && LIFETIMEBOUND->decltype(auto) {
         return std::move(*this).value();
     }
-    [[nodiscard]] constexpr auto operator*() && -> decltype(auto) {
+    [[nodiscard]] constexpr auto operator*() && LIFETIMEBOUND->decltype(auto) {
         return std::move(*this).value();
     }
 
@@ -128,7 +135,7 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
     }
 
     template <typename... Args>
-    constexpr auto emplace(Args &&...args) -> value_type & {
+    constexpr auto emplace(Args &&...args) LIFETIMEBOUND -> value_type & {
         val.~value_type();
         new (std::addressof(val)) value_type(std::forward<Args>(args)...);
         return value();

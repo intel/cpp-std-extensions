@@ -62,42 +62,44 @@ concept nonderivable = not std::is_class_v<T>;
 
 template <std::size_t Index, nonderivable T, typename... Ts>
 struct element<Index, T, Ts...> {
-    [[nodiscard]] constexpr auto
-    ugly_iGet_clvr(index_constant<Index>) const & noexcept -> T const & {
+    [[nodiscard]] constexpr auto ugly_iGet_clvr(
+        index_constant<Index>) const & noexcept LIFETIMEBOUND -> T const & {
         return value;
     }
     [[nodiscard]] constexpr auto
-    ugly_iGet_lvr(index_constant<Index>) & noexcept -> T & {
+    ugly_iGet_lvr(index_constant<Index>) & noexcept LIFETIMEBOUND -> T & {
         return value;
     }
     [[nodiscard]] constexpr auto
-    ugly_iGet_rvr(index_constant<Index>) && noexcept -> T && {
+    ugly_iGet_rvr(index_constant<Index>) && noexcept LIFETIMEBOUND -> T && {
         return std::forward<T>(value);
     }
 
     template <typename U>
         requires(std::same_as<U, T> or ... or std::same_as<U, Ts>)
-    [[nodiscard]] constexpr auto
-    ugly_tGet_clvr(tag_constant<U> *) const & noexcept -> T const & {
+    [[nodiscard]] constexpr auto ugly_tGet_clvr(
+        tag_constant<U> *) const & noexcept LIFETIMEBOUND -> T const & {
         return value;
     }
     template <typename U>
         requires(std::same_as<U, T> or ... or std::same_as<U, Ts>)
     [[nodiscard]] constexpr auto
-    ugly_tGet_lvr(tag_constant<U> *) & noexcept -> T & {
+    ugly_tGet_lvr(tag_constant<U> *) & noexcept LIFETIMEBOUND -> T & {
         return value;
     }
     template <typename U>
         requires(std::same_as<U, T> or ... or std::same_as<U, Ts>)
     [[nodiscard]] constexpr auto
-    ugly_tGet_rvr(tag_constant<U> *) && noexcept -> T && {
+    ugly_tGet_rvr(tag_constant<U> *) && noexcept LIFETIMEBOUND -> T && {
         return std::forward<T>(value);
     }
 
     constexpr static auto ugly_Value(index_constant<Index>) -> T;
-    constexpr auto ugly_Value_clvr() const & -> T const & { return value; }
-    constexpr auto ugly_Value_lvr() & -> T & { return value; }
-    constexpr auto ugly_Value_rvr() && -> T && {
+    constexpr auto ugly_Value_clvr() const & LIFETIMEBOUND -> T const & {
+        return value;
+    }
+    constexpr auto ugly_Value_lvr() & LIFETIMEBOUND -> T & { return value; }
+    constexpr auto ugly_Value_rvr() && LIFETIMEBOUND -> T && {
         return std::forward<T>(value);
     }
 
@@ -256,8 +258,8 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     }
 
     template <std::size_t I>
-    [[nodiscard]] constexpr auto
-    operator[](index_constant<I> i) const & -> decltype(auto) {
+        [[nodiscard]] constexpr auto operator[](index_constant<I> i) const
+        & LIFETIMEBOUND->decltype(auto) {
         if constexpr (I >= sizeof...(Ts)) {
             error::index_out_of_bounds<I, Ts...>();
         } else {
@@ -265,8 +267,8 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
         }
     }
     template <std::size_t I>
-    [[nodiscard]] constexpr auto
-    operator[](index_constant<I> i) & -> decltype(auto) {
+        [[nodiscard]] constexpr auto operator[](index_constant<I> i) &
+        LIFETIMEBOUND->decltype(auto) {
         if constexpr (I >= sizeof...(Ts)) {
             error::index_out_of_bounds<I, Ts...>();
         } else {
@@ -274,8 +276,8 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
         }
     }
     template <std::size_t I>
-    [[nodiscard]] constexpr auto
-    operator[](index_constant<I> i) && -> decltype(auto) {
+        [[nodiscard]] constexpr auto operator[](index_constant<I> i) &&
+        LIFETIMEBOUND->decltype(auto) {
         if constexpr (I >= sizeof...(Ts)) {
             error::index_out_of_bounds<I, Ts...>();
         } else {
@@ -431,13 +433,13 @@ indexed_tuple(Ts...) -> indexed_tuple<detail::index_function_list<>, Ts...>;
 
 template <std::size_t I, tuplelike Tuple>
 [[nodiscard]] constexpr auto
-get(Tuple &&t) -> decltype(std::forward<Tuple>(t)[index<I>]) {
+get(Tuple &&t LIFETIMEBOUND) -> decltype(std::forward<Tuple>(t)[index<I>]) {
     return std::forward<Tuple>(t)[index<I>];
 }
 
 template <typename T, tuplelike Tuple>
 [[nodiscard]] constexpr auto
-get(Tuple &&t) -> decltype(std::forward<Tuple>(t).get(tag<T>)) {
+get(Tuple &&t LIFETIMEBOUND) -> decltype(std::forward<Tuple>(t).get(tag<T>)) {
     return std::forward<Tuple>(t).get(tag<T>);
 }
 
