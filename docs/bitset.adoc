@@ -68,3 +68,6 @@ auto bs = stdx::bitset<11>{0b101}; // 11 bits, value 5
 auto i = bs.to<std::uint64_t>();   // 5 (a std::uint64_t)
 auto j = bs.to_natural();          // 5 (a std::uint16_t)
 ----
+
+Bitsets support all the usual bitwise operators (`and`, `or`, `xor` and `not`)
+and also support `operator-` meaning set difference, or `a & ~b`.
