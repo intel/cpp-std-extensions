@@ -432,3 +432,13 @@ TEST_CASE("forward_as_tuple", "[tuple]") {
     static_assert(
         std::is_same_v<decltype(t), stdx::tuple<int const &, int &, int &&>>);
 }
+
+TEST_CASE("one_of", "[tuple]") {
+    static_assert(1 == stdx::one_of{1, 2, 3});
+    static_assert(4 != stdx::one_of{1, 2, 3});
+    static_assert(stdx::one_of{1, 2, 3} == 1);
+    static_assert(stdx::one_of{1, 2, 3} != 4);
+
+    static_assert(stdx::one_of{1, 2, 3} == stdx::one_of{3, 4, 5});
+    static_assert(stdx::one_of{1, 2, 3} != stdx::one_of{4, 5, 6});
+}
