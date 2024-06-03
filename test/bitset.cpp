@@ -227,6 +227,13 @@ TEMPLATE_TEST_CASE("not", "[bitset]", std::uint8_t, std::uint16_t,
     static_assert(~bs == stdx::bitset<3, TestType>{0b10ul});
 }
 
+TEMPLATE_TEST_CASE("difference", "[bitset]", std::uint8_t, std::uint16_t,
+                   std::uint32_t, std::uint64_t) {
+    constexpr auto bs1 = stdx::bitset<3, TestType>{0b101ul};
+    constexpr auto bs2 = stdx::bitset<3, TestType>{0b011ul};
+    static_assert(bs1 - bs2 == stdx::bitset<3, TestType>{0b100ul});
+}
+
 TEMPLATE_TEST_CASE("left shift", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     constexpr auto bs = stdx::bitset<3, TestType>{0b101ul};

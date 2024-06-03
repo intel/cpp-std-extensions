@@ -84,6 +84,11 @@ template <std::size_t N, typename StorageElem> class bitset {
         return lhs;
     }
 
+    friend constexpr auto operator-(bitset const &lhs, bitset rhs) -> bitset {
+        rhs.flip();
+        return lhs & rhs;
+    }
+
     friend constexpr auto operator<<(bitset lhs, std::size_t pos) -> bitset {
         lhs <<= pos;
         return lhs;
