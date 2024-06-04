@@ -195,3 +195,16 @@ auto t = stdx::tuple{map_entry<X, int>{42}}; // regular tuple
 auto i = stdx::apply_indices<key_for>(t);    // tuple indexed with key_for
 auto x = get<X>(i).value;                    // 42
 ----
+
+=== `one_of`
+
+`one_of` is a convenient way to declaratively determine if a value is in a set.
+
+[source,cpp]
+----
+auto is_taxicab(int x) -> bool {
+  return x == one_of{2, 1'729, 875'339'319};
+}
+----
+
+NOTE: `one_of` is a type, not a function.
