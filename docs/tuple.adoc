@@ -140,11 +140,20 @@ NOTE: `tuple_cat` is an algorithm in
 xref:tuple_algorithms.adoc#_tuple_algorithms_hpp[`tuple_algorithms.hpp`].
 
 `join` is a member function that works the same way as `fold_left`, but without
-needing an initial value. It is only defined for non-empty tuples.
+needing an initial value. It has overloads either for non-empty tuples, or for
+empty tuples with a given default.
 [source,cpp]
 ----
-auto t = stdx::tuple{1, 2, 3};
-auto sum = t.join(std::plus{});  // 6
+auto sum1 = stdx::tuple{1, 2, 3}.join(std::plus{});  // 6
+auto sum2 = stdx::tuple{1}.join(std::plus{});        // 1
+auto sum3 = stdx::tuple{}.join(42, std::plus{});     // 42
+----
+
+`join` is useful for things like string concatenation with comma separation.
+[source,cpp]
+----
+auto sum1 = stdx::tuple{"hello"s, "world"s}.join(
+    [] (auto const &acc, auto const &s) { return acc + ", " + s; });  // "hello, world"
 ----
 
 === Indexed tuples
