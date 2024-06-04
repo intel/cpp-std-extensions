@@ -332,6 +332,23 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
             .value;
     }
 
+    template <typename Init, typename Op>
+    constexpr auto join(Init &&init, Op &&op) const & {
+        if constexpr (sizeof...(Ts) == 0) {
+            return init;
+        } else {
+            return this->join(std::forward<Op>(op));
+        }
+    }
+    template <typename Init, typename Op>
+    constexpr auto join(Init &&init, Op &&op) && {
+        if constexpr (sizeof...(Ts) == 0) {
+            return init;
+        } else {
+            return std::move(*this).join(std::forward<Op>(op));
+        }
+    }
+
     constexpr static auto size =
         std::integral_constant<std::size_t, sizeof...(Ts)>{};
     constexpr static auto ugly_Value(...) -> void;
