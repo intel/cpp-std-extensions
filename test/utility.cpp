@@ -149,3 +149,23 @@ TEST_CASE("CX_VALUE type", "[utility]") {
     static_assert(std::is_same_v<decltype(y()),
                                  stdx::type_identity<std::pair<int, int>>>);
 }
+
+namespace {
+template <std::size_t S> constexpr auto cx_value_test_nttp() {
+    return CX_VALUE(S);
+}
+
+template <typename T> constexpr auto cx_value_test_type() {
+    return CX_VALUE(T);
+}
+} // namespace
+
+TEST_CASE("CX_VALUE on NTTP", "[utility]") {
+    auto x = cx_value_test_nttp<42>();
+    static_assert(x() == 42);
+}
+
+TEST_CASE("CX_VALUE on type template argument", "[utility]") {
+    auto x = cx_value_test_type<int>();
+    static_assert(std::is_same_v<decltype(x()), stdx::type_identity<int>>);
+}
