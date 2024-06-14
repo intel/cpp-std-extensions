@@ -62,6 +62,12 @@ concept nonderivable = not std::is_class_v<T>;
 
 template <std::size_t Index, nonderivable T, typename... Ts>
 struct element<Index, T, Ts...> {
+#if __has_builtin(__type_pack_element)
+    using type = T;
+#else
+    constexpr static auto ugly_Value(index_constant<Index>) -> T;
+#endif
+
     [[nodiscard]] constexpr auto ugly_iGet_clvr(
         index_constant<Index>) const & noexcept LIFETIMEBOUND -> T const & {
         return value;
@@ -94,7 +100,6 @@ struct element<Index, T, Ts...> {
         return std::forward<T>(value);
     }
 
-    constexpr static auto ugly_Value(index_constant<Index>) -> T;
     constexpr auto ugly_Value_clvr() const & LIFETIMEBOUND -> T const & {
         return value;
     }
@@ -114,7 +119,11 @@ struct element<Index, T, Ts...> {
 
 template <std::size_t Index, derivable T, typename... Ts>
 struct element<Index, T, Ts...> : T {
-    constexpr static auto ugly_Index = Index;
+#if __has_builtin(__type_pack_element)
+    using type = T;
+#else
+    constexpr static auto ugly_Value(index_constant<Index>) -> T;
+#endif
 
     [[nodiscard]] constexpr auto
     ugly_iGet_clvr(index_constant<Index>) const & noexcept -> T const & {
@@ -148,7 +157,6 @@ struct element<Index, T, Ts...> : T {
         return std::move(*this);
     }
 
-    constexpr static auto ugly_Value(index_constant<Index>) -> T;
     constexpr auto ugly_Value_clvr() const & -> T const & { return *this; }
     constexpr auto ugly_Value_lvr() & -> T & { return *this; }
     constexpr auto ugly_Value_rvr() && -> T && { return std::move(*this); }
@@ -227,7 +235,15 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     using base_t<Is, Ts>::ugly_tGet_clvr...;
     using base_t<Is, Ts>::ugly_tGet_lvr...;
     using base_t<Is, Ts>::ugly_tGet_rvr...;
+
+#if __has_builtin(__type_pack_element)
+    template <std::size_t I>
+    using element_t = typename base_t<I, __type_pack_element<I, Ts...>>::type;
+#else
+    constexpr static auto ugly_Value(...) -> void;
     using base_t<Is, Ts>::ugly_Value...;
+    template <std::size_t I> using element_t = decltype(ugly_Value(index<I>));
+#endif
 
     template <typename Init, typename Op>
     [[nodiscard]] constexpr inline auto fold_left(Init &&init,
@@ -351,7 +367,6 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
 
     constexpr static auto size =
         std::integral_constant<std::size_t, sizeof...(Ts)>{};
-    constexpr static auto ugly_Value(...) -> void;
 
     [[nodiscard]] constexpr static auto
     fill_inner_indices(index_pair *p) -> index_pair * {
@@ -408,7 +423,7 @@ template <typename T, std::size_t N>
 constexpr auto tuple_size_v<std::array<T, N>> = N;
 
 template <std::size_t I, typename T>
-using tuple_element_t = decltype(T::ugly_Value(index<I>));
+using tuple_element_t = typename T::template element_t<I>;
 
 template <typename T>
 concept tuple_comparable = requires { typename T::common_tuple_comparable; };
