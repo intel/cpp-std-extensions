@@ -120,12 +120,12 @@ class span : public detail::span_base<T, Extent> {
 
     template <typename R,
               std::enable_if_t<dependent_extent<R> != dynamic_extent, int> = 0>
-    explicit constexpr span(R &&r LIFETIMEBOUND)
+    explicit constexpr span(R &&r)
         : ptr{stdx::to_address(std::begin(std::forward<R>(r)))} {}
 
     template <typename R,
               std::enable_if_t<dependent_extent<R> == dynamic_extent, int> = 0>
-    explicit constexpr span(R &&r LIFETIMEBOUND)
+    explicit constexpr span(R &&r)
         : base_t{std::begin(std::forward<R>(r)), std::end(std::forward<R>(r))},
           ptr{stdx::to_address(std::begin(std::forward<R>(r)))} {}
 
