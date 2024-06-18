@@ -165,6 +165,20 @@ template <typename T> struct typer<from_any(T)> {
 template <int> constexpr auto type_of() -> void;
 template <typename T> constexpr auto type_of() -> typename typer<T>::type;
 } // namespace cxv_detail
+
+template <typename T>
+constexpr auto is_aligned_with = [](auto v) -> bool {
+    static_assert(std::is_integral_v<decltype(v)> or
+                      std::is_pointer_v<decltype(v)>,
+                  "is_aligned_with should only be used with an integral or "
+                  "pointer argument!");
+    constexpr auto mask = alignof(T) - 1u;
+    if constexpr (std::is_pointer_v<decltype(v)>) {
+        return (__builtin_bit_cast(std::uintptr_t, v) & mask) == 0;
+    } else {
+        return (static_cast<std::uintptr_t>(v) & mask) == 0;
+    }
+};
 } // namespace v1
 } // namespace stdx
 

@@ -110,8 +110,9 @@ class span : public detail::span_base<T, Extent> {
     }
 
     template <std::size_t N>
-    // NOLINTNEXTLINE(google-explicit-constructor, *-avoid-c-arrays)
+    // NOLINTNEXTLINE(google-explicit-constructor)
     constexpr span(
+        // NOLINTNEXTLINE(*-avoid-c-arrays)
         stdx::type_identity_t<element_type> (&arr)[N] LIFETIMEBOUND) noexcept
         : ptr{std::data(arr)} {
         static_assert(Extent == dynamic_extent or Extent <= N,
