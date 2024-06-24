@@ -32,7 +32,7 @@ using endian = std::endian;
 
 #if __cpp_lib_bit_cast < 201806L
 template <typename To, typename From>
-[[nodiscard]] constexpr auto bit_cast(From &from) noexcept -> To {
+[[nodiscard]] constexpr auto bit_cast(From &&from) noexcept -> To {
     return __builtin_bit_cast(To, from);
 }
 #else
