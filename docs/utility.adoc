@@ -67,6 +67,27 @@ auto l = [] (auto&& arg) {
 };
 ----
 
+=== `is_aligned_with`
+
+`is_aligned_with` is a function that returns true when a value "is aligned with"
+a type. That is, a pointer to that type would have a certain power-of-two
+alignment, and the value is a multiple of that.
+
+[source,cpp]
+----
+static_assert(stdx::is_aligned_with<std::uint16_t>(0b1110));
+static_assert(stdx::is_aligned_with<std::uint32_t>(0b1100));
+static_assert(stdx::is_aligned_with<std::uint64_t>(0b1000));
+----
+
+`is_aligned_with` can also be used with pointer values.
+
+[source,cpp]
+----
+std::uint32_t i;
+assert(stdx::is_aligned_with<std::uint32_t>(&i));
+----
+
 === `overload`
 
 `overload` is a struct designed to encapsulate an overload set. It inherits from

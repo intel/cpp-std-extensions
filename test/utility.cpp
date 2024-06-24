@@ -169,3 +169,37 @@ TEST_CASE("CX_VALUE on type template argument", "[utility]") {
     auto x = cx_value_test_type<int>();
     static_assert(std::is_same_v<decltype(x()), stdx::type_identity<int>>);
 }
+
+namespace {
+struct alignas(16) over_aligned {};
+} // namespace
+
+TEST_CASE("is_aligned_with (integral)", "[utility]") {
+    static_assert(stdx::is_aligned_with<std::uint8_t>(0b1111));
+
+    static_assert(stdx::is_aligned_with<std::uint16_t>(0b1110));
+    static_assert(not stdx::is_aligned_with<std::uint16_t>(0b1111));
+
+    static_assert(stdx::is_aligned_with<std::uint32_t>(0b1100));
+    static_assert(not stdx::is_aligned_with<std::uint32_t>(0b1110));
+
+    static_assert(stdx::is_aligned_with<std::uint64_t>(0b1000));
+    static_assert(not stdx::is_aligned_with<std::uint64_t>(0b1100));
+
+    static_assert(stdx::is_aligned_with<over_aligned>(0b1'0000));
+    static_assert(not stdx::is_aligned_with<over_aligned>(0b1000));
+}
+
+TEST_CASE("is_aligned_with (pointer)", "[utility]") {
+    std::int32_t i;
+    auto p = &i;
+    auto pc = reinterpret_cast<std::int8_t *>(p);
+    ++pc;
+
+    CHECK(stdx::is_aligned_with<std::uint8_t>(pc));
+    CHECK(not stdx::is_aligned_with<std::uint16_t>(pc));
+
+    CHECK(stdx::is_aligned_with<std::uint8_t>(p));
+    CHECK(stdx::is_aligned_with<std::uint16_t>(p));
+    CHECK(stdx::is_aligned_with<std::uint32_t>(p));
+}
