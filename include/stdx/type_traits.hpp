@@ -119,9 +119,9 @@ template <typename...> struct type_list {};
 template <auto...> struct value_list {};
 
 template <typename L> struct for_each_t {
-    static_assert(
-        always_false_v<L>,
-        "template_for_each must be called with a type list (or value list)");
+    static_assert(always_false_v<L>,
+                  "template_for_each must be called with a type list, "
+                  "value_list, or std::integer_sequence");
 };
 
 template <template <typename...> typename L, typename... Ts>
@@ -132,6 +132,12 @@ struct for_each_t<L<Ts...>> {
 };
 template <template <auto...> typename L, auto... Vs>
 struct for_each_t<L<Vs...>> {
+    template <typename F> constexpr auto operator()(F &&f) const {
+        (f.template operator()<Vs>(), ...);
+    }
+};
+template <template <typename, auto...> typename L, typename T, T... Vs>
+struct for_each_t<L<T, Vs...>> {
     template <typename F> constexpr auto operator()(F &&f) const {
         (f.template operator()<Vs>(), ...);
     }
