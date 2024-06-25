@@ -1,0 +1,96 @@
+
+== `byterator.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/byterator.hpp[`byterator.hpp`]
+provides a random-access-iterator-like type that offers some extra functionality
+for reading and writing values.
+
+It is relatively common to have an array of bytes or words that represents a
+table that needs to be interpreted in some way. Values in that table could
+be interpreted as 8-bit values, or 16-bit values, or 32-bit values split across
+multiple bytes in the table. Values at particular points in the table may
+represent offsets, number of elements to process, etc.
+
+In general, pointer-manipulating code like this is a bad idea:
+[source,cpp]
+----
+std::uint8_t const table[1024];
+
+std::uint8_t value1 = *table;
+std::uint16_t value2 = *reinterpret_cast<std::uint16_t const *>(&table[1]);
+// etc...
+----
+
+It's a one-way ticket to undefined behaviour. Even if the hardware allows
+unaligned accesses.
+
+`byterator` is designed to help deal with this situation, by providing a safe
+interface for reading and writing values like this. Create a `byterator` from an iterator:
+[source,cpp]
+----
+std::uint8_t const table[1024];
+auto i = stdx::byterator{std::begin(table)};
+----
+
+NOTE: A `byterator` must be constructed from a random access iterator whose
+`value_type` is trivially copyable.
+
+
+A `byterator` is a random access iterator whose `value_type` is `std::byte`, and
+it can be used just like that. It supports all the
+https://en.cppreference.com/w/cpp/named_req/RandomAccessIterator[requirements].
+[source,cpp]
+----
+std::uint8_t const table[1024];
+for (auto i = stdx::byterator{std::begin(table)}; i != std::end(table); ++i) {
+  std::byte b = *i;
+  // do something ...
+}
+----
+
+But the real use case is when accessing heterogeneous types in the table:
+
+[source,cpp]
+----
+std::uint8_t const table[1024];
+auto i = stdx::byterator{std::begin(table)};
+// read a std::uint16_t (and advance i by 2 bytes)
+auto value = i.readu16();
+----
+
+`byterator` has the following convenience functions:
+[source,cpp]
+----
+auto v8 = i.peeku8();   // read value without advancing
+v8 = i.readu8();        // read and advance
+i.writeu8(v8);          // write and advance
+
+auto v16 = i.peeku16(); // read value without advancing
+v16 = i.readu16();      // read and advance
+i.writeu16(v16);        // write and advance
+
+auto v32 = i.peeku32(); // read value without advancing
+v32 = i.readu32();      // read and advance
+i.writeu32(v32);        // write and advance
+----
+
+These convenience functions are implemented by function templates that offer
+more control, if needed:
+[source,cpp]
+----
+// peek and read have identical arguments; read is shown
+
+// read and return a std::uint16_t, advance 2 bytes
+auto v1 = i.read<std::uint16_t>();
+
+// read a std::uint8_t, advance 1 byte, but return the value as a std::uint16_t
+auto v2 = i.read<std::uint8_t, std::uint16_t>();
+----
+
+The last case above is particularly useful for dealing with enumerations:
+[source,cpp]
+----
+// E is a std::uint32_t under the hood, but we might well have a 1-byte value in the table
+enum struct E : std::uint32_t { A, B, C };
+auto v3 = i.read<std::uint8_t, E>();
+----
