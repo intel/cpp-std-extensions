@@ -17,6 +17,7 @@ add_tests(
     bind
     bit
     bitset
+    byterator
     cached
     callable
     concepts

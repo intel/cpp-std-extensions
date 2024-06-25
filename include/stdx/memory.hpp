@@ -26,7 +26,7 @@ template <typename T> constexpr auto to_address(T const &t) {
     if constexpr (detail::detect::pointer_traits_to_address<T>) {
         return std::pointer_traits<T>::to_address(t);
     } else {
-        return to_address(t.operator->());
+        return stdx::to_address(t.operator->());
     }
 }
 } // namespace v1
