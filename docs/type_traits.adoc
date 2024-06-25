@@ -152,6 +152,17 @@ stdx::template_for_each<L2>([&] <auto V> () { y += V; });
 // y is now 3
 ----
 
+`template_for_each` can also be used with a
+https://en.cppreference.com/w/cpp/utility/integer_sequence[`std::integer_sequence`]:
+
+[source,cpp]
+----
+using L3 = stdx::make_index_sequence<3>;
+int y{};
+stdx::template_for_each<L3>([&] <auto V> () { y += V; });
+// y is now 3
+----
+
 NOTE: A primary use case of `template_for_each` is to be able to use a list of
 tag types without those types having to be complete.
 

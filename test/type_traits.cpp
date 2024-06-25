@@ -4,6 +4,7 @@
 
 #include <cstddef>
 #include <type_traits>
+#include <utility>
 
 namespace {
 template <typename> struct unary_t {};
@@ -128,6 +129,13 @@ TEST_CASE("template_for_each with empty value list", "[type_traits]") {
     using L = stdx::value_list<>;
     stdx::template_for_each<L>(add_value{});
     CHECK(value == 17);
+}
+
+TEST_CASE("template_for_each with index sequence", "[type_traits]") {
+    value = 0;
+    using L = std::make_index_sequence<3>;
+    stdx::template_for_each<L>(add_value{});
+    CHECK(value == 3);
 }
 
 TEST_CASE("is_same_unqualified", "[type_traits]") {
