@@ -8,6 +8,7 @@
 
 #if __cpp_lib_concepts < 202002L
 
+#include <functional>
 #include <type_traits>
 #include <utility>
 
@@ -154,23 +155,22 @@ concept totally_ordered =
     equality_comparable<T> and detail::partially_ordered<T>;
 
 template <typename F, typename... Args>
-concept invocable =
-    requires(F &&f, Args &&...args) {
-        std::invoke(std::forward<F>(f), std::forward<Args>(args)...);
-    }
+concept invocable = requires(F &&f, Args &&...args) {
+    std::invoke(std::forward<F>(f), std::forward<Args>(args)...);
+};
 
 namespace detail {
-    template <typename B>
-    concept boolean_testable_impl = stdx::convertible_to<B, bool>;
+template <typename B>
+concept boolean_testable_impl = stdx::convertible_to<B, bool>;
 
-    template <typename B>
-    concept boolean_testable = boolean_testable_impl<B> and requires(B &&b) {
-        { not std::forward<B>(b) } -> boolean_testable_impl;
-    };
+template <typename B>
+concept boolean_testable = boolean_testable_impl<B> and requires(B &&b) {
+    { not std::forward<B>(b) } -> boolean_testable_impl;
+};
 } // namespace detail
 
 template <typename F, typename... Args>
-concept predicate = invocable<F, Args> and
+concept predicate = invocable<F, Args...> and
                     detail::boolean_testable<std::invoke_result_t<F, Args...>>;
 
 template <typename T>
