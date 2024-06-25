@@ -36,6 +36,38 @@ auto f(T) {
 };
 ----
 
+=== `apply_sequence`
+
+A xref:type_traits.adoc#_type_list_and_value_list[`type_list` or a `value_list`]
+can be unpacked and passed as individual template arguments with
+`apply_sequence`. A function object whose call operator is a variadic function
+template with no runtime arguments is called with the pack of arguments.
+
+[source,cpp]
+----
+using L1 = stdx::type_list<std::integral_constant<int, 1>,
+                           std::integral_constant<int, 2>>;
+int x = stdx::apply_sequence<L1>([&] <typename... Ts> () { return (0 + ... + Ts::value); });
+// x is 3
+
+using L2 = stdx::value_list<1, 2>;
+int y = stdx::apply_sequence<L1>([&] <auto... Vs> () { return (0 + ... + Vs); });
+// y is 3
+----
+
+`apply_sequence` can also be used with a
+https://en.cppreference.com/w/cpp/utility/integer_sequence[`std::integer_sequence`]:
+
+[source,cpp]
+----
+using L3 = stdx::make_index_sequence<3>;
+auto y = stdx::apply_sequence<L3>([&] <auto... Vs> () { y += V; });
+// y is 3
+----
+
+NOTE: If the function iterates the pack by folding over `operator,` then
+xref:type_traits.adoc#_template_for_each[`template_for_each`] is probably what you want.
+
 === `is_function_object_v`
 
 `is_function_object_v` is a variable template that detects whether a type is a
@@ -50,6 +82,17 @@ auto const gen_lam = []<typename>(){};
 stdx::is_function_object_v<decltype(f)>;         // false
 stdx::is_function_object_v<decltype(lam)>;       // true
 stdx::is_function_object_v<decltype(gen_lam)>;   // true
+----
+
+=== `is_same_unqualified_v`
+
+`is_same_unqualified_v` is a variable template that detects whether a two types
+are the same are removing top-level cv-qualifications and references, if any.
+
+[source,cpp]
+----
+stdx::is_same_unqualified_v<int, int const&>; // true
+stdx::is_same_unqualified_v<int, void>;       // false
 ----
 
 === `is_specialization_of_v`
@@ -112,31 +155,12 @@ NOTE: Detecting structurality of a type is not yet possible in the general case,
 so there are certain structural types for which this trait will be `false`. In
 practice those types should be rare, and there should be no false positives.
 
-=== `type_or_t`
-
-`type_or_t` is an alias template that selects a type based on whether or not it
-passes a predicate. If not, a default is returned.
-
-[source,cpp]
-----
-using A = int *;
-using T = stdx::type_or_t<std::is_pointer, A>;        // A
-
-using B = int;
-using X = stdx::type_or_t<std::is_pointer, B>;        // void (implicit default)
-using Y = stdx::type_or_t<std::is_pointer, B, float>; // float (explicit default)
-----
-
-=== `type_list` and `value_list`
-
-`type_list` is an empty `struct` templated over any number of types.
-`value_list` is an empty `struct` templated over any number of NTTPs.
-
 === `template_for_each`
 
-A `type_list` or a `value_list` can be iterated with `template_for_each`. A
-function object whose call operator is a unary function template with no runtime
-arguments is passed to each of these functions.
+A xref:type_traits.adoc#_type_list_and_value_list[`type_list` or a `value_list`]
+can be iterated with `template_for_each`. A function object whose call operator
+is a unary function template with no runtime arguments is called with each
+element of the list.
 
 [source,cpp]
 ----
@@ -158,7 +182,7 @@ https://en.cppreference.com/w/cpp/utility/integer_sequence[`std::integer_sequenc
 [source,cpp]
 ----
 using L3 = stdx::make_index_sequence<3>;
-int y{};
+std::size_t y{};
 stdx::template_for_each<L3>([&] <auto V> () { y += V; });
 // y is now 3
 ----
@@ -166,13 +190,23 @@ stdx::template_for_each<L3>([&] <auto V> () { y += V; });
 NOTE: A primary use case of `template_for_each` is to be able to use a list of
 tag types without those types having to be complete.
 
-=== `is_same_unqualified_v`
+=== `type_or_t`
 
-`is_same_unqualified_v` is a variable template that detects whether a two types
-are the same are removing top-level cv-qualifications and references, if any.
+`type_or_t` is an alias template that selects a type based on whether or not it
+passes a predicate. If not, a default is returned.
 
 [source,cpp]
 ----
-stdx::is_same_unqualified_v<int, int const&>; // true
-stdx::is_same_unqualified_v<int, void>;       // false
+using A = int *;
+using T = stdx::type_or_t<std::is_pointer, A>;        // A
+
+using B = int;
+using X = stdx::type_or_t<std::is_pointer, B>;        // void (implicit default)
+using Y = stdx::type_or_t<std::is_pointer, B, float>; // float (explicit default)
 ----
+
+=== `type_list` and `value_list`
+
+`type_list` is an empty `struct` templated over any number of types.
+`value_list` is an empty `struct` templated over any number of NTTPs.
+

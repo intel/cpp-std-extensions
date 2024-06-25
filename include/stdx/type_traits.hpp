@@ -118,6 +118,7 @@ constexpr bool is_scoped_enum_v =
 template <typename...> struct type_list {};
 template <auto...> struct value_list {};
 
+namespace detail {
 template <typename L> struct for_each_t {
     static_assert(always_false_v<L>,
                   "template_for_each must be called with a type list, "
@@ -142,8 +143,40 @@ struct for_each_t<L<T, Vs...>> {
         (f.template operator()<Vs>(), ...);
     }
 };
+} // namespace detail
 
-template <typename L> constexpr static auto template_for_each = for_each_t<L>{};
+template <typename L>
+constexpr static auto template_for_each = detail::for_each_t<L>{};
+
+namespace detail {
+template <typename L> struct apply_sequence_t {
+    static_assert(always_false_v<L>,
+                  "apply_sequence must be called with a type list, "
+                  "value_list, or std::integer_sequence");
+};
+
+template <template <typename...> typename L, typename... Ts>
+struct apply_sequence_t<L<Ts...>> {
+    template <typename F> constexpr auto operator()(F &&f) const {
+        return f.template operator()<Ts...>();
+    }
+};
+template <template <auto...> typename L, auto... Vs>
+struct apply_sequence_t<L<Vs...>> {
+    template <typename F> constexpr auto operator()(F &&f) const {
+        return f.template operator()<Vs...>();
+    }
+};
+template <template <typename, auto...> typename L, typename T, T... Vs>
+struct apply_sequence_t<L<T, Vs...>> {
+    template <typename F> constexpr auto operator()(F &&f) const {
+        return f.template operator()<Vs...>();
+    }
+};
+} // namespace detail
+
+template <typename L>
+constexpr static auto apply_sequence = detail::apply_sequence_t<L>{};
 
 template <typename T, typename U>
 constexpr bool is_same_unqualified_v =
