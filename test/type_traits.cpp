@@ -100,6 +100,15 @@ struct add_value {
     }
     template <auto T> constexpr auto operator()() const -> void { value += T; }
 };
+
+struct add_values {
+    template <typename... Ts> constexpr auto operator()() const {
+        return (0 + ... + Ts::value);
+    }
+    template <auto... Ts> constexpr auto operator()() const {
+        return (0 + ... + Ts);
+    }
+};
 } // namespace
 
 TEST_CASE("template_for_each with type list", "[type_traits]") {
@@ -136,6 +145,22 @@ TEST_CASE("template_for_each with index sequence", "[type_traits]") {
     using L = std::make_index_sequence<3>;
     stdx::template_for_each<L>(add_value{});
     CHECK(value == 3);
+}
+
+TEST_CASE("apply_sequence with type list", "[type_traits]") {
+    using L = stdx::type_list<std::integral_constant<int, 1>,
+                              std::integral_constant<int, 2>>;
+    CHECK(stdx::apply_sequence<L>(add_values{}) == 3);
+}
+
+TEST_CASE("apply_sequence with value list", "[type_traits]") {
+    using L = stdx::value_list<1, 2>;
+    CHECK(stdx::apply_sequence<L>(add_values{}) == 3);
+}
+
+TEST_CASE("apply_sequence with index sequence", "[type_traits]") {
+    using L = std::make_index_sequence<3>;
+    CHECK(stdx::apply_sequence<L>(add_values{}) == 3);
 }
 
 TEST_CASE("is_same_unqualified", "[type_traits]") {
