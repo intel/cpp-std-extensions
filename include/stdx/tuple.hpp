@@ -504,11 +504,18 @@ constexpr auto apply(Op &&op, T &&t) -> decltype(auto) {
     return std::forward<T>(t).apply(std::forward<Op>(op));
 }
 
-template <typename Op, tuplelike T> constexpr auto transform(Op &&op, T &&t) {
-    return std::forward<T>(t).apply([&]<typename... Ts>(Ts &&...ts) {
-        return stdx::tuple<decltype(op(std::forward<Ts>(ts)))...>{
-            op(std::forward<Ts>(ts))...};
-    });
+template <template <typename> typename... Fs, typename Op, tuplelike T>
+constexpr auto transform(Op &&op, T &&t) {
+    if constexpr (sizeof...(Fs) == 0) {
+        return std::forward<T>(t).apply([&]<typename... Ts>(Ts &&...ts) {
+            return stdx::tuple<decltype(op(std::forward<Ts>(ts)))...>{
+                op(std::forward<Ts>(ts))...};
+        });
+    } else {
+        return std::forward<T>(t).apply([&]<typename... Ts>(Ts &&...ts) {
+            return stdx::make_indexed_tuple<Fs...>(op(std::forward<Ts>(ts))...);
+        });
+    }
 }
 
 template <typename Op, tuplelike T>
