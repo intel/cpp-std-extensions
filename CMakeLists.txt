@@ -8,7 +8,11 @@ project(
 )
 
 include(cmake/get_cpm.cmake)
-cpmaddpackage("gh:intel/cicd-repo-infrastructure#main")
+if(PROJECT_IS_TOP_LEVEL)
+    cpmaddpackage("gh:intel/cicd-repo-infrastructure#dev")
+else()
+    cpmaddpackage("gh:intel/cicd-repo-infrastructure#3e2bef0")
+endif()
 
 add_versioned_package("gh:boostorg/mp11#boost-1.83.0")
 fmt_recipe(11.0.0)
