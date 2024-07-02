@@ -66,7 +66,6 @@ struct element<Index, T, Ts...> {
     using type = T;
 #else
     constexpr static auto ugly_Value(index_constant<Index>) -> T;
-#endif
 
     [[nodiscard]] constexpr auto ugly_iGet_clvr(
         index_constant<Index>) const & noexcept LIFETIMEBOUND -> T const & {
@@ -80,6 +79,7 @@ struct element<Index, T, Ts...> {
     ugly_iGet_rvr(index_constant<Index>) && noexcept LIFETIMEBOUND -> T && {
         return std::forward<T>(value);
     }
+#endif
 
     template <typename U>
         requires(std::same_as<U, T> or ... or std::same_as<U, Ts>)
@@ -123,7 +123,6 @@ struct element<Index, T, Ts...> : T {
     using type = T;
 #else
     constexpr static auto ugly_Value(index_constant<Index>) -> T;
-#endif
 
     [[nodiscard]] constexpr auto
     ugly_iGet_clvr(index_constant<Index>) const & noexcept -> T const & {
@@ -137,6 +136,7 @@ struct element<Index, T, Ts...> : T {
     ugly_iGet_rvr(index_constant<Index>) && noexcept -> T && {
         return std::move(*this);
     }
+#endif
 
     template <typename U>
         requires(std::is_same_v<U, T> or ... or std::is_same_v<U, Ts>)
@@ -229,9 +229,6 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     using common_tuple_comparable = void;
     using is_tuple = void;
 
-    using base_t<Is, Ts>::ugly_iGet_clvr...;
-    using base_t<Is, Ts>::ugly_iGet_lvr...;
-    using base_t<Is, Ts>::ugly_iGet_rvr...;
     using base_t<Is, Ts>::ugly_tGet_clvr...;
     using base_t<Is, Ts>::ugly_tGet_lvr...;
     using base_t<Is, Ts>::ugly_tGet_rvr...;
@@ -243,6 +240,10 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     constexpr static auto ugly_Value(...) -> void;
     using base_t<Is, Ts>::ugly_Value...;
     template <std::size_t I> using element_t = decltype(ugly_Value(index<I>));
+
+    using base_t<Is, Ts>::ugly_iGet_clvr...;
+    using base_t<Is, Ts>::ugly_iGet_lvr...;
+    using base_t<Is, Ts>::ugly_iGet_rvr...;
 #endif
 
     template <typename Init, typename Op>
@@ -274,30 +275,48 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     }
 
     template <std::size_t I>
-        [[nodiscard]] constexpr auto operator[](index_constant<I> i) const
+        [[nodiscard]] constexpr auto
+        operator[]([[maybe_unused]] index_constant<I> i) const
         & LIFETIMEBOUND->decltype(auto) {
         if constexpr (I >= sizeof...(Ts)) {
             error::index_out_of_bounds<I, Ts...>();
         } else {
+#if __has_builtin(__type_pack_element)
+            using B = base_t<I, __type_pack_element<I, Ts...>>;
+            return this->B::ugly_Value_clvr();
+#else
             return this->ugly_iGet_clvr(i);
+#endif
         }
     }
     template <std::size_t I>
-        [[nodiscard]] constexpr auto operator[](index_constant<I> i) &
+        [[nodiscard]] constexpr auto
+        operator[]([[maybe_unused]] index_constant<I> i) &
         LIFETIMEBOUND->decltype(auto) {
         if constexpr (I >= sizeof...(Ts)) {
             error::index_out_of_bounds<I, Ts...>();
         } else {
+#if __has_builtin(__type_pack_element)
+            using B = base_t<I, __type_pack_element<I, Ts...>>;
+            return this->B::ugly_Value_lvr();
+#else
             return this->ugly_iGet_lvr(i);
+#endif
         }
     }
     template <std::size_t I>
-        [[nodiscard]] constexpr auto operator[](index_constant<I> i) &&
+        [[nodiscard]] constexpr auto
+        operator[]([[maybe_unused]] index_constant<I> i) &&
         LIFETIMEBOUND->decltype(auto) {
         if constexpr (I >= sizeof...(Ts)) {
             error::index_out_of_bounds<I, Ts...>();
         } else {
+#if __has_builtin(__type_pack_element)
+            using B [[maybe_unused]] = base_t<I, __type_pack_element<I, Ts...>>;
+            return std::move(*this).B::ugly_Value_rvr();
+#else
             return std::move(*this).ugly_iGet_rvr(i);
+#endif
         }
     }
 

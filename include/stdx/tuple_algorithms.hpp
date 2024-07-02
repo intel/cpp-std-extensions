@@ -40,13 +40,11 @@ template <tuplelike... Ts> [[nodiscard]] constexpr auto tuple_cat(Ts &&...ts) {
         return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
             using T = stdx::tuple<stdx::tuple_element_t<
                 element_indices[Is].inner,
-                std::remove_cvref_t<
-                    decltype(std::move(outer_tuple)
-                                 .ugly_iGet_rvr(
-                                     index<element_indices[Is].outer>))>>...>;
-            return T{std::move(outer_tuple)
-                         .ugly_iGet_rvr(index<element_indices[Is].outer>)
-                             [index<element_indices[Is].inner>]...};
+                std::remove_cvref_t<decltype(std::move(
+                    outer_tuple)[index<element_indices[Is].outer>])>>...>;
+            return T{
+                std::move(outer_tuple)[index<element_indices[Is].outer>]
+                                      [index<element_indices[Is].inner>]...};
         }(std::make_index_sequence<total_num_elements>{});
     }
 }
