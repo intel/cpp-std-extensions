@@ -19,6 +19,7 @@ The following compilers are supported:
 * clang 14
 * clang 15
 * clang 16
+* clang 17
 * clang 18
 * gcc 12
 * gcc 13
@@ -36,6 +37,7 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/algorithm.hpp[`algorithm.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bit.hpp[`bit.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bitset.hpp[`bitset.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/byterator.hpp[`byterator.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/cached.hpp[`cached.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/compiler.hpp[`compiler.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/concepts.hpp[`concepts.hpp`]
