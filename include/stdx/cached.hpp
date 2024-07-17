@@ -10,67 +10,73 @@
 
 namespace stdx {
 inline namespace v1 {
-template <typename F> class cached : with_result_of<F> {
-    using lazy_t = with_result_of<F>;
-
-  public:
+template <typename F> struct cached {
     using value_type = stdx::remove_cvref_t<std::invoke_result_t<F>>;
 
-    constexpr explicit cached(F const &f) : lazy_t{f} {}
-    constexpr explicit cached(F &&f) : lazy_t{std::move(f)} {}
+    constexpr explicit cached(F const &f) : lazy{f} {}
+    constexpr explicit cached(F &&f) : lazy{std::move(f)} {}
 
-    auto has_value() const noexcept -> bool { return opt.has_value(); }
-    explicit operator bool() const noexcept { return opt.has_value(); }
-    explicit operator bool() noexcept { return opt.has_value(); }
+    constexpr auto has_value() const noexcept -> bool {
+        return opt.has_value();
+    }
+    constexpr explicit operator bool() const noexcept {
+        return opt.has_value();
+    }
 
-    auto value() & LIFETIMEBOUND -> value_type & {
+    constexpr auto value() & LIFETIMEBOUND -> value_type & {
         populate();
         return *opt;
     }
-    auto value() const & LIFETIMEBOUND -> value_type const & {
+    constexpr auto value() const & LIFETIMEBOUND -> value_type const & {
         populate();
         return *opt;
     }
-    auto value() && LIFETIMEBOUND -> value_type && {
+    constexpr auto value() && LIFETIMEBOUND -> value_type && {
         populate();
         return *std::move(opt);
     }
-    auto value() const && LIFETIMEBOUND -> value_type const && {
+    constexpr auto value() const && LIFETIMEBOUND -> value_type const && {
         populate();
         return *std::move(opt);
     }
 
-    auto operator->() const LIFETIMEBOUND->value_type const * {
+    constexpr auto operator->() const LIFETIMEBOUND->value_type const * {
         populate();
         return opt.operator->();
     }
-    auto operator->() LIFETIMEBOUND->value_type * {
+    constexpr auto operator->() LIFETIMEBOUND->value_type * {
         populate();
         return opt.operator->();
     }
 
-    auto operator*() const & LIFETIMEBOUND->decltype(auto) { return value(); }
-    auto operator*() & LIFETIMEBOUND->decltype(auto) { return value(); }
-    auto operator*() const && LIFETIMEBOUND->decltype(auto) {
+    constexpr auto operator*() const & LIFETIMEBOUND->decltype(auto) {
+        return value();
+    }
+    constexpr auto operator*() & LIFETIMEBOUND->decltype(auto) {
+        return value();
+    }
+    constexpr auto operator*() const && LIFETIMEBOUND->decltype(auto) {
         return std::move(*this).value();
     }
-    auto operator*() && LIFETIMEBOUND->decltype(auto) {
+    constexpr auto operator*() && LIFETIMEBOUND->decltype(auto) {
         return std::move(*this).value();
     }
 
     auto reset() { opt.reset(); }
-    auto refresh() {
+    auto refresh() LIFETIMEBOUND -> value_type & {
         opt.reset();
         populate();
+        return *opt;
     }
 
   private:
-    auto populate() const {
+    constexpr auto populate() const {
         if (not opt.has_value()) {
-            opt.emplace(static_cast<lazy_t>(*this));
+            opt.emplace(lazy);
         }
     }
 
+    with_result_of<F> lazy;
     mutable std::optional<value_type> opt{};
 };
 

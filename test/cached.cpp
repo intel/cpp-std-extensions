@@ -61,6 +61,12 @@ TEST_CASE("refresh immediately repopulates value", "[cached]") {
     CHECK(count == 2);
 }
 
+TEST_CASE("refresh returns a reference to value", "[cached]") {
+    auto c = stdx::cached{[] { return 42; }};
+    static_assert(std::is_same_v<decltype(c.refresh()), int &>);
+    CHECK(c.refresh() == 42);
+}
+
 namespace {
 struct move_only {
     constexpr move_only(int i) : value{i} {}
