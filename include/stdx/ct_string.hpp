@@ -116,9 +116,7 @@ operator+(ct_string<N> const &lhs,
 
 inline namespace literals {
 inline namespace ct_string_literals {
-template <typename T, T... Cs> CONSTEVAL auto operator""_cts() {
-    return ct_string<sizeof...(Cs) + 1U>{{Cs..., 0}};
-}
+template <ct_string S> CONSTEVAL auto operator""_cts() { return S; }
 } // namespace ct_string_literals
 } // namespace literals
 
