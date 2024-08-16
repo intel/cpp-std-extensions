@@ -202,8 +202,8 @@ template <template <typename> typename Proj = std::type_identity_t,
 namespace detail {
 template <tuplelike T, template <typename> typename Proj, std::size_t I>
 [[nodiscard]] constexpr auto test_adjacent() -> bool {
-    return stdx::type_as_string<Proj<stdx::tuple_element_t<I, T>>>() ==
-           stdx::type_as_string<Proj<stdx::tuple_element_t<I + 1, T>>>();
+    return std::is_same_v<Proj<stdx::tuple_element_t<I, T>>,
+                          Proj<stdx::tuple_element_t<I + 1, T>>>;
 }
 
 template <tuplelike T, template <typename> typename Proj = std::type_identity_t>
