@@ -173,6 +173,21 @@ constexpr auto contains_type(
     stdx::detail::tuple_impl<IndexSeq, index_function_list<Fs...>, Us...> const
         &) -> std::bool_constant<(is_index_for<T, Fs, Us...> or ...) or
                                  (std::is_same_v<T, Us> or ...)>;
+
+template <tuplelike T, template <typename> typename Proj = std::type_identity_t>
+[[nodiscard]] constexpr auto sorted_indices() {
+    return []<std::size_t... Is>(std::index_sequence<Is...>)
+               -> std::array<std::size_t, sizeof...(Is)> {
+        using P = std::pair<std::string_view, std::size_t>;
+        auto a = std::array<P, sizeof...(Is)>{
+            P{stdx::type_as_string<Proj<tuple_element_t<Is, T>>>(), Is}...};
+        std::sort(a.begin(), a.end(), [](auto const &p1, auto const &p2) {
+            return p1.first < p2.first;
+        });
+        return {a[Is].second...};
+    }
+    (std::make_index_sequence<T::size()>{});
+}
 } // namespace detail
 
 template <tuplelike Tuple, typename T>
@@ -183,36 +198,29 @@ template <template <typename> typename Proj = std::type_identity_t,
           tuplelike Tuple>
 [[nodiscard]] constexpr auto sort(Tuple &&t) {
     using T = stdx::remove_cvref_t<Tuple>;
-    using P = std::pair<std::string_view, std::size_t>;
-    constexpr auto indices = []<std::size_t... Is>(std::index_sequence<Is...>) {
-        auto a = std::array<P, sizeof...(Is)>{
-            P{stdx::type_as_string<Proj<tuple_element_t<Is, T>>>(), Is}...};
-        std::sort(a.begin(), a.end(), [](auto const &p1, auto const &p2) {
-            return p1.first < p2.first;
-        });
-        return a;
-    }(std::make_index_sequence<T::size()>{});
-
+    constexpr auto indices = detail::sorted_indices<T, Proj>();
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return stdx::tuple<tuple_element_t<indices[Is].second, T>...>{
-            std::forward<Tuple>(t)[index<indices[Is].second>]...};
+        return stdx::tuple<tuple_element_t<indices[Is], T>...>{
+            std::forward<Tuple>(t)[index<indices[Is]>]...};
     }(std::make_index_sequence<T::size()>{});
 }
 
 namespace detail {
-template <tuplelike T, template <typename> typename Proj, std::size_t I>
-[[nodiscard]] constexpr auto test_adjacent() -> bool {
-    return std::is_same_v<Proj<stdx::tuple_element_t<I, T>>,
-                          Proj<stdx::tuple_element_t<I + 1, T>>>;
-}
+
+template <tuplelike T, template <typename> typename Proj> struct test_pair_t {
+    template <std::size_t I, std::size_t J>
+    constexpr static auto value =
+        std::is_same_v<Proj<stdx::tuple_element_t<I, T>>,
+                       Proj<stdx::tuple_element_t<J, T>>>;
+};
 
 template <tuplelike T, template <typename> typename Proj = std::type_identity_t>
     requires(tuple_size_v<T> > 1)
 [[nodiscard]] constexpr auto count_chunks() {
     auto count = std::size_t{1};
     [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        ((count +=
-          static_cast<std::size_t>(not detail::test_adjacent<T, Proj, Is>())),
+        ((count += static_cast<std::size_t>(
+              not test_pair_t<T, Proj>::template value<Is, Is + 1>)),
          ...);
     }(std::make_index_sequence<stdx::tuple_size_v<T> - 1>{});
     return count;
@@ -232,7 +240,7 @@ template <tuplelike T, template <typename> typename Proj = std::type_identity_t>
     std::array<chunk, count_chunks<T, Proj>()> chunks{};
     ++chunks[index].size;
     auto check_next_chunk = [&]<std::size_t I>() {
-        if (not detail::test_adjacent<T, Proj, I>()) {
+        if (not test_pair_t<T, Proj>::template value<I, I + 1>) {
             chunks[++index].offset = I + 1;
         }
         ++chunks[index].size;
@@ -332,6 +340,55 @@ template <tuplelike Tuple> constexpr auto to_unsorted_set(Tuple &&t) {
         return U{get<boost::mp11::mp_find<T, tuple_element_t<Is, U>>::value>(
             std::forward<Tuple>(t))...};
     }(std::make_index_sequence<U::size()>{});
+}
+
+template <template <typename> typename Proj = std::type_identity_t,
+          tuplelike Tuple>
+[[nodiscard]] constexpr auto gather_by(Tuple &&t) {
+    using tuple_t = std::remove_cvref_t<Tuple>;
+    if constexpr (tuple_size_v<tuple_t> == 0) {
+        return stdx::tuple{};
+    } else if constexpr (tuple_size_v<tuple_t> == 1) {
+        return stdx::make_tuple(std::forward<Tuple>(t));
+    } else {
+        constexpr auto sorted_idxs = detail::sorted_indices<tuple_t, Proj>();
+        constexpr auto tests =
+            [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+                return std::array<bool, stdx::tuple_size_v<tuple_t> - 1>{
+                    detail::test_pair_t<tuple_t, Proj>::template value<
+                        sorted_idxs[Is], sorted_idxs[Is + 1]>...};
+            }(std::make_index_sequence<stdx::tuple_size_v<tuple_t> - 1>{});
+
+        constexpr auto chunks = [&] {
+            constexpr auto chunk_count =
+                std::count(std::begin(tests), std::end(tests), false) + 1;
+            std::array<detail::chunk, chunk_count> cs{};
+
+            auto index = std::size_t{};
+            ++cs[index].size;
+            for (auto i = std::size_t{}; i < std::size(tests); ++i) {
+                if (not tests[i]) {
+                    cs[++index].offset = i + 1;
+                }
+                ++cs[index].size;
+            }
+            return cs;
+        }();
+
+        return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+            return stdx::make_tuple([&]<std::size_t... Js>(
+                                        std::index_sequence<Js...>) {
+                constexpr auto offset = chunks[Is].offset;
+                return stdx::tuple<
+                    tuple_element_t<sorted_idxs[offset + Js], tuple_t>...>{
+                    std::forward<Tuple>(t)[index<sorted_idxs[offset + Js]>]...};
+            }(std::make_index_sequence<chunks[Is].size>{})...);
+        }(std::make_index_sequence<chunks.size()>{});
+    }
+}
+
+template <tuplelike Tuple> [[nodiscard]] constexpr auto gather(Tuple &&t) {
+    return gather_by(std::forward<Tuple>(t));
 }
 } // namespace v1
 } // namespace stdx

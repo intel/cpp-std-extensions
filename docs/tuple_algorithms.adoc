@@ -176,6 +176,28 @@ auto a = std::array{1, 2, 3};
 stdx::unrolled_for_each([] (auto x) { std::cout << x << '\n'; }, a);
 ----
 
+=== `gather_by`
+
+`gather_by` takes a tuple and returns a tuple-of-tuples, where each tuple is
+grouped by type name.
+[source,cpp]
+----
+auto t = stdx::tuple{1, true, 2, false, 3}; // tuple<int, int, int, bool, bool>
+auto c1 = stdx::gather_by(t); // tuple<tuple<int, int, int>, tuple<bool, bool>>
+auto c2 = stdx::gather(t);    // without a template argument, the same as gather_by
+----
+
+`gather_by` is like `chunk_by`, except that `gather_by` gathers elements that are not adjacent.
+
+`gather_by` takes an optional template argument which is a type
+function (a template of one argument). This will be applied to each type in the
+tuple to obtain a type name that is then used to chunk. By default, this
+type function is `std::type_identity_t`.
+
+WARNING: `gather_by` uses `sort` - not `stable_sort`! For a given type, the
+order of values in the gathered tuple is not necessarily the same as that of the
+input tuple.
+
 === `sort`
 
 `sort` is used to sort a tuple by type name.
@@ -190,6 +212,9 @@ function (a template of one argument). This will be applied to each type in the
 tuple to obtain a type name that is then sorted alphabetically. By default, this
 type function is `std::type_identity_t`.
 
+WARNING: `sort` is not `stable_sort`! For a given type, the order of values in
+the sorted tuple is not necessarily the same as that of the input tuple.
+
 === `to_sorted_set`
 
 `to_sorted_set` is `sort` followed by `unique`: it sorts the types in a tuple,
@@ -198,8 +223,12 @@ then collapses it so that there is only one element of each type.
 [source,cpp]
 ----
 auto t = stdx::tuple{1, true, 2, false};
-auto u = stdx::to_sorted_set(t); // {true, 1}
+auto u = stdx::to_sorted_set(t); // {<some bool>, <some integer>}
 ----
+
+WARNING: `sort` is not `stable_sort`! The value in the example above is not
+necessarily `{true, 1}` because there is no stable ordering between elements of
+the same type.
 
 === `to_unsorted_set`
 

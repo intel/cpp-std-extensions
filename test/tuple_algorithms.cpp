@@ -649,3 +649,76 @@ TEST_CASE("unrolled enumerate on arrays", "[tuple_algorithms]") {
         a, a);
     CHECK(sum == (0 + 1 + 2) + (2 + 4 + 6));
 }
+
+TEST_CASE("gather (empty tuple)", "[tuple_algorithms]") {
+    constexpr auto t = stdx::tuple{};
+    [[maybe_unused]] constexpr auto gathered = stdx::gather(t);
+    static_assert(std::is_same_v<decltype(gathered), stdx::tuple<> const>);
+}
+
+TEST_CASE("gather (1-element tuple)", "[tuple_algorithms]") {
+    constexpr auto t = stdx::tuple{1};
+    constexpr auto gathered = stdx::gather(t);
+    static_assert(std::is_same_v<decltype(gathered),
+                                 stdx::tuple<stdx::tuple<int>> const>);
+    CHECK(gathered == stdx::make_tuple(stdx::tuple{1}));
+}
+
+TEST_CASE("gather (general case)", "[tuple_algorithms]") {
+    constexpr auto t = stdx::tuple{1, 1.0, 2, 1.0, 3, true};
+    constexpr auto gathered = stdx::gather(t);
+    static_assert(std::is_same_v<
+                  decltype(gathered),
+                  stdx::tuple<stdx::tuple<bool>, stdx::tuple<double, double>,
+                              stdx::tuple<int, int, int>> const>);
+    // NB: the subtuples are not necessarily ordered the same way as originally
+    CHECK(stdx::get<0>(gathered) == stdx::tuple{true});
+    CHECK(stdx::get<1>(gathered).fold_left(0.0, std::plus{}) == 2.0);
+    CHECK(stdx::get<2>(gathered).fold_left(0, std::plus{}) == 6);
+}
+
+TEST_CASE("gather preserves references", "[tuple_algorithms]") {
+    int x{1};
+    int y{2};
+    auto t = stdx::tuple<int &, int &>{x, y};
+    auto gathered = stdx::gather(t);
+    static_assert(std::is_same_v<decltype(gathered),
+                                 stdx::tuple<stdx::tuple<int &, int &>>>);
+    CHECK(get<0>(gathered) == stdx::tuple{1, 2});
+}
+
+TEST_CASE("gather with move only types", "[tuple_algorithms]") {
+    auto t = stdx::tuple{move_only{1}};
+    auto gathered = stdx::gather(std::move(t));
+    static_assert(std::is_same_v<decltype(gathered),
+                                 stdx::tuple<stdx::tuple<move_only>>>);
+    CHECK(get<0>(gathered) == stdx::tuple{move_only{1}});
+}
+
+namespace {
+template <typename T> struct named_int {
+    using name_t = T;
+    int value;
+    friend constexpr auto operator==(named_int, named_int) -> bool = default;
+};
+
+template <typename T> using name_of_t = typename T::name_t;
+} // namespace
+
+TEST_CASE("gather_by with projection", "[tuple_algorithms]") {
+    struct A;
+    struct B;
+    struct C;
+    constexpr auto t = stdx::tuple{named_int<C>{3}, named_int<B>{11},
+                                   named_int<A>{0}, named_int<B>{12}};
+    constexpr auto gathered = stdx::gather_by<name_of_t>(t);
+    static_assert(
+        std::is_same_v<decltype(gathered),
+                       stdx::tuple<stdx::tuple<named_int<A>>,
+                                   stdx::tuple<named_int<B>, named_int<B>>,
+                                   stdx::tuple<named_int<C>>> const>);
+    CHECK(get<0>(gathered) == stdx::tuple{named_int<A>{0}});
+    CHECK(stdx::get<1>(gathered).fold_left(
+              0, [](auto x, auto y) { return x + y.value; }) == 23);
+    CHECK(get<2>(gathered) == stdx::tuple{named_int<C>{3}});
+}
