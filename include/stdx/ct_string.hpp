@@ -58,6 +58,10 @@ template <std::size_t N> struct ct_string {
     std::array<char, N> value{};
 };
 
+template <stdx::ct_string S> struct cts_t {
+    constexpr static auto value = S;
+};
+
 template <std::size_t N, std::size_t M>
 [[nodiscard]] constexpr auto operator==(ct_string<N> const &lhs,
                                         ct_string<M> const &rhs) -> bool {

@@ -130,3 +130,9 @@ TEST_CASE("template argument as CX_VALUE", "[ct_string]") {
     constexpr auto s = to_cx_value<"Hello">();
     static_assert(s() == "Hello"_cts);
 }
+
+TEST_CASE("wrap ct_string in type", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    using S = stdx::cts_t<"Hello">;
+    static_assert(S::value == "Hello"_cts);
+}

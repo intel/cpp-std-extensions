@@ -216,5 +216,12 @@ constexpr bool is_structural_v = detail::detect_structural<T>;
 template <typename T, typename = void> constexpr auto is_cx_value_v = false;
 template <typename T>
 constexpr auto is_cx_value_v<T, std::void_t<typename T::cx_value_t>> = true;
+
+#if __cplusplus >= 202002L
+template <typename T>
+using shrink_t = decltype([]() -> T (*)() { return nullptr; });
+
+template <typename T> using expand_t = decltype(T{}()());
+#endif
 } // namespace v1
 } // namespace stdx
