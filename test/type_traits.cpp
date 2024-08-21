@@ -1,3 +1,4 @@
+#include <stdx/ct_conversions.hpp>
 #include <stdx/type_traits.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -237,3 +238,19 @@ struct S {
 TEST_CASE("non-structural types", "[type_traits]") {
     static_assert(not stdx::is_structural_v<non_structural::S>);
 }
+
+#if __cplusplus >= 202002L
+namespace {
+template <typename...> struct long_type_name {};
+} // namespace
+
+TEST_CASE("type shrinkage", "[type_traits]") {
+    using A = long_type_name<int, int, int, int, int, int, int, int>;
+    using B = long_type_name<A, A, A, A, A, A, A, A>;
+    using C = long_type_name<B, B, B, B, B, B, B, B>;
+    using X = stdx::shrink_t<C>;
+    static_assert(stdx::type_as_string<X>().size() <
+                  stdx::type_as_string<C>().size());
+    static_assert(std::same_as<stdx::expand_t<X>, C>);
+}
+#endif
