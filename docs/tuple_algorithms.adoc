@@ -22,6 +22,10 @@ contains various (free function) algorithms that work on `stdx::tuple`.
 * `to_unordered_set` - produce a tuple of unique types that are in the order given
 * `transform` - a variadic transform on tuple(s)
 * `tuple_cat` - like `std::tuple_cat`
+* `tuple_cons` - add an element to the front of a tuple
+* `tuple_push_back` - alias for `tuple_snoc`
+* `tuple_push_front` - alias for `tuple_cons`
+* `tuple_snoc` - add an element to the back of a tuple
 * `unique` - produce a tuple where adjacent types that are the same are merged into one element (the first such)
 
 === `all_of`, `any_of`, `none_of`
@@ -277,6 +281,32 @@ auto x = get<X>(t).value; // 42
 
 `tuple_cat` works just like
 https://en.cppreference.com/w/cpp/utility/tuple/tuple_cat[`std::tuple_cat`].
+
+=== `tuple_cons`/`tuple_push_front`
+
+`tuple_cons` adds an item to the front of a tuple. `tuple_push_front` is an
+alias for `tuple_cons`.
+
+[source,cpp]
+----
+auto t = stdx::tuple_cons(1, stdx:tuple{2, 3}); // {1, 2, 3}
+----
+
+NOTE: `tuple_cons` preserves the reference qualifiers in the given tuple, but
+decays the "single" argument, as `make_tuple` does.
+
+=== `tuple_snoc`/`tuple_push_back`
+
+`tuple_snoc` adds an item to the back of a tuple. `tuple_push_back` is an alias
+for `tuple_snoc`.
+
+[source,cpp]
+----
+auto t = stdx::tuple_snoc(stdx:tuple{2, 3}, 1); // {2, 3, 1}
+----
+
+NOTE: `tuple_snoc` preserves the reference qualifiers in the given tuple, but
+decays the "single" argument, as `make_tuple` does.
 
 === `unique`
 

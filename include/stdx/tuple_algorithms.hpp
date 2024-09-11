@@ -49,6 +49,38 @@ template <tuplelike... Ts> [[nodiscard]] constexpr auto tuple_cat(Ts &&...ts) {
     }
 }
 
+template <typename T, tuplelike Tup>
+[[nodiscard]] constexpr auto tuple_cons(T &&t, Tup &&tup) {
+    using tuple_t = std::remove_cvref_t<Tup>;
+    return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+        return stdx::tuple<std::remove_cvref_t<T>,
+                           stdx::tuple_element_t<Is, tuple_t>...>{
+            std::forward<T>(t), std::forward<Tup>(tup)[index<Is>]...};
+    }(std::make_index_sequence<stdx::tuple_size_v<tuple_t>>{});
+}
+
+template <tuplelike Tup, typename T>
+[[nodiscard]] constexpr auto tuple_snoc(Tup &&tup, T &&t) {
+    using tuple_t = std::remove_cvref_t<Tup>;
+    return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+        return stdx::tuple<stdx::tuple_element_t<Is, tuple_t>...,
+                           std::remove_cvref_t<T>>{
+            std::forward<Tup>(tup)[index<Is>]..., std::forward<T>(t)};
+    }(std::make_index_sequence<stdx::tuple_size_v<tuple_t>>{});
+}
+
+template <typename T, tuplelike Tup>
+[[nodiscard]] constexpr auto tuple_push_front(T &&t,
+                                              Tup &&tup) -> decltype(auto) {
+    return tuple_cons(std::forward<T>(t), std::forward<Tup>(tup));
+}
+
+template <tuplelike Tup, typename T>
+[[nodiscard]] constexpr auto tuple_push_back(Tup &&tup,
+                                             T &&t) -> decltype(auto) {
+    return tuple_snoc(std::forward<Tup>(tup), std::forward<T>(t));
+}
+
 template <template <typename T> typename Pred, tuplelike T>
 [[nodiscard]] constexpr auto filter(T &&t) {
     using tuple_t = std::remove_cvref_t<T>;
