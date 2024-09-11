@@ -722,3 +722,49 @@ TEST_CASE("gather_by with projection", "[tuple_algorithms]") {
               0, [](auto x, auto y) { return x + y.value; }) == 23);
     CHECK(get<2>(gathered) == stdx::tuple{named_int<C>{3}});
 }
+
+TEST_CASE("tuple_cons", "[tuple_algorithms]") {
+    static_assert(stdx::tuple_cons(1, stdx::tuple{}) == stdx::tuple{1});
+    auto t = stdx::tuple_cons(1, stdx::tuple{});
+    static_assert(std::is_same_v<decltype(t), stdx::tuple<int>>);
+}
+
+TEST_CASE("tuple_cons (move only)", "[tuple_algorithms]") {
+    auto t = stdx::tuple_cons(move_only{5}, stdx::tuple{move_only{10}});
+    static_assert(
+        std::is_same_v<decltype(t), stdx::tuple<move_only, move_only>>);
+    CHECK(t == stdx::tuple{move_only{5}, move_only{10}});
+}
+
+TEST_CASE("tuple_cons (references)", "[tuple_algorithms]") {
+    auto x = 1;
+    auto t = stdx::tuple_cons(1, stdx::tuple<int &>{x});
+    static_assert(std::is_same_v<decltype(t), stdx::tuple<int, int &>>);
+}
+
+TEST_CASE("tuple_snoc", "[tuple_algorithms]") {
+    static_assert(stdx::tuple_snoc(stdx::tuple{}, 1) == stdx::tuple{1});
+    auto t = stdx::tuple_snoc(stdx::tuple{}, 1);
+    static_assert(std::is_same_v<decltype(t), stdx::tuple<int>>);
+}
+
+TEST_CASE("tuple_snoc (move only)", "[tuple_algorithms]") {
+    auto t = stdx::tuple_snoc(stdx::tuple{move_only{10}}, move_only{5});
+    static_assert(
+        std::is_same_v<decltype(t), stdx::tuple<move_only, move_only>>);
+    CHECK(t == stdx::tuple{move_only{10}, move_only{5}});
+}
+
+TEST_CASE("tuple_snoc (references)", "[tuple_algorithms]") {
+    auto x = 1;
+    auto t = stdx::tuple_snoc(stdx::tuple<int &>{x}, 1);
+    static_assert(std::is_same_v<decltype(t), stdx::tuple<int &, int>>);
+}
+
+TEST_CASE("tuple_push_front", "[tuple_algorithms]") {
+    static_assert(stdx::tuple_push_front(1, stdx::tuple{}) == stdx::tuple{1});
+}
+
+TEST_CASE("tuple_push_back", "[tuple_algorithms]") {
+    static_assert(stdx::tuple_push_back(stdx::tuple{}, 1) == stdx::tuple{1});
+}
