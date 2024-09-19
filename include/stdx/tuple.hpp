@@ -53,15 +53,7 @@ template <auto I, typename... Ts> constexpr auto index_out_of_bounds() {
 } // namespace error
 
 namespace detail {
-template <std::size_t, typename...> struct element;
-
-template <typename T>
-concept derivable = std::is_class_v<T>;
-template <typename T>
-concept nonderivable = not std::is_class_v<T>;
-
-template <std::size_t Index, nonderivable T, typename... Ts>
-struct element<Index, T, Ts...> {
+template <std::size_t Index, typename T, typename... Ts> struct element {
 #if __has_builtin(__type_pack_element)
     using type = T;
 #else
@@ -115,51 +107,6 @@ struct element<Index, T, Ts...> {
     operator==(element const &, element const &) -> bool = default;
     [[nodiscard]] friend constexpr auto operator<=>(element const &,
                                                     element const &) = default;
-};
-
-template <std::size_t Index, derivable T, typename... Ts>
-struct element<Index, T, Ts...> : T {
-#if __has_builtin(__type_pack_element)
-    using type = T;
-#else
-    constexpr static auto ugly_Value(index_constant<Index>) -> T;
-
-    [[nodiscard]] constexpr auto
-    ugly_iGet_clvr(index_constant<Index>) const & noexcept -> T const & {
-        return *this;
-    }
-    [[nodiscard]] constexpr auto
-    ugly_iGet_lvr(index_constant<Index>) & noexcept -> T & {
-        return *this;
-    }
-    [[nodiscard]] constexpr auto
-    ugly_iGet_rvr(index_constant<Index>) && noexcept -> T && {
-        return std::move(*this);
-    }
-#endif
-
-    template <typename U>
-        requires(std::is_same_v<U, T> or ... or std::is_same_v<U, Ts>)
-    [[nodiscard]] constexpr auto
-    ugly_tGet_clvr(tag_constant<U> *) const & noexcept -> T const & {
-        return *this;
-    }
-    template <typename U>
-        requires(std::is_same_v<U, T> or ... or std::is_same_v<U, Ts>)
-    [[nodiscard]] constexpr auto
-    ugly_tGet_lvr(tag_constant<U> *) & noexcept -> T & {
-        return *this;
-    }
-    template <typename U>
-        requires(std::is_same_v<U, T> or ... or std::is_same_v<U, Ts>)
-    [[nodiscard]] constexpr auto
-    ugly_tGet_rvr(tag_constant<U> *) && noexcept -> T && {
-        return std::move(*this);
-    }
-
-    constexpr auto ugly_Value_clvr() const & -> T const & { return *this; }
-    constexpr auto ugly_Value_lvr() & -> T & { return *this; }
-    constexpr auto ugly_Value_rvr() && -> T && { return std::move(*this); }
 };
 
 template <typename Op, typename Value> struct fold_helper {
