@@ -442,3 +442,11 @@ TEST_CASE("one_of", "[tuple]") {
     static_assert(stdx::one_of{1, 2, 3} == stdx::one_of{3, 4, 5});
     static_assert(stdx::one_of{1, 2, 3} != stdx::one_of{4, 5, 6});
 }
+
+TEST_CASE("indexing unambiguously", "[tuple]") {
+    using namespace stdx::literals;
+
+    constexpr auto t = stdx::tuple{42, stdx::tuple{17}};
+    static_assert(t[0_idx] == 42);
+    static_assert(t[1_idx][0_idx] == 17);
+}
