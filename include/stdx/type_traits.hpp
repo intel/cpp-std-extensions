@@ -13,6 +13,8 @@ template <typename E> constexpr auto to_underlying(E e) noexcept {
         return e;
     }
 }
+template <typename E>
+using underlying_type_t = decltype(to_underlying(std::declval<E>()));
 
 template <typename T> struct remove_cvref {
     using type = std::remove_cv_t<std::remove_reference_t<T>>;
