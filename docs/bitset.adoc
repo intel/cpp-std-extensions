@@ -15,6 +15,7 @@ platform.
 * Stream input and output operators are not implemented.
 * A `std::hash` specialization is not implemented.
 * `to_string`, `to_ulong` and `to_ullong` are not implemented
+* `operator[]` is read-only: it does not return a proxy reference type
 
 A bitset has two template parameters: the size of the bitset and the storage
 element type to use. The storage element type must be unsigned.
@@ -71,3 +72,17 @@ auto j = bs.to_natural();          // 5 (a std::uint16_t)
 
 Bitsets support all the usual bitwise operators (`and`, `or`, `xor` and `not`)
 and also support `operator-` meaning set difference, or `a & ~b`.
+
+A bitset can also be used with an enumeration that represents bits:
+[source,cpp]
+----
+enum struct Bits { ZERO, ONE, TWO, THREE, MAX };
+auto bs = stdx::bitset<Bits::MAX>{stdx::all_bits}; // 4 bits, value 0b1111
+bs.set(Bits::ZERO);
+bs.reset(Bits::ZERO);
+bs.flip(Bits::ZERO);
+auto bit_zero = bs[Bits::ZERO];
+----
+
+NOTE: The enumeration values are the bit positions, not the bits themselves (the
+enumeration values are not fixed to powers-of-2).

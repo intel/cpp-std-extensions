@@ -156,20 +156,21 @@ template <std::size_t N, typename StorageElem> class bitset {
     }
 
     template <typename T> [[nodiscard]] constexpr auto to() const -> T {
-        static_assert(unsigned_integral<T>,
-                      "Conversion must be to an unsigned integral type!");
-        static_assert(N <= std::numeric_limits<T>::digits,
+        using U = underlying_type_t<T>;
+        static_assert(
+            unsigned_integral<U>,
+            "Conversion must be to an unsigned integral type or enum!");
+        static_assert(N <= std::numeric_limits<U>::digits,
                       "Bitset too big for conversion to T");
-        if constexpr (std::is_same_v<StorageElem, T>) {
-            return storage[0] & lastmask;
+        if constexpr (std::is_same_v<StorageElem, U>) {
+            return static_cast<T>(storage[0] & lastmask);
         } else {
-
-            T result{highbits()};
+            U result{highbits()};
             for (auto i = storage_size - 2u; i < storage_size; --i) {
                 result = static_cast<T>(result << storage_elem_size);
                 result |= storage[i];
             }
-            return result;
+            return static_cast<T>(result);
         }
     }
 
@@ -182,13 +183,16 @@ template <std::size_t N, typename StorageElem> class bitset {
 
     constexpr static std::integral_constant<std::size_t, N> size{};
 
-    [[nodiscard]] constexpr auto operator[](std::size_t pos) const -> bool {
+    template <typename T>
+    [[nodiscard]] constexpr auto operator[](T idx) const -> bool {
+        auto const pos = static_cast<std::size_t>(to_underlying(idx));
         auto const [index, offset] = indices(pos);
         return (storage[index] & (bit << offset)) != 0;
     }
 
-    constexpr auto set(std::size_t pos,
-                       bool value = true) LIFETIMEBOUND -> bitset & {
+    template <typename T>
+    constexpr auto set(T idx, bool value = true) LIFETIMEBOUND -> bitset & {
+        auto const pos = static_cast<std::size_t>(to_underlying(idx));
         auto const [index, offset] = indices(pos);
         if (value) {
             storage[index] |= static_cast<StorageElem>(bit << offset);
@@ -241,7 +245,9 @@ template <std::size_t N, typename StorageElem> class bitset {
         return *this;
     }
 
-    constexpr auto reset(std::size_t pos) LIFETIMEBOUND -> bitset & {
+    template <typename T>
+    constexpr auto reset(T idx) LIFETIMEBOUND -> bitset & {
+        auto const pos = static_cast<std::size_t>(to_underlying(idx));
         auto const [index, offset] = indices(pos);
         storage[index] &= static_cast<StorageElem>(~(bit << offset));
         return *this;
@@ -262,7 +268,8 @@ template <std::size_t N, typename StorageElem> class bitset {
         return set(lsb, len, false);
     }
 
-    constexpr auto flip(std::size_t pos) LIFETIMEBOUND -> bitset & {
+    template <typename T> constexpr auto flip(T idx) LIFETIMEBOUND -> bitset & {
+        auto const pos = static_cast<std::size_t>(to_underlying(idx));
         auto const [index, offset] = indices(pos);
         storage[index] ^= static_cast<StorageElem>(bit << offset);
         return *this;
@@ -406,8 +413,10 @@ constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F {
 }
 } // namespace detail
 
-template <std::size_t N, typename StorageElem = void>
-using bitset = detail::bitset<N, decltype(smallest_uint<N, StorageElem>())>;
+template <auto N, typename StorageElem = void>
+using bitset =
+    detail::bitset<to_underlying(N),
+                   decltype(smallest_uint<to_underlying(N), StorageElem>())>;
 
 } // namespace v1
 } // namespace stdx

@@ -422,3 +422,35 @@ TEMPLATE_TEST_CASE("find lowest unset bit (full)", "[bitset]", std::uint8_t,
     constexpr auto bs = stdx::bitset<sz, TestType>{stdx::all_bits};
     static_assert(bs.lowest_unset() == sz);
 }
+
+namespace {
+enum struct Bits : std::uint8_t { ZERO, ONE, TWO, THREE, MAX };
+}
+
+TEST_CASE("use bitset with enum struct (construct)", "[bitset]") {
+    constexpr auto bs = stdx::bitset<Bits::MAX>{};
+    static_assert(bs.size() == stdx::to_underlying(Bits::MAX));
+}
+
+TEST_CASE("use bitset with enum struct (to)", "[bitset]") {
+    constexpr auto bs = stdx::bitset<Bits::MAX>{stdx::all_bits};
+    static_assert(bs.to<Bits>() == static_cast<Bits>(0b1111));
+}
+
+TEST_CASE("use bitset with enum struct (set/flip)", "[bitset]") {
+    auto bs = stdx::bitset<Bits::MAX>{};
+    bs.set(Bits::ZERO);
+    CHECK(bs.to_natural() == 1);
+    bs.reset(Bits::ZERO);
+    CHECK(bs.to_natural() == 0);
+    bs.flip(Bits::ZERO);
+    CHECK(bs.to_natural() == 1);
+}
+
+TEST_CASE("use bitset with enum struct (read index)", "[bitset]") {
+    constexpr auto bs = stdx::bitset<Bits::MAX>{stdx::all_bits};
+    static_assert(bs[Bits::ZERO]);
+    static_assert(bs[Bits::ONE]);
+    static_assert(bs[Bits::TWO]);
+    static_assert(bs[Bits::THREE]);
+}
