@@ -43,3 +43,10 @@
 #define LIFETIMEBOUND
 #endif
 #endif
+
+#define STDX_DO_PRAGMA(X) _Pragma(#X)
+#ifdef __clang__
+#define STDX_PRAGMA(X) STDX_DO_PRAGMA(clang X)
+#else
+#define STDX_PRAGMA(X) STDX_DO_PRAGMA(GCC X)
+#endif

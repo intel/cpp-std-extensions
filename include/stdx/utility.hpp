@@ -186,13 +186,6 @@ constexpr auto is_aligned_with = [](auto v) -> bool {
 #define FWD(x) std::forward<decltype(x)>(x)
 #endif
 
-#define STDX_DO_PRAGMA(X) _Pragma(#X)
-#ifdef __clang__
-#define STDX_PRAGMA(X) STDX_DO_PRAGMA(clang X)
-#else
-#define STDX_PRAGMA(X) STDX_DO_PRAGMA(GCC X)
-#endif
-
 #ifndef CX_VALUE
 #define CX_VALUE(...)                                                          \
     [] {                                                                       \
