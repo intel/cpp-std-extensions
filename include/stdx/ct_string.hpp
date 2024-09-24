@@ -124,6 +124,17 @@ template <ct_string S> CONSTEVAL auto operator""_cts() { return S; }
 } // namespace ct_string_literals
 } // namespace literals
 
+template <bool B> struct ct_check_t {
+    template <ct_string S> constexpr static bool diagnostic = false;
+    template <ct_string S>
+    constexpr static auto emit() -> void
+        requires diagnostic<S>;
+};
+template <> struct ct_check_t<true> {
+    template <ct_string S> constexpr static auto emit() -> void {}
+};
+template <bool B> constexpr auto ct_check = ct_check_t<B>{};
+
 } // namespace v1
 } // namespace stdx
 
