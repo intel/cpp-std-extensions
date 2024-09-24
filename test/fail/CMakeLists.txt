@@ -25,6 +25,15 @@ add_fail_tests(
     to_address_undefined_on_function)
 
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"
+       AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL 15)
+        add_fail_tests(ct_check)
+    endif()
+    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${CMAKE_CXX_COMPILER_VERSION}
+                                                   VERSION_GREATER_EQUAL 13.2)
+        add_fail_tests(ct_check)
+    endif()
+
     add_fail_tests(
         dynamic_span_no_ct_capacity
         dynamic_container_no_ct_capacity
