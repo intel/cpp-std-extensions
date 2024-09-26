@@ -240,9 +240,9 @@ TEST_CASE("checked operation clears pointers on clear", "[intrusive_list]") {
 
 namespace {
 #if __cplusplus >= 202002L
-bool compile_time_call{};
+int compile_time_calls{};
 #else
-bool runtime_call{};
+int runtime_calls{};
 #endif
 
 struct injected_handler {
@@ -250,13 +250,13 @@ struct injected_handler {
     template <stdx::ct_string Why, typename... Ts>
     static auto panic(Ts &&...) noexcept -> void {
         static_assert(std::string_view{Why} == "bad list node!");
-        compile_time_call = true;
+        ++compile_time_calls;
     }
 #else
     template <typename Why, typename... Ts>
     static auto panic(Why why, Ts &&...) noexcept -> void {
         CHECK(std::string_view{why} == "bad list node!");
-        runtime_call = true;
+        ++runtime_calls;
     }
 #endif
 };
@@ -270,15 +270,15 @@ TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
     int_node n{5};
 
     n.next = &n;
-    compile_time_call = false;
+    compile_time_calls = 0;
     list.push_back(&n);
-    CHECK(compile_time_call);
+    CHECK(compile_time_calls == 1);
     list.pop_front();
 
     n.next = &n;
-    compile_time_call = false;
+    compile_time_calls = 0;
     list.push_front(&n);
-    CHECK(compile_time_call);
+    CHECK(compile_time_calls == 1);
 }
 #else
 TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
@@ -286,15 +286,15 @@ TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
     int_node n{5};
 
     n.next = &n;
-    runtime_call = false;
+    runtime_calls = 0;
     list.push_back(&n);
-    CHECK(runtime_call);
+    CHECK(runtime_calls == 1);
     list.pop_front();
 
     n.next = &n;
-    runtime_call = false;
+    runtime_calls = 0;
     list.push_front(&n);
-    CHECK(runtime_call);
+    CHECK(runtime_calls == 1);
 }
 #endif
 

@@ -28,8 +28,7 @@ TEST_CASE("single element tuple", "[tuple]") {
     static_assert(T::size() == 1);
     static_assert(sizeof(T) == sizeof(int));
 
-    auto x = 1;
-    auto u = stdx::tuple{x};
+    auto u = stdx::tuple{1};
     using U = decltype(u);
     static_assert(std::is_same_v<U, stdx::tuple<int>>);
     static_assert(stdx::tuple_size_v<U> == 1);
@@ -141,9 +140,9 @@ TEST_CASE("tuple of lvalue references", "[tuple]") {
 
 TEST_CASE("tuple of lambdas", "[tuple]") {
     auto x = 1;
-    auto t = stdx::make_tuple([&] { x = 2; }, [&] { x = 3; });
+    auto t = stdx::make_tuple([&] { x += 2; }, [&] { x += 3; });
     get<0>(t)();
-    CHECK(x == 2);
+    CHECK(x == 3);
 }
 
 TEST_CASE("tuple size/elements", "[tuple]") {
@@ -335,12 +334,12 @@ TEST_CASE("order comparable", "[tuple]") {
 }
 
 TEST_CASE("order comparable (references and non-references)", "[tuple]") {
-    int x{6};
-    int y{5};
+    int x{5};
+    int y{6};
     auto const t = stdx::tuple<int &, int &>{x, y};
-    auto const u = stdx::tuple<int, int>{6, 4};
-    CHECK(t > u);
-    CHECK(u < t);
+    auto const u = stdx::tuple<int, int>{5, 7};
+    CHECK(t < u);
+    CHECK(u > t);
 }
 
 TEST_CASE("spaceship comparable", "[tuple]") {
@@ -378,18 +377,17 @@ TEST_CASE("free get is SFINAE-friendly", "[tuple]") {
 }
 
 TEST_CASE("copy/move behavior for tuple", "[tuple]") {
-    counter::reset();
     auto t1 = stdx::tuple{counter{}};
-    auto const orig_moves = counter::moves;
-    auto const orig_copies = counter::copies;
 
+    counter::reset();
     [[maybe_unused]] auto t2 = t1;
-    CHECK(counter::moves == orig_moves);
-    CHECK(counter::copies == orig_copies + 1);
+    CHECK(counter::moves == 0);
+    CHECK(counter::copies == 1);
 
+    counter::reset();
     [[maybe_unused]] auto t3 = std::move(t1);
-    CHECK(counter::moves == orig_moves + 1);
-    CHECK(counter::copies == orig_copies + 1);
+    CHECK(counter::moves == 1);
+    CHECK(counter::copies == 0);
 }
 
 TEST_CASE("make_tuple", "[tuple]") {
@@ -426,11 +424,13 @@ TEST_CASE("tuple type-based concat", "[tuple]") {
 }
 
 TEST_CASE("forward_as_tuple", "[tuple]") {
-    auto const x = 42;
-    auto y = 42;
-    auto t = stdx::forward_as_tuple(x, y, 42);
+    auto const x = 17;
+    auto y = 17;
+    auto z = 17;
+    auto t = stdx::forward_as_tuple(x, y, std::move(z));
     static_assert(
         std::is_same_v<decltype(t), stdx::tuple<int const &, int &, int &&>>);
+    CHECK(t == stdx::tuple{17, 17, 17});
 }
 
 TEST_CASE("one_of", "[tuple]") {

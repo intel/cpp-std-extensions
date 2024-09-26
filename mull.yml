@@ -1,0 +1,7 @@
+mutators:
+  - cxx_all
+ignoreMutators:
+  - cxx_remove_void_call
+excludePaths:
+  - .*/include/stdx/.*
+timeout: 10000

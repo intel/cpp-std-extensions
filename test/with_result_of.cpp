@@ -26,9 +26,9 @@ TEST_CASE("implicit conversion (rvalue)", "[with_result_of]") {
 }
 
 TEST_CASE("capturing lambda", "[with_result_of]") {
-    auto value = 42;
+    auto value = 17;
     auto const result = [](int n) {
-        return n;
+        return n + 42;
     }(stdx::with_result_of{[&]() { return value; }});
-    CHECK(result == value);
+    CHECK(result == 59);
 }

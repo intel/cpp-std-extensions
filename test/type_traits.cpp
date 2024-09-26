@@ -96,6 +96,9 @@ TEST_CASE("type_or_t", "[type_traits]") {
 namespace {
 int value{};
 struct add_value {
+    add_value() = default;
+    add_value(int init) { value = init; }
+
     template <typename T> constexpr auto operator()() const -> void {
         value += T::value;
     }
@@ -121,30 +124,26 @@ TEST_CASE("template_for_each with type list", "[type_traits]") {
 }
 
 TEST_CASE("template_for_each with empty type list", "[type_traits]") {
-    value = 42;
     using L = stdx::type_list<>;
-    stdx::template_for_each<L>(add_value{});
-    CHECK(value == 42);
+    stdx::template_for_each<L>(add_value{17});
+    CHECK(value == 17);
 }
 
 TEST_CASE("template_for_each with value list", "[type_traits]") {
-    value = 0;
     using L = stdx::value_list<1, 2>;
-    stdx::template_for_each<L>(add_value{});
+    stdx::template_for_each<L>(add_value{0});
     CHECK(value == 3);
 }
 
 TEST_CASE("template_for_each with empty value list", "[type_traits]") {
-    value = 17;
     using L = stdx::value_list<>;
-    stdx::template_for_each<L>(add_value{});
+    stdx::template_for_each<L>(add_value{17});
     CHECK(value == 17);
 }
 
 TEST_CASE("template_for_each with index sequence", "[type_traits]") {
-    value = 0;
     using L = std::make_index_sequence<3>;
-    stdx::template_for_each<L>(add_value{});
+    stdx::template_for_each<L>(add_value{0});
     CHECK(value == 3);
 }
 

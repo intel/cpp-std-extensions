@@ -45,8 +45,8 @@ TEST_CASE("insert multiple", "[cx_set]") {
     stdx::cx_set<int, 64> t;
 
     t.insert(10);
-    t.insert(10);
-
+    CHECK(t.size() == 1);
+    CHECK(not t.insert(10));
     CHECK(t.size() == 1);
     CHECK(not t.empty());
     CHECK(t.contains(10));
@@ -56,7 +56,7 @@ TEST_CASE("erase all", "[cx_set]") {
     stdx::cx_set<int, 64> t;
 
     t.insert(10);
-    t.erase(10);
+    CHECK(t.erase(10) == 1);
 
     CHECK(t.size() == 0);
     CHECK(t.empty());
@@ -67,6 +67,7 @@ TEST_CASE("erase some", "[cx_set]") {
     stdx::cx_set<int, 64> t;
 
     t.insert(10);
+    CHECK(t.contains(10));
     t.insert(11);
     t.erase(10);
 

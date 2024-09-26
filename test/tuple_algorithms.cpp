@@ -51,6 +51,8 @@ TEST_CASE("transform preserves references", "[tuple_algorithms]") {
         },
         stdx::tuple{1});
     CHECK(std::addressof(value) == std::addressof(u[stdx::index<0>]));
+    CHECK(u == stdx::tuple{2});
+    CHECK(value == 2);
 }
 
 namespace {
@@ -187,6 +189,9 @@ TEST_CASE("tuple_cat (references)", "[tuple_algorithms]") {
     auto x = 1;
     auto t = stdx::tuple_cat(stdx::tuple<int &>{x}, stdx::tuple<int &>{x});
     static_assert(std::is_same_v<decltype(t), stdx::tuple<int &, int &>>);
+    CHECK(std::addressof(x) == std::addressof(t[stdx::index<0>]));
+    CHECK(std::addressof(x) == std::addressof(t[stdx::index<1>]));
+    CHECK(x == 1);
     stdx::get<0>(t) = 2;
     CHECK(x == 2);
     stdx::get<1>(t) = 1;
@@ -199,6 +204,9 @@ TEST_CASE("tuple_cat (const references)", "[tuple_algorithms]") {
                              stdx::tuple<int const &>{x});
     static_assert(
         std::is_same_v<decltype(t), stdx::tuple<int const &, int const &>>);
+    CHECK(std::addressof(x) == std::addressof(t[stdx::index<0>]));
+    CHECK(std::addressof(x) == std::addressof(t[stdx::index<1>]));
+    CHECK(x == 1);
     x = 2;
     CHECK(stdx::get<0>(t) == 2);
     CHECK(stdx::get<1>(t) == 2);
@@ -206,10 +214,15 @@ TEST_CASE("tuple_cat (const references)", "[tuple_algorithms]") {
 
 TEST_CASE("tuple_cat (rvalue references)", "[tuple_algorithms]") {
     auto x = 1;
-    auto y = 2;
+    auto y = 1;
     auto t = stdx::tuple_cat(stdx::tuple<int &&>{std::move(x)},
                              stdx::tuple<int &&>{std::move(y)});
     static_assert(std::is_same_v<decltype(t), stdx::tuple<int &&, int &&>>);
+    CHECK(std::addressof(x) == std::addressof(t[stdx::index<0>]));
+    CHECK(std::addressof(y) == std::addressof(t[stdx::index<1>]));
+    CHECK(x == 1);
+    CHECK(y == 1);
+
     x = 2;
     CHECK(stdx::get<0>(t) == 2);
     y = 2;
@@ -558,9 +571,11 @@ TEST_CASE("unique preserves references", "[tuple_algorithms]") {
     int y{2};
     auto t = stdx::forward_as_tuple(x, y);
     static_assert(std::is_same_v<decltype(t), stdx::tuple<int &, int &>>);
+    CHECK(t == stdx::tuple{1, 2});
     auto u = stdx::unique(t);
     static_assert(std::is_same_v<decltype(u), stdx::tuple<int &>>);
     CHECK(u == stdx::tuple{1});
+    CHECK(std::addressof(x) == std::addressof(u[stdx::index<0>]));
 }
 
 TEST_CASE("unique with move only types", "[tuple_algorithms]") {
@@ -597,9 +612,12 @@ TEST_CASE("to_sorted_set preserves references", "[tuple_algorithms]") {
     static_assert(
         std::is_same_v<decltype(t),
                        stdx::tuple<int &, int &, double &, double &>>);
+    CHECK(t == stdx::tuple{1, 2, 3.0, 4.0});
     auto u = stdx::to_sorted_set(t);
     static_assert(std::is_same_v<decltype(u), stdx::tuple<double &, int &>>);
     CHECK(u == stdx::tuple{3.0, 1});
+    CHECK(std::addressof(a) == std::addressof(u[stdx::index<0>]));
+    CHECK(std::addressof(x) == std::addressof(u[stdx::index<1>]));
 }
 
 TEST_CASE("to_unsorted_set", "[tuple_algorithms]") {
@@ -619,9 +637,12 @@ TEST_CASE("to_unsorted_set preserves references", "[tuple_algorithms]") {
     static_assert(
         std::is_same_v<decltype(t),
                        stdx::tuple<int &, int &, double &, double &>>);
+    CHECK(t == stdx::tuple{1, 2, 3.0, 4.0});
     auto u = stdx::to_unsorted_set(t);
     static_assert(std::is_same_v<decltype(u), stdx::tuple<int &, double &>>);
     CHECK(u == stdx::tuple{1, 3.0});
+    CHECK(std::addressof(x) == std::addressof(u[stdx::index<0>]));
+    CHECK(std::addressof(a) == std::addressof(u[stdx::index<1>]));
 }
 
 TEST_CASE("to_unsorted_set with move only types", "[tuple_algorithms]") {
@@ -740,6 +761,8 @@ TEST_CASE("tuple_cons (references)", "[tuple_algorithms]") {
     auto x = 1;
     auto t = stdx::tuple_cons(1, stdx::tuple<int &>{x});
     static_assert(std::is_same_v<decltype(t), stdx::tuple<int, int &>>);
+    CHECK(t == stdx::tuple{1, 1});
+    CHECK(std::addressof(x) == std::addressof(t[stdx::index<1>]));
 }
 
 TEST_CASE("tuple_snoc", "[tuple_algorithms]") {
@@ -759,6 +782,8 @@ TEST_CASE("tuple_snoc (references)", "[tuple_algorithms]") {
     auto x = 1;
     auto t = stdx::tuple_snoc(stdx::tuple<int &>{x}, 1);
     static_assert(std::is_same_v<decltype(t), stdx::tuple<int &, int>>);
+    CHECK(t == stdx::tuple{1, 1});
+    CHECK(std::addressof(x) == std::addressof(t[stdx::index<0>]));
 }
 
 TEST_CASE("tuple_push_front", "[tuple_algorithms]") {
