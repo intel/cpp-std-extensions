@@ -50,13 +50,25 @@ TEST_CASE("erase values", "[cx_multimap]") {
 
     t.put(60, 1);
     t.put(60, 2);
-    t.put(60, 3);
+    t.put(61, 3);
+    t.put(62, 4);
+    CHECK(t.size() == 3);
 
-    t.erase(60, 2);
-    CHECK(t.size() == 1);
+    CHECK(t.erase(60, 1));
+    CHECK(t.size() == 3);
+    CHECK(not t.contains(60, 1));
+    CHECK(t.contains(60, 2));
+
+    CHECK(t.erase(60, 2));
+    CHECK(t.size() == 2);
     CHECK(not t.contains(60, 2));
+    CHECK(t.contains(61, 3));
+    CHECK(t.contains(62, 4));
 
-    t.erase(60);
+    t.erase(61);
+    CHECK(t.size() == 1);
+    CHECK(t.contains(62, 4));
+    t.erase(62);
     CHECK(t.empty());
 }
 

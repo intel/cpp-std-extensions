@@ -170,28 +170,29 @@ TEST_CASE("generic lambda arity", "[function_traits]") {
 }
 
 namespace {
-bool called_1{};
-bool called_2{};
+int called_1{};
+int called_2{};
 
 template <typename F>
 constexpr auto call_f(F f, stdx::priority_t<1>) -> stdx::return_t<F> {
-    called_1 = true;
+    ++called_1;
     return f();
 }
 
 template <typename F> constexpr auto call_f(F f, stdx::priority_t<0>) -> void {
-    called_2 = true;
+    ++called_2;
     f(0);
 }
 } // namespace
 
 TEST_CASE("SFINAE friendly", "[function_traits]") {
-    called_1 = false;
-    called_2 = false;
+    called_1 = 0;
+    called_2 = 0;
     auto f1 = []() -> int { return 1; };
     auto f2 = [](auto) -> void {};
     call_f(f1, stdx::priority<1>);
-    CHECK(called_1);
+    CHECK(called_1 == 1);
+    CHECK(called_2 == 0);
     call_f(f2, stdx::priority<1>);
-    CHECK(called_2);
+    CHECK(called_2 == 1);
 }

@@ -67,20 +67,20 @@ TEST_CASE("format a compile-time enum argument", "[ct_format]") {
 }
 
 TEST_CASE("format a runtime argument", "[ct_format]") {
-    auto x = 42;
+    auto x = 17;
     CHECK(stdx::ct_format<"Hello {}">(x) ==
-          stdx::format_result{"Hello {}"_cts, stdx::make_tuple(42)});
-    static_assert(stdx::ct_format<"Hello {}">(42) ==
-                  stdx::format_result{"Hello {}"_cts, stdx::make_tuple(42)});
+          stdx::format_result{"Hello {}"_cts, stdx::make_tuple(17)});
+    static_assert(stdx::ct_format<"Hello {}">(17) ==
+                  stdx::format_result{"Hello {}"_cts, stdx::make_tuple(17)});
 }
 
 TEST_CASE("format a compile-time and a runtime argument (1)", "[ct_format]") {
-    auto x = 42;
+    auto x = 17;
     CHECK(stdx::ct_format<"Hello {} {}">(CX_VALUE(int), x) ==
-          stdx::format_result{"Hello int {}"_cts, stdx::make_tuple(42)});
+          stdx::format_result{"Hello int {}"_cts, stdx::make_tuple(17)});
     static_assert(
-        stdx::ct_format<"Hello {} {}">(CX_VALUE(int), 42) ==
-        stdx::format_result{"Hello int {}"_cts, stdx::make_tuple(42)});
+        stdx::ct_format<"Hello {} {}">(CX_VALUE(int), 17) ==
+        stdx::format_result{"Hello int {}"_cts, stdx::make_tuple(17)});
 }
 
 TEST_CASE("format a compile-time and a runtime argument (2)", "[ct_format]") {
@@ -141,13 +141,13 @@ TEST_CASE("format_to a different type", "[ct_format]") {
     static_assert(stdx::ct_format<"{}", string_constant>(CX_VALUE("A"sv)) ==
                   string_constant<char, 'A'>{});
 
-    auto x = 42;
+    auto x = 17;
     CHECK(stdx::ct_format<"{}", string_constant>(x) ==
           stdx::format_result{string_constant<char, '{', '}'>{},
-                              stdx::make_tuple(42)});
-    static_assert(stdx::ct_format<"{}", string_constant>(42) ==
+                              stdx::make_tuple(17)});
+    static_assert(stdx::ct_format<"{}", string_constant>(17) ==
                   stdx::format_result{string_constant<char, '{', '}'>{},
-                                      stdx::make_tuple(42)});
+                                      stdx::make_tuple(17)});
 }
 
 TEST_CASE("format a string-type argument", "[ct_format]") {

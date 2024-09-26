@@ -40,13 +40,14 @@ TEST_CASE("n-ary transform_reduce_n", "[numeric]") {
     CHECK(v == 40);
 }
 
-TEST_CASE("transform_reduce with output fixed by template arumgent",
+TEST_CASE("transform_reduce with output fixed by template argument",
           "[numeric]") {
     auto const input = std::array{1.5, 2.5, 3.5, 4.5};
-    auto const v = stdx::transform_reduce<double>(
-        std::cbegin(input), std::cend(input), 0, std::plus{},
-        [](auto n) { return n * 2; });
-    CHECK(v == 24);
+    auto v =
+        stdx::transform_reduce<double>(std::cbegin(input), std::cend(input), 0,
+                                       std::plus{}, [](auto n) { return n; });
+    static_assert(std::is_same_v<decltype(v), double>);
+    CHECK(v == 12);
 }
 
 TEST_CASE("saturate_cast cppreference example", "[numeric]") {

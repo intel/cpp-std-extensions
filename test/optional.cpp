@@ -95,6 +95,16 @@ TEST_CASE("in-place construction (no args)", "[optional]") {
     static_assert(o);
 }
 
+TEST_CASE("retrieve value", "[optional]") {
+    auto o = stdx::optional<E>{E::VALUE};
+    CHECK(o.value() == E::VALUE);
+}
+
+TEST_CASE("operator*", "[optional]") {
+    auto o = stdx::optional<E>{E::VALUE};
+    CHECK(*o == E::VALUE);
+}
+
 TEST_CASE("assignment from nullopt", "[optional]") {
     auto o = stdx::optional<E>{E::VALUE};
     o = std::nullopt;
@@ -104,7 +114,8 @@ TEST_CASE("assignment from nullopt", "[optional]") {
 TEST_CASE("assignment from value", "[optional]") {
     auto o = stdx::optional<E>{};
     o = E::VALUE;
-    CHECK(o);
+    REQUIRE(o);
+    CHECK(*o == E::VALUE);
 }
 
 TEST_CASE("trivially copy assignable", "[optional]") {
@@ -121,16 +132,6 @@ TEST_CASE("has_value and boolean conversion", "[optional]") {
     constexpr auto o = stdx::optional<E>{E::VALUE};
     static_assert(o.has_value());
     static_assert(o);
-}
-
-TEST_CASE("retrieve value", "[optional]") {
-    auto o = stdx::optional<E>{E::VALUE};
-    CHECK(o.value() == E::VALUE);
-}
-
-TEST_CASE("operator*", "[optional]") {
-    auto o = stdx::optional<E>{E::VALUE};
-    CHECK(*o == E::VALUE);
 }
 
 TEST_CASE("operator->", "[optional]") {
@@ -181,6 +182,7 @@ TEST_CASE("less than - both engaged", "[optional]") {
     auto o1 = stdx::optional<S>{17};
     auto o2 = stdx::optional<S>{42};
     CHECK(o1 < o2);
+    CHECK(not(o1 < o1));
 }
 
 TEST_CASE("less than - neither engaged", "[optional]") {
@@ -397,6 +399,7 @@ TEST_CASE("optional pointer value has default sentinel", "[optional]") {
     CHECK(*o1 == nullptr);
     float f{1.0f};
     auto const o2 = stdx::optional<float *>{&f};
+    CHECK(**o2 == 1.0f);
     CHECK(o1 < o2);
 }
 

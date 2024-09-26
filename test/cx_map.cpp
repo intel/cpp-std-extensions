@@ -44,8 +44,10 @@ TEST_CASE("const get", "[cx_map]") {
 TEST_CASE("update existing key", "[cx_map]") {
     auto t = stdx::cx_map<int, int, 64>{};
     t.put(13, 500);
-    t.put(13, 700);
+    REQUIRE(t.contains(13));
+    CHECK(t.get(13) == 500);
 
+    t.put(13, 700);
     REQUIRE(t.contains(13));
     CHECK(t.get(13) == 700);
 }

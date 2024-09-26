@@ -134,9 +134,9 @@ TEST_CASE("remove only node", "[intrusive_list]") {
     int_node n1{1};
 
     list.push_back(&n1);
+    CHECK(not list.empty());
 
     list.remove(&n1);
-
     CHECK(list.empty());
 }
 
@@ -241,7 +241,7 @@ TEST_CASE("iterator equality", "[intrusive_list]") {
     int_node n1{1};
 
     list.push_back(&n1);
-
+    CHECK(not list.empty());
     CHECK(std::begin(list) == std::begin(list));
 }
 
@@ -278,6 +278,7 @@ TEST_CASE("clear", "[intrusive_list]") {
     int_node n2{2};
 
     list.push_back(&n1);
+    CHECK(not list.empty());
     list.push_back(&n2);
     list.clear();
 
@@ -352,9 +353,9 @@ TEST_CASE("checked operation clears pointers on clear", "[intrusive_list]") {
 
 namespace {
 #if __cplusplus >= 202002L
-bool compile_time_call{};
+int compile_time_calls{};
 #else
-bool runtime_call{};
+int runtime_calls{};
 #endif
 
 struct injected_handler {
@@ -362,13 +363,13 @@ struct injected_handler {
     template <stdx::ct_string Why, typename... Ts>
     static auto panic(Ts &&...) noexcept -> void {
         static_assert(std::string_view{Why} == "bad list node!");
-        compile_time_call = true;
+        ++compile_time_calls;
     }
 #else
     template <typename Why, typename... Ts>
     static auto panic(Why why, Ts &&...) noexcept -> void {
         CHECK(std::string_view{why} == "bad list node!");
-        runtime_call = true;
+        ++runtime_calls;
     }
 #endif
 };
@@ -382,15 +383,15 @@ TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
     int_node n{5};
 
     n.prev = &n;
-    compile_time_call = false;
+    compile_time_calls = 0;
     list.push_back(&n);
-    CHECK(compile_time_call);
+    CHECK(compile_time_calls == 1);
     list.pop_back();
 
     n.prev = &n;
-    compile_time_call = false;
+    compile_time_calls = 0;
     list.push_front(&n);
-    CHECK(compile_time_call);
+    CHECK(compile_time_calls == 1);
 }
 #else
 TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
@@ -398,15 +399,15 @@ TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
     int_node n{5};
 
     n.prev = &n;
-    runtime_call = false;
+    runtime_calls = 0;
     list.push_back(&n);
-    CHECK(runtime_call);
+    CHECK(runtime_calls == 1);
     list.pop_back();
 
     n.prev = &n;
-    runtime_call = false;
+    runtime_calls = 0;
     list.push_front(&n);
-    CHECK(runtime_call);
+    CHECK(runtime_calls == 1);
 }
 #endif
 
@@ -492,17 +493,19 @@ TEST_CASE("insert in middle", "[intrusive_list]") {
 TEST_CASE("insert use case", "[intrusive_list]") {
     stdx::intrusive_list<int_node> list{};
     int_node n1{1};
-    int_node n3{3};
+    int_node n2{2};
 
     list.push_back(&n1);
-    list.push_back(&n3);
+    list.push_back(&n2);
 
-    int_node n2{2};
+    int_node n{2};
     {
         auto it =
             std::find_if(std::begin(list), std::end(list),
-                         [&](auto &node) { return node.value >= n2.value; });
-        list.insert(it, &n2);
+                         [&](auto &node) { return n.value <= node.value; });
+        list.insert(it, &n);
+        CHECK(n2.prev == &n);
+        CHECK(n.prev == &n1);
     }
 
     auto it = std::cbegin(list);
@@ -510,7 +513,7 @@ TEST_CASE("insert use case", "[intrusive_list]") {
     ++it;
     CHECK(it->value == 2);
     ++it;
-    CHECK(it->value == 3);
+    CHECK(it->value == 2);
     ++it;
     CHECK(it == std::cend(list));
 }

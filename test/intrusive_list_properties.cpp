@@ -42,7 +42,7 @@ template <typename ListSut> struct IntrusiveListCommands {
     static void rc_assert_equal(ListModel const &m, ListSut const &sut) {
         RC_ASSERT(m.empty() == sut.list.empty());
 
-        if (!m.empty() && !sut.list.empty()) {
+        if (!m.empty()) {
             RC_ASSERT(m.front() == sut.list.front().value);
             RC_ASSERT(m.back() == sut.list.back().value);
         }
