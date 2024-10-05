@@ -77,17 +77,6 @@ auto x_by_index2 = t[0_idx]; // equivalent
 `_idx` is a user-defined literal in the `stdx::literals` namespace. It is
 equivalent to using the `index` variable template.
 
-`get` is also available as a member function on `stdx::tuple` and works either
-by index or by type (using the `tag` variable template):
-[source,cpp]
-----
-using namespace stdx::literals;
-auto t = stdx::tuple{1, true};
-auto x_by_index1 = t.get(index<0>);
-auto x_by_index2 = t.get(0_idx);
-auto x_by_type = t.get(tag<int>);
-----
-
 NOTE: All forms of access preserve the value category of the tuple; i.e.
 accessing an `int` member of a `stdx::tuple const &` gives an `int const &` and
 so on.
