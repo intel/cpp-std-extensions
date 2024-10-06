@@ -10,3 +10,7 @@
 .cmake-format.yaml
 CMakePresets.json
 /toolchains
+__pycache__
+.mypy_cache
+.pytest_cache
+.hypothesis
