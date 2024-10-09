@@ -48,6 +48,15 @@ auto t = stdx::tuple{1, 2, 3};
 auto sum = stdx::apply([] (auto... args) { return (args + ... + 0); }, t); // 6
 ----
 
+`stdx::apply` can also be called with a variadic pack of tuples, which are
+unpacked and passed to the function:
+[source,cpp]
+----
+auto t1 = stdx::tuple{1, 2, 3};
+auto t2 = stdx::tuple{4, 5, 6};
+auto sum = stdx::apply([] (auto... args) { return (args + ... + 0); }, t1, t2); // 21
+----
+
 === `cartesian_product`
 
 `cartesian_product` takes any number of tuples and returns the tuple-of-tuples
