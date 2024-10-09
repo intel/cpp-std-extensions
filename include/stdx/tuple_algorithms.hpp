@@ -319,16 +319,16 @@ template <tuplelike... Ts> constexpr auto cartesian_product_copy(Ts &&...ts) {
         return []<typename First, typename... Rest>(First &&first,
                                                     Rest &&...rest) {
             auto const c = cartesian_product_copy(std::forward<Rest>(rest)...);
-            return std::forward<First>(first).apply(
-                [&]<typename... Elems>(Elems &&...elems) {
-                    auto const prepend = [&]<typename E>(E &&e) {
-                        return c.apply([&](auto... subs) {
-                            return make_tuple(tuple_cat(
-                                make_tuple(std::forward<E>(e)), subs)...);
-                        });
-                    };
-                    return tuple_cat(prepend(std::forward<Elems>(elems))...);
-                });
+            return std::forward<First>(first).apply([&]<typename... Elems>(
+                                                        Elems &&...elems) {
+                [[maybe_unused]] auto const prepend = [&]<typename E>(E &&e) {
+                    return c.apply([&](auto... subs) {
+                        return make_tuple(
+                            tuple_cat(make_tuple(std::forward<E>(e)), subs)...);
+                    });
+                };
+                return tuple_cat(prepend(std::forward<Elems>(elems))...);
+            });
         }(std::forward<Ts>(ts)...);
     }
 }

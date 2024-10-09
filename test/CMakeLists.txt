@@ -64,3 +64,4 @@ if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
 endif()
 
 add_subdirectory(fail)
+add_subdirectory(pbt)
