@@ -140,39 +140,40 @@ template <std::size_t I, typename... Ts>
 constexpr auto invoke_at(auto &&op, Ts &&...ts) -> decltype(auto) {
     return op(std::forward<Ts>(ts)[index<I>]...);
 }
+
+template <typename... Ts>
+constexpr std::size_t zip_length_for =
+    sizeof...(Ts) == 0
+        ? 0
+        : std::min({stdx::tuple_size_v<std::remove_cvref_t<Ts>>...});
 } // namespace detail
 
-template <template <typename> typename... Fs, typename Op, tuplelike T,
-          tuplelike... Ts>
-constexpr auto transform(Op &&op, T &&t, Ts &&...ts) {
+template <template <typename> typename... Fs, typename Op, tuplelike... Ts>
+constexpr auto transform(Op &&op, Ts &&...ts) {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         if constexpr (sizeof...(Fs) == 0) {
             return stdx::tuple<decltype(detail::invoke_at<Is>(
-                std::forward<Op>(op), std::forward<T>(t),
-                std::forward<Ts>(ts)...))...>{
-                detail::invoke_at<Is>(std::forward<Op>(op), std::forward<T>(t),
+                std::forward<Op>(op), std::forward<Ts>(ts)...))...>{
+                detail::invoke_at<Is>(std::forward<Op>(op),
                                       std::forward<Ts>(ts)...)...};
         } else {
-            return stdx::make_indexed_tuple<Fs...>(
-                detail::invoke_at<Is>(std::forward<Op>(op), std::forward<T>(t),
-                                      std::forward<Ts>(ts)...)...);
+            return stdx::make_indexed_tuple<Fs...>(detail::invoke_at<Is>(
+                std::forward<Op>(op), std::forward<Ts>(ts)...)...);
         }
-    }(std::make_index_sequence<stdx::tuple_size_v<std::remove_cvref_t<T>>>{});
+    }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
 }
 
-template <typename Op, typename T, typename... Ts>
-constexpr auto unrolled_for_each(Op &&op, T &&t, Ts &&...ts) -> Op {
+template <typename Op, typename... Ts>
+constexpr auto unrolled_for_each(Op &&op, Ts &&...ts) -> Op {
     [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        (detail::invoke_at<Is>(op, std::forward<T>(t), std::forward<Ts>(ts)...),
-         ...);
-    }(std::make_index_sequence<stdx::tuple_size_v<std::remove_cvref_t<T>>>{});
+        (detail::invoke_at<Is>(op, std::forward<Ts>(ts)...), ...);
+    }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
     return op;
 }
 
-template <typename Op, tuplelike T, tuplelike... Ts>
-constexpr auto for_each(Op &&op, T &&t, Ts &&...ts) -> Op {
-    return unrolled_for_each(std::forward<Op>(op), std::forward<T>(t),
-                             std::forward<Ts>(ts)...);
+template <typename Op, tuplelike... Ts>
+constexpr auto for_each(Op &&op, Ts &&...ts) -> Op {
+    return unrolled_for_each(std::forward<Op>(op), std::forward<Ts>(ts)...);
 }
 
 namespace detail {
@@ -182,36 +183,31 @@ constexpr auto invoke_with_idx_at(auto &&op, Ts &&...ts) -> decltype(auto) {
 }
 } // namespace detail
 
-template <typename Op, typename T, typename... Ts>
-constexpr auto unrolled_enumerate(Op &&op, T &&t, Ts &&...ts) -> Op {
+template <typename Op, typename... Ts>
+constexpr auto unrolled_enumerate(Op &&op, Ts &&...ts) -> Op {
     [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        (detail::invoke_with_idx_at<Is>(op, std::forward<T>(t),
-                                        std::forward<Ts>(ts)...),
-         ...);
-    }(std::make_index_sequence<stdx::tuple_size_v<std::remove_cvref_t<T>>>{});
+        (detail::invoke_with_idx_at<Is>(op, std::forward<Ts>(ts)...), ...);
+    }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
     return op;
 }
 
-template <typename Op, tuplelike T, tuplelike... Ts>
-constexpr auto enumerate(Op &&op, T &&t, Ts &&...ts) -> Op {
-    return unrolled_enumerate(std::forward<Op>(op), std::forward<T>(t),
-                              std::forward<Ts>(ts)...);
+template <typename Op, tuplelike... Ts>
+constexpr auto enumerate(Op &&op, Ts &&...ts) -> Op {
+    return unrolled_enumerate(std::forward<Op>(op), std::forward<Ts>(ts)...);
 }
 
-template <typename F, tuplelike T, tuplelike... Ts>
-constexpr auto all_of(F &&f, T &&t, Ts &&...ts) -> bool {
+template <typename F, tuplelike... Ts>
+constexpr auto all_of(F &&f, Ts &&...ts) -> bool {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return (... and detail::invoke_at<Is>(f, std::forward<T>(t),
-                                              std::forward<Ts>(ts)...));
-    }(std::make_index_sequence<stdx::tuple_size_v<std::remove_cvref_t<T>>>{});
+        return (... and detail::invoke_at<Is>(f, std::forward<Ts>(ts)...));
+    }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
 }
 
-template <typename F, tuplelike T, tuplelike... Ts>
-constexpr auto any_of(F &&f, T &&t, Ts &&...ts) -> bool {
+template <typename F, tuplelike... Ts>
+constexpr auto any_of(F &&f, Ts &&...ts) -> bool {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return (... or detail::invoke_at<Is>(f, std::forward<T>(t),
-                                             std::forward<Ts>(ts)...));
-    }(std::make_index_sequence<stdx::tuple_size_v<std::remove_cvref_t<T>>>{});
+        return (... or detail::invoke_at<Is>(f, std::forward<Ts>(ts)...));
+    }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
 }
 
 template <typename... Ts> constexpr auto none_of(Ts &&...ts) -> bool {
