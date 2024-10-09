@@ -56,6 +56,11 @@ TEST_CASE("transform preserves references", "[tuple_algorithms]") {
     CHECK(value == 2);
 }
 
+TEST_CASE("transform stops at smallest tuple length", "[tuple_algorithms]") {
+    static_assert(stdx::transform(std::plus{}, stdx::tuple{1, 2, 3},
+                                  stdx::tuple{1, 2}) == stdx::tuple{2, 4});
+}
+
 namespace {
 template <typename Key, typename Value> struct map_entry {
     using key_t = Key;
@@ -205,6 +210,13 @@ TEST_CASE("for_each", "[tuple_algorithms]") {
             t);
         CHECK(f(0) == 4);
     }
+}
+
+TEST_CASE("for_each stops at smallest tuple length", "[tuple_algorithms]") {
+    auto sum = 0;
+    stdx::for_each([&](auto x, auto y) { sum += x + y; }, stdx::tuple{1, 2, 3},
+                   stdx::tuple{1, 2});
+    CHECK(sum == 6);
 }
 
 TEST_CASE("unrolled_for_each on arrays", "[tuple_algorithms]") {
@@ -419,6 +431,9 @@ TEST_CASE("all_of", "[tuple_algorithms]") {
     static_assert(stdx::all_of([](auto n) { return n > 0; }, t));
     static_assert(
         stdx::all_of([](auto x, auto y) { return (x + y) % 2 == 0; }, t, t));
+
+    static_assert(stdx::all_of([](auto x, auto y) { return (x + y) % 2 == 0; },
+                               stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
 }
 
 TEST_CASE("any_of", "[tuple_algorithms]") {
@@ -426,6 +441,9 @@ TEST_CASE("any_of", "[tuple_algorithms]") {
     static_assert(stdx::any_of([](auto n) { return n % 2 == 0; }, t));
     static_assert(
         stdx::any_of([](auto x, auto y) { return (x + y) % 2 == 0; }, t, t));
+
+    static_assert(stdx::any_of([](auto x, auto y) { return (x + y) % 2 == 0; },
+                               stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
 }
 
 TEST_CASE("none_of", "[tuple_algorithms]") {
@@ -433,6 +451,9 @@ TEST_CASE("none_of", "[tuple_algorithms]") {
     static_assert(stdx::none_of([](auto n) { return n % 2 == 0; }, t));
     static_assert(
         stdx::none_of([](auto x, auto y) { return (x + y) % 2 != 0; }, t, t));
+
+    static_assert(stdx::none_of([](auto x, auto y) { return (x + y) % 2 != 0; },
+                                stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
 }
 
 TEST_CASE("contains_type", "[tuple_algorithms]") {

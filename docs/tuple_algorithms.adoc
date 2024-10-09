@@ -274,6 +274,9 @@ auto t2 = stdx::tuple{2, 3, 4};
 auto u = stdx::transform(std::multiplies{}, t1, t2); // {2, 6, 12}
 ----
 
+NOTE: It's OK to zip together different length tuples: `transform` will produce
+a tuple that is the length of the shortest input.
+
 `transform` can also apply xref:tuple.adoc#_indexed_tuples[indexing functions]
 while it transforms:
 [source,cpp]
