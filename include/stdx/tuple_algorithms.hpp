@@ -16,6 +16,29 @@
 
 namespace stdx {
 inline namespace v1 {
+template <typename F, tuplelike... Ts> constexpr auto apply(F &&f, Ts &&...ts) {
+    constexpr auto total_num_elements =
+        (std::size_t{} + ... + stdx::tuple_size_v<std::remove_cvref_t<Ts>>);
+
+    [[maybe_unused]] constexpr auto element_indices = [&] {
+        std::array<detail::index_pair, total_num_elements> indices{};
+        [[maybe_unused]] auto p = indices.data();
+        ((p = std::remove_cvref_t<Ts>::fill_inner_indices(p)), ...);
+        [[maybe_unused]] auto q = indices.data();
+        [[maybe_unused]] std::size_t n{};
+        ((q = std::remove_cvref_t<Ts>::fill_outer_indices(q, n++)), ...);
+        return indices;
+    }();
+
+    [[maybe_unused]] auto outer_tuple =
+        stdx::tuple<Ts &&...>{std::forward<Ts>(ts)...};
+    return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+        return std::forward<F>(f)(
+            std::move(outer_tuple)[index<element_indices[Is].outer>]
+                                  [index<element_indices[Is].inner>]...);
+    }(std::make_index_sequence<total_num_elements>{});
+}
+
 template <tuplelike... Ts> [[nodiscard]] constexpr auto tuple_cat(Ts &&...ts) {
     if constexpr (sizeof...(Ts) == 0) {
         return stdx::tuple<>{};

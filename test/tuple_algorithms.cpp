@@ -5,6 +5,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <algorithm>
 #include <array>
 #include <functional>
 #include <type_traits>
@@ -77,17 +78,80 @@ TEST_CASE("apply", "[tuple_algorithms]") {
                               stdx::tuple{}) == 0);
     static_assert(stdx::apply([](auto... xs) { return (0 + ... + xs); },
                               stdx::tuple{1, 2, 3}) == 6);
+}
 
+TEST_CASE("apply handles a stateful function properly", "[tuple_algorithms]") {
     auto stateful = [calls = 0](auto...) mutable { return ++calls; };
     CHECK(stdx::apply(stateful, stdx::tuple{1, 2, 3}) == 1);
     CHECK(stdx::apply(stateful, stdx::tuple{1, 2, 3}) == 2);
+}
 
+TEST_CASE("apply handles move-only types", "[tuple_algorithms]") {
     static_assert(stdx::apply([](auto x) { return x.value; },
                               stdx::tuple{move_only{42}}) == 42);
+}
 
+TEST_CASE("apply handles tuples of references", "[tuple_algorithms]") {
     auto t = stdx::tuple{1, 2, 3};
     stdx::apply([](auto &...xs) { (++xs, ...); }, t);
     CHECK(t == stdx::tuple{2, 3, 4});
+}
+
+TEST_CASE("apply preserves argument order", "[tuple_algorithms]") {
+    int called{};
+    stdx::apply(
+        [&](auto... xs) {
+            ++called;
+            auto const a = std::array{xs...};
+            CHECK(std::is_sorted(std::begin(a), std::end(a)));
+        },
+        stdx::tuple{1, 2, 3});
+    CHECK(called == 1);
+}
+
+TEST_CASE("variadic apply", "[tuple_algorithms]") {
+    static_assert(stdx::apply([](auto... xs) { return (0 + ... + xs); }) == 0);
+    static_assert(stdx::apply([](auto... xs) { return (0 + ... + xs); },
+                              stdx::tuple{1, 2, 3},
+                              stdx::tuple{4, 5, 6}) == 21);
+}
+
+TEST_CASE("variadic apply handles a stateful function properly",
+          "[tuple_algorithms]") {
+    auto stateful = [calls = 0](auto...) mutable { return ++calls; };
+    CHECK(stdx::apply(stateful) == 1);
+    CHECK(stdx::apply(stateful) == 2);
+}
+
+TEST_CASE("variadic apply handles move-only types", "[tuple_algorithms]") {
+    static_assert(stdx::apply([](auto x, auto y) { return x.value + y.value; },
+                              stdx::tuple{move_only{42}},
+                              stdx::tuple{move_only{17}}) == 59);
+}
+
+TEST_CASE("variadic apply handles tuples of references", "[tuple_algorithms]") {
+    auto t1 = stdx::tuple{1};
+    auto t2 = stdx::tuple{2};
+    stdx::apply(
+        [](auto &x1, auto &x2) {
+            x1 += x2;
+            x2 *= 2;
+        },
+        t1, t2);
+    CHECK(t1 == stdx::tuple{3});
+    CHECK(t2 == stdx::tuple{4});
+}
+
+TEST_CASE("variadic apply preserves argument order", "[tuple_algorithms]") {
+    int called{};
+    stdx::apply(
+        [&](auto... xs) {
+            ++called;
+            auto const a = std::array{xs...};
+            CHECK(std::is_sorted(std::begin(a), std::end(a)));
+        },
+        stdx::tuple{1, 2, 3}, stdx::tuple{4, 5, 6});
+    CHECK(called == 1);
 }
 
 TEST_CASE("join", "[tuple_algorithms]") {
