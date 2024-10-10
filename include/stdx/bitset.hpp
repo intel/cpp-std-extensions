@@ -3,6 +3,7 @@
 #include <stdx/bit.hpp>
 #include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
+#include <stdx/detail/bitset_common.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/udls.hpp>
 
@@ -17,11 +18,6 @@
 
 namespace stdx {
 inline namespace v1 {
-struct place_bits_t {};
-constexpr inline auto place_bits = place_bits_t{};
-struct all_bits_t {};
-constexpr inline auto all_bits = all_bits_t{};
-
 namespace detail {
 template <std::size_t N, typename StorageElem> class bitset {
     constexpr static auto storage_elem_size =

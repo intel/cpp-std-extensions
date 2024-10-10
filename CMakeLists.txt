@@ -37,6 +37,7 @@ target_sources(
               include
               FILES
               include/stdx/algorithm.hpp
+              include/stdx/atomic_bitset.hpp
               include/stdx/bit.hpp
               include/stdx/bitset.hpp
               include/stdx/byterator.hpp
@@ -51,6 +52,7 @@ target_sources(
               include/stdx/cx_queue.hpp
               include/stdx/cx_set.hpp
               include/stdx/cx_vector.hpp
+              include/stdx/detail/bitset_common.hpp
               include/stdx/detail/list_common.hpp
               include/stdx/for_each_n_args.hpp
               include/stdx/functional.hpp

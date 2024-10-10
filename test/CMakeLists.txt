@@ -21,6 +21,7 @@ add_tests(
     FILES
     algorithm
     always_false
+    atomic_bitset
     bind
     bit
     bitset
