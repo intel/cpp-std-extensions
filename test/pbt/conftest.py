@@ -9,7 +9,8 @@ import re
 hypothesis.settings.register_profile("ci", max_examples=500)
 hypothesis.settings.register_profile("fast", max_examples=10)
 
-    
+profile = os.environ.get("HYPOTHESIS_PROFILE", "fast")
+hypothesis.settings.load_profile(profile)
 
 def pytest_addoption(parser):
     parser.addoption("--compiler", action="store", help="C++ compiler", default=None, required=False)
