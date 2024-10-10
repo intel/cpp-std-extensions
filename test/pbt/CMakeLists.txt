@@ -8,6 +8,9 @@ if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
         PYTEST
         FILES
         tuple.py
+        EXTRA_DEPS
+        ${CMAKE_SOURCE_DIR}/include/stdx/tuple.hpp
+        ${CMAKE_SOURCE_DIR}/include/stdx/tuple_algorithms.hpp
         EXTRA_ARGS
         -vv
         -n2
