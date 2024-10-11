@@ -1,0 +1,6 @@
+
+== `ranges.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ranges.hpp[`ranges.hpp`]
+contains a single concept: `range`. A type models the `stdx::range` concept if
+`std::begin` and `std::end` are defined for that type.
