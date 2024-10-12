@@ -16,7 +16,7 @@ env:
   DEFAULT_LLVM_VERSION: 18
   DEFAULT_GCC_VERSION: 13
   MULL_LLVM_VERSION: 17
-  HYPOTHESIS_PROFILE: ci
+  HYPOTHESIS_PROFILE: default
 
 concurrency:
   group: ${{ github.head_ref || github.run_id }}

@@ -35,6 +35,7 @@ into headers whose names match the standard.
 The following headers are available:
 
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/algorithm.hpp[`algorithm.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/atomic_bitset.hpp[`atomic_bitset.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bit.hpp[`bit.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bitset.hpp[`bitset.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/byterator.hpp[`byterator.hpp`]
@@ -60,6 +61,7 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/optional.hpp[`optional.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/panic.hpp[`panic.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/priority.hpp[`priority.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ranges.hpp[`ranges.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/span.hpp[`span.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/tuple.hpp[`tuple.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/tuple_algorithms.hpp[`tuple_algorithms.hpp`]

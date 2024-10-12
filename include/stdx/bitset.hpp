@@ -3,6 +3,8 @@
 #include <stdx/bit.hpp>
 #include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
+#include <stdx/ct_string.hpp>
+#include <stdx/detail/bitset_common.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/udls.hpp>
 
@@ -17,30 +19,31 @@
 
 namespace stdx {
 inline namespace v1 {
-struct place_bits_t {};
-constexpr inline auto place_bits = place_bits_t{};
-struct all_bits_t {};
-constexpr inline auto all_bits = all_bits_t{};
+template <auto Size,
+          typename StorageElem = decltype(smallest_uint<to_underlying(Size)>())>
+class bitset {
+    constexpr static std::size_t N = to_underlying(Size);
+    using elem_t = StorageElem;
+    static_assert(std::is_unsigned_v<elem_t>,
+                  "Storage element for bitset must be an unsigned type");
 
-namespace detail {
-template <std::size_t N, typename StorageElem> class bitset {
     constexpr static auto storage_elem_size =
-        std::numeric_limits<StorageElem>::digits;
+        std::numeric_limits<elem_t>::digits;
     constexpr static auto storage_size =
         (N + storage_elem_size - 1) / storage_elem_size;
-    constexpr static auto bit = StorageElem{1U};
-    constexpr static auto allbits = std::numeric_limits<StorageElem>::max();
+    constexpr static auto bit = elem_t{1U};
+    constexpr static auto allbits = std::numeric_limits<elem_t>::max();
 
-    std::array<StorageElem, storage_size> storage{};
+    std::array<elem_t, storage_size> storage{};
 
-    constexpr static auto lastmask = []() -> StorageElem {
+    constexpr static auto lastmask = []() -> elem_t {
         if constexpr (N % storage_elem_size != 0) {
             return allbits >> (storage_elem_size - N % storage_elem_size);
         } else {
             return allbits;
         }
     }();
-    constexpr auto highbits() const -> StorageElem {
+    constexpr auto highbits() const -> elem_t {
         return storage.back() & lastmask;
     }
 
@@ -103,21 +106,21 @@ template <std::size_t N, typename StorageElem> class bitset {
         for (auto e : storage) {
             while (e != 0) {
                 auto const offset = static_cast<std::size_t>(countr_zero(e));
-                e &= static_cast<StorageElem>(~(bit << offset));
+                e &= static_cast<elem_t>(~(bit << offset));
                 f(i + offset);
             }
-            i += std::numeric_limits<StorageElem>::digits;
+            i += std::numeric_limits<elem_t>::digits;
         }
         return std::forward<F>(f);
     }
 
-    template <typename F, std::size_t M, typename... S>
+    template <typename F, auto M, typename... S>
     friend constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F;
 
   public:
     constexpr bitset() = default;
     constexpr explicit bitset(std::uint64_t value) {
-        if constexpr (std::is_same_v<StorageElem, std::uint64_t>) {
+        if constexpr (std::is_same_v<elem_t, std::uint64_t>) {
             storage[0] = value;
         } else {
             for (auto &elem : storage) {
@@ -155,6 +158,11 @@ template <std::size_t N, typename StorageElem> class bitset {
         }
     }
 
+#if __cplusplus >= 202002L
+    constexpr explicit bitset(ct_string<N + 1> s)
+        : bitset{static_cast<std::string_view>(s)} {}
+#endif
+
     template <typename T> [[nodiscard]] constexpr auto to() const -> T {
         using U = underlying_type_t<T>;
         static_assert(
@@ -162,7 +170,7 @@ template <std::size_t N, typename StorageElem> class bitset {
             "Conversion must be to an unsigned integral type or enum!");
         static_assert(N <= std::numeric_limits<U>::digits,
                       "Bitset too big for conversion to T");
-        if constexpr (std::is_same_v<StorageElem, U>) {
+        if constexpr (std::is_same_v<elem_t, U>) {
             return static_cast<T>(storage[0] & lastmask);
         } else {
             U result{highbits()};
@@ -195,9 +203,9 @@ template <std::size_t N, typename StorageElem> class bitset {
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         auto const [index, offset] = indices(pos);
         if (value) {
-            storage[index] |= static_cast<StorageElem>(bit << offset);
+            storage[index] |= static_cast<elem_t>(bit << offset);
         } else {
-            storage[index] &= static_cast<StorageElem>(~(bit << offset));
+            storage[index] &= static_cast<elem_t>(~(bit << offset));
         }
         return *this;
     }
@@ -209,25 +217,25 @@ template <std::size_t N, typename StorageElem> class bitset {
         auto [l_index, l_offset] = indices(l);
         auto const [m_index, m_offset] = indices(m);
 
-        using setfn = auto (*)(StorageElem *, StorageElem)->void;
+        using setfn = auto (*)(elem_t *, elem_t)->void;
         auto const fn = [&]() -> setfn {
             if (value) {
-                return [](StorageElem *ptr, StorageElem val) { *ptr |= val; };
+                return [](elem_t *ptr, elem_t val) { *ptr |= val; };
             }
-            return [](StorageElem *ptr, StorageElem val) { *ptr &= ~val; };
+            return [](elem_t *ptr, elem_t val) { *ptr &= ~val; };
         }();
 
-        auto l_mask = std::numeric_limits<StorageElem>::max() << l_offset;
+        auto l_mask = std::numeric_limits<elem_t>::max() << l_offset;
         if (l_index != m_index) {
-            fn(&storage[l_index++], static_cast<StorageElem>(l_mask));
-            l_mask = std::numeric_limits<StorageElem>::max();
+            fn(&storage[l_index++], static_cast<elem_t>(l_mask));
+            l_mask = std::numeric_limits<elem_t>::max();
         }
         while (l_index != m_index) {
-            fn(&storage[l_index++], static_cast<StorageElem>(l_mask));
+            fn(&storage[l_index++], static_cast<elem_t>(l_mask));
         }
-        auto const m_mask = std::numeric_limits<StorageElem>::max() >>
+        auto const m_mask = std::numeric_limits<elem_t>::max() >>
                             (storage_elem_size - m_offset - 1);
-        fn(&storage[l_index], static_cast<StorageElem>(l_mask & m_mask));
+        fn(&storage[l_index], static_cast<elem_t>(l_mask & m_mask));
         return *this;
     }
 
@@ -249,7 +257,7 @@ template <std::size_t N, typename StorageElem> class bitset {
     constexpr auto reset(T idx) LIFETIMEBOUND -> bitset & {
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         auto const [index, offset] = indices(pos);
-        storage[index] &= static_cast<StorageElem>(~(bit << offset));
+        storage[index] &= static_cast<elem_t>(~(bit << offset));
         return *this;
     }
 
@@ -271,7 +279,7 @@ template <std::size_t N, typename StorageElem> class bitset {
     template <typename T> constexpr auto flip(T idx) LIFETIMEBOUND -> bitset & {
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         auto const [index, offset] = indices(pos);
-        storage[index] ^= static_cast<StorageElem>(bit << offset);
+        storage[index] ^= static_cast<elem_t>(bit << offset);
         return *this;
     }
 
@@ -314,10 +322,10 @@ template <std::size_t N, typename StorageElem> class bitset {
         std::size_t i = 0;
         for (auto e : storage) {
             if (auto offset = static_cast<std::size_t>(countr_one(e));
-                offset != std::numeric_limits<StorageElem>::digits) {
+                offset != std::numeric_limits<elem_t>::digits) {
                 return i + offset;
             }
-            i += std::numeric_limits<StorageElem>::digits;
+            i += std::numeric_limits<elem_t>::digits;
         }
         return i;
     }
@@ -362,13 +370,13 @@ template <std::size_t N, typename StorageElem> class bitset {
         } else {
             auto const borrow_shift = storage_elem_size - pos;
             for (auto i = start; i > std::size_t{}; --i) {
-                storage[dst] = static_cast<StorageElem>(storage[i] << pos);
+                storage[dst] = static_cast<elem_t>(storage[i] << pos);
                 storage[dst] |=
-                    static_cast<StorageElem>(storage[i - 1] >> borrow_shift);
+                    static_cast<elem_t>(storage[i - 1] >> borrow_shift);
                 --dst;
             }
         }
-        storage[dst] = static_cast<StorageElem>(storage.front() << pos);
+        storage[dst] = static_cast<elem_t>(storage.front() << pos);
         while (dst > std::size_t{}) {
             storage[--dst] = 0;
         }
@@ -388,13 +396,13 @@ template <std::size_t N, typename StorageElem> class bitset {
         } else {
             auto const borrow_shift = storage_elem_size - pos;
             for (auto i = start; i < storage_size - 1; ++i) {
-                storage[dst] = static_cast<StorageElem>(storage[i] >> pos);
+                storage[dst] = static_cast<elem_t>(storage[i] >> pos);
                 storage[dst] |=
-                    static_cast<StorageElem>(storage[i + 1] << borrow_shift);
+                    static_cast<elem_t>(storage[i + 1] << borrow_shift);
                 ++dst;
             }
         }
-        storage[dst++] = static_cast<StorageElem>(storage.back() >> pos);
+        storage[dst++] = static_cast<elem_t>(storage.back() >> pos);
         while (dst < storage_size) {
             storage[dst++] = 0;
         }
@@ -402,7 +410,7 @@ template <std::size_t N, typename StorageElem> class bitset {
     }
 };
 
-template <typename F, std::size_t M, typename... S>
+template <typename F, auto M, typename... S>
 constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F {
     if constexpr (sizeof...(bs) == 1) {
         return (bs.for_each(std::forward<F>(f)), ...);
@@ -411,12 +419,9 @@ constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F {
         return f;
     }
 }
-} // namespace detail
 
-template <auto N, typename StorageElem = void>
-using bitset =
-    detail::bitset<to_underlying(N),
-                   decltype(smallest_uint<to_underlying(N), StorageElem>())>;
-
+#if __cplusplus >= 202002L
+template <std::size_t N> bitset(ct_string<N>) -> bitset<N - 1>;
+#endif
 } // namespace v1
 } // namespace stdx

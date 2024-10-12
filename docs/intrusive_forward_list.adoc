@@ -2,8 +2,7 @@
 == `intrusive_forward_list.hpp`
 
 `intrusive_forward_list` is a singly-linked list designed for use at compile-time or
-with static objects. It supports pushing and popping at the front or back, and
-removal from the middle.
+with static objects. It supports pushing and popping at the front or back.
 
 [source,cpp]
 ----

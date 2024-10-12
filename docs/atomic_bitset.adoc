@@ -1,0 +1,107 @@
+
+== `atomic_bitset.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/atomic_bitset.hpp[`atomic_bitset.hpp`]
+provides an implementation of a xref:bitset.adoc#_bitset_hpp[`bitset`] with atomic semantics.
+
+An `atomic_bitset` is limited in size to the maximum integral type a platform
+can support while still using lock-free atomic instructions. Like `bitset`, it
+can be defined by selecting the underlying storage type automatically:
+[source,cpp]
+----
+using A = stdx::bitset<8>;   // uses uint8_t
+using B = stdx::bitset<16>;  // uses uint16_t
+using C = stdx::bitset<32>;  // uses uint32_t
+using D = stdx::bitset<64>;  // uses uint64_t
+----
+
+`atomic_bitset` is constructed in the same way as `bitset`: with `all_bits`,
+`place_bits`, a value, or a `string_view`:
+[source,cpp]
+----
+using namespace std::string_view_literals;
+auto bs0 = stdx::atomic_bitset<8>{};
+auto bs1 = stdx::atomic_bitset<8>{stdx::all_bits};            // 0b1111'1111
+auto bs2 = stdx::atomic_bitset<8>{stdx::place_bits, 0, 1, 3}; // 0b1011
+auto bs3 = stdx::atomic_bitset<8>{0b1011};
+auto bs4 = stdx::atomic_bitset<8>{"1011"sv};
+----
+
+NOTE: `atomic_bitset`​'s constructors are `constexpr`, but none of the other
+functions are.
+
+Also like `bitset`, `atomic_bitset` supports conversion to integral types:
+[source,cpp]
+----
+auto bs = stdx::atomic_bitset<11>{0b101}; // 11 bits, value 5
+auto i = bs.to<std::uint64_t>();          // 5 (a std::uint64_t)
+auto j = bs.to_natural();                 // 5 (a std::uint16_t)
+----
+
+And operation with enumeration types:
+[source,cpp]
+----
+enum struct Bits { ZERO, ONE, TWO, THREE, MAX };
+auto bs = stdx::atomic_bitset<Bits::MAX>{stdx::all_bits}; // 4 bits, value 0b1111
+bs.set(Bits::ZERO);
+bs.reset(Bits::ZERO);
+bs.flip(Bits::ZERO);
+auto bit_zero = bs[Bits::ZERO];
+----
+
+Unlike `bitset`, `atomic_bitset`​'s operations are atomic. For example, `load`
+and `store` are basic operations that return and take a corresponding `bitset`:
+
+[source,cpp]
+----
+constexpr auto bs = stdx::atomic_bitset<8>{0b1010ul};
+auto copy = bs.load(); // a stdx::bitset<8>{0b1010ul};
+bs.store(copy);
+----
+
+Like https://en.cppreference.com/w/cpp/atomic/atomic/load[`load`] and
+https://en.cppreference.com/w/cpp/atomic/atomic/store[`store`] on
+https://en.cppreference.com/w/cpp/atomic/atomic[`std::atomic`], the `load` and
+`store` operations on `stdx::atomic_bitset` take an optional
+https://en.cppreference.com/w/cpp/atomic/memory_order[`std::memory_order`].
+`stdx::atomic_bitset` is also implicitly convertible to a corresponding
+`stdx::bitset`; that operation is equivalent to `load()`.
+
+The `set`, `reset` and `flip` operations also take an optional
+`std::memory_order`: these operations are equivalent to `store` in their
+semantics, except that they return the `stdx::bitset` that was the previous
+value.
+
+[source,cpp]
+----
+constexpr auto bs = stdx::atomic_bitset<8>{0b1010ul};
+auto prev = bs.set(0);
+// bs   == 1011
+// prev == 1010 (stdx::bitset<8>)
+----
+
+NOTE: When `set` or `reset` are called without specifying bits, they return a
+reference to the `atomic_bitset`. This is because these operations result in a
+plain `store` which does not return the previous value.
+
+`all`, `any`, `none` and `count` are also available on `atomic_bitset` and they
+are each equivalent to `load` followed by the respective operation. Like `load`,
+they also take an optional `std::memory_order`.
+
+So what is _not_ available on `atomic_bitset`?
+
+ * any binary operation: equality, binary versions of `and`, `or`, etc.
+ * bit shift operations
+ * `for_each` and `lowest_unset`
+ * unary `not`
+
+These operations are not provided for varying reasons:
+
+ * atomic semantics are impossible or problematic to guarantee (binary operations)
+ * atomic instructions are not available (bit shifts, `lowest_unset`)
+ * atomic semantics are unclear (`for_each`)
+ * the caller can easily achieve what they want (unary `not`)
+
+In all of these cases though, the caller can make the right choice for them, and
+use the corresponding operations on `bitset` after correctly reasoning about the
+required semantics.
