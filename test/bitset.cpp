@@ -454,3 +454,13 @@ TEST_CASE("use bitset with enum struct (read index)", "[bitset]") {
     static_assert(bs[Bits::TWO]);
     static_assert(bs[Bits::THREE]);
 }
+
+#if __cplusplus >= 202002L
+TEST_CASE("construct with a ct_string", "[bitset]") {
+    using namespace stdx::literals;
+    static_assert(stdx::bitset{"1010"_cts} ==
+                  stdx::bitset<4ul, std::uint8_t>{0b1010ul});
+    static_assert(stdx::bitset{"101010101"_cts} ==
+                  stdx::bitset<9ul, std::uint16_t>{0b101010101ul});
+}
+#endif

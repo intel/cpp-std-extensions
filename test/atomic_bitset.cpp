@@ -368,3 +368,13 @@ TEST_CASE("atomic bitset is thread-safe", "[atomic_bitset]") {
     t1.join();
     t2.join();
 }
+
+#if __cplusplus >= 202002L
+TEST_CASE("construct with a ct_string", "[atomic_bitset]") {
+    using namespace stdx::literals;
+    CHECK(stdx::atomic_bitset{"1010"_cts} ==
+          stdx::bitset<4ul, std::uint8_t>{0b1010ul});
+    CHECK(stdx::atomic_bitset{"101010101"_cts} ==
+          stdx::bitset<9ul, std::uint16_t>{0b101010101ul});
+}
+#endif

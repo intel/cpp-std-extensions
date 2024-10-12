@@ -341,12 +341,8 @@ template <typename T> constexpr auto bit_size() -> std::size_t {
     return sizeof(T) * CHAR_BIT;
 }
 
-template <std::size_t N, typename S = void> CONSTEVAL auto smallest_uint() {
-    if constexpr (not std::is_same_v<S, void>) {
-        static_assert(std::is_unsigned_v<S>,
-                      "smallest_uint override must be an unsigned type");
-        return S{};
-    } else if constexpr (N <= std::numeric_limits<std::uint8_t>::digits) {
+template <std::size_t N> CONSTEVAL auto smallest_uint() {
+    if constexpr (N <= std::numeric_limits<std::uint8_t>::digits) {
         return std::uint8_t{};
     } else if constexpr (N <= std::numeric_limits<std::uint16_t>::digits) {
         return std::uint16_t{};
@@ -357,7 +353,6 @@ template <std::size_t N, typename S = void> CONSTEVAL auto smallest_uint() {
     }
 }
 
-template <std::size_t N, typename S = void>
-using smallest_uint_t = decltype(smallest_uint<N, S>());
+template <std::size_t N> using smallest_uint_t = decltype(smallest_uint<N>());
 } // namespace v1
 } // namespace stdx

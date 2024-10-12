@@ -4,6 +4,7 @@
 #include <stdx/bitset.hpp>
 #include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
+#include <stdx/ct_string.hpp>
 #include <stdx/detail/bitset_common.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/udls.hpp>
@@ -17,25 +18,30 @@
 
 namespace stdx {
 inline namespace v1 {
-namespace detail {
-template <std::size_t N, typename StorageElem> class atomic_bitset {
-    constexpr static auto bit = StorageElem{1U};
+template <auto Size,
+          typename StorageElem = decltype(smallest_uint<to_underlying(Size)>())>
+class atomic_bitset {
+    constexpr static std::size_t N = to_underlying(Size);
+    using elem_t = StorageElem;
+    static_assert(std::is_unsigned_v<elem_t>,
+                  "Storage element for atomic_bitset must be an unsigned type");
 
-    static_assert(N <= std::numeric_limits<StorageElem>::digits,
+    constexpr static auto bit = elem_t{1U};
+
+    static_assert(N <= std::numeric_limits<elem_t>::digits,
                   "atomic_bitset is limited to a single storage element");
-    static_assert(std::atomic<StorageElem>::is_always_lock_free,
-                  "atomic_bitset must always be lock free");
-    std::atomic<StorageElem> storage{};
+    std::atomic<elem_t> storage{};
 
-    constexpr static auto mask = bit_mask<StorageElem, N - 1>();
-    StorageElem salient_value(std::memory_order order) const {
+    constexpr static auto mask = bit_mask<elem_t, N - 1>();
+    elem_t salient_value(std::memory_order order) const {
         return storage.load(order) & mask;
     }
 
-    [[nodiscard]] static constexpr auto
-    value_from_string(std::string_view str, std::size_t pos, std::size_t n,
-                      char one) -> StorageElem {
-        StorageElem ret{};
+    [[nodiscard]] static constexpr auto value_from_string(std::string_view str,
+                                                          std::size_t pos,
+                                                          std::size_t n,
+                                                          char one) -> elem_t {
+        elem_t ret{};
         auto const len = std::min(n, str.size() - pos);
         auto const s = str.substr(pos, std::min(len, N));
         auto i = bit;
@@ -43,23 +49,23 @@ template <std::size_t N, typename StorageElem> class atomic_bitset {
             if (*it == one) {
                 ret |= i;
             }
-            i = static_cast<StorageElem>(i << 1u);
+            i = static_cast<elem_t>(i << 1u);
         }
         return ret;
     }
 
-    using bitset_t = bitset<N, StorageElem>;
+    using bitset_t = bitset<Size, elem_t>;
 
   public:
     constexpr atomic_bitset() = default;
     constexpr explicit atomic_bitset(std::uint64_t value)
-        : storage{static_cast<StorageElem>(value & mask)} {}
+        : storage{static_cast<elem_t>(value & mask)} {}
 
     template <typename... Bs>
     constexpr explicit atomic_bitset(place_bits_t, Bs... bs)
-        : storage{static_cast<StorageElem>(
-              (StorageElem{} | ... |
-               static_cast<StorageElem>(bit << to_underlying(bs))))} {}
+        : storage{static_cast<elem_t>(
+              (elem_t{} | ... |
+               static_cast<elem_t>(bit << to_underlying(bs))))} {}
 
     constexpr explicit atomic_bitset(all_bits_t) : storage{mask} {}
 
@@ -67,6 +73,11 @@ template <std::size_t N, typename StorageElem> class atomic_bitset {
                                      std::size_t n = std::string_view::npos,
                                      char one = '1')
         : storage{value_from_string(str, pos, n, one)} {}
+
+#if __cplusplus >= 202002L
+    constexpr explicit atomic_bitset(ct_string<N + 1> s)
+        : atomic_bitset{static_cast<std::string_view>(s)} {}
+#endif
 
     template <typename T>
     [[nodiscard]] auto
@@ -93,13 +104,13 @@ template <std::size_t N, typename StorageElem> class atomic_bitset {
     }
     auto store(bitset_t b,
                std::memory_order order = std::memory_order_seq_cst) {
-        storage.store(b.template to<StorageElem>(), order);
+        storage.store(b.template to<elem_t>(), order);
     }
 
     constexpr static std::integral_constant<std::size_t, N> size{};
 
     constexpr static std::bool_constant<
-        std::atomic<StorageElem>::is_always_lock_free>
+        std::atomic<elem_t>::is_always_lock_free>
         is_always_lock_free{};
 
     template <typename T> [[nodiscard]] auto operator[](T idx) const -> bool {
@@ -113,17 +124,17 @@ template <std::size_t N, typename StorageElem> class atomic_bitset {
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         if (value) {
             return bitset_t{
-                storage.fetch_or(static_cast<StorageElem>(bit << pos), order)};
+                storage.fetch_or(static_cast<elem_t>(bit << pos), order)};
         }
         return bitset_t{
-            storage.fetch_and(static_cast<StorageElem>(~(bit << pos)), order)};
+            storage.fetch_and(static_cast<elem_t>(~(bit << pos)), order)};
     }
 
     auto set(lsb_t lsb, msb_t msb, bool value = true,
              std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
         auto const l = to_underlying(lsb);
         auto const m = to_underlying(msb);
-        auto const shifted_value = bit_mask<StorageElem>(m, l);
+        auto const shifted_value = bit_mask<elem_t>(m, l);
         if (value) {
             return bitset_t{storage.fetch_or(shifted_value, order)};
         }
@@ -145,13 +156,12 @@ template <std::size_t N, typename StorageElem> class atomic_bitset {
 
     template <typename T> auto reset(T idx) -> bitset_t {
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
-        return bitset_t{
-            storage.fetch_and(static_cast<StorageElem>(~(bit << pos)))};
+        return bitset_t{storage.fetch_and(static_cast<elem_t>(~(bit << pos)))};
     }
 
     auto reset(std::memory_order order = std::memory_order_seq_cst)
         LIFETIMEBOUND -> atomic_bitset & {
-        storage.store(StorageElem{}, order);
+        storage.store(elem_t{}, order);
         return *this;
     }
 
@@ -172,7 +182,7 @@ template <std::size_t N, typename StorageElem> class atomic_bitset {
               std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         return bitset_t{
-            storage.fetch_xor(static_cast<StorageElem>(bit << pos), order)};
+            storage.fetch_xor(static_cast<elem_t>(bit << pos), order)};
     }
 
     auto flip(std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
@@ -198,10 +208,9 @@ template <std::size_t N, typename StorageElem> class atomic_bitset {
         return static_cast<std::size_t>(popcount(salient_value(order)));
     }
 };
-} // namespace detail
 
-template <auto N, typename StorageElem = void>
-using atomic_bitset = detail::atomic_bitset<
-    to_underlying(N), decltype(smallest_uint<to_underlying(N), StorageElem>())>;
+#if __cplusplus >= 202002L
+template <std::size_t N> atomic_bitset(ct_string<N>) -> atomic_bitset<N - 1>;
+#endif
 } // namespace v1
 } // namespace stdx
