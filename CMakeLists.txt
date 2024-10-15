@@ -16,6 +16,7 @@ endif()
 
 add_versioned_package("gh:boostorg/mp11#boost-1.83.0")
 fmt_recipe(10.2.1)
+add_versioned_package("gh:intel/cpp-baremetal-concurrency#27de8e1")
 
 if(NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 20)
@@ -25,7 +26,8 @@ add_library(stdx INTERFACE)
 target_compile_features(stdx INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 target_compile_options(
     stdx INTERFACE $<$<CXX_COMPILER_ID:Clang>:-Wno-missing-braces>)
-target_link_libraries_system(stdx INTERFACE boost_mp11 fmt::fmt-header-only)
+target_link_libraries_system(stdx INTERFACE concurrency boost_mp11
+                             fmt::fmt-header-only)
 
 target_sources(
     stdx

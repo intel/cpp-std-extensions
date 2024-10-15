@@ -1,5 +1,7 @@
 #pragma once
 
+#include <conc/atomic.hpp>
+
 #include <stdx/bit.hpp>
 #include <stdx/bitset.hpp>
 #include <stdx/compiler.hpp>
@@ -22,7 +24,10 @@ template <auto Size,
           typename StorageElem = decltype(smallest_uint<to_underlying(Size)>())>
 class atomic_bitset {
     constexpr static std::size_t N = to_underlying(Size);
-    using elem_t = StorageElem;
+
+    using elem_t = atomic::atomic_type_t<StorageElem>;
+    constexpr static auto alignment = atomic::alignment_of<StorageElem>;
+
     static_assert(std::is_unsigned_v<elem_t>,
                   "Storage element for atomic_bitset must be an unsigned type");
 
@@ -30,11 +35,11 @@ class atomic_bitset {
 
     static_assert(N <= std::numeric_limits<elem_t>::digits,
                   "atomic_bitset is limited to a single storage element");
-    std::atomic<elem_t> storage{};
+    alignas(alignment) elem_t storage{};
 
     constexpr static auto mask = bit_mask<elem_t, N - 1>();
-    elem_t salient_value(std::memory_order order) const {
-        return storage.load(order) & mask;
+    auto salient_value(std::memory_order order) const -> elem_t {
+        return atomic::load(storage, order) & mask;
     }
 
     [[nodiscard]] static constexpr auto value_from_string(std::string_view str,
@@ -88,34 +93,32 @@ class atomic_bitset {
             "Conversion must be to an unsigned integral type or enum!");
         static_assert(N <= std::numeric_limits<U>::digits,
                       "atomic_bitset must fit within T");
-        return static_cast<T>(storage.load(order));
+        return static_cast<T>(salient_value(order));
     }
 
     [[nodiscard]] auto
-    to_natural(std::memory_order order = std::memory_order_seq_cst) const {
-        return storage.load(order);
+    to_natural(std::memory_order order = std::memory_order_seq_cst) const
+        -> StorageElem {
+        return static_cast<StorageElem>(salient_value(order));
     }
 
-    operator bitset_t() const { return bitset_t{storage.load()}; }
+    operator bitset_t() const {
+        return bitset_t{salient_value(std::memory_order_seq_cst)};
+    }
 
     auto load(std::memory_order order = std::memory_order_seq_cst) const
         -> bitset_t {
-        return bitset_t{storage.load(order)};
+        return bitset_t{salient_value(order)};
     }
     auto store(bitset_t b,
                std::memory_order order = std::memory_order_seq_cst) {
-        storage.store(b.template to<elem_t>(), order);
+        atomic::store(storage, b.template to<elem_t>(), order);
     }
 
     constexpr static std::integral_constant<std::size_t, N> size{};
 
-    constexpr static std::bool_constant<
-        std::atomic<elem_t>::is_always_lock_free>
-        is_always_lock_free{};
-
     template <typename T> [[nodiscard]] auto operator[](T idx) const -> bool {
-        auto const pos = static_cast<std::size_t>(to_underlying(idx));
-        return (salient_value(std::memory_order_seq_cst) & (bit << pos)) != 0;
+        return load()[idx];
     }
 
     template <typename T>
@@ -123,11 +126,11 @@ class atomic_bitset {
              std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         if (value) {
-            return bitset_t{
-                storage.fetch_or(static_cast<elem_t>(bit << pos), order)};
+            return bitset_t{atomic::fetch_or(
+                storage, static_cast<elem_t>(bit << pos), order)};
         }
-        return bitset_t{
-            storage.fetch_and(static_cast<elem_t>(~(bit << pos)), order)};
+        return bitset_t{atomic::fetch_and(
+            storage, static_cast<elem_t>(~(bit << pos)), order)};
     }
 
     auto set(lsb_t lsb, msb_t msb, bool value = true,
@@ -136,9 +139,9 @@ class atomic_bitset {
         auto const m = to_underlying(msb);
         auto const shifted_value = bit_mask<elem_t>(m, l);
         if (value) {
-            return bitset_t{storage.fetch_or(shifted_value, order)};
+            return bitset_t{atomic::fetch_or(storage, shifted_value, order)};
         }
-        return bitset_t{storage.fetch_and(~shifted_value, order)};
+        return bitset_t{atomic::fetch_and(storage, ~shifted_value, order)};
     }
 
     auto set(lsb_t lsb, length_t len, bool value = true,
@@ -150,18 +153,19 @@ class atomic_bitset {
 
     auto set(std::memory_order order = std::memory_order_seq_cst)
         LIFETIMEBOUND -> atomic_bitset & {
-        storage.store(mask, order);
+        atomic::store(storage, mask, order);
         return *this;
     }
 
     template <typename T> auto reset(T idx) -> bitset_t {
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
-        return bitset_t{storage.fetch_and(static_cast<elem_t>(~(bit << pos)))};
+        return bitset_t{
+            atomic::fetch_and(storage, static_cast<elem_t>(~(bit << pos)))};
     }
 
     auto reset(std::memory_order order = std::memory_order_seq_cst)
         LIFETIMEBOUND -> atomic_bitset & {
-        storage.store(elem_t{}, order);
+        atomic::store(storage, elem_t{}, order);
         return *this;
     }
 
@@ -182,11 +186,11 @@ class atomic_bitset {
               std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         return bitset_t{
-            storage.fetch_xor(static_cast<elem_t>(bit << pos), order)};
+            atomic::fetch_xor(storage, static_cast<elem_t>(bit << pos), order)};
     }
 
     auto flip(std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
-        return bitset_t{storage.fetch_xor(mask, order)};
+        return bitset_t{atomic::fetch_xor(storage, mask, order)};
     }
 
     [[nodiscard]] auto
