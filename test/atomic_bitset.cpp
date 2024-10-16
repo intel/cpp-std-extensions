@@ -39,11 +39,6 @@ TEST_CASE("atomic_bitset with implicit storage element type",
     static_assert(sizeof(stdx::atomic_bitset<64>) == sizeof(std::uint64_t));
 }
 
-TEMPLATE_TEST_CASE("atomic_bitset is always lock free", "[atomic_bitset]",
-                   std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
-    static_assert(stdx::atomic_bitset<8, TestType>::is_always_lock_free);
-}
-
 TEMPLATE_TEST_CASE("index operation", "[atomic_bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     CHECK(not stdx::atomic_bitset<1, TestType>{}[0]);
@@ -161,6 +156,13 @@ TEMPLATE_TEST_CASE("convert to natural type", "[atomic_bitset]", std::uint8_t,
     CHECK(std::is_same_v<decltype(val), TestType const>);
     CHECK(val == 0b1000'1000u);
     CHECK(bs.to_natural(std::memory_order_acquire) == 0b1000'1000u);
+}
+
+TEST_CASE("to_natural returns smallest_uint", "[atomic_bitset]") {
+    auto bs = stdx::atomic_bitset<4>{stdx::all_bits};
+    auto value = bs.to_natural();
+    CHECK(value == 0b1111);
+    static_assert(std::same_as<decltype(value), std::uint8_t>);
 }
 
 TEMPLATE_TEST_CASE("construct with a string_view", "[atomic_bitset]",

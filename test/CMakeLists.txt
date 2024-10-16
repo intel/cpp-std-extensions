@@ -22,6 +22,7 @@ add_tests(
     algorithm
     always_false
     atomic_bitset
+    atomic_bitset_override
     bind
     bit
     bitset
@@ -59,6 +60,10 @@ add_tests(
     with_result_of
     utility
     udls)
+
+target_compile_definitions(
+    atomic_bitset_override_test
+    PRIVATE -DATOMIC_CFG="${CMAKE_CURRENT_LIST_DIR}/detail/atomic_cfg.hpp")
 
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
     add_tests(FILES ct_format ct_string indexed_tuple tuple tuple_algorithms)
