@@ -162,7 +162,7 @@ TEST_CASE("to_natural returns smallest_uint", "[atomic_bitset]") {
     auto bs = stdx::atomic_bitset<4>{stdx::all_bits};
     auto value = bs.to_natural();
     CHECK(value == 0b1111);
-    static_assert(std::same_as<decltype(value), std::uint8_t>);
+    static_assert(std::is_same_v<decltype(value), std::uint8_t>);
 }
 
 TEMPLATE_TEST_CASE("construct with a string_view", "[atomic_bitset]",

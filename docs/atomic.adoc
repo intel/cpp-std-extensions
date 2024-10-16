@@ -1,0 +1,49 @@
+
+== `atomic.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/atomic.hpp[`atomic.hpp`]
+provides an implementation of
+https://en.cppreference.com/w/cpp/atomic/atomic[`std::atomic`] with a few
+differences.
+
+`stdx::atomic` does not implement:
+
+ * `is_lock_free` or `is_always_lock_free`
+ * `compare_exchange_{weak,strong}`
+ * `wait`
+ * `notify_{one,all}`
+ * `fetch_{max,min}`
+
+However, `stdx::atomic` allows customization of the atomic implementation for
+best codegen. `stdx::atomic` is implemented using the atomic API exposed by
+Intel's https://github.com/intel/cpp-baremetal-concurrency[baremetal concurrency
+library].
+
+For example, it is possible that a particular platform requires atomic accesses
+to be 32-bit aligned. To achieve that for `stdx::atomic<bool>`, we could provide a
+configuration header specializing `::atomic::alignment_of`:
+
+[source,cpp]
+----
+// this header: atomic_cfg.hpp
+#include <cstdint>
+
+template <>
+constexpr inline auto ::atomic::alignment_of<bool> = alignof(std::uint32_t);
+----
+
+To apply this configuration, when compiling, pass `-DATOMIC_CFG="<path>/atomic_cfg.hpp"`.
+The result would be that `stdx::atomic<bool>` has 32-bit alignment:
+
+[source,cpp]
+----
+static_assert(alignof(stdx::atomic<bool>) == alignof(std::uint32_t));
+----
+
+Using the https://github.com/intel/cpp-baremetal-concurrency[baremetal
+concurrency library] it is possible to override the handling of atomic access
+(`load`, `store`, `exchange`, `fetch_<op>`) to ensure the best codegen on a
+particular platform. As well as alignment concerns, for instance it may be the
+case on a single-core microcontroller that it is cheaper to disable and
+re-enable interrupts around a read/write than incurring a lock-free atomic
+access.
