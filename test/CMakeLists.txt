@@ -21,6 +21,8 @@ add_tests(
     FILES
     algorithm
     always_false
+    atomic
+    atomic_override
     atomic_bitset
     atomic_bitset_override
     bind
@@ -63,6 +65,10 @@ add_tests(
 
 target_compile_definitions(
     atomic_bitset_override_test
+    PRIVATE -DATOMIC_CFG="${CMAKE_CURRENT_LIST_DIR}/detail/atomic_cfg.hpp")
+
+target_compile_definitions(
+    atomic_override_test
     PRIVATE -DATOMIC_CFG="${CMAKE_CURRENT_LIST_DIR}/detail/atomic_cfg.hpp")
 
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)

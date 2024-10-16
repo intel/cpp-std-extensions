@@ -2,8 +2,8 @@
 
 #include <catch2/catch_test_macros.hpp>
 
-#include <concepts>
 #include <cstdint>
+#include <type_traits>
 
 TEST_CASE("atomic_bitset works with overridden type",
           "[atomic_bitset_override]") {
@@ -16,5 +16,5 @@ TEST_CASE("to_natural returns smallest_uint", "[atomic_bitset_override]") {
     auto bs = stdx::atomic_bitset<4>{stdx::all_bits};
     auto value = bs.to_natural();
     CHECK(value == 0b1111);
-    static_assert(std::same_as<decltype(value), std::uint8_t>);
+    static_assert(std::is_same_v<decltype(value), std::uint8_t>);
 }

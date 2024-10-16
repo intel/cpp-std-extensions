@@ -16,7 +16,7 @@ endif()
 
 add_versioned_package("gh:boostorg/mp11#boost-1.83.0")
 fmt_recipe(10.2.1)
-add_versioned_package("gh:intel/cpp-baremetal-concurrency#27de8e1")
+add_versioned_package("gh:intel/cpp-baremetal-concurrency#06e5901")
 
 if(NOT DEFINED CMAKE_CXX_STANDARD)
     set(CMAKE_CXX_STANDARD 20)
@@ -39,6 +39,7 @@ target_sources(
               include
               FILES
               include/stdx/algorithm.hpp
+              include/stdx/atomic.hpp
               include/stdx/atomic_bitset.hpp
               include/stdx/bit.hpp
               include/stdx/bitset.hpp
