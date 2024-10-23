@@ -19,7 +19,8 @@ inline namespace v1 {
 // endian
 
 #if __cpp_lib_endian < 201907L
-enum struct endian {
+// NOLINTNEXTLINE(performance-enum-size)
+enum struct endian : underlying_type_t<decltype(__BYTE_ORDER__)> {
     little = __ORDER_LITTLE_ENDIAN__,
     big = __ORDER_BIG_ENDIAN__,
     native = __BYTE_ORDER__
@@ -262,14 +263,14 @@ constexpr auto bit_pack = [](auto... args) {
 };
 
 template <>
-constexpr auto bit_pack<std::uint16_t> =
+constexpr inline auto bit_pack<std::uint16_t> =
     [](std::uint8_t hi, std::uint8_t lo) -> std::uint16_t {
     return static_cast<std::uint16_t>((static_cast<std::uint32_t>(hi) << 8u) |
                                       lo);
 };
 
 template <>
-constexpr auto bit_pack<std::uint32_t> =
+constexpr inline auto bit_pack<std::uint32_t> =
     stdx::overload{[](std::uint16_t hi, std::uint16_t lo) -> std::uint32_t {
                        return (static_cast<std::uint32_t>(hi) << 16u) | lo;
                    },
@@ -281,7 +282,7 @@ constexpr auto bit_pack<std::uint32_t> =
                    }};
 
 template <>
-constexpr auto bit_pack<std::uint64_t> =
+constexpr inline auto bit_pack<std::uint64_t> =
     stdx::overload{[](std::uint32_t hi, std::uint32_t lo) -> std::uint64_t {
                        return (static_cast<std::uint64_t>(hi) << 32u) | lo;
                    },

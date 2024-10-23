@@ -102,6 +102,7 @@ class atomic_bitset {
         return static_cast<StorageElem>(salient_value(order));
     }
 
+    // NOLINTNEXTLINE(google-explicit-constructor)
     operator bitset_t() const {
         return bitset_t{salient_value(std::memory_order_seq_cst)};
     }

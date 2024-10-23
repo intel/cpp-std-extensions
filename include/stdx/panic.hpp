@@ -31,6 +31,8 @@ auto panic(Args &&...args) -> void {
 } // namespace v1
 } // namespace stdx
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
 #if __cplusplus >= 202002L
 #define STDX_PANIC(MSG, ...)                                                   \
     [] {                                                                       \
@@ -40,3 +42,5 @@ auto panic(Args &&...args) -> void {
 #else
 #define STDX_PANIC(...) stdx::panic(__VA_ARGS__)
 #endif
+
+// NOLINTEND(cppcoreguidelines-macro-usage)

@@ -84,6 +84,8 @@ operator""_Gi(unsigned long long int n) -> unsigned long long int {
     return n * 1'024ull * 1'024ull * 1'024ull;
 }
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
 #define STDX_SMALL_INT_LITERAL_DEF(x)                                          \
     CONSTEVAL auto operator""_##x(char const *, std::size_t)                   \
         ->std::integral_constant<std::size_t, x##u> {                          \
@@ -102,6 +104,8 @@ STDX_SMALL_INT_LITERAL_DEF(8)
 STDX_SMALL_INT_LITERAL_DEF(9)
 
 #undef STDX_SMALL_INT_LITERAL_DEF
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 // NOLINTEND(google-runtime-int)
 } // namespace literals
