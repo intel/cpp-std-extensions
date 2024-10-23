@@ -78,7 +78,7 @@ template <typename T, typename U>
         if constexpr (t_is_const) {
             return std::as_const(u);
         } else {
-            return static_cast<U &>(u);
+            return (u);
         }
     } else {
         if constexpr (t_is_const) {
@@ -182,6 +182,8 @@ constexpr auto is_aligned_with = [](auto v) -> bool {
 } // namespace v1
 } // namespace stdx
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
 #ifndef FWD
 #define FWD(x) std::forward<decltype(x)>(x)
 #endif
@@ -217,3 +219,5 @@ constexpr auto is_aligned_with = [](auto v) -> bool {
         STDX_PRAGMA(diagnostic pop)                                            \
     }()
 #endif
+
+// NOLINTEND(cppcoreguidelines-macro-usage)

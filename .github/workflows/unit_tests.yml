@@ -100,11 +100,6 @@ jobs:
         run: |
           ${{ matrix.install }}
           sudo apt install -y ninja-build python3-venv python3-pip
-          python3 -m venv ${{github.workspace}}/test_venv
-          source ${{github.workspace}}/test_venv/bin/activate
-          pip install -r ${{github.workspace}}/requirements.txt
-          echo "${{github.workspace}}/test_venv/bin" >> $GITHUB_PATH
-
 
       - name: Restore CPM cache
         env:
@@ -131,6 +126,13 @@ jobs:
         with:
           path: ~/cpm-cache
           key: ${{runner.os}}-${{env.cache-name}}-${{ hashFiles('**/CMakeLists.txt', 'cmake/**') }}
+
+      - name: Install python test requirements
+        run: |
+          python3 -m venv ${{github.workspace}}/test_venv
+          source ${{github.workspace}}/test_venv/bin/activate
+          pip install -r ${{github.workspace}}/requirements.txt
+          echo "${{github.workspace}}/test_venv/bin" >> $GITHUB_PATH
 
       - name: Build Unit Tests
         run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} -v -t build_unit_tests
@@ -184,10 +186,6 @@ jobs:
         run: |
           ${{ matrix.install }}
           sudo apt install -y ninja-build python3-venv python3-pip
-          python3 -m venv ${{github.workspace}}/test_venv
-          source ${{github.workspace}}/test_venv/bin/activate
-          pip install -r ${{github.workspace}}/requirements.txt
-          echo "${{github.workspace}}/test_venv/bin" >> $GITHUB_PATH
 
       - name: Restore CPM cache
         env:
@@ -214,6 +212,13 @@ jobs:
         with:
           path: ~/cpm-cache
           key: ${{runner.os}}-${{env.cache-name}}-${{ hashFiles('**/CMakeLists.txt', 'cmake/**') }}
+
+      - name: Install python test requirements
+        run: |
+          python3 -m venv ${{github.workspace}}/test_venv
+          source ${{github.workspace}}/test_venv/bin/activate
+          pip install -r ${{github.workspace}}/requirements.txt
+          echo "${{github.workspace}}/test_venv/bin" >> $GITHUB_PATH
 
       - name: Build Unit Tests
         run: cmake --build ${{github.workspace}}/build --config ${{matrix.build_type}} -v -t build_unit_tests
@@ -263,7 +268,7 @@ jobs:
           CC: "/usr/lib/llvm-${{env.DEFAULT_LLVM_VERSION}}/bin/clang"
           CXX: "/usr/lib/llvm-${{env.DEFAULT_LLVM_VERSION}}/bin/clang++"
           PR_TARGET_BRANCH: ${{ steps.target_branch.outputs.branch }}
-        run: cmake -B ${{github.workspace}}/build -DCMAKE_CXX_STANDARD=${{env.DEFAULT_CXX_STANDARD}} -DCPM_SOURCE_CACHE=~/cpm-cache
+        run: cmake -B ${{github.workspace}}/build -DCMAKE_CXX_STANDARD=17 -DCPM_SOURCE_CACHE=~/cpm-cache
 
       - name: Save CPM cache
         env:
@@ -303,10 +308,6 @@ jobs:
         run: |
           ${{ matrix.install }}
           sudo apt install -y ninja-build python3-venv python3-pip
-          python3 -m venv ${{github.workspace}}/test_venv
-          source ${{github.workspace}}/test_venv/bin/activate
-          pip install -r ${{github.workspace}}/requirements.txt
-          echo "${{github.workspace}}/test_venv/bin" >> $GITHUB_PATH
 
       - name: Restore CPM cache
         env:
@@ -335,6 +336,13 @@ jobs:
           path: ~/cpm-cache
           key: ${{runner.os}}-${{env.cache-name}}-${{ hashFiles('**/CMakeLists.txt', 'cmake/**') }}
 
+      - name: Install python test requirements
+        run: |
+          python3 -m venv ${{github.workspace}}/test_venv
+          source ${{github.workspace}}/test_venv/bin/activate
+          pip install -r ${{github.workspace}}/requirements.txt
+          echo "${{github.workspace}}/test_venv/bin" >> $GITHUB_PATH
+
       # https://github.com/actions/runner-images/issues/9524
       - name: Fix kernel mmap rnd bits
         # Asan in llvm 14 provided in ubuntu 22.04 is incompatible with
@@ -353,10 +361,6 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt update && sudo apt install -y gcc-${{env.DEFAULT_GCC_VERSION}} g++-${{env.DEFAULT_GCC_VERSION}} ninja-build valgrind python3-venv python3-pip
-          python3 -m venv ${{github.workspace}}/test_venv
-          source ${{github.workspace}}/test_venv/bin/activate
-          pip install -r ${{github.workspace}}/requirements.txt
-          echo "${{github.workspace}}/test_venv/bin" >> $GITHUB_PATH
 
       - name: Restore CPM cache
         env:
@@ -383,6 +387,13 @@ jobs:
         with:
           path: ~/cpm-cache
           key: ${{runner.os}}-${{env.cache-name}}-${{ hashFiles('**/CMakeLists.txt', 'cmake/**') }}
+
+      - name: Install python test requirements
+        run: |
+          python3 -m venv ${{github.workspace}}/test_venv
+          source ${{github.workspace}}/test_venv/bin/activate
+          pip install -r ${{github.workspace}}/requirements.txt
+          echo "${{github.workspace}}/test_venv/bin" >> $GITHUB_PATH
 
       - name: Build Unit Tests
         run: cmake --build ${{github.workspace}}/build -t build_unit_tests
@@ -428,10 +439,6 @@ jobs:
       - name: Install build tools
         run: |
           sudo apt update && sudo apt install -y clang-${{env.MULL_LLVM_VERSION}} ninja-build python3-venv python3-pip
-          python3 -m venv ${{github.workspace}}/test_venv
-          source ${{github.workspace}}/test_venv/bin/activate
-          pip install -r ${{github.workspace}}/requirements.txt
-          echo "${{github.workspace}}/test_venv/bin" >> $GITHUB_PATH
 
       - name: Install mull
         env:
@@ -466,12 +473,19 @@ jobs:
           path: ~/cpm-cache
           key: ${{runner.os}}-${{env.cache-name}}-${{ hashFiles('**/CMakeLists.txt', 'cmake/**') }}
 
+      - name: Install python test requirements
+        run: |
+          python3 -m venv ${{github.workspace}}/test_venv
+          source ${{github.workspace}}/test_venv/bin/activate
+          pip install -r ${{github.workspace}}/requirements.txt
+          echo "${{github.workspace}}/test_venv/bin" >> $GITHUB_PATH
+
       - name: Build and run mull tests
         run: cmake --build build -t mull_tests
 
   merge_ok:
     runs-on: ${{ github.repository_owner == 'intel' && 'intel-' || '' }}ubuntu-24.04
-    needs: [build_and_test_24, build_and_test_22, quality_checks_pass, sanitize, valgrind]
+    needs: [build_and_test_24, build_and_test_22, mutate, quality_checks_pass, sanitize, valgrind]
     if: ${{ !cancelled() }}
     steps:
       - name: Enable merge

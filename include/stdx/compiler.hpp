@@ -1,5 +1,7 @@
 #pragma once
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
 #ifndef CONSTINIT
 #ifndef __cpp_constinit
 #if defined(__clang__)
@@ -50,3 +52,5 @@
 #else
 #define STDX_PRAGMA(X) STDX_DO_PRAGMA(GCC X)
 #endif
+
+// NOLINTEND(cppcoreguidelines-macro-usage)

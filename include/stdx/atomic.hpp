@@ -13,6 +13,7 @@
 
 namespace stdx {
 inline namespace v1 {
+// NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
 template <typename T> class atomic {
     static_assert(std::is_trivially_copyable_v<T> and
                       std::is_copy_constructible_v<T> and
@@ -39,7 +40,7 @@ template <typename T> class atomic {
 
     constexpr atomic() CPP20(requires std::is_default_constructible_v<elem_t>)
         : value{} {}
-    constexpr atomic(T t) : value{static_cast<elem_t>(t)} {}
+    constexpr explicit atomic(T t) : value{static_cast<elem_t>(t)} {}
     atomic(atomic const &) = delete;
     auto operator=(atomic const &) -> atomic & = delete;
 
@@ -52,7 +53,9 @@ template <typename T> class atomic {
         ::atomic::store(value, static_cast<elem_t>(t), mo);
     }
 
+    // NOLINTNEXTLINE(google-explicit-constructor)
     [[nodiscard]] operator T() const { return load(); }
+    // NOLINTNEXTLINE(misc-unconventional-assign-operator)
     auto operator=(T t) -> T {
         store(t);
         return t;
