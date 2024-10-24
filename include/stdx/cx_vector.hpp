@@ -31,6 +31,7 @@ template <typename T, std::size_t N> class cx_vector {
 
     constexpr cx_vector() = default;
     template <typename... Ts,
+              // NOLINTNEXTLINE(modernize-use-constraints)
               std::enable_if_t<((sizeof...(Ts) <= N) and ... and
                                 stdx::convertible_to<value_type, Ts>),
                                int> = 0>

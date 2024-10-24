@@ -50,6 +50,7 @@ class atomic_bitset {
         auto const len = std::min(n, str.size() - pos);
         auto const s = str.substr(pos, std::min(len, N));
         auto i = bit;
+        // NOLINTNEXTLINE(modernize-loop-convert)
         for (auto it = std::rbegin(s); it != std::rend(s); ++it) {
             if (*it == one) {
                 ret |= i;

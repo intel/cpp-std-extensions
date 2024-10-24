@@ -14,7 +14,7 @@ inline namespace v1 {
 template <std::size_t N> struct ct_string {
     CONSTEVAL ct_string() = default;
 
-    // NOLINTNEXTLINE(*-avoid-c-arrays)
+    // NOLINTNEXTLINE(*-avoid-c-arrays, google-explicit-constructor)
     CONSTEVAL explicit(false) ct_string(char const (&str)[N]) {
         for (auto i = std::size_t{}; i < N; ++i) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-*)

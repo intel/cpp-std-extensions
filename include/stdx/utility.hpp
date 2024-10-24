@@ -9,6 +9,8 @@
 #include <type_traits>
 #include <utility>
 
+// NOLINTBEGIN(modernize-use-constraints)
+
 namespace stdx {
 inline namespace v1 {
 
@@ -221,3 +223,4 @@ constexpr auto is_aligned_with = [](auto v) -> bool {
 #endif
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
+// NOLINTEND(modernize-use-constraints)

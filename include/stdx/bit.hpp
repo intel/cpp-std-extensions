@@ -13,6 +13,8 @@
 #include <bit>
 #endif
 
+// NOLINTBEGIN(modernize-use-constraints)
+
 namespace stdx {
 inline namespace v1 {
 
@@ -357,3 +359,5 @@ template <std::size_t N> CONSTEVAL auto smallest_uint() {
 template <std::size_t N> using smallest_uint_t = decltype(smallest_uint<N>());
 } // namespace v1
 } // namespace stdx
+
+// NOLINTEND(modernize-use-constraints)

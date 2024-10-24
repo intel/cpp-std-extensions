@@ -13,6 +13,8 @@
 #include <limits>
 #include <type_traits>
 
+// NOLINTBEGIN(modernize-use-constraints)
+
 namespace stdx {
 inline namespace v1 {
 
@@ -280,3 +282,5 @@ template <typename T, std::size_t N>
 constexpr auto ct_capacity_v<span<T, N>> = N;
 } // namespace v1
 } // namespace stdx
+
+// NOLINTEND(modernize-use-constraints)
