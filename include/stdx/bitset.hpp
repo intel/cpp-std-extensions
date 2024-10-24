@@ -153,6 +153,7 @@ class bitset {
         auto const len = std::min(n, str.size() - pos);
         auto i = std::size_t{};
         auto const s = str.substr(pos, std::min(len, N));
+        // NOLINTNEXTLINE(modernize-loop-convert)
         for (auto it = std::rbegin(s); it != std::rend(s); ++it) {
             set(i++, *it == one);
         }

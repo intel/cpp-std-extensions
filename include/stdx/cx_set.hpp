@@ -24,6 +24,7 @@ template <typename Key, std::size_t N> class cx_set {
 
     constexpr cx_set() = default;
     template <typename... Ts,
+              // NOLINTNEXTLINE(modernize-use-constraints)
               std::enable_if_t<((sizeof...(Ts) <= N) and ... and
                                 stdx::convertible_to<key_type, Ts>),
                                int> = 0>

@@ -10,6 +10,8 @@
 #include <iterator>
 #include <type_traits>
 
+// NOLINTBEGIN(modernize-use-constraints)
+
 namespace stdx {
 inline namespace v1 {
 
@@ -210,3 +212,5 @@ byterator(It) -> byterator<detail::iterator_value_t<It>>;
 
 } // namespace v1
 } // namespace stdx
+
+// NOLINTEND(modernize-use-constraints)

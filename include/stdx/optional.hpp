@@ -10,6 +10,8 @@
 #include <type_traits>
 #include <utility>
 
+// NOLINTBEGIN(modernize-use-constraints)
+
 namespace stdx {
 inline namespace v1 {
 template <typename T, typename = void> struct tombstone_traits {
@@ -256,3 +258,5 @@ constexpr auto transform(F &&f, Ts &&...ts) {
 }
 } // namespace v1
 } // namespace stdx
+
+// NOLINTEND(modernize-use-constraints)

@@ -5,6 +5,7 @@
 #include <atomic>
 #include <type_traits>
 
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
 #if __cplusplus >= 202002L
 #define CPP20(...) __VA_ARGS__
 #else
@@ -123,3 +124,5 @@ template <typename T> class atomic {
 };
 } // namespace v1
 } // namespace stdx
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
