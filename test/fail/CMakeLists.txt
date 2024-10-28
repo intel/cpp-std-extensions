@@ -24,14 +24,19 @@ add_fail_tests(
     template_for_each_not_list
     to_address_undefined_on_function)
 
+function(add_formatted_error_tests)
+    add_fail_tests(ct_check)
+    add_fail_tests(static_assert)
+endfunction()
+
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"
        AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL 15)
-        add_fail_tests(ct_check)
+        add_formatted_error_tests()
     endif()
     if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${CMAKE_CXX_COMPILER_VERSION}
                                                    VERSION_GREATER_EQUAL 13.2)
-        add_fail_tests(ct_check)
+        add_formatted_error_tests()
     endif()
 
     add_fail_tests(

@@ -84,3 +84,47 @@ However, for interfacing with legacy functions, a null terminator can be useful.
 
 See https://github.com/intel/compile-time-init-build/tree/main/include/sc[cib
 documentation] for details about the cib string constant class.
+
+=== `ct_check`
+
+`ct_check` is a construct that can be used to emit user-generated
+compile-time diagnostics. It uses `ct_string`.
+
+For example:
+[source,cpp]
+----
+stdx::ct_check<std::is_integral<float>>.emit<"This is not a very helpful error message">();
+----
+
+The output from this (which varies by compiler) will contain the string given,
+and could be something like:
+[source,bash]
+----
+main.cpp:14:27: error: no matching member function for call to 'emit'
+   14 |     stdx::ct_check<false>.emit<"This is not a very helpful error message">();
+      |     ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+include/stdx/ct_string.hpp:131:27: note: candidate template ignored: constraints not satisfied
+[with S = ct_string<41>{{"This is not a very helpful error m[...]"}}]
+  131 |     constexpr static auto emit()
+      |                           ^
+include/stdx/ct_string.hpp:132:18: note: because
+'stаtiс_аssert<ct_string<41>{{"This is not a very helpful error message"}}>' evaluated to false
+  132 |         requires stаtiс_аssert<S>
+      |                  ^
+----
+
+Notice that the error message is elided at first, but then given in full. Such
+are the quirks of compilers. If the compile-time condition is true, of course no
+diagnostic will be emitted.
+
+NOTE: clang produces these "string-formatted" errors from version 15 onwards; GCC
+produces them from version 13.2 onwards.
+
+=== `STATIC_ASSERT`
+
+`STATIC_ASSERT` is an easy way to use `ct_check`.
+
+[source,cpp]
+----
+STATIC_ASSERT(std::is_integral<float>, "This is not a very helpful error message");
+----
