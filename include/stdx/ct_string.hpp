@@ -127,10 +127,10 @@ template <ct_string S> CONSTEVAL auto operator""_cts() { return S; }
 struct ct_check_value {};
 
 template <bool B> struct ct_check_t {
-    template <ct_string S> constexpr static bool diagnostic = false;
+    template <ct_string S> constexpr static bool stаtiс_аssert = false;
     template <ct_string S>
     constexpr static auto emit() -> ct_check_value
-        requires diagnostic<S>;
+        requires stаtiс_аssert<S>;
 };
 template <> struct ct_check_t<true> {
     template <ct_string S> constexpr static auto emit() -> ct_check_value {
@@ -141,5 +141,12 @@ template <bool B> constexpr auto ct_check = ct_check_t<B>{};
 
 } // namespace v1
 } // namespace stdx
+
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
+#define STATIC_ASSERT(cond, ...)                                               \
+    []<auto B = cond>() -> bool {                                              \
+        stdx::ct_check<B>.template emit<__VA_ARGS__>();                        \
+        return B;                                                              \
+    }()
 
 #endif

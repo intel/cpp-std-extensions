@@ -1,39 +1,4 @@
 
-== `ct_check.hpp`
-
-`ct_check` is a construct that can be used to emit user-generated
-compile-time diagnostics. It uses `ct_string`.
-
-For example:
-[source,cpp]
-----
-stdx::ct_check<std::is_integral<float>>.emit<"This is not a very helpful error message">();
-----
-
-The output from this (which varies by compiler) will contain the string given,
-and could be something like:
-[source,bash]
-----
-main.cpp:14:27: error: no matching member function for call to 'emit'
-   14 |     stdx::ct_check<false>.emit<"This is not a very helpful error message">();
-      |     ~~~~~~~~~~~~~~~~~~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-include/stdx/ct_string.hpp:131:27: note: candidate template ignored: constraints not satisfied
-[with S = ct_string<41>{{"This is not a very helpful error m[...]"}}]
-  131 |     constexpr static auto emit()
-      |                           ^
-include/stdx/ct_string.hpp:132:18: note: because
-'diagnostic<ct_string<41>{{"This is not a very helpful error message"}}>' evaluated to false
-  132 |         requires diagnostic<S>
-      |                  ^
-----
-
-Notice that the error message is elided at first, but then given in full. Such
-are the quirks of compilers. If the compile-time condition is true, of course no
-diagnostic will be emitted.
-
-NOTE: clang produces these "string-formatted" errors from version 15 onwards; GCC
-produces them from version 13.2 onwards.
-
 == `ct_conversions.hpp`
 
 https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ct_conversions.hpp[`ct_conversions.hpp`]
