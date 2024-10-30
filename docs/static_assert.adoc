@@ -1,0 +1,33 @@
+
+== `static_assert.hpp`
+
+`STATIC_ASSERT` is a way to produce compile-time errors using formatted strings.
+
+[source,cpp]
+----
+template <typename T>
+constexpr auto f() {
+  STATIC_ASSERT(std::is_integral<T>,
+                "f() must take an integral type, received {}", CX_VALUE(T));
+}
+
+f<float>(); // produces compile-time error
+----
+
+The arguments to be formatted (if any) must be wrapped in xref:utility.adoc#_cx_value[`CX_VALUE`].
+
+The output from this (which varies by compiler) will contain the formatted
+string, and could be something like:
+
+[source,bash]
+----
+main.cpp:14:27: error: no matching member function for call to 'emit'
+...
+include/stdx/static_assert.hpp:16:18: note: because
+'stаtiс_аssert<ct_string<47>{{"f() must take an integral type, received float"}}>' evaluated to false
+   16 |         requires stаtiс_аssert<S>
+      |                  ^
+----
+
+NOTE: clang produces these "string-formatted" errors from version 15 onwards; GCC
+produces them from version 13.2 onwards.

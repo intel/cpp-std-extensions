@@ -151,9 +151,12 @@ struct type_val {
     friend constexpr auto operator+(T &&t, U &&) -> T {
         return t;
     }
-    friend constexpr auto operator+(type_val const &f) -> type_val;
+    friend constexpr auto operator+(type_val const &f) -> type_val { return f; }
     // NOLINTNEXTLINE(google-explicit-constructor)
-    template <typename T> constexpr operator T() const;
+    template <typename T> constexpr operator T() const {
+        extern auto cxv_type_val_get_t(T *) -> T;
+        return cxv_type_val_get_t(nullptr);
+    }
 };
 
 template <int> constexpr auto is_type() -> std::false_type;
@@ -166,6 +169,14 @@ template <typename T> struct typer<from_any(T)> {
 
 template <int> constexpr auto type_of() -> void;
 template <typename T> constexpr auto type_of() -> typename typer<T>::type;
+
+class cx_base {
+    struct unusable {};
+
+  public:
+    using cx_value_t [[maybe_unused]] = void;
+    constexpr auto operator()(unusable) const {}
+};
 } // namespace cxv_detail
 
 template <typename T>
@@ -192,31 +203,24 @@ constexpr auto is_aligned_with = [](auto v) -> bool {
 
 #ifndef CX_VALUE
 #define CX_VALUE(...)                                                          \
-    [] {                                                                       \
+    []() constexpr {                                                           \
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
         STDX_PRAGMA(diagnostic ignored "-Wunused-value")                       \
         if constexpr (decltype(stdx::cxv_detail::is_type<                      \
                                stdx::cxv_detail::from_any(                     \
                                    __VA_ARGS__)>())::value) {                  \
-            [[maybe_unused]] struct {                                          \
-                constexpr auto operator()() const noexcept {                   \
-                    return stdx::type_identity<                                \
-                        decltype(stdx::cxv_detail::type_of<                    \
-                                 stdx::cxv_detail::from_any(                   \
-                                     __VA_ARGS__)>())>{};                      \
-                }                                                              \
-                using cx_value_t [[maybe_unused]] = void;                      \
-            } val;                                                             \
-            return val;                                                        \
+            return stdx::overload{stdx::cxv_detail::cx_base{}, [] {            \
+                                      return stdx::type_identity<              \
+                                          decltype(stdx::cxv_detail::type_of<  \
+                                                   stdx::cxv_detail::from_any( \
+                                                       __VA_ARGS__)>())>{};    \
+                                  }};                                          \
         } else {                                                               \
-            [[maybe_unused]] struct {                                          \
-                constexpr auto operator()() const {                            \
-                    return (__VA_ARGS__) + stdx::cxv_detail::type_val{};       \
-                }                                                              \
-                using cx_value_t [[maybe_unused]] = void;                      \
-            } val;                                                             \
-            return val;                                                        \
+            return stdx::overload{stdx::cxv_detail::cx_base{}, [] {            \
+                                      return (__VA_ARGS__) +                   \
+                                             stdx::cxv_detail::type_val{};     \
+                                  }};                                          \
         }                                                                      \
         STDX_PRAGMA(diagnostic pop)                                            \
     }()

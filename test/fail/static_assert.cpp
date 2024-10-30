@@ -1,4 +1,4 @@
-#include <stdx/ct_string.hpp>
+#include <stdx/static_assert.hpp>
 
 // EXPECT: 01234567890123456789012345678901234567890123456789
 
