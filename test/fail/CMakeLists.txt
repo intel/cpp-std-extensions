@@ -27,6 +27,7 @@ add_fail_tests(
 function(add_formatted_error_tests)
     add_fail_tests(ct_check)
     add_fail_tests(static_assert)
+    add_fail_tests(static_assert_format)
 endfunction()
 
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
