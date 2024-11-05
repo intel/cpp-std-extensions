@@ -14,7 +14,9 @@ constexpr auto f() {
 f<float>(); // produces compile-time error
 ----
 
-The arguments to be formatted (if any) must be wrapped in xref:utility.adoc#_cx_value[`CX_VALUE`].
+The arguments to be formatted (if any) must be wrapped in
+xref:utility.adoc#_cx_value[`CX_VALUE`] if they are not admissible as template
+arguments.
 
 The output from this (which varies by compiler) will contain the formatted
 string, and could be something like:
