@@ -50,6 +50,9 @@ TEST_CASE("compile-time constant", "[units]") {
                        std::integral_constant<unsigned int, 0> const>);
     static_assert(std::is_same_v<decltype(0_c),
                                  std::integral_constant<std::uint32_t, 0>>);
+    static_assert(
+        std::is_same_v<decltype(123'456_c),
+                       std::integral_constant<std::uint32_t, 123'456>>);
 }
 
 namespace {

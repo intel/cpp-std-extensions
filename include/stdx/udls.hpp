@@ -11,12 +11,26 @@ namespace stdx {
 inline namespace v1 {
 
 namespace detail {
+template <char C>
+constexpr static bool is_decimal_digit_v = C >= '0' and C <= '9';
+template <char C> constexpr static bool is_digit_sep_v = C == '\'';
+
+template <char C, typename Sum> CONSTEVAL auto maybe_add_digit(Sum s) {
+    if constexpr (is_decimal_digit_v<C>) {
+        s *= 10;
+        s += C - '0';
+    }
+    return s;
+}
+
 template <typename T, char... Chars> CONSTEVAL auto decimal() -> T {
-    static_assert((... and (Chars >= '0' and Chars <= '9')),
-                  "decimal numbers only are supported");
+    static_assert(
+        (... and (is_decimal_digit_v<Chars> or is_digit_sep_v<Chars>)),
+        "decimal numbers only are supported");
     using U = decltype(stdx::to_underlying(std::declval<T>()));
+
     auto x = U{};
-    ((x *= 10, x += Chars - '0'), ...);
+    ((x = maybe_add_digit<Chars>(x)), ...);
     return T{x};
 }
 } // namespace detail
