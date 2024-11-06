@@ -23,11 +23,15 @@ template <> struct ct_check_t<true> {
 template <bool B> constexpr auto ct_check = ct_check_t<B>{};
 
 namespace detail {
-template <ct_string Fmt, auto... Args>
-constexpr auto static_format()
-    requires(... and cx_value<decltype(Args)>)
-{
-    return ct_format<Fmt>(Args...);
+template <ct_string Fmt, auto... Args> constexpr auto static_format() {
+    constexpr auto make_ct = []<auto V>() {
+        if constexpr (cx_value<decltype(V)>) {
+            return V;
+        } else {
+            return CX_VALUE(V);
+        }
+    };
+    return ct_format<Fmt>(make_ct.template operator()<Args>()...);
 }
 } // namespace detail
 
