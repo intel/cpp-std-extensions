@@ -13,6 +13,8 @@ add_fail_tests(
     for_each_n_args_bad_size
     optional_without_tombstone
     optional_integral_with_tombstone_traits
+    rollover_less_than
+    rollover_signed
     span_insufficient_storage
     span_larger_prefix
     span_larger_suffix

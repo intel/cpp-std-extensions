@@ -63,6 +63,7 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/panic.hpp[`panic.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/priority.hpp[`priority.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ranges.hpp[`ranges.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/rollover.hpp[`rollover.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/span.hpp[`span.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/static_assert.hpp[`static_assert.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/tuple.hpp[`tuple.hpp`]

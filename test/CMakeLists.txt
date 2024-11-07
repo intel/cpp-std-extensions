@@ -55,6 +55,7 @@ add_tests(
     priority
     ranges
     remove_cvref
+    rollover
     span
     to_underlying
     type_map
