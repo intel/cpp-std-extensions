@@ -19,7 +19,7 @@ template <std::size_t I> constexpr static index_constant<I> index{};
 
 inline namespace literals {
 template <char... Chars> CONSTEVAL auto operator""_idx() {
-    return index<detail::decimal<std::size_t, Chars...>()>;
+    return index<parse_literal<std::size_t, Chars...>()>;
 }
 } // namespace literals
 
