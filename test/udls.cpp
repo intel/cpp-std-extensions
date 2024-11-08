@@ -42,14 +42,50 @@ TEST_CASE("compile-time named small indices", "[units]") {
 }
 
 TEST_CASE("compile-time constant", "[units]") {
-    using namespace stdx;
+    static_assert(std::is_same_v<decltype(stdx::_c<0>),
+                                 std::integral_constant<int, 0> const>);
     static_assert(
-        std::is_same_v<decltype(_c<0>), std::integral_constant<int, 0> const>);
-    static_assert(
-        std::is_same_v<decltype(_c<0u>),
+        std::is_same_v<decltype(stdx::_c<0u>),
                        std::integral_constant<unsigned int, 0> const>);
+}
+
+TEST_CASE("compile-time literal (decimal)", "[units]") {
+    using namespace stdx::literals;
     static_assert(std::is_same_v<decltype(0_c),
                                  std::integral_constant<std::uint32_t, 0>>);
+}
+
+TEST_CASE("compile-time literal supports digit separators", "[units]") {
+    using namespace stdx::literals;
+    static_assert(
+        std::is_same_v<decltype(123'456_c),
+                       std::integral_constant<std::uint32_t, 123'456>>);
+}
+
+TEST_CASE("compile-time literal (octal)", "[units]") {
+    using namespace stdx::literals;
+    static_assert(std::is_same_v<decltype(010_c),
+                                 std::integral_constant<std::uint32_t, 8>>);
+    static_assert(std::is_same_v<decltype(0'10_c),
+                                 std::integral_constant<std::uint32_t, 8>>);
+}
+
+TEST_CASE("compile-time literal (binary)", "[units]") {
+    using namespace stdx::literals;
+    static_assert(std::is_same_v<decltype(0b11_c),
+                                 std::integral_constant<std::uint32_t, 3>>);
+    static_assert(std::is_same_v<decltype(0b1'1_c),
+                                 std::integral_constant<std::uint32_t, 3>>);
+}
+
+TEST_CASE("compile-time literal (hex)", "[units]") {
+    using namespace stdx::literals;
+    static_assert(std::is_same_v<decltype(0xaa_c),
+                                 std::integral_constant<std::uint32_t, 170>>);
+    static_assert(std::is_same_v<decltype(0xAA_c),
+                                 std::integral_constant<std::uint32_t, 170>>);
+    static_assert(std::is_same_v<decltype(0xA'a_c),
+                                 std::integral_constant<std::uint32_t, 170>>);
 }
 
 namespace {
