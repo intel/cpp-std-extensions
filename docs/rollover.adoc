@@ -1,0 +1,94 @@
+
+== `rollover.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/rollover.hpp[`rollover.hpp`]
+provides a class template `rollover_t` that is intended to act like an unsigned
+integral type, but with semantics that include the ability to roll-over on overflow.
+
+A `rollover_t` can be instantiated with any unsigned integral type:
+
+[source,cpp]
+----
+// explicit type
+auto x = stdx::rollover_t<std::uint8_t>{};
+
+// deduced type: must be unsigned
+auto y = stdx::rollover_t{1u}; // rollover_t<unsigned int>
+----
+
+It supports all the usual arithmetic operations (`+` `-` `*` `/` `%`) and
+behaves much like an unsigned integral type, with defined overflow and underflow
+semantics.
+
+=== Comparison semantics
+
+`rollover_t` supports equality, but the comparison operators (`<` `<​=` `>` `>=`)
+are deleted. Instead, `cmp_less` is provided, with different semantics. A
+`rollover_t` considers itself to be in the middle of a rolling window where half
+the bit-range is always lower and half is higher.
+
+For instance, imagine a 3-bit unsigned integral type. There are eight values of
+this type: `0` `1` `2` `3` `4` `5` `6` `7`. Let's call the `rollover_t` over
+this type `R`.
+
+CAUTION: `operator<` on `rollover_t` is not antisymmetric!
+
+For any value, there are always four values (half the bit-space) less than it,
+and four values greater than it. And of course it is equal to itself. e.g. for
+the `R` value `5`:
+
+- `1`, `2`, `3`, `4` are all less than `5`
+- `6`, `7`, `0`, `1` are all greater than `5`
+
+i.e. `cmp_less(R{1u}, R{5u})` is `true`. And `cmp_less(R{5u}, R{1u})` is true.
+
+Effectively any value partitions the cyclic space in this way.
+
+CAUTION: `operator<` on `rollover_t` is not transitive!
+
+Also, the following are all true for `R`:
+
+- `1` < `3`
+- `3` < `5`
+- `5` < `7`
+- `7` < `1`
+
+The cyclic nature of the space means that `operator<` is neither antisymmetric
+nor transitive! (Lack of antisymmetry might be viewed as a special case of
+non-transitivity.)
+
+This means we need to take care with operations that assume the antisymmetric
+and transitive nature of the less-than operation. In particular `cmp_less` does
+_not_ define a
+https://en.cppreference.com/w/cpp/concepts/strict_weak_order[strict weak order]
+-- which is why `operator<` and friends are deleted. In the absence of data
+constraints, `rollover_t` cannot be sorted with `std::sort`.
+
+NOTE: A suitable constraint might be that the data lies completely within half
+the bit-range: in that case, `cmp_less` _would_ have the correct properties and
+_could_ be used as a
+https://en.cppreference.com/w/cpp/named_req/LessThanComparable[comparator]
+argument to `std::sort`. As always in C++, we protect against Murphy, not
+Machiavelli.
+
+=== Use with `std::chrono`
+
+`rollover_t` is intended for use in applications like timers which may be
+modelled as a 32-bit counter that rolls over. In that case, it makes sense to
+consider a sliding window centred around "now" where half the bit-space is in
+the past, and half is in the future. Under such a scheme, in general it is
+undefined to schedule an event more than 31 bits-worth in the future.
+
+[source,cpp]
+----
+// 32-bit rollover type
+using ro_t = stdx::rollover_t<std::uint32_t>;
+// Used with a microsecond resolution
+using ro_duration_t = std::chrono::duration<ro_t, std::micro>;
+using ro_time_point_t = std::chrono::time_point<std::chrono::local_t, ro_duration_t>;
+----
+
+This allows us to benefit from the typed time handling of `std::chrono`, and use
+`cmp_less` for specialist applications like keeping a sorted list of timer
+tasks, where we have the constraint that we never schedule an event beyond a
+certain point in the future.
