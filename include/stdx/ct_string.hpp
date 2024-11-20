@@ -52,7 +52,7 @@ template <std::size_t N> struct ct_string {
     constexpr static std::integral_constant<bool, N == 1U> empty{};
 
     constexpr explicit(true) operator std::string_view() const {
-        return std::string_view{value.cbegin(), size()};
+        return std::string_view{value.data(), size()};
     }
 
     std::array<char, N> value{};
