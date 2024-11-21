@@ -45,24 +45,24 @@ template <typename Key, typename Value, std::size_t N> class cx_map {
         : storage{vs...}, current_size{sizeof...(Vs)} {}
 
     [[nodiscard]] constexpr auto begin() LIFETIMEBOUND -> iterator {
-        return std::begin(storage);
+        return std::data(storage);
     }
     [[nodiscard]] constexpr auto begin() const LIFETIMEBOUND -> const_iterator {
-        return std::begin(storage);
+        return std::data(storage);
     }
     [[nodiscard]] constexpr auto
     cbegin() const LIFETIMEBOUND -> const_iterator {
-        return std::cbegin(storage);
+        return std::data(storage);
     }
 
     [[nodiscard]] constexpr auto end() LIFETIMEBOUND -> iterator {
-        return std::begin(storage) + current_size;
+        return begin() + current_size;
     }
     [[nodiscard]] constexpr auto end() const LIFETIMEBOUND -> const_iterator {
-        return std::begin(storage) + current_size;
+        return begin() + current_size;
     }
     [[nodiscard]] constexpr auto cend() const LIFETIMEBOUND -> const_iterator {
-        return std::cbegin(storage) + current_size;
+        return cbegin() + current_size;
     }
 
     [[nodiscard]] constexpr auto size() const -> std::size_t {
