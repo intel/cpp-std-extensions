@@ -77,8 +77,13 @@ enum struct E2 {};
 } // namespace
 
 TEST_CASE("is_scoped_enum", "[type_traits]") {
+    static_assert(not stdx::is_scoped_enum_v<int>);
     static_assert(not stdx::is_scoped_enum_v<E1>);
     static_assert(stdx::is_scoped_enum_v<E2>);
+
+    static_assert(not stdx::is_scoped_enum<int>::value);
+    static_assert(not stdx::is_scoped_enum<E1>::value);
+    static_assert(stdx::is_scoped_enum<E2>::value);
 }
 
 TEST_CASE("type_identity", "[type_traits]") {
