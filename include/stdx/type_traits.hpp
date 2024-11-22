@@ -114,8 +114,9 @@ constexpr auto is_specialization_of()
 
 template <typename E>
 constexpr bool is_scoped_enum_v =
-    std::is_enum_v<E> and
-    not std::is_convertible_v<E, std::underlying_type_t<E>>;
+    std::is_enum_v<E> and not std::is_convertible_v<E, underlying_type_t<E>>;
+template <typename E>
+using is_scoped_enum = std::bool_constant<is_scoped_enum_v<E>>;
 
 template <typename...> struct type_list {};
 template <auto...> struct value_list {};
