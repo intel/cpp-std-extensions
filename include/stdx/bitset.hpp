@@ -135,8 +135,8 @@ class bitset {
 
     template <typename... Bs>
     constexpr explicit bitset(place_bits_t, Bs... bs) {
-        static_assert((std::is_integral_v<Bs> and ...),
-                      "Bit places must be integral!");
+        static_assert(((std::is_integral_v<Bs> or std::is_enum_v<Bs>) and ...),
+                      "Bit places must be integral or enumeration types!");
         (set(static_cast<std::size_t>(bs)), ...);
     }
 

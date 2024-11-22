@@ -427,7 +427,7 @@ namespace {
 enum struct Bits : std::uint8_t { ZERO, ONE, TWO, THREE, MAX };
 }
 
-TEST_CASE("use bitset with enum struct (construct)", "[bitset]") {
+TEST_CASE("use bitset with enum struct (default construct)", "[bitset]") {
     constexpr auto bs = stdx::bitset<Bits::MAX>{};
     static_assert(bs.size() == stdx::to_underlying(Bits::MAX));
 }
@@ -453,6 +453,11 @@ TEST_CASE("use bitset with enum struct (read index)", "[bitset]") {
     static_assert(bs[Bits::ONE]);
     static_assert(bs[Bits::TWO]);
     static_assert(bs[Bits::THREE]);
+}
+
+TEST_CASE("use bitset with enum struct (place_bits construct)", "[bitset]") {
+    constexpr auto bs = stdx::bitset<Bits::MAX>{stdx::place_bits, Bits::ZERO};
+    static_assert(bs.to_natural() == 1);
 }
 
 #if __cplusplus >= 202002L
