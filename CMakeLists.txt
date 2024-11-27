@@ -25,7 +25,10 @@ endif()
 add_library(stdx INTERFACE)
 target_compile_features(stdx INTERFACE cxx_std_${CMAKE_CXX_STANDARD})
 target_compile_options(
-    stdx INTERFACE $<$<CXX_COMPILER_ID:Clang>:-Wno-missing-braces>)
+    stdx
+    INTERFACE
+        $<$<OR:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:AppleClang>>:-Wno-missing-braces>
+)
 target_link_libraries_system(stdx INTERFACE concurrency boost_mp11
                              fmt::fmt-header-only)
 
