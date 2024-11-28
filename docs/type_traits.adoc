@@ -51,7 +51,7 @@ int x = stdx::apply_sequence<L1>([&] <typename... Ts> () { return (0 + ... + Ts:
 // x is 3
 
 using L2 = stdx::value_list<1, 2>;
-int y = stdx::apply_sequence<L1>([&] <auto... Vs> () { return (0 + ... + Vs); });
+int y = stdx::apply_sequence<L2>([&] <auto... Vs> () { return (0 + ... + Vs); });
 // y is 3
 ----
 
