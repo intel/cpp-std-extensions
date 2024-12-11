@@ -249,3 +249,92 @@ TEMPLATE_TEST_CASE("bit_size", "[bit]", std::uint8_t, std::uint16_t,
     static_assert(stdx::bit_size<TestType>() ==
                   std::numeric_limits<std::make_unsigned_t<TestType>>::digits);
 }
+
+TEST_CASE("bit_unpack 64 -> 2x32", "[bit]") {
+    auto const [a, b] =
+        stdx::bit_unpack<std::uint32_t>(std::uint64_t{0x1234'5678'9abc'def0});
+    CHECK(a == 0x1234'5678);
+    CHECK(b == 0x9abc'def0);
+}
+
+TEST_CASE("bit_unpack 32 -> 2x16", "[bit]") {
+    auto const [a, b] =
+        stdx::bit_unpack<std::uint16_t>(std::uint32_t{0x1234'5678});
+    CHECK(a == 0x1234);
+    CHECK(b == 0x5678);
+}
+
+TEST_CASE("bit_unpack 64 -> 4x16", "[bit]") {
+    auto const [a, b, c, d] =
+        stdx::bit_unpack<std::uint16_t>(std::uint64_t{0x1234'5678'9abc'def0});
+    CHECK(a == 0x1234);
+    CHECK(b == 0x5678);
+    CHECK(c == 0x9abc);
+    CHECK(d == 0xdef0);
+}
+
+TEST_CASE("bit_unpack 16 -> 2x8", "[bit]") {
+    auto const [a, b] = stdx::bit_unpack<std::uint8_t>(std::uint16_t{0x1234});
+    CHECK(a == 0x12);
+    CHECK(b == 0x34);
+}
+
+TEST_CASE("bit_unpack 32 -> 4x8", "[bit]") {
+    auto const [a, b, c, d] =
+        stdx::bit_unpack<std::uint8_t>(std::uint32_t{0x1234'5678});
+    CHECK(a == 0x12);
+    CHECK(b == 0x34);
+    CHECK(c == 0x56);
+    CHECK(d == 0x78);
+}
+
+TEST_CASE("bit_unpack 64 -> 8x8", "[bit]") {
+    auto const [a, b, c, d, e, f, g, h] =
+        stdx::bit_unpack<std::uint8_t>(std::uint64_t{0x1234'5678'9abc'def0});
+    CHECK(a == 0x12);
+    CHECK(b == 0x34);
+    CHECK(c == 0x56);
+    CHECK(d == 0x78);
+    CHECK(e == 0x9a);
+    CHECK(f == 0xbc);
+    CHECK(g == 0xde);
+    CHECK(h == 0xf0);
+}
+
+TEST_CASE("bit_pack/unpack round trip 16 <-> 8", "[bit]") {
+    constexpr auto x = stdx::bit_pack<std::uint16_t>(0x12, 0x34);
+    auto const [a, b] = stdx::bit_unpack<std::uint8_t>(x);
+    CHECK(stdx::bit_pack<std::uint16_t>(a, b) == x);
+}
+
+TEST_CASE("bit_pack/unpack round trip 32 <-> 8", "[bit]") {
+    constexpr auto x = stdx::bit_pack<std::uint32_t>(0x12, 0x34, 0x56, 0x78);
+    auto const [a, b, c, d] = stdx::bit_unpack<std::uint8_t>(x);
+    CHECK(stdx::bit_pack<std::uint32_t>(a, b, c, d) == x);
+}
+
+TEST_CASE("bit_pack/unpack round trip 64 <-> 8", "[bit]") {
+    constexpr auto x = stdx::bit_pack<std::uint64_t>(0x12, 0x34, 0x56, 0x78,
+                                                     0x9a, 0xbc, 0xde, 0xf0);
+    auto const [a, b, c, d, e, f, g, h] = stdx::bit_unpack<std::uint8_t>(x);
+    CHECK(stdx::bit_pack<std::uint64_t>(a, b, c, d, e, f, g, h) == x);
+}
+
+TEST_CASE("bit_pack/unpack round trip 32 <-> 16", "[bit]") {
+    constexpr auto x = stdx::bit_pack<std::uint32_t>(0x1234, 0x5678);
+    auto const [a, b] = stdx::bit_unpack<std::uint16_t>(x);
+    CHECK(stdx::bit_pack<std::uint32_t>(a, b) == x);
+}
+
+TEST_CASE("bit_pack/unpack round trip 64 <-> 16", "[bit]") {
+    constexpr auto x =
+        stdx::bit_pack<std::uint64_t>(0x1234, 0x5678, 0x9abc, 0xdef0);
+    auto const [a, b, c, d] = stdx::bit_unpack<std::uint16_t>(x);
+    CHECK(stdx::bit_pack<std::uint64_t>(a, b, c, d) == x);
+}
+
+TEST_CASE("bit_pack/unpack round trip 64 <-> 32", "[bit]") {
+    constexpr auto x = stdx::bit_pack<std::uint64_t>(0x1234'5678, 0x9abcdef0);
+    auto const [a, b] = stdx::bit_unpack<std::uint32_t>(x);
+    CHECK(stdx::bit_pack<std::uint64_t>(a, b) == x);
+}

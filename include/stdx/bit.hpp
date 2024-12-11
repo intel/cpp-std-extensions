@@ -4,6 +4,7 @@
 #include <stdx/type_traits.hpp>
 #include <stdx/utility.hpp>
 
+#include <array>
 #include <climits>
 #include <cstdint>
 #include <limits>
@@ -305,6 +306,20 @@ constexpr inline auto bit_pack<std::uint64_t> =
                               (static_cast<std::uint64_t>(b5) << 16u) |
                               (static_cast<std::uint64_t>(b6) << 8u) | b7;
                    }};
+
+template <typename To, typename From> constexpr auto bit_unpack(From arg) {
+    static_assert(unsigned_integral<To> and unsigned_integral<From>,
+                  "bit_unpack is undefined for those types");
+
+    constexpr auto sz = sized<From>{1}.template in<To>();
+    auto r = bit_cast<std::array<To, sz>>(to_be(arg));
+    if constexpr (stdx::endian::native == stdx::endian::little) {
+        for (auto &elem : r) {
+            elem = byteswap(elem);
+        }
+    }
+    return r;
+}
 
 namespace detail {
 template <typename T, std::size_t Bit>
