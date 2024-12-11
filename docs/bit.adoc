@@ -79,6 +79,37 @@ constexpr std::size_t x = stdx::bit_size<std::uint8_t>();
 static_assert(x == 8);
 ----
 
+=== `bit_unpack`
+
+`bit_unpack` is a function for unpacking an unsigned integral values into multiple
+smaller bit width values.
+
+[source,cpp]
+----
+auto const [a, b] = stdx::bit_unpack<std::uint16_t>(0x1234'5678u);
+assert(a == 0x1234u);
+assert(b == 0x5678u);
+----
+
+`bit_unpack` can be used:
+
+- to unpack a `std::uint16_t`  into 2 `std::uint8_t`​s
+- to unpack a `std::uint32_t`  into 2 `std::uint16_t`​s
+- to unpack a `std::uint32_t`  into 4 `std::uint8_t`​s
+- to unpack a `std::uint64_t`  into 2 `std::uint32_t`​s
+- to unpack a `std::uint64_t`  into 4 `std::uint16_t`​s
+- to unpack a `std::uint64_t`  into 8 `std::uint8_t`​s
+
+The return value of `bit_unpack` is actually a `std::array` with elements in
+order of significance. In this way `bit_unpack` followed by `bit_pack` produces
+the original value.
+
+[source,cpp]
+----
+constexpr auto a = stdx::bit_unpack<std::uint16_t>(0x1234'5678u);
+static_assert(stdx::bit_pack<std::uint32_t>(a[0], a[1]) == 0x1234'5678u);
+----
+
 === `smallest_uint`
 
 `smallest_uint` is a function template that selects the smallest unsigned
