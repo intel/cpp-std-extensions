@@ -31,6 +31,7 @@ add_tests(
     byterator
     cached
     callable
+    compiler
     concepts
     conditional
     ct_conversions
