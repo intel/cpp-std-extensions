@@ -22,12 +22,24 @@
 #endif
 #endif
 
+#ifndef USING_ATTR_NS
+#if defined(__clang__)
+#define USING_ATTR_NS using clang:
+#else
+#define USING_ATTR_NS using gnu:
+#endif
+#endif
+
 #ifndef ALWAYS_INLINE
 #define ALWAYS_INLINE inline __attribute__((always_inline))
 #endif
 
 #ifndef NEVER_INLINE
 #define NEVER_INLINE __attribute__((noinline))
+#endif
+
+#ifndef FLATTEN
+#define FLATTEN __attribute__((flatten))
 #endif
 
 #ifndef MUSTTAIL
