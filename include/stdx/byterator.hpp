@@ -188,20 +188,32 @@ template <typename T> class byterator {
         ptr += sizeof(R);
     }
 
-    [[nodiscard]] auto peeku8() { return peek<std::uint8_t>(); }
-    [[nodiscard]] auto readu8() { return read<std::uint8_t>(); }
+    template <typename V = std::uint8_t> [[nodiscard]] auto peeku8() {
+        return peek<std::uint8_t, V>();
+    }
+    template <typename V = std::uint8_t> [[nodiscard]] auto readu8() {
+        return read<std::uint8_t, V>();
+    }
     template <typename V> [[nodiscard]] auto writeu8(V &&v) {
         return write(static_cast<std::uint8_t>(std::forward<V>(v)));
     }
 
-    [[nodiscard]] auto peeku16() { return peek<std::uint16_t>(); }
-    [[nodiscard]] auto readu16() { return read<std::uint16_t>(); }
+    template <typename V = std::uint16_t> [[nodiscard]] auto peeku16() {
+        return peek<std::uint16_t, V>();
+    }
+    template <typename V = std::uint16_t> [[nodiscard]] auto readu16() {
+        return read<std::uint16_t, V>();
+    }
     template <typename V> [[nodiscard]] auto writeu16(V &&v) {
         return write(static_cast<std::uint16_t>(std::forward<V>(v)));
     }
 
-    [[nodiscard]] auto peeku32() { return peek<std::uint32_t>(); }
-    [[nodiscard]] auto readu32() { return read<std::uint32_t>(); }
+    template <typename V = std::uint32_t> [[nodiscard]] auto peeku32() {
+        return peek<std::uint32_t, V>();
+    }
+    template <typename V = std::uint32_t> [[nodiscard]] auto readu32() {
+        return read<std::uint32_t, V>();
+    }
     template <typename V> [[nodiscard]] auto writeu32(V &&v) {
         return write(static_cast<std::uint32_t>(std::forward<V>(v)));
     }

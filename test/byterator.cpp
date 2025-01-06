@@ -258,3 +258,21 @@ TEST_CASE("write enum (constrained size)", "[byterator]") {
     CHECK(a[0] == stdx::to_be<std::uint16_t>(0x0302));
     CHECK((i == j));
 }
+
+TEST_CASE("peek enum (constrained size alias)", "[byterator]") {
+    auto const a = std::array{stdx::to_be<std::uint16_t>(0x0102),
+                              stdx::to_be<std::uint16_t>(0x0304)};
+    auto i = stdx::byterator{std::begin(a)};
+    static_assert(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
+    CHECK(i.peeku8<E2>() == E2::A);
+}
+
+TEST_CASE("read enum (constrained size alias)", "[byterator]") {
+    auto const a = std::array{stdx::to_be<std::uint16_t>(0x0102),
+                              stdx::to_be<std::uint16_t>(0x0304)};
+    auto i = stdx::byterator{std::begin(a)};
+    auto j = std::next(i);
+    static_assert(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
+    CHECK(i.readu8<E2>() == E2::A);
+    CHECK((i == j));
+}
