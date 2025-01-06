@@ -159,10 +159,29 @@ class atomic_bitset {
         return *this;
     }
 
-    template <typename T> auto reset(T idx) -> bitset_t {
+    template <typename T>
+    auto reset(T idx, std::memory_order order = std::memory_order_seq_cst)
+        -> bitset_t {
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
-        return bitset_t{
-            atomic::fetch_and(storage, static_cast<elem_t>(~(bit << pos)))};
+        return bitset_t{atomic::fetch_and(
+            storage, static_cast<elem_t>(~(bit << pos)), order)};
+    }
+
+    auto
+    reset(lsb_t lsb, msb_t msb,
+          std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
+        auto const l = to_underlying(lsb);
+        auto const m = to_underlying(msb);
+        auto const shifted_value = bit_mask<elem_t>(m, l);
+        return bitset_t{atomic::fetch_and(storage, ~shifted_value, order)};
+    }
+
+    auto
+    reset(lsb_t lsb, length_t len,
+          std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
+        auto const l = to_underlying(lsb);
+        auto const length = to_underlying(len);
+        return reset(lsb, static_cast<msb_t>(l + length - 1), order);
     }
 
     auto reset(std::memory_order order = std::memory_order_seq_cst)
@@ -171,24 +190,27 @@ class atomic_bitset {
         return *this;
     }
 
-    auto
-    reset(lsb_t lsb, msb_t msb,
-          std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
-        return set(lsb, msb, false, order);
-    }
-
-    auto
-    reset(lsb_t lsb, length_t len,
-          std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
-        return set(lsb, len, false, order);
-    }
-
     template <typename T>
     auto flip(T idx,
               std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         return bitset_t{
             atomic::fetch_xor(storage, static_cast<elem_t>(bit << pos), order)};
+    }
+
+    auto flip(lsb_t lsb, msb_t msb,
+              std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
+        auto const l = to_underlying(lsb);
+        auto const m = to_underlying(msb);
+        auto const shifted_value = bit_mask<elem_t>(m, l);
+        return bitset_t{atomic::fetch_xor(storage, shifted_value, order)};
+    }
+
+    auto flip(lsb_t lsb, length_t len,
+              std::memory_order order = std::memory_order_seq_cst) -> bitset_t {
+        auto const l = to_underlying(lsb);
+        auto const length = to_underlying(len);
+        return flip(lsb, static_cast<msb_t>(l + length - 1), order);
     }
 
     auto flip(std::memory_order order = std::memory_order_seq_cst) -> bitset_t {

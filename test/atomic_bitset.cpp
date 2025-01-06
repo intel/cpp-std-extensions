@@ -355,11 +355,13 @@ TEMPLATE_TEST_CASE("reset returns the previous bitset", "[atomic_bitset]",
 TEMPLATE_TEST_CASE("flip returns the previous bitset", "[atomic_bitset]",
                    std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
     using namespace stdx::literals;
-    auto bs = stdx::atomic_bitset<1, TestType>{0b1ul};
-    CHECK(bs.flip() == stdx::bitset<1, TestType>{0b1ul});
+    auto bs = stdx::atomic_bitset<8, TestType>{0b111ul};
+    CHECK(bs.flip(0) == stdx::bitset<8, TestType>{0b111ul});
     CHECK(not bs[0]);
-    CHECK(bs.flip(0) == stdx::bitset<1, TestType>{});
-    CHECK(bs[0]);
+    CHECK(bs.flip(1_lsb, 1_len) == stdx::bitset<8, TestType>{0b110ul});
+    CHECK(not bs[1]);
+    CHECK(bs.flip(2_lsb, 2_msb) == stdx::bitset<8, TestType>{0b100ul});
+    CHECK(not bs[2]);
 }
 
 TEST_CASE("atomic bitset is thread-safe", "[atomic_bitset]") {
