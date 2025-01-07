@@ -128,6 +128,8 @@ constexpr auto operator+(cts_t<X>, cts_t<Y>) {
     return cts_t<X + Y>{};
 }
 
+template <ct_string Value> CONSTEVAL auto ct() { return cts_t<Value>{}; }
+
 inline namespace literals {
 inline namespace ct_string_literals {
 template <ct_string S> CONSTEVAL auto operator""_cts() { return S; }
