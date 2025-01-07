@@ -31,7 +31,7 @@ template <ct_string Fmt, auto... Args> constexpr auto static_format() {
             return CX_VALUE(V);
         }
     };
-    return ct_format<Fmt>(make_ct.template operator()<Args>()...);
+    return ct_format<Fmt>(make_ct.template operator()<Args>()...).str.value;
 }
 } // namespace detail
 
