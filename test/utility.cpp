@@ -203,3 +203,39 @@ TEST_CASE("is_aligned_with (pointer)", "[utility]") {
     CHECK(stdx::is_aligned_with<std::uint16_t>(p));
     CHECK(stdx::is_aligned_with<std::uint32_t>(p));
 }
+
+TEST_CASE("ct (integral)", "[utility]") {
+    constexpr auto vs = stdx::ct<42>();
+    static_assert(
+        std::is_same_v<decltype(vs), std::integral_constant<int, 42> const>);
+    constexpr auto vu = stdx::ct<42u>();
+    static_assert(
+        std::is_same_v<decltype(vu),
+                       std::integral_constant<unsigned int, 42> const>);
+}
+
+TEST_CASE("ct (bool)", "[utility]") {
+    constexpr auto v = stdx::ct<true>();
+    static_assert(std::is_same_v<decltype(v), std::bool_constant<true> const>);
+}
+
+TEST_CASE("ct (char)", "[utility]") {
+    constexpr auto v = stdx::ct<'A'>();
+    static_assert(
+        std::is_same_v<decltype(v), std::integral_constant<char, 'A'> const>);
+}
+
+namespace {
+enum struct E { A, B, C };
+}
+
+TEST_CASE("ct (enum)", "[utility]") {
+    constexpr auto v = stdx::ct<E::A>();
+    static_assert(
+        std::is_same_v<decltype(v), std::integral_constant<E, E::A> const>);
+}
+
+TEST_CASE("ct (type)", "[utility]") {
+    constexpr auto v = stdx::ct<int>();
+    static_assert(std::is_same_v<decltype(v), stdx::type_identity<int> const>);
+}

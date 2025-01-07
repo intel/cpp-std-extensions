@@ -192,6 +192,11 @@ constexpr auto is_aligned_with = [](auto v) -> bool {
         return (static_cast<std::uintptr_t>(v) & mask) == 0;
     }
 };
+
+template <auto Value> CONSTEVAL auto ct() {
+    return std::integral_constant<decltype(Value), Value>{};
+}
+template <typename T> CONSTEVAL auto ct() { return type_identity<T>{}; }
 } // namespace v1
 } // namespace stdx
 

@@ -31,68 +31,95 @@ TEST_CASE("split format string by specifiers", "[ct_format]") {
 }
 
 TEST_CASE("format a static string", "[ct_format]") {
-    static_assert(stdx::ct_format<"Hello">() == "Hello"_cts);
+    static_assert(stdx::ct_format<"Hello">() == "Hello"_fmt_res);
 }
 
-TEST_CASE("format a compile-time stringish argument", "[ct_format]") {
+TEST_CASE("format a compile-time stringish argument (CX_VALUE)",
+          "[ct_format]") {
     using namespace std::string_view_literals;
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE("world"sv)) ==
-                  "Hello world"_cts);
+                  "Hello world"_fmt_res);
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE("world"_cts)) ==
-                  "Hello world"_cts);
+                  "Hello world"_fmt_res);
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE("world")) ==
-                  "Hello world"_cts);
+                  "Hello world"_fmt_res);
 }
 
-TEST_CASE("format a compile-time integral argument", "[ct_format]") {
-    static_assert(stdx::ct_format<"Hello {}">(CX_VALUE(42)) == "Hello 42"_cts);
+TEST_CASE("format a compile-time stringish argument (ct)", "[ct_format]") {
+    using namespace std::string_view_literals;
+    static_assert(stdx::ct_format<"Hello {}">("world"_ctst) ==
+                  "Hello world"_fmt_res);
+    static_assert(stdx::ct_format<"Hello {}">(stdx::ct<"world">()) ==
+                  "Hello world"_fmt_res);
 }
 
-TEST_CASE("format a type argument", "[ct_format]") {
+TEST_CASE("format a compile-time integral argument (CX_VALUE)", "[ct_format]") {
+    static_assert(stdx::ct_format<"Hello {}">(CX_VALUE(42)) ==
+                  "Hello 42"_fmt_res);
+}
+
+TEST_CASE("format a compile-time integral argument (ct)", "[ct_format]") {
+    static_assert(stdx::ct_format<"Hello {}">(stdx::ct<42>()) ==
+                  "Hello 42"_fmt_res);
+}
+
+TEST_CASE("format a type argument (CX_VALUE)", "[ct_format]") {
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE(int)) ==
-                  "Hello int"_cts);
+                  "Hello int"_fmt_res);
+}
+
+TEST_CASE("format a type argument (ct)", "[ct_format]") {
+    static_assert(stdx::ct_format<"Hello {}">(stdx::ct<int>()) ==
+                  "Hello int"_fmt_res);
 }
 
 TEST_CASE("format a compile-time argument with fmt spec", "[ct_format]") {
     static_assert(stdx::ct_format<"Hello {:*>#6x}">(CX_VALUE(42)) ==
-                  "Hello **0x2a"_cts);
+                  "Hello **0x2a"_fmt_res);
 }
 
 namespace {
 enum struct E { A };
 }
 
-TEST_CASE("format a compile-time enum argument", "[ct_format]") {
-    static_assert(stdx::ct_format<"Hello {}">(CX_VALUE(E::A)) == "Hello A"_cts);
+TEST_CASE("format a compile-time enum argument (CX_VALUE)", "[ct_format]") {
+    static_assert(stdx::ct_format<"Hello {}">(CX_VALUE(E::A)) ==
+                  "Hello A"_fmt_res);
+}
+
+TEST_CASE("format a compile-time enum argument (ct)", "[ct_format]") {
+    static_assert(stdx::ct_format<"Hello {}">(stdx::ct<E::A>()) ==
+                  "Hello A"_fmt_res);
 }
 
 TEST_CASE("format a runtime argument", "[ct_format]") {
-    auto x = 17;
-    CHECK(stdx::ct_format<"Hello {}">(x) ==
-          stdx::format_result{"Hello {}"_cts, stdx::make_tuple(17)});
-    static_assert(stdx::ct_format<"Hello {}">(17) ==
-                  stdx::format_result{"Hello {}"_cts, stdx::make_tuple(17)});
+    constexpr auto x = 17;
+    constexpr auto expected =
+        stdx::format_result{"Hello {}"_ctst, stdx::make_tuple(x)};
+
+    CHECK(stdx::ct_format<"Hello {}">(x) == expected);
+    static_assert(stdx::ct_format<"Hello {}">(x) == expected);
 }
 
 TEST_CASE("format a compile-time and a runtime argument (1)", "[ct_format]") {
-    auto x = 17;
-    CHECK(stdx::ct_format<"Hello {} {}">(CX_VALUE(int), x) ==
-          stdx::format_result{"Hello int {}"_cts, stdx::make_tuple(17)});
-    static_assert(
-        stdx::ct_format<"Hello {} {}">(CX_VALUE(int), 17) ==
-        stdx::format_result{"Hello int {}"_cts, stdx::make_tuple(17)});
+    constexpr auto x = 17;
+    constexpr auto expected =
+        stdx::format_result{"Hello int {}"_ctst, stdx::make_tuple(x)};
+
+    CHECK(stdx::ct_format<"Hello {} {}">(CX_VALUE(int), x) == expected);
+    static_assert(stdx::ct_format<"Hello {} {}">(CX_VALUE(int), x) == expected);
 }
 
 TEST_CASE("format a compile-time and a runtime argument (2)", "[ct_format]") {
     static_assert(
         stdx::ct_format<"Hello {} {}">(42, CX_VALUE(int)) ==
-        stdx::format_result{"Hello {} int"_cts, stdx::make_tuple(42)});
+        stdx::format_result{"Hello {} int"_ctst, stdx::make_tuple(42)});
 }
 
 TEST_CASE("format multiple runtime arguments", "[ct_format]") {
     static_assert(
         stdx::ct_format<"Hello {} {}">(42, 17) ==
-        stdx::format_result{"Hello {} {}"_cts, stdx::make_tuple(42, 17)});
+        stdx::format_result{"Hello {} {}"_ctst, stdx::make_tuple(42, 17)});
 }
 
 TEST_CASE("format multiple mixed arguments", "[ct_format]") {
@@ -100,25 +127,25 @@ TEST_CASE("format multiple mixed arguments", "[ct_format]") {
     auto b = "B"sv;
     CHECK(stdx::ct_format<"Hello {} {} {} {} world">(42, CX_VALUE("A"sv), b,
                                                      CX_VALUE(int)) ==
-          stdx::format_result{"Hello {} A {} int world"_cts,
+          stdx::format_result{"Hello {} A {} int world"_ctst,
                               stdx::make_tuple(42, "B"sv)});
     static_assert(stdx::ct_format<"Hello {} {} {} {} world">(
                       42, CX_VALUE("A"sv), "B"sv, CX_VALUE(int)) ==
-                  stdx::format_result{"Hello {} A {} int world"_cts,
+                  stdx::format_result{"Hello {} A {} int world"_ctst,
                                       stdx::make_tuple(42, "B"sv)});
 }
 
 TEST_CASE("format a formatted string", "[ct_format]") {
     static_assert(stdx::ct_format<"The value is {}.">(
                       CX_VALUE(stdx::ct_format<"(year={})">(2022))) ==
-                  stdx::format_result{"The value is (year={})."_cts,
+                  stdx::format_result{"The value is (year={})."_ctst,
                                       stdx::make_tuple(2022)});
 }
 
 TEST_CASE("format a ct-formatted string", "[ct_format]") {
     constexpr static auto cts = stdx::ct_format<"(year={})">(CX_VALUE(2024));
     static_assert(stdx::ct_format<"The value is {}.">(CX_VALUE(cts)) ==
-                  "The value is (year=2024)."_cts);
+                  "The value is (year=2024)."_fmt_res);
 }
 
 namespace {
@@ -139,7 +166,7 @@ template <class T, T... Ls, T... Rs>
 TEST_CASE("format_to a different type", "[ct_format]") {
     using namespace std::string_view_literals;
     static_assert(stdx::ct_format<"{}", string_constant>(CX_VALUE("A"sv)) ==
-                  string_constant<char, 'A'>{});
+                  stdx::format_result{string_constant<char, 'A'>{}});
 
     auto x = 17;
     CHECK(stdx::ct_format<"{}", string_constant>(x) ==
@@ -152,7 +179,7 @@ TEST_CASE("format_to a different type", "[ct_format]") {
 
 TEST_CASE("format a string-type argument", "[ct_format]") {
     static_assert(stdx::ct_format<"Hello {}!">(string_constant<char, 'A'>{}) ==
-                  "Hello A!"_cts);
+                  "Hello A!"_fmt_res);
 }
 
 TEST_CASE("format a formatted string with different type", "[ct_format]") {
@@ -168,7 +195,8 @@ TEST_CASE("format a ct-formatted string with different type", "[ct_format]") {
         stdx::ct_format<"B{}C", string_constant>(CX_VALUE(2024));
     static_assert(
         stdx::ct_format<"A{}D", string_constant>(CX_VALUE(cts)) ==
-        string_constant<char, 'A', 'B', '2', '0', '2', '4', 'C', 'D'>{});
+        stdx::format_result{
+            string_constant<char, 'A', 'B', '2', '0', '2', '4', 'C', 'D'>{}});
 }
 
 TEST_CASE("format multiple mixed arguments with different type",

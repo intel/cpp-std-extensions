@@ -32,14 +32,24 @@ namespace stdx {
 inline namespace v1 {
 template <typename Str, typename Args> struct format_result {
     [[no_unique_address]] Str str;
-    [[no_unique_address]] Args args;
+    [[no_unique_address]] Args args{};
 
   private:
     friend constexpr auto operator==(format_result const &,
                                      format_result const &) -> bool = default;
 };
+
 template <typename Str, typename Args>
 format_result(Str, Args) -> format_result<Str, Args>;
+template <typename Str> format_result(Str) -> format_result<Str, tuple<>>;
+
+inline namespace literals {
+inline namespace ct_string_literals {
+template <ct_string S> CONSTEVAL auto operator""_fmt_res() {
+    return format_result{cts_t<S>{}};
+}
+} // namespace ct_string_literals
+} // namespace literals
 
 namespace detail {
 template <typename It> CONSTEVAL auto find_spec(It first, It last) -> It {
@@ -90,19 +100,30 @@ template <typename T>
 concept cx_value = requires { typename T::cx_value_t; } or
                    requires(T t) { ct_string_from_type(t); };
 
-CONSTEVAL auto arg_value(auto a) { return a; }
+template <typename T, T V>
+CONSTEVAL auto arg_value(std::integral_constant<T, V>) {
+    if constexpr (std::is_enum_v<T>) {
+        return enum_as_string<V>();
+    } else {
+        return V;
+    }
+}
 
 template <typename T> CONSTEVAL auto arg_value(type_identity<T>) {
     return type_as_string<T>();
 }
+
+template <ct_string S> CONSTEVAL auto arg_value(cts_t<S>) { return S; }
 
 CONSTEVAL auto arg_value(cx_value auto a) {
     if constexpr (requires { ct_string_from_type(a); }) {
         return ct_string_from_type(a);
     } else if constexpr (std::is_enum_v<decltype(a())>) {
         return enum_as_string<a()>();
-    } else {
+    } else if constexpr (requires { arg_value(a()); }) {
         return arg_value(a());
+    } else {
+        return a();
     }
 }
 
@@ -131,7 +152,7 @@ CONSTEVAL auto convert_input(auto s) {
     if constexpr (requires { ct_string_from_type(s); }) {
         return ct_string_from_type(s);
     } else {
-        return s;
+        return s.value;
     }
 }
 
@@ -139,43 +160,36 @@ template <ct_string S,
           template <typename T, T...> typename Output = detail::null_output>
 CONSTEVAL auto convert_output() {
     if constexpr (same_as<Output<char>, null_output<char>>) {
-        return S;
+        return cts_t<S>{};
     } else {
         return ct_string_to_type<S, Output>();
     }
 }
 
-template <ct_string Fmt,
-          template <typename T, T...> typename Output = detail::null_output,
-          typename Arg>
-constexpr auto format1(Arg arg) {
-    if constexpr (cx_value<Arg>) {
-        constexpr auto result = [&] {
+template <ct_string Fmt, typename Arg> constexpr auto format1(Arg arg) {
+    if constexpr (requires { arg_value(arg); }) {
+        return [&] {
             constexpr auto fmtstr = FMT_COMPILE(std::string_view{Fmt});
             constexpr auto a = arg_value(arg);
+            auto const f = []<std::size_t N>(auto s, auto v) {
+                ct_string<N + 1> cts{};
+                fmt::format_to(cts.begin(), s, v);
+                return cts;
+            };
             if constexpr (is_specialization_of_v<std::remove_cv_t<decltype(a)>,
                                                  format_result>) {
                 constexpr auto s = convert_input(a.str);
                 constexpr auto sz = fmt::formatted_size(fmtstr, s);
-                ct_string<sz + 1> cts{};
-                fmt::format_to(cts.begin(), fmtstr, s);
-                return format_result{cts, a.args};
+                constexpr auto cts = f.template operator()<sz>(fmtstr, s);
+                return format_result{cts_t<cts>{}, a.args};
             } else {
                 constexpr auto sz = fmt::formatted_size(fmtstr, a);
-                ct_string<sz + 1> cts{};
-                fmt::format_to(cts.begin(), fmtstr, a);
-                return cts;
+                constexpr auto cts = f.template operator()<sz>(fmtstr, a);
+                return format_result{cts_t<cts>{}};
             }
         }();
-        if constexpr (is_specialization_of_v<std::remove_cv_t<decltype(result)>,
-                                             format_result>) {
-            return format_result{convert_output<result.str, Output>(),
-                                 result.args};
-        } else {
-            return convert_output<result, Output>();
-        }
     } else {
-        return format_result{convert_output<Fmt, Output>(), tuple{arg}};
+        return format_result{cts_t<Fmt>{}, tuple{arg}};
     }
 }
 
@@ -188,10 +202,9 @@ concept ct_format_compatible = requires {
 
 template <ct_string Fmt> struct fmt_data {
     constexpr static auto fmt = std::string_view{Fmt};
-    constexpr static auto N = detail::count_specifiers(fmt);
-    constexpr static auto splits = detail::split_specifiers<N + 1>(fmt);
-    constexpr static auto last_cts =
-        detail::to_ct_string<splits[N].size()>(splits[N]);
+    constexpr static auto N = count_specifiers(fmt);
+    constexpr static auto splits = split_specifiers<N + 1>(fmt);
+    constexpr static auto last_cts = to_ct_string<splits[N].size()>(splits[N]);
 };
 } // namespace detail
 
@@ -207,13 +220,15 @@ constexpr auto ct_format = [](auto &&...args) {
     [[maybe_unused]] auto const format1 = [&]<std::size_t I>(auto &&arg) {
         constexpr auto cts =
             detail::to_ct_string<data::splits[I].size()>(data::splits[I]);
-        return detail::format1<cts, Output>(FWD(arg));
+        return detail::format1<cts>(FWD(arg));
     };
 
-    return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+    auto const result = [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         return (format1.template operator()<Is>(FWD(args)) + ... +
-                detail::convert_output<data::last_cts, Output>());
+                format_result{cts_t<data::last_cts>{}});
     }(std::make_index_sequence<data::N>{});
+    return format_result{detail::convert_output<result.str.value, Output>(),
+                         result.args};
 };
 } // namespace v1
 } // namespace stdx

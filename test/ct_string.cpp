@@ -136,3 +136,9 @@ TEST_CASE("wrap ct_string in type", "[ct_string]") {
     using S = stdx::cts_t<"Hello">;
     static_assert(S::value == "Hello"_cts);
 }
+
+TEST_CASE("ct (ct_string)", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    constexpr auto v = stdx::ct<"Hello">();
+    static_assert(v == "Hello"_ctst);
+}

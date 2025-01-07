@@ -58,10 +58,6 @@ template <std::size_t N> struct ct_string {
     std::array<char, N> value{};
 };
 
-template <stdx::ct_string S> struct cts_t {
-    constexpr static auto value = S;
-};
-
 template <std::size_t N, std::size_t M>
 [[nodiscard]] constexpr auto operator==(ct_string<N> const &lhs,
                                         ct_string<M> const &rhs) -> bool {
@@ -118,9 +114,27 @@ operator+(ct_string<N> const &lhs,
     return ret;
 }
 
+template <ct_string S> struct cts_t {
+    constexpr static auto value = S;
+};
+
+template <ct_string X, ct_string Y>
+constexpr auto operator==(cts_t<X>, cts_t<Y>) -> bool {
+    return X == Y;
+}
+
+template <ct_string X, ct_string Y>
+constexpr auto operator+(cts_t<X>, cts_t<Y>) {
+    return cts_t<X + Y>{};
+}
+
+template <ct_string Value> CONSTEVAL auto ct() { return cts_t<Value>{}; }
+
 inline namespace literals {
 inline namespace ct_string_literals {
 template <ct_string S> CONSTEVAL auto operator""_cts() { return S; }
+
+template <ct_string S> CONSTEVAL auto operator""_ctst() { return cts_t<S>{}; }
 } // namespace ct_string_literals
 } // namespace literals
 } // namespace v1
