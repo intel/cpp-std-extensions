@@ -114,7 +114,7 @@ operator+(ct_string<N> const &lhs,
     return ret;
 }
 
-template <stdx::ct_string S> struct cts_t {
+template <ct_string S> struct cts_t {
     constexpr static auto value = S;
 };
 

@@ -34,7 +34,8 @@ TEST_CASE("format a static string", "[ct_format]") {
     static_assert(stdx::ct_format<"Hello">() == "Hello"_fmt_res);
 }
 
-TEST_CASE("format a compile-time stringish argument", "[ct_format]") {
+TEST_CASE("format a compile-time stringish argument (CX_VALUE)",
+          "[ct_format]") {
     using namespace std::string_view_literals;
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE("world"sv)) ==
                   "Hello world"_fmt_res);
@@ -44,13 +45,31 @@ TEST_CASE("format a compile-time stringish argument", "[ct_format]") {
                   "Hello world"_fmt_res);
 }
 
-TEST_CASE("format a compile-time integral argument", "[ct_format]") {
+TEST_CASE("format a compile-time stringish argument (ct)", "[ct_format]") {
+    using namespace std::string_view_literals;
+    static_assert(stdx::ct_format<"Hello {}">("world"_ctst) ==
+                  "Hello world"_fmt_res);
+    static_assert(stdx::ct_format<"Hello {}">(stdx::ct<"world">()) ==
+                  "Hello world"_fmt_res);
+}
+
+TEST_CASE("format a compile-time integral argument (CX_VALUE)", "[ct_format]") {
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE(42)) ==
                   "Hello 42"_fmt_res);
 }
 
-TEST_CASE("format a type argument", "[ct_format]") {
+TEST_CASE("format a compile-time integral argument (ct)", "[ct_format]") {
+    static_assert(stdx::ct_format<"Hello {}">(stdx::ct<42>()) ==
+                  "Hello 42"_fmt_res);
+}
+
+TEST_CASE("format a type argument (CX_VALUE)", "[ct_format]") {
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE(int)) ==
+                  "Hello int"_fmt_res);
+}
+
+TEST_CASE("format a type argument (ct)", "[ct_format]") {
+    static_assert(stdx::ct_format<"Hello {}">(stdx::ct<int>()) ==
                   "Hello int"_fmt_res);
 }
 
@@ -63,8 +82,13 @@ namespace {
 enum struct E { A };
 }
 
-TEST_CASE("format a compile-time enum argument", "[ct_format]") {
+TEST_CASE("format a compile-time enum argument (CX_VALUE)", "[ct_format]") {
     static_assert(stdx::ct_format<"Hello {}">(CX_VALUE(E::A)) ==
+                  "Hello A"_fmt_res);
+}
+
+TEST_CASE("format a compile-time enum argument (ct)", "[ct_format]") {
+    static_assert(stdx::ct_format<"Hello {}">(stdx::ct<E::A>()) ==
                   "Hello A"_fmt_res);
 }
 

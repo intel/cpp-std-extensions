@@ -100,19 +100,30 @@ template <typename T>
 concept cx_value = requires { typename T::cx_value_t; } or
                    requires(T t) { ct_string_from_type(t); };
 
-CONSTEVAL auto arg_value(auto a) { return a; }
+template <typename T, T V>
+CONSTEVAL auto arg_value(std::integral_constant<T, V>) {
+    if constexpr (std::is_enum_v<T>) {
+        return enum_as_string<V>();
+    } else {
+        return V;
+    }
+}
 
 template <typename T> CONSTEVAL auto arg_value(type_identity<T>) {
     return type_as_string<T>();
 }
+
+template <ct_string S> CONSTEVAL auto arg_value(cts_t<S>) { return S; }
 
 CONSTEVAL auto arg_value(cx_value auto a) {
     if constexpr (requires { ct_string_from_type(a); }) {
         return ct_string_from_type(a);
     } else if constexpr (std::is_enum_v<decltype(a())>) {
         return enum_as_string<a()>();
-    } else {
+    } else if constexpr (requires { arg_value(a()); }) {
         return arg_value(a());
+    } else {
+        return a();
     }
 }
 
@@ -156,7 +167,7 @@ CONSTEVAL auto convert_output() {
 }
 
 template <ct_string Fmt, typename Arg> constexpr auto format1(Arg arg) {
-    if constexpr (cx_value<Arg>) {
+    if constexpr (requires { arg_value(arg); }) {
         return [&] {
             constexpr auto fmtstr = FMT_COMPILE(std::string_view{Fmt});
             constexpr auto a = arg_value(arg);
