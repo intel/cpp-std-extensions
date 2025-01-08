@@ -168,26 +168,27 @@ CONSTEVAL auto convert_output() {
 
 template <ct_string Fmt, typename Arg> constexpr auto format1(Arg arg) {
     if constexpr (requires { arg_value(arg); }) {
-        return [&] {
-            constexpr auto fmtstr = FMT_COMPILE(std::string_view{Fmt});
-            constexpr auto a = arg_value(arg);
-            auto const f = []<std::size_t N>(auto s, auto v) {
-                ct_string<N + 1> cts{};
-                fmt::format_to(cts.begin(), s, v);
-                return cts;
-            };
-            if constexpr (is_specialization_of_v<std::remove_cv_t<decltype(a)>,
-                                                 format_result>) {
-                constexpr auto s = convert_input(a.str);
-                constexpr auto sz = fmt::formatted_size(fmtstr, s);
-                constexpr auto cts = f.template operator()<sz>(fmtstr, s);
-                return format_result{cts_t<cts>{}, a.args};
-            } else {
-                constexpr auto sz = fmt::formatted_size(fmtstr, a);
-                constexpr auto cts = f.template operator()<sz>(fmtstr, a);
-                return format_result{cts_t<cts>{}};
-            }
-        }();
+        constexpr auto fmtstr = FMT_COMPILE(std::string_view{Fmt});
+        constexpr auto a = arg_value(arg);
+        auto const f = []<std::size_t N>(auto s, auto v) {
+            ct_string<N + 1> cts{};
+            fmt::format_to(cts.begin(), s, v);
+            return cts;
+        };
+        if constexpr (is_specialization_of_v<std::remove_cv_t<decltype(a)>,
+                                             format_result>) {
+            constexpr auto s = convert_input(a.str);
+            constexpr auto sz = fmt::formatted_size(fmtstr, s);
+            constexpr auto cts = f.template operator()<sz>(fmtstr, s);
+            return format_result{cts_t<cts>{}, a.args};
+        } else {
+            constexpr auto sz = fmt::formatted_size(fmtstr, a);
+            constexpr auto cts = f.template operator()<sz>(fmtstr, a);
+            return format_result{cts_t<cts>{}};
+        }
+    } else if constexpr (is_specialization_of_v<Arg, format_result>) {
+        auto const sub_result = format1<Fmt>(arg.str);
+        return format_result{sub_result.str, arg.args};
     } else {
         return format_result{cts_t<Fmt>{}, tuple{arg}};
     }

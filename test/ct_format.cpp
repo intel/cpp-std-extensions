@@ -135,17 +135,11 @@ TEST_CASE("format multiple mixed arguments", "[ct_format]") {
                                       stdx::make_tuple(42, "B"sv)});
 }
 
-TEST_CASE("format a formatted string", "[ct_format]") {
+TEST_CASE("format a format result", "[ct_format]") {
     static_assert(stdx::ct_format<"The value is {}.">(
-                      CX_VALUE(stdx::ct_format<"(year={})">(2022))) ==
+                      stdx::ct_format<"(year={})">(2022)) ==
                   stdx::format_result{"The value is (year={})."_ctst,
                                       stdx::make_tuple(2022)});
-}
-
-TEST_CASE("format a ct-formatted string", "[ct_format]") {
-    constexpr static auto cts = stdx::ct_format<"(year={})">(CX_VALUE(2024));
-    static_assert(stdx::ct_format<"The value is {}.">(CX_VALUE(cts)) ==
-                  "The value is (year=2024)."_fmt_res);
 }
 
 namespace {
@@ -182,21 +176,12 @@ TEST_CASE("format a string-type argument", "[ct_format]") {
                   "Hello A!"_fmt_res);
 }
 
-TEST_CASE("format a formatted string with different type", "[ct_format]") {
-    static_assert(stdx::ct_format<"A{}D", string_constant>(CX_VALUE(
-                      stdx::ct_format<"B{}C", string_constant>(2022))) ==
+TEST_CASE("format a format result with different type", "[ct_format]") {
+    static_assert(stdx::ct_format<"A{}D", string_constant>(
+                      stdx::ct_format<"B{}C", string_constant>(2022)) ==
                   stdx::format_result{
                       string_constant<char, 'A', 'B', '{', '}', 'C', 'D'>{},
                       stdx::make_tuple(2022)});
-}
-
-TEST_CASE("format a ct-formatted string with different type", "[ct_format]") {
-    constexpr static auto cts =
-        stdx::ct_format<"B{}C", string_constant>(CX_VALUE(2024));
-    static_assert(
-        stdx::ct_format<"A{}D", string_constant>(CX_VALUE(cts)) ==
-        stdx::format_result{
-            string_constant<char, 'A', 'B', '2', '0', '2', '4', 'C', 'D'>{}});
 }
 
 TEST_CASE("format multiple mixed arguments with different type",
