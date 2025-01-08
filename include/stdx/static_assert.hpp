@@ -46,3 +46,6 @@ template <ct_string Fmt, auto... Args> constexpr auto static_format() {
     }.template operator()<cond>()
 
 #endif
+
+#define STATIC_PROOF(cond) \
+    if (not (cond)) asm("compiler cannot prove (" #cond ") is always true");
