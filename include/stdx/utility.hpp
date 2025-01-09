@@ -193,10 +193,23 @@ constexpr auto is_aligned_with = [](auto v) -> bool {
     }
 };
 
-template <auto Value> CONSTEVAL auto ct() {
-    return std::integral_constant<decltype(Value), Value>{};
+#if __cplusplus >= 202002L
+
+namespace detail {
+template <typename T> struct ct_helper {
+    // NOLINTNEXTLINE(google-explicit-constructor)
+    CONSTEVAL ct_helper(T t) : value(t) {}
+    T value;
+};
+template <typename T> ct_helper(T) -> ct_helper<T>;
+} // namespace detail
+
+template <detail::ct_helper Value> CONSTEVAL auto ct() {
+    return std::integral_constant<decltype(Value.value), Value.value>{};
 }
 template <typename T> CONSTEVAL auto ct() { return type_identity<T>{}; }
+
+#endif
 } // namespace v1
 } // namespace stdx
 
