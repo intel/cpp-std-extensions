@@ -3,6 +3,7 @@
 #if __cplusplus >= 202002L
 
 #include <stdx/compiler.hpp>
+#include <stdx/utility.hpp>
 
 #include <array>
 #include <cstddef>
@@ -127,6 +128,10 @@ template <ct_string X, ct_string Y>
 constexpr auto operator+(cts_t<X>, cts_t<Y>) {
     return cts_t<X + Y>{};
 }
+
+namespace detail {
+template <std::size_t N> struct ct_helper<ct_string<N>>;
+} // namespace detail
 
 template <ct_string Value> CONSTEVAL auto ct() { return cts_t<Value>{}; }
 

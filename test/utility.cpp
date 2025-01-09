@@ -204,6 +204,8 @@ TEST_CASE("is_aligned_with (pointer)", "[utility]") {
     CHECK(stdx::is_aligned_with<std::uint32_t>(p));
 }
 
+#if __cplusplus >= 202002L
+
 TEST_CASE("ct (integral)", "[utility]") {
     constexpr auto vs = stdx::ct<42>();
     static_assert(
@@ -239,3 +241,5 @@ TEST_CASE("ct (type)", "[utility]") {
     constexpr auto v = stdx::ct<int>();
     static_assert(std::is_same_v<decltype(v), stdx::type_identity<int> const>);
 }
+
+#endif
