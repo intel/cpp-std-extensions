@@ -51,6 +51,42 @@ TEST_CASE("to big endian", "[bit]") {
     }
 }
 
+TEST_CASE("from little endian", "[bit]") {
+    static_assert(stdx::from_le(std::uint8_t{1u}) == 1u);
+
+    [[maybe_unused]] constexpr std::uint16_t u16{0x1234};
+    [[maybe_unused]] constexpr std::uint32_t u32{0x1234'5678};
+    [[maybe_unused]] constexpr std::uint64_t u64{0x1234'5678'9abc'def0};
+
+    if constexpr (stdx::endian::native == stdx::endian::little) {
+        CHECK(stdx::from_le(u16) == u16);
+        CHECK(stdx::from_le(u32) == u32);
+        CHECK(stdx::from_le(u64) == u64);
+    } else if constexpr (stdx::endian::native == stdx::endian::big) {
+        CHECK(stdx::from_le(u16) == stdx::byteswap(u16));
+        CHECK(stdx::from_le(u32) == stdx::byteswap(u32));
+        CHECK(stdx::from_le(u64) == stdx::byteswap(u64));
+    }
+}
+
+TEST_CASE("from big endian", "[bit]") {
+    static_assert(stdx::from_be(std::uint8_t{1u}) == 1u);
+
+    [[maybe_unused]] constexpr std::uint16_t u16{0x1234};
+    [[maybe_unused]] constexpr std::uint32_t u32{0x1234'5678};
+    [[maybe_unused]] constexpr std::uint64_t u64{0x1234'5678'9abc'def0};
+
+    if constexpr (stdx::endian::native == stdx::endian::big) {
+        CHECK(stdx::from_be(u16) == u16);
+        CHECK(stdx::from_be(u32) == u32);
+        CHECK(stdx::from_be(u64) == u64);
+    } else if constexpr (stdx::endian::native == stdx::endian::little) {
+        CHECK(stdx::from_be(u16) == stdx::byteswap(u16));
+        CHECK(stdx::from_be(u32) == stdx::byteswap(u32));
+        CHECK(stdx::from_be(u64) == stdx::byteswap(u64));
+    }
+}
+
 TEMPLATE_TEST_CASE("popcount", "[bit]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     static_assert(stdx::popcount(TestType{}) == 0);

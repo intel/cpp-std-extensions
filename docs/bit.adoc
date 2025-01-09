@@ -124,18 +124,28 @@ constexpr auto y = stdx::smallest_uint<1337>(); // std::uint16_t{}
 using T = stdx::smallest_uint_t<1337>; // std::uint16_t
 ----
 
-=== `to_le` and `to_be`
+=== `to_be`, `from_be`, `to_le`, `from_le`
 
-`to_le` and `to_be` are variations on `byteswap` that convert unsigned integral
-types to little- or big-endian respectively. On a little-endian machine, `to_le`
-does nothing, and `to_be` is the equivalent of `byteswap`. On a big endian
-machine it is the other way around.
+`to_be` and `from_be` are variations on `byteswap` that do the job of
+https://linux.die.net/man/3/htonl[`htonl` and friends]. On a big-endian machine,
+they do nothing, and on a little-endian machine, they are the equivalent of
+`byteswap`.
+
+`to_le` and `from_le` do the same thing for little-endian order.
 
 [source,cpp]
 ----
-constexpr auto x = std::uint32_t{0x12'34'56'78};
-constexpr auto y = stdx::to_be(x); // 0x78'56'34'12 (on a little-endian machine)
+constexpr auto addr = std::uint32_t{0x7f'00'00'01}; // localhost
+packet.dest_addr = stdx::to_be(addr);
 ----
 
-`to_le` and `to_be` are defined for unsigned integral types. Of course for
+These functions are defined for unsigned integral types. Of course for
 `std::uint8_t` they do nothing.
+
+NOTE: The implementations of `to_be` and `from_be` are identical on a machine
+with given endianness (either a no-op, or a byteswap). However they are provided
+for clarity of intent.
+
+CAUTION: `from_be` is not the same as `to_le`! (And _vice versa_.) These functions are named from
+the point of view of the serialization format. Either we are serializing to/from
+big-endian, or to/from little-endian.
