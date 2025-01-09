@@ -259,6 +259,26 @@ to_be(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
     }
 }
 
+template <typename T>
+[[nodiscard]] constexpr auto
+from_le(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+    if constexpr (stdx::endian::native == stdx::endian::big) {
+        return byteswap(x);
+    } else {
+        return x;
+    }
+}
+
+template <typename T>
+[[nodiscard]] constexpr auto
+from_be(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+    if constexpr (stdx::endian::native == stdx::endian::little) {
+        return byteswap(x);
+    } else {
+        return x;
+    }
+}
+
 template <typename To>
 constexpr auto bit_pack = [](auto... args) {
     static_assert(stdx::always_false_v<To, decltype(args)...>,
@@ -313,10 +333,8 @@ template <typename To, typename From> constexpr auto bit_unpack(From arg) {
 
     constexpr auto sz = sized<From>{1}.template in<To>();
     auto r = bit_cast<std::array<To, sz>>(to_be(arg));
-    if constexpr (stdx::endian::native == stdx::endian::little) {
-        for (auto &elem : r) {
-            elem = byteswap(elem);
-        }
+    for (auto &elem : r) {
+        elem = from_be(elem);
     }
     return r;
 }
