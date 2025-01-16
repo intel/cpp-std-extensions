@@ -31,6 +31,9 @@ struct fmt::formatter<stdx::ct_string<N>> : fmt::formatter<std::string_view> {
 namespace stdx {
 inline namespace v1 {
 template <typename Str, typename Args> struct format_result {
+    CONSTEVAL static auto
+    ct_string_convertible() -> std::bool_constant<Args::size() == 0>;
+
     [[no_unique_address]] Str str;
     [[no_unique_address]] Args args{};
 

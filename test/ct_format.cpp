@@ -143,6 +143,23 @@ TEST_CASE("format a format result", "[ct_format]") {
 }
 
 namespace {
+template <stdx::ct_string> constexpr auto conversion_success = true;
+} // namespace
+
+TEST_CASE("empty format_result can implicitly convert to ct_string",
+          "[ct_format]") {
+    using namespace std::string_view_literals;
+    static_assert(
+        stdx::detail::format_convertible<decltype(stdx::ct_format<"Hello">())>);
+    static_assert(stdx::detail::format_convertible<
+                  decltype(stdx::ct_format<"Hello {}">("world"_ctst))>);
+    static_assert(not stdx::detail::format_convertible<
+                  decltype(stdx::ct_format<"Hello {}">(42))>);
+
+    static_assert(conversion_success<stdx::ct_format<"Hello">()>);
+}
+
+namespace {
 template <typename T, T...> struct string_constant {
   private:
     friend constexpr auto operator==(string_constant const &,
