@@ -3,15 +3,29 @@
 #if __cplusplus >= 202002L
 
 #include <stdx/compiler.hpp>
+#include <stdx/type_traits.hpp>
 #include <stdx/utility.hpp>
 
 #include <array>
+#include <concepts>
 #include <cstddef>
 #include <string_view>
+#include <type_traits>
 #include <utility>
 
 namespace stdx {
 inline namespace v1 {
+
+template <std::size_t N> struct ct_string;
+
+namespace detail {
+template <typename T>
+concept format_convertible = requires(T t) {
+    { T::ct_string_convertible() } -> std::same_as<std::true_type>;
+    { ct_string{t.str.value} };
+};
+} // namespace detail
+
 template <std::size_t N> struct ct_string {
     CONSTEVAL ct_string() = default;
 
@@ -22,6 +36,10 @@ template <std::size_t N> struct ct_string {
             value[i] = str[i];
         }
     }
+
+    template <detail::format_convertible T>
+    // NOLINTNEXTLINE(google-explicit-constructor)
+    CONSTEVAL explicit(false) ct_string(T t) : ct_string(t.str.value) {}
 
     CONSTEVAL explicit(true) ct_string(char const *str, std::size_t sz) {
         for (auto i = std::size_t{}; i < sz; ++i) {
@@ -58,6 +76,9 @@ template <std::size_t N> struct ct_string {
 
     std::array<char, N> value{};
 };
+
+template <detail::format_convertible T>
+ct_string(T) -> ct_string<decltype(std::declval<T>().str.value)::capacity()>;
 
 template <std::size_t N, std::size_t M>
 [[nodiscard]] constexpr auto operator==(ct_string<N> const &lhs,
@@ -116,6 +137,7 @@ operator+(ct_string<N> const &lhs,
 }
 
 template <ct_string S> struct cts_t {
+    using value_type = decltype(S);
     constexpr static auto value = S;
 };
 
