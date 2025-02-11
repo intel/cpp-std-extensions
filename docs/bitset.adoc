@@ -103,3 +103,12 @@ objects, `lowest_unset` is also provided:
 auto bs = stdx::bitset<8>{0b11'0111ul};
 auto i = bs.lowest_unset(); // i == 3
 ----
+
+`transform_reduce` is also provided for bitsets:
+[source,cpp]
+----
+auto bs = stdx::bitset<8>{0b1010'1010ul};
+auto result = transform_reduce([](auto i) { return i * 2 },
+                               std::plus{}, std::size_t{}, bs);
+// result is 1*2 + 3*2 + 5*2 + 7*2
+----

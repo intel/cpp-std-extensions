@@ -117,6 +117,24 @@ class bitset {
     template <typename F, auto M, typename... S>
     friend constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F;
 
+    template <typename T, typename F, typename R>
+    constexpr auto transform_reduce(F &&f, R &&r, T init) const -> T {
+        std::size_t i = 0;
+        for (auto e : storage) {
+            while (e != 0) {
+                auto const offset = static_cast<std::size_t>(countr_zero(e));
+                e &= static_cast<elem_t>(~(bit << offset));
+                init = r(std::move(init), f(i + offset));
+            }
+            i += std::numeric_limits<elem_t>::digits;
+        }
+        return init;
+    }
+
+    template <typename T, typename F, typename R, auto M, typename... S>
+    friend constexpr auto transform_reduce(F &&f, R &&r, T init,
+                                           bitset<M, S> const &...bs) -> T;
+
   public:
     constexpr bitset() = default;
     constexpr explicit bitset(std::uint64_t value) {
@@ -418,6 +436,19 @@ constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F {
     } else {
         static_assert(stdx::always_false_v<F>, "unimplemented");
         return f;
+    }
+}
+
+template <typename T, typename F, typename R, auto M, typename... S>
+constexpr auto transform_reduce(F &&f, R &&r, T init,
+                                bitset<M, S> const &...bs) -> T {
+    if constexpr (sizeof...(bs) == 1) {
+        return (bs.transform_reduce(std::forward<F>(f), std::forward<R>(r),
+                                    std::move(init)),
+                ...);
+    } else {
+        static_assert(stdx::always_false_v<F>, "unimplemented");
+        return init;
     }
 }
 
