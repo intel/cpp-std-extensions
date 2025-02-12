@@ -474,6 +474,17 @@ TEST_CASE("use bitset with enum struct (place_bits construct)", "[bitset]") {
     static_assert(bs.to_natural() == 1);
 }
 
+TEST_CASE("use bitset with enum struct (for_each)", "[bitset]") {
+    constexpr auto bs = stdx::bitset<Bits::MAX>{stdx::all_bits};
+    for_each([](Bits) {}, bs);
+}
+
+TEST_CASE("use bitset with enum struct (transform_reduce)", "[bitset]") {
+    constexpr auto bs = stdx::bitset<Bits::MAX>{stdx::all_bits};
+    CHECK(transform_reduce([](Bits) { return true; }, std::logical_or{}, false,
+                           bs));
+}
+
 #if __cplusplus >= 202002L
 TEST_CASE("construct with a ct_string", "[bitset]") {
     using namespace stdx::literals;
