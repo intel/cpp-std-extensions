@@ -101,13 +101,16 @@ class bitset {
         return lhs;
     }
 
+    using iter_arg_t = conditional_t<std::is_enum_v<decltype(Size)>,
+                                     decltype(Size), std::size_t>;
+
     template <typename F> constexpr auto for_each(F &&f) const -> F {
         std::size_t i = 0;
         for (auto e : storage) {
             while (e != 0) {
                 auto const offset = static_cast<std::size_t>(countr_zero(e));
                 e &= static_cast<elem_t>(~(bit << offset));
-                f(i + offset);
+                f(static_cast<iter_arg_t>(i + offset));
             }
             i += std::numeric_limits<elem_t>::digits;
         }
@@ -124,7 +127,8 @@ class bitset {
             while (e != 0) {
                 auto const offset = static_cast<std::size_t>(countr_zero(e));
                 e &= static_cast<elem_t>(~(bit << offset));
-                init = r(std::move(init), f(i + offset));
+                init =
+                    r(std::move(init), f(static_cast<iter_arg_t>(i + offset)));
             }
             i += std::numeric_limits<elem_t>::digits;
         }
@@ -440,8 +444,8 @@ constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F {
 }
 
 template <typename T, typename F, typename R, auto M, typename... S>
-constexpr auto transform_reduce(F &&f, R &&r, T init,
-                                bitset<M, S> const &...bs) -> T {
+[[nodiscard]] constexpr auto transform_reduce(F &&f, R &&r, T init,
+                                              bitset<M, S> const &...bs) -> T {
     if constexpr (sizeof...(bs) == 1) {
         return (bs.transform_reduce(std::forward<F>(f), std::forward<R>(r),
                                     std::move(init)),
