@@ -38,6 +38,14 @@ template <ct_string Fmt, auto... Args> constexpr auto static_format() {
 } // namespace v1
 } // namespace stdx
 
+#if __cpp_static_assert >= 202306L
+#define STATIC_ASSERT(cond, ...)                                               \
+    []<bool B>() -> bool {                                                     \
+        static_assert(                                                         \
+            B, std::string_view{stdx::detail::static_format<__VA_ARGS__>()});  \
+        return B;                                                              \
+    }.template operator()<cond>()
+#else
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define STATIC_ASSERT(cond, ...)                                                       \
     []<bool B>() -> bool {                                                             \
@@ -45,4 +53,5 @@ template <ct_string Fmt, auto... Args> constexpr auto static_format() {
         return B;                                                                      \
     }.template operator()<cond>()
 
+#endif
 #endif
