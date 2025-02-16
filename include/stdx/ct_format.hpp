@@ -19,17 +19,12 @@
 #include <string_view>
 #include <utility>
 
-template <std::size_t N>
-struct fmt::formatter<stdx::ct_string<N>> : fmt::formatter<std::string_view> {
-    template <typename Ctx>
-    constexpr auto format(stdx::ct_string<N> const &s, Ctx &ctx) const {
-        return fmt::formatter<std::string_view>::format(std::string_view{s},
-                                                        ctx);
-    }
-};
-
 namespace stdx {
 inline namespace v1 {
+template <std::size_t N> constexpr auto format_as(stdx::ct_string<N> const &s) {
+    return std::string_view{s};
+}
+
 template <typename Str, typename Args> struct format_result {
     CONSTEVAL static auto
     ct_string_convertible() -> std::bool_constant<Args::size() == 0>;
