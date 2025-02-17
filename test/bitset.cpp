@@ -485,6 +485,11 @@ TEST_CASE("use bitset with enum struct (transform_reduce)", "[bitset]") {
                            bs));
 }
 
+TEST_CASE("use bitset with enum struct (lowest_unset)", "[bitset]") {
+    constexpr auto bs = stdx::bitset<Bits::MAX>{stdx::place_bits, Bits::ZERO};
+    CHECK(bs.lowest_unset() == Bits::ONE);
+}
+
 #if __cplusplus >= 202002L
 TEST_CASE("construct with a ct_string", "[bitset]") {
     using namespace stdx::literals;
