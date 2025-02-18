@@ -7,8 +7,9 @@ endfunction()
 add_fail_tests(
     as_signed_bool
     as_unsigned_bool
-    bitset_signed_storage
+    bitset_mixed_enumeration
     bitset_nonintegral_bit_places
+    bitset_signed_storage
     bitset_to_uint64_over_64_bits
     for_each_n_args_bad_size
     optional_without_tombstone

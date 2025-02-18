@@ -104,6 +104,10 @@ class bitset {
     using iter_arg_t = conditional_t<std::is_enum_v<decltype(Size)>,
                                      decltype(Size), std::size_t>;
 
+    template <typename T> CONSTEVAL static auto admissible_enum() {
+        return not std::is_enum_v<T> or std::is_same_v<T, decltype(Size)>;
+    }
+
     template <typename F> constexpr auto for_each(F &&f) const -> F {
         std::size_t i = 0;
         for (auto e : storage) {
@@ -216,6 +220,9 @@ class bitset {
 
     template <typename T>
     [[nodiscard]] constexpr auto operator[](T idx) const -> bool {
+        static_assert(admissible_enum<T>() or
+                          stdx::always_false_v<T, decltype(Size)>,
+                      "T is not the required enumeration type");
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         auto const [index, offset] = indices(pos);
         return (storage[index] & (bit << offset)) != 0;
@@ -223,6 +230,9 @@ class bitset {
 
     template <typename T>
     constexpr auto set(T idx, bool value = true) LIFETIMEBOUND -> bitset & {
+        static_assert(admissible_enum<T>() or
+                          stdx::always_false_v<T, decltype(Size)>,
+                      "T is not the required enumeration type");
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         auto const [index, offset] = indices(pos);
         if (value) {
@@ -278,6 +288,9 @@ class bitset {
 
     template <typename T>
     constexpr auto reset(T idx) LIFETIMEBOUND -> bitset & {
+        static_assert(admissible_enum<T>() or
+                          stdx::always_false_v<T, decltype(Size)>,
+                      "T is not the required enumeration type");
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         auto const [index, offset] = indices(pos);
         storage[index] &= static_cast<elem_t>(~(bit << offset));
@@ -300,6 +313,9 @@ class bitset {
     }
 
     template <typename T> constexpr auto flip(T idx) LIFETIMEBOUND -> bitset & {
+        static_assert(admissible_enum<T>() or
+                          stdx::always_false_v<T, decltype(Size)>,
+                      "T is not the required enumeration type");
         auto const pos = static_cast<std::size_t>(to_underlying(idx));
         auto const [index, offset] = indices(pos);
         storage[index] ^= static_cast<elem_t>(bit << offset);
