@@ -15,7 +15,7 @@ else()
 endif()
 
 add_versioned_package("gh:boostorg/mp11#boost-1.83.0")
-fmt_recipe(10.2.1)
+fmt_recipe(11.1.3)
 add_versioned_package("gh:intel/cpp-baremetal-concurrency#06e5901")
 
 if(NOT DEFINED CMAKE_CXX_STANDARD)
