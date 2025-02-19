@@ -341,16 +341,16 @@ class bitset {
         return n + static_cast<std::size_t>(popcount(highbits()));
     }
 
-    [[nodiscard]] constexpr auto lowest_unset() const -> std::size_t {
+    [[nodiscard]] constexpr auto lowest_unset() const {
         std::size_t i = 0;
         for (auto e : storage) {
             if (auto offset = static_cast<std::size_t>(countr_one(e));
                 offset != std::numeric_limits<elem_t>::digits) {
-                return i + offset;
+                return static_cast<iter_arg_t>(i + offset);
             }
             i += std::numeric_limits<elem_t>::digits;
         }
-        return i;
+        return static_cast<iter_arg_t>(i);
     }
 
     [[nodiscard]] constexpr auto operator~() const -> bitset {
