@@ -3,6 +3,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <array>
 #include <cstdint>
 #include <string_view>
 #include <type_traits>
@@ -128,6 +129,18 @@ TEST_CASE("sized<T> aliases", "[utility]") {
     static_assert(stdx::sized16{1}.in<std::uint64_t>() == 1);
     static_assert(stdx::sized32{1}.in<std::uint64_t>() == 1);
     static_assert(stdx::sized64{1}.in<std::uint64_t>() == 1);
+}
+
+TEST_CASE("sized<T> in (downsize not divisible)", "[utility]") {
+    using T = std::array<char, 3>;
+    static_assert(sizeof(T) == 3);
+    static_assert(stdx::sized<std::uint32_t>{2}.in<T>() == 3);
+}
+
+TEST_CASE("sized<T> in (upsize not divisible)", "[utility]") {
+    using T = std::array<char, 3>;
+    static_assert(sizeof(T) == 3);
+    static_assert(stdx::sized<T>{3}.in<std::uint32_t>() == 3);
 }
 
 TEST_CASE("CX_VALUE structural value", "[utility]") {

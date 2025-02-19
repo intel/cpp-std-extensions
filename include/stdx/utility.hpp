@@ -116,7 +116,7 @@ template <typename T, typename U>
     if constexpr (sizeof(T) == sizeof(U)) {
         return sz;
     } else if constexpr (sizeof(T) > sizeof(U)) {
-        return sz * (sizeof(T) / sizeof(U));
+        return (sz * sizeof(T) / sizeof(U)) + (sizeof(T) % sizeof(U) & 1u);
     } else {
         return (sz * sizeof(T) + sizeof(U) - 1) / sizeof(U);
     }
