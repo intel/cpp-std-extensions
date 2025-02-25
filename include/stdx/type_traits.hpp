@@ -101,8 +101,8 @@ constexpr bool is_value_specialization_of_v =
     detail::is_value_specialization_of_v<U &, T>;
 
 template <typename U, template <typename...> typename T>
-constexpr auto
-is_specialization_of() -> std::bool_constant<is_specialization_of_v<U, T>> {
+constexpr auto is_specialization_of()
+    -> std::bool_constant<is_specialization_of_v<U, T>> {
     return {};
 }
 

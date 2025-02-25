@@ -38,8 +38,8 @@ template <typename Key, std::size_t N> class cx_set {
     [[nodiscard]] constexpr auto begin() const LIFETIMEBOUND -> const_iterator {
         return std::data(storage);
     }
-    [[nodiscard]] constexpr auto
-    cbegin() const LIFETIMEBOUND -> const_iterator {
+    [[nodiscard]] constexpr auto cbegin() const LIFETIMEBOUND
+        -> const_iterator {
         return std::data(storage);
     }
 

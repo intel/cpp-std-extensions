@@ -80,34 +80,39 @@ template <typename T> struct rollover_t {
     constexpr friend auto operator>(rollover_t, rollover_t) -> bool = delete;
     constexpr friend auto operator>=(rollover_t, rollover_t) -> bool = delete;
 
-    [[nodiscard]] constexpr friend auto cmp_less(rollover_t lhs,
-                                                 rollover_t rhs) -> bool {
+    [[nodiscard]] constexpr friend auto cmp_less(rollover_t lhs, rollover_t rhs)
+        -> bool {
         constexpr auto mid = static_cast<underlying_t>(~underlying_t{}) / 2;
         return static_cast<underlying_t>(lhs.value - rhs.value) > mid;
     }
 
-    [[nodiscard]] constexpr friend auto
-    operator+(rollover_t lhs, rollover_t rhs) -> rollover_t {
+    [[nodiscard]] constexpr friend auto operator+(rollover_t lhs,
+                                                  rollover_t rhs)
+        -> rollover_t {
         lhs += rhs;
         return lhs;
     }
-    [[nodiscard]] constexpr friend auto
-    operator-(rollover_t lhs, rollover_t rhs) -> rollover_t {
+    [[nodiscard]] constexpr friend auto operator-(rollover_t lhs,
+                                                  rollover_t rhs)
+        -> rollover_t {
         lhs -= rhs;
         return lhs;
     }
-    [[nodiscard]] constexpr friend auto
-    operator*(rollover_t lhs, rollover_t rhs) -> rollover_t {
+    [[nodiscard]] constexpr friend auto operator*(rollover_t lhs,
+                                                  rollover_t rhs)
+        -> rollover_t {
         lhs *= rhs;
         return lhs;
     }
-    [[nodiscard]] constexpr friend auto
-    operator/(rollover_t lhs, rollover_t rhs) -> rollover_t {
+    [[nodiscard]] constexpr friend auto operator/(rollover_t lhs,
+                                                  rollover_t rhs)
+        -> rollover_t {
         lhs /= rhs;
         return lhs;
     }
-    [[nodiscard]] constexpr friend auto
-    operator%(rollover_t lhs, rollover_t rhs) -> rollover_t {
+    [[nodiscard]] constexpr friend auto operator%(rollover_t lhs,
+                                                  rollover_t rhs)
+        -> rollover_t {
         lhs %= rhs;
         return lhs;
     }

@@ -46,17 +46,17 @@ class intrusive_list {
         pointer node{};
 
 #if __cpp_impl_three_way_comparison < 201907L
-        friend constexpr auto operator==(iterator_t lhs,
-                                         iterator_t rhs) -> bool {
+        friend constexpr auto operator==(iterator_t lhs, iterator_t rhs)
+            -> bool {
             return lhs.node == rhs.node;
         }
-        friend constexpr auto operator!=(iterator_t lhs,
-                                         iterator_t rhs) -> bool {
+        friend constexpr auto operator!=(iterator_t lhs, iterator_t rhs)
+            -> bool {
             return not(lhs == rhs);
         }
 #else
-        friend constexpr auto operator==(iterator_t,
-                                         iterator_t) -> bool = default;
+        friend constexpr auto operator==(iterator_t, iterator_t)
+            -> bool = default;
 #endif
     };
 

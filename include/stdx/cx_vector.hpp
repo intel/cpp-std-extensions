@@ -45,8 +45,8 @@ template <typename T, std::size_t N> class cx_vector {
     [[nodiscard]] constexpr auto begin() const LIFETIMEBOUND -> const_iterator {
         return std::data(storage);
     }
-    [[nodiscard]] constexpr auto
-    cbegin() const LIFETIMEBOUND -> const_iterator {
+    [[nodiscard]] constexpr auto cbegin() const LIFETIMEBOUND
+        -> const_iterator {
         return std::data(storage);
     }
 
@@ -63,32 +63,32 @@ template <typename T, std::size_t N> class cx_vector {
     [[nodiscard]] constexpr auto rbegin() LIFETIMEBOUND -> reverse_iterator {
         return end();
     }
-    [[nodiscard]] constexpr auto
-    rbegin() const LIFETIMEBOUND -> const_reverse_iterator {
+    [[nodiscard]] constexpr auto rbegin() const LIFETIMEBOUND
+        -> const_reverse_iterator {
         return end();
     }
-    [[nodiscard]] constexpr auto
-    crbegin() const LIFETIMEBOUND -> const_reverse_iterator {
+    [[nodiscard]] constexpr auto crbegin() const LIFETIMEBOUND
+        -> const_reverse_iterator {
         return cend();
     }
 
     [[nodiscard]] constexpr auto rend() LIFETIMEBOUND -> reverse_iterator {
         return begin();
     }
-    [[nodiscard]] constexpr auto
-    rend() const LIFETIMEBOUND -> const_reverse_iterator {
+    [[nodiscard]] constexpr auto rend() const LIFETIMEBOUND
+        -> const_reverse_iterator {
         return begin();
     }
-    [[nodiscard]] constexpr auto
-    crend() const LIFETIMEBOUND -> const_reverse_iterator {
+    [[nodiscard]] constexpr auto crend() const LIFETIMEBOUND
+        -> const_reverse_iterator {
         return cbegin();
     }
 
     [[nodiscard]] constexpr auto front() LIFETIMEBOUND -> reference {
         return storage[0];
     }
-    [[nodiscard]] constexpr auto
-    front() const LIFETIMEBOUND -> const_reference {
+    [[nodiscard]] constexpr auto front() const LIFETIMEBOUND
+        -> const_reference {
         return storage[0];
     }
     [[nodiscard]] constexpr auto back() LIFETIMEBOUND -> reference {
@@ -130,8 +130,8 @@ template <typename T, std::size_t N> class cx_vector {
 
     constexpr auto clear() -> void { current_size = 0; }
 
-    constexpr auto
-    push_back(value_type const &value) LIFETIMEBOUND -> reference {
+    constexpr auto push_back(value_type const &value) LIFETIMEBOUND
+        -> reference {
         return storage[current_size++] = value;
     }
     constexpr auto push_back(value_type &&value) LIFETIMEBOUND -> reference {
@@ -149,8 +149,9 @@ template <typename T, std::size_t N> class cx_vector {
             std::forward<F>(f)(std::data(v.storage), std::size(v.storage));
     }
 
-    [[nodiscard]] friend constexpr auto
-    operator==(cx_vector const &lhs, cx_vector const &rhs) -> bool {
+    [[nodiscard]] friend constexpr auto operator==(cx_vector const &lhs,
+                                                   cx_vector const &rhs)
+        -> bool {
         if (lhs.size() != rhs.size()) {
             return false;
         }
@@ -163,8 +164,9 @@ template <typename T, std::size_t N> class cx_vector {
     }
 
 #if __cpp_impl_three_way_comparison < 201907L
-    [[nodiscard]] friend constexpr auto
-    operator!=(cx_vector const &lhs, cx_vector const &rhs) -> bool {
+    [[nodiscard]] friend constexpr auto operator!=(cx_vector const &lhs,
+                                                   cx_vector const &rhs)
+        -> bool {
         return not(lhs == rhs);
     }
 #endif

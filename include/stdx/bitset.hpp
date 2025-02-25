@@ -243,8 +243,8 @@ class bitset {
         return *this;
     }
 
-    constexpr auto set(lsb_t lsb, msb_t msb,
-                       bool value = true) LIFETIMEBOUND -> bitset & {
+    constexpr auto set(lsb_t lsb, msb_t msb, bool value = true) LIFETIMEBOUND
+        -> bitset & {
         auto const l = to_underlying(lsb);
         auto const m = to_underlying(msb);
         auto [l_index, l_offset] = indices(l);
@@ -272,8 +272,8 @@ class bitset {
         return *this;
     }
 
-    constexpr auto set(lsb_t lsb, length_t len,
-                       bool value = true) LIFETIMEBOUND -> bitset & {
+    constexpr auto set(lsb_t lsb, length_t len, bool value = true) LIFETIMEBOUND
+        -> bitset & {
         auto const l = to_underlying(lsb);
         auto const length = to_underlying(len);
         return set(lsb, static_cast<msb_t>(l + length - 1), value);
@@ -398,7 +398,7 @@ class bitset {
 
     constexpr auto operator<<=(std::size_t pos) LIFETIMEBOUND->bitset & {
         auto dst = storage_size - 1;
-        auto const start = dst - pos / storage_elem_size;
+        auto const start = dst - (pos / storage_elem_size);
         pos %= storage_elem_size;
 
         if (pos == 0) {

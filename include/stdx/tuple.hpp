@@ -59,8 +59,9 @@ template <std::size_t Index, typename T, typename... Ts> struct element {
 #else
     constexpr static auto ugly_Value(index_constant<Index>) -> T;
 
-    [[nodiscard]] constexpr auto ugly_iGet_clvr(
-        index_constant<Index>) const & noexcept LIFETIMEBOUND -> T const & {
+    [[nodiscard]] constexpr auto
+    ugly_iGet_clvr(index_constant<Index>) const & noexcept LIFETIMEBOUND
+        -> T const & {
         return value;
     }
     [[nodiscard]] constexpr auto
@@ -75,8 +76,9 @@ template <std::size_t Index, typename T, typename... Ts> struct element {
 
     template <typename U>
         requires(std::same_as<U, T> or ... or std::same_as<U, Ts>)
-    [[nodiscard]] constexpr auto ugly_tGet_clvr(
-        tag_constant<U> *) const & noexcept LIFETIMEBOUND -> T const & {
+    [[nodiscard]] constexpr auto
+    ugly_tGet_clvr(tag_constant<U> *) const & noexcept LIFETIMEBOUND
+        -> T const & {
         return value;
     }
     template <typename U>
@@ -103,8 +105,9 @@ template <std::size_t Index, typename T, typename... Ts> struct element {
     T value;
 
   private:
-    [[nodiscard]] friend constexpr auto
-    operator==(element const &, element const &) -> bool = default;
+    [[nodiscard]] friend constexpr auto operator==(element const &,
+                                                   element const &)
+        -> bool = default;
     [[nodiscard]] friend constexpr auto operator<=>(element const &,
                                                     element const &) = default;
 };
@@ -334,14 +337,14 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     constexpr static auto size =
         std::integral_constant<std::size_t, sizeof...(Ts)>{};
 
-    [[nodiscard]] constexpr static auto
-    fill_inner_indices(index_pair *p) -> index_pair * {
+    [[nodiscard]] constexpr static auto fill_inner_indices(index_pair *p)
+        -> index_pair * {
         ((p++->inner = Is), ...);
         return p;
     }
     [[nodiscard]] constexpr static auto
-    fill_outer_indices(index_pair *p,
-                       [[maybe_unused]] std::size_t n) -> index_pair * {
+    fill_outer_indices(index_pair *p, [[maybe_unused]] std::size_t n)
+        -> index_pair * {
         ((p++->outer = (static_cast<void>(Is), n)), ...);
         return p;
     }
@@ -402,8 +405,8 @@ class tuple : public detail::tuple_impl<std::index_sequence_for<Ts...>,
                                         detail::index_function_list<>, Ts...> {
     template <typename U>
         requires(not tuple_comparable<U>)
-    [[nodiscard]] friend constexpr auto operator==(tuple const &,
-                                                   U const &) -> bool = delete;
+    [[nodiscard]] friend constexpr auto operator==(tuple const &, U const &)
+        -> bool = delete;
 
     template <typename U>
         requires(not tuple_comparable<U>)
@@ -430,14 +433,14 @@ template <typename... Ts>
 indexed_tuple(Ts...) -> indexed_tuple<detail::index_function_list<>, Ts...>;
 
 template <std::size_t I, tuplelike Tuple>
-[[nodiscard]] constexpr auto
-get(Tuple &&t LIFETIMEBOUND) -> decltype(std::forward<Tuple>(t)[index<I>]) {
+[[nodiscard]] constexpr auto get(Tuple &&t LIFETIMEBOUND)
+    -> decltype(std::forward<Tuple>(t)[index<I>]) {
     return std::forward<Tuple>(t)[index<I>];
 }
 
 template <typename T, tuplelike Tuple>
-[[nodiscard]] constexpr auto
-get(Tuple &&t LIFETIMEBOUND) -> decltype(std::forward<Tuple>(t).get(tag<T>)) {
+[[nodiscard]] constexpr auto get(Tuple &&t LIFETIMEBOUND)
+    -> decltype(std::forward<Tuple>(t).get(tag<T>)) {
     return std::forward<Tuple>(t).get(tag<T>);
 }
 
