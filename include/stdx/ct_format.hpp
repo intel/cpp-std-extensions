@@ -26,8 +26,8 @@ template <std::size_t N> constexpr auto format_as(stdx::ct_string<N> const &s) {
 }
 
 template <typename Str, typename Args> struct format_result {
-    CONSTEVAL static auto
-    ct_string_convertible() -> std::bool_constant<Args::size() == 0>;
+    CONSTEVAL static auto ct_string_convertible()
+        -> std::bool_constant<Args::size() == 0>;
 
     [[no_unique_address]] Str str;
     [[no_unique_address]] Args args{};

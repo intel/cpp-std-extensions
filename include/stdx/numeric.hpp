@@ -17,8 +17,8 @@ inline namespace v1 {
 template <typename T, typename InputIt, typename ROp, typename TOp,
           typename... InputItN>
 CONSTEXPR_INVOKE auto transform_reduce(InputIt first, InputIt last, T init,
-                                       ROp rop, TOp top,
-                                       InputItN... first_n) -> T {
+                                       ROp rop, TOp top, InputItN... first_n)
+    -> T {
     while (first != last) {
         init = std::invoke(rop, std::move(init),
                            std::invoke(top, *first, *first_n...));

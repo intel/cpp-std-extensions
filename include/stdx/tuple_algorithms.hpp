@@ -93,14 +93,14 @@ template <tuplelike Tup, typename T>
 }
 
 template <typename T, tuplelike Tup>
-[[nodiscard]] constexpr auto tuple_push_front(T &&t,
-                                              Tup &&tup) -> decltype(auto) {
+[[nodiscard]] constexpr auto tuple_push_front(T &&t, Tup &&tup)
+    -> decltype(auto) {
     return tuple_cons(std::forward<T>(t), std::forward<Tup>(tup));
 }
 
 template <tuplelike Tup, typename T>
-[[nodiscard]] constexpr auto tuple_push_back(Tup &&tup,
-                                             T &&t) -> decltype(auto) {
+[[nodiscard]] constexpr auto tuple_push_back(Tup &&tup, T &&t)
+    -> decltype(auto) {
     return tuple_snoc(std::forward<Tup>(tup), std::forward<T>(t));
 }
 
@@ -280,8 +280,8 @@ template <tuplelike T, template <typename> typename Proj = std::type_identity_t>
 struct chunk {
     std::size_t offset{};
     std::size_t size{};
-    friend constexpr auto operator==(chunk const &,
-                                     chunk const &) -> bool = default;
+    friend constexpr auto operator==(chunk const &, chunk const &)
+        -> bool = default;
 };
 
 template <tuplelike T, template <typename> typename Proj = std::type_identity_t>

@@ -47,8 +47,8 @@ using std::bit_cast;
 
 #if __cpp_lib_byteswap < 202110L
 template <typename T>
-[[nodiscard]] constexpr auto
-byteswap(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+[[nodiscard]] constexpr auto byteswap(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
     if constexpr (sizeof(T) == sizeof(std::uint16_t)) {
         return __builtin_bswap16(x);
     } else if constexpr (sizeof(T) == sizeof(std::uint32_t)) {
@@ -67,8 +67,8 @@ using std::byteswap;
 
 #if __cpp_lib_bitops < 201907L
 template <typename T>
-[[nodiscard]] constexpr auto
-countl_zero(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, int> {
+[[nodiscard]] constexpr auto countl_zero(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, int> {
     if (x == 0) {
         return std::numeric_limits<T>::digits;
     }
@@ -88,8 +88,8 @@ countl_zero(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, int> {
 }
 
 template <typename T>
-[[nodiscard]] constexpr auto
-countr_zero(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, int> {
+[[nodiscard]] constexpr auto countr_zero(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, int> {
     if (x == 0) {
         return std::numeric_limits<T>::digits;
     }
@@ -104,20 +104,20 @@ countr_zero(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, int> {
 }
 
 template <typename T>
-[[nodiscard]] constexpr auto
-countl_one(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, int> {
+[[nodiscard]] constexpr auto countl_one(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, int> {
     return countl_zero(T(~x));
 }
 
 template <typename T>
-[[nodiscard]] constexpr auto
-countr_one(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, int> {
+[[nodiscard]] constexpr auto countr_one(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, int> {
     return countr_zero(T(~x));
 }
 
 template <typename T>
-[[nodiscard]] constexpr auto
-popcount(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, int> {
+[[nodiscard]] constexpr auto popcount(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, int> {
     if constexpr (sizeof(T) <= sizeof(unsigned int)) {
         return __builtin_popcount(x);
     } else if constexpr (sizeof(T) <=
@@ -130,8 +130,8 @@ popcount(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, int> {
 
 namespace detail {
 template <typename T>
-[[nodiscard]] constexpr auto
-rotl(T x, T s) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+[[nodiscard]] constexpr auto rotl(T x, T s) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
 #ifdef __clang__
     if constexpr (sizeof(T) == sizeof(std::uint8_t)) {
         return __builtin_rotateleft8(x, s);
@@ -148,8 +148,8 @@ rotl(T x, T s) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
 #endif
 }
 template <typename T>
-[[nodiscard]] constexpr auto
-rotr(T x, T s) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+[[nodiscard]] constexpr auto rotr(T x, T s) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
 #ifdef __clang__
     if constexpr (sizeof(T) == sizeof(std::uint8_t)) {
         return __builtin_rotateright8(x, s);
@@ -168,8 +168,8 @@ rotr(T x, T s) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
 } // namespace detail
 
 template <typename T>
-[[nodiscard]] constexpr auto
-rotl(T x, int s) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+[[nodiscard]] constexpr auto rotl(T x, int s) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
     if (s == 0) {
         return x;
     }
@@ -180,8 +180,8 @@ rotl(T x, int s) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
 }
 
 template <typename T>
-[[nodiscard]] constexpr auto
-rotr(T x, int s) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+[[nodiscard]] constexpr auto rotr(T x, int s) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
     if (s == 0) {
         return x;
     }
@@ -204,20 +204,20 @@ using std::rotr;
 
 #if __cpp_lib_int_pow2 < 202002L
 template <typename T>
-[[nodiscard]] constexpr auto
-has_single_bit(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, bool> {
+[[nodiscard]] constexpr auto has_single_bit(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, bool> {
     return x and not(x & (x - 1));
 }
 
 template <typename T>
-[[nodiscard]] constexpr auto
-bit_width(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, int> {
+[[nodiscard]] constexpr auto bit_width(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, int> {
     return std::numeric_limits<T>::digits - countl_zero(x);
 }
 
 template <typename T>
-[[nodiscard]] constexpr auto
-bit_ceil(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+[[nodiscard]] constexpr auto bit_ceil(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
     if (x <= 1U) {
         return 1U;
     }
@@ -225,8 +225,8 @@ bit_ceil(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
 }
 
 template <typename T>
-[[nodiscard]] constexpr auto
-bit_floor(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+[[nodiscard]] constexpr auto bit_floor(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
     if (x == 0) {
         return x;
     }
@@ -240,8 +240,8 @@ using std::has_single_bit;
 #endif
 
 template <typename T>
-[[nodiscard]] constexpr auto
-to_le(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+[[nodiscard]] constexpr auto to_le(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
     if constexpr (stdx::endian::native == stdx::endian::big) {
         return byteswap(x);
     } else {
@@ -250,8 +250,8 @@ to_le(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
 }
 
 template <typename T>
-[[nodiscard]] constexpr auto
-to_be(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+[[nodiscard]] constexpr auto to_be(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
     if constexpr (stdx::endian::native == stdx::endian::little) {
         return byteswap(x);
     } else {
@@ -260,8 +260,8 @@ to_be(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
 }
 
 template <typename T>
-[[nodiscard]] constexpr auto
-from_le(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+[[nodiscard]] constexpr auto from_le(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
     if constexpr (stdx::endian::native == stdx::endian::big) {
         return byteswap(x);
     } else {
@@ -270,8 +270,8 @@ from_le(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
 }
 
 template <typename T>
-[[nodiscard]] constexpr auto
-from_be(T x) noexcept -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+[[nodiscard]] constexpr auto from_be(T x) noexcept
+    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
     if constexpr (stdx::endian::native == stdx::endian::little) {
         return byteswap(x);
     } else {
@@ -341,8 +341,8 @@ template <typename To, typename From> constexpr auto bit_unpack(From arg) {
 
 namespace detail {
 template <typename T, std::size_t Bit>
-constexpr auto
-mask_bits() -> std::enable_if_t<Bit <= std::numeric_limits<T>::digits, T> {
+constexpr auto mask_bits()
+    -> std::enable_if_t<Bit <= std::numeric_limits<T>::digits, T> {
     if constexpr (Bit == std::numeric_limits<T>::digits) {
         return std::numeric_limits<T>::max();
     } else {

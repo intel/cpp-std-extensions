@@ -50,8 +50,8 @@ template <typename Key, typename Value, std::size_t N> class cx_map {
     [[nodiscard]] constexpr auto begin() const LIFETIMEBOUND -> const_iterator {
         return std::data(storage);
     }
-    [[nodiscard]] constexpr auto
-    cbegin() const LIFETIMEBOUND -> const_iterator {
+    [[nodiscard]] constexpr auto cbegin() const LIFETIMEBOUND
+        -> const_iterator {
         return std::data(storage);
     }
 
@@ -83,8 +83,8 @@ template <typename Key, typename Value, std::size_t N> class cx_map {
         return storage[--current_size];
     }
 
-    [[nodiscard]] constexpr auto
-    get(key_type const &key) LIFETIMEBOUND -> mapped_type & {
+    [[nodiscard]] constexpr auto get(key_type const &key) LIFETIMEBOUND
+        -> mapped_type & {
         for (auto &[k, v] : *this) {
             if (k == key) {
                 return v;
@@ -92,8 +92,8 @@ template <typename Key, typename Value, std::size_t N> class cx_map {
         }
         unreachable();
     }
-    [[nodiscard]] constexpr auto
-    get(key_type const &key) const LIFETIMEBOUND -> mapped_type const & {
+    [[nodiscard]] constexpr auto get(key_type const &key) const LIFETIMEBOUND
+        -> mapped_type const & {
         for (auto const &[k, v] : *this) {
             if (k == key) {
                 return v;

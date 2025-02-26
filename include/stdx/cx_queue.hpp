@@ -66,8 +66,8 @@ class cx_queue {
         OverflowPolicy::check_pop(current_size);
         return storage[pop_index];
     }
-    [[nodiscard]] constexpr auto front() const
-        & LIFETIMEBOUND -> const_reference {
+    [[nodiscard]] constexpr auto front() const & LIFETIMEBOUND
+                                                 -> const_reference {
         OverflowPolicy::check_pop(current_size);
         return storage[pop_index];
     }
@@ -75,8 +75,8 @@ class cx_queue {
         OverflowPolicy::check_pop(current_size);
         return storage[push_index];
     }
-    [[nodiscard]] constexpr auto back() const
-        & LIFETIMEBOUND -> const_reference {
+    [[nodiscard]] constexpr auto back() const & LIFETIMEBOUND
+                                                -> const_reference {
         OverflowPolicy::check_pop(current_size);
         return storage[push_index];
     }

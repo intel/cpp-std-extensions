@@ -42,8 +42,8 @@ template <typename T> class byterator {
     template <typename It,
               std::enable_if_t<std::is_same_v<detail::iterator_value_t<It>, T>,
                                int> = 0>
-    [[nodiscard]] constexpr friend auto operator==(byterator const &x,
-                                                   It y) -> bool {
+    [[nodiscard]] constexpr friend auto operator==(byterator const &x, It y)
+        -> bool {
         return static_cast<void const *>(x.ptr) ==
                static_cast<void const *>(stdx::to_address(y));
     }
@@ -60,18 +60,18 @@ template <typename T> class byterator {
     }
 
     template <typename It>
-    [[nodiscard]] constexpr friend auto operator==(It y,
-                                                   byterator const &x) -> bool {
+    [[nodiscard]] constexpr friend auto operator==(It y, byterator const &x)
+        -> bool {
         return x == y;
     }
     template <typename It>
-    [[nodiscard]] constexpr friend auto operator!=(byterator const &x,
-                                                   It y) -> bool {
+    [[nodiscard]] constexpr friend auto operator!=(byterator const &x, It y)
+        -> bool {
         return not(x == y);
     }
     template <typename It>
-    [[nodiscard]] constexpr friend auto operator!=(It y,
-                                                   byterator const &x) -> bool {
+    [[nodiscard]] constexpr friend auto operator!=(It y, byterator const &x)
+        -> bool {
         return not(x == y);
     }
 
@@ -135,8 +135,9 @@ template <typename T> class byterator {
         return *this;
     }
 
-    [[nodiscard]] friend constexpr auto
-    operator+(byterator i, difference_type d) -> byterator {
+    [[nodiscard]] friend constexpr auto operator+(byterator i,
+                                                  difference_type d)
+        -> byterator {
         i += d;
         return i;
     }
@@ -145,21 +146,22 @@ template <typename T> class byterator {
         i += d;
         return i;
     }
-    [[nodiscard]] friend constexpr auto
-    operator-(byterator i, difference_type d) -> byterator {
+    [[nodiscard]] friend constexpr auto operator-(byterator i,
+                                                  difference_type d)
+        -> byterator {
         i -= d;
         return i;
     }
-    [[nodiscard]] friend constexpr auto
-    operator-(byterator x, byterator y) -> difference_type {
+    [[nodiscard]] friend constexpr auto operator-(byterator x, byterator y)
+        -> difference_type {
         return x.ptr - y.ptr;
     }
 
     [[nodiscard]] constexpr auto operator[](difference_type n) -> byte_t & {
         return ptr[n];
     }
-    [[nodiscard]] constexpr auto
-    operator[](difference_type n) const -> byte_t const & {
+    [[nodiscard]] constexpr auto operator[](difference_type n) const
+        -> byte_t const & {
         return ptr[n];
     }
 

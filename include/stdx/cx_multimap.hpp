@@ -31,8 +31,8 @@ class cx_multimap {
     [[nodiscard]] constexpr auto begin() const LIFETIMEBOUND -> const_iterator {
         return std::begin(storage);
     }
-    [[nodiscard]] constexpr auto
-    cbegin() const LIFETIMEBOUND -> const_iterator {
+    [[nodiscard]] constexpr auto cbegin() const LIFETIMEBOUND
+        -> const_iterator {
         return std::cbegin(storage);
     }
 
@@ -82,12 +82,12 @@ class cx_multimap {
         return 0;
     }
 
-    [[nodiscard]] constexpr auto
-    get(key_type const &key) LIFETIMEBOUND -> set_t & {
+    [[nodiscard]] constexpr auto get(key_type const &key) LIFETIMEBOUND
+        -> set_t & {
         return storage.get(key);
     }
-    [[nodiscard]] constexpr auto
-    get(key_type const &key) const LIFETIMEBOUND -> set_t const & {
+    [[nodiscard]] constexpr auto get(key_type const &key) const LIFETIMEBOUND
+        -> set_t const & {
         return storage.get(key);
     }
 
