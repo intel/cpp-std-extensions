@@ -74,7 +74,14 @@ target_compile_definitions(
     PRIVATE -DATOMIC_CFG="${CMAKE_CURRENT_LIST_DIR}/detail/atomic_cfg.hpp")
 
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
-    add_tests(FILES ct_format ct_string indexed_tuple tuple tuple_algorithms)
+    add_tests(
+        FILES
+        ct_format
+        ct_string
+        env
+        indexed_tuple
+        tuple
+        tuple_algorithms)
 endif()
 
 add_subdirectory(fail)
