@@ -3,7 +3,7 @@
 // EXPECT: deleted
 
 struct S {
-    constexpr friend auto operator==(S, S) -> bool = default;
+    friend constexpr auto operator==(S, S) -> bool = default;
 };
 
 auto main() -> int {

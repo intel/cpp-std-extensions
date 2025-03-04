@@ -14,10 +14,10 @@ enum struct E : std::uint8_t { VALUE, ALT_VALUE };
 
 struct S {
     constexpr explicit S(int i) : value{i} {}
-    constexpr friend auto operator==(S const &x, S const &y) -> bool {
+    friend constexpr auto operator==(S const &x, S const &y) -> bool {
         return x.value == y.value;
     }
-    constexpr friend auto operator<(S const &x, S const &y) -> bool {
+    friend constexpr auto operator<(S const &x, S const &y) -> bool {
         return x.value < y.value;
     }
     int value{};
@@ -332,7 +332,7 @@ struct move_only {
     constexpr move_only(int i) : value{i} {}
     constexpr move_only(move_only &&) = default;
     int value{};
-    constexpr friend auto operator==(move_only const &x, move_only const &y)
+    friend constexpr auto operator==(move_only const &x, move_only const &y)
         -> bool {
         return x.value == y.value;
     }
@@ -342,7 +342,7 @@ struct non_movable {
     constexpr non_movable(int i) : value{i} {}
     constexpr non_movable(non_movable &&) = delete;
     int value{};
-    constexpr friend auto operator==(non_movable const &x, non_movable const &y)
+    friend constexpr auto operator==(non_movable const &x, non_movable const &y)
         -> bool {
         return x.value == y.value;
     }

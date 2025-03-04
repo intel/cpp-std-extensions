@@ -337,7 +337,7 @@ TEST_CASE("fold_left (heterogeneous types in fold)", "[tuple_algorithms]") {
 }
 
 template <auto N> struct addend {
-    constexpr friend auto operator==(addend, addend) -> bool { return true; }
+    friend constexpr auto operator==(addend, addend) -> bool { return true; }
 };
 template <auto X, auto Y> constexpr auto operator+(addend<X>, addend<Y>) {
     return addend<X + Y>{};
