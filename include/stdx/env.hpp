@@ -4,18 +4,19 @@
 
 #include <stdx/compiler.hpp>
 #include <stdx/ct_string.hpp>
+#include <stdx/type_traits.hpp>
 
 #include <boost/mp11/algorithm.hpp>
 
 namespace stdx {
 inline namespace v1 {
+namespace _env {
 template <auto Query, auto Value> struct ct_prop {
     [[nodiscard]] CONSTEVAL static auto query(decltype(Query)) noexcept {
         return Value;
     }
 };
 
-namespace _env {
 template <typename Q, typename Env>
 concept valid_query_for = requires(Env const &e) { e.query(Q{}); };
 
@@ -37,6 +38,9 @@ template <typename... Envs> struct env {
         return Q{}(E{});
     }
 };
+
+template <typename T>
+concept envlike = is_specialization_of_v<T, env>;
 
 namespace _env {
 template <typename T> struct autowrap {
@@ -64,14 +68,14 @@ template <auto V> struct wrap {
 template <typename> struct for_each_pair;
 template <std::size_t... Is> struct for_each_pair<std::index_sequence<Is...>> {
     template <auto... Args>
-    using type =
-        env<ct_prop<boost::mp11::mp_at_c<boost::mp11::mp_list<wrap<Args>...>,
-                                         2 * Is>::value.value,
-                    boost::mp11::mp_at_c<boost::mp11::mp_list<wrap<Args>...>,
-                                         (2 * Is) + 1>::value.value>...>;
+    using type = env<
+        _env::ct_prop<boost::mp11::mp_at_c<boost::mp11::mp_list<wrap<Args>...>,
+                                           2 * Is>::value.value,
+                      boost::mp11::mp_at_c<boost::mp11::mp_list<wrap<Args>...>,
+                                           (2 * Is) + 1>::value.value>...>;
 };
 
-template <typename Env = env<>>
+template <envlike Env = env<>>
 constexpr auto make_env = []<autowrap... Args> {
     using new_env_t = typename for_each_pair<
         std::make_index_sequence<sizeof...(Args) / 2>>::template type<Args...>;
@@ -79,9 +83,12 @@ constexpr auto make_env = []<autowrap... Args> {
 };
 } // namespace _env
 
-template <typename Env, _env::autowrap... Args>
+template <envlike Env, _env::autowrap... Args>
 using extend_env_t =
     decltype(_env::make_env<Env>.template operator()<Args...>());
+
+template <envlike... Envs>
+using append_env_t = boost::mp11::mp_reverse<boost::mp11::mp_append<Envs...>>;
 
 template <_env::autowrap... Args>
 using make_env_t = extend_env_t<env<>, Args...>;
