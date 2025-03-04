@@ -1,7 +1,5 @@
 #pragma once
 
-#include <conc/atomic.hpp>
-
 #include <stdx/bit.hpp>
 #include <stdx/bitset.hpp>
 #include <stdx/compiler.hpp>
@@ -10,6 +8,8 @@
 #include <stdx/detail/bitset_common.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/udls.hpp>
+
+#include <conc/atomic.hpp>
 
 #include <algorithm>
 #include <atomic>

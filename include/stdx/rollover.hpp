@@ -75,10 +75,10 @@ template <typename T> struct rollover_t {
         return not(lhs == rhs);
     }
 
-    constexpr friend auto operator<(rollover_t, rollover_t) -> bool = delete;
-    constexpr friend auto operator<=(rollover_t, rollover_t) -> bool = delete;
-    constexpr friend auto operator>(rollover_t, rollover_t) -> bool = delete;
-    constexpr friend auto operator>=(rollover_t, rollover_t) -> bool = delete;
+    friend constexpr auto operator<(rollover_t, rollover_t) -> bool = delete;
+    friend constexpr auto operator<=(rollover_t, rollover_t) -> bool = delete;
+    friend constexpr auto operator>(rollover_t, rollover_t) -> bool = delete;
+    friend constexpr auto operator>=(rollover_t, rollover_t) -> bool = delete;
 
     [[nodiscard]] constexpr friend auto cmp_less(rollover_t lhs, rollover_t rhs)
         -> bool {

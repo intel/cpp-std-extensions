@@ -499,7 +499,7 @@ template <typename... Ts>
 class one_of : public detail::tuple_impl<std::index_sequence_for<Ts...>,
                                          detail::index_function_list<>, Ts...> {
     template <typename T>
-    constexpr friend auto operator==(one_of const &lhs, T const &rhs) -> bool {
+    friend constexpr auto operator==(one_of const &lhs, T const &rhs) -> bool {
         return lhs.apply(
             [&](auto &&...args) { return ((args == rhs) || ...); });
     }
