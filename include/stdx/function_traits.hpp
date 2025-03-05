@@ -1,5 +1,7 @@
 #pragma once
 
+#include <stdx/type_traits.hpp>
+
 #include <boost/mp11/algorithm.hpp>
 #include <boost/mp11/utility.hpp>
 
@@ -21,11 +23,8 @@ struct function_traits<std::function<R(Args...)>> {
     using decayed_args = List<std::decay_t<Args>...>;
     using arity = std::integral_constant<std::size_t, sizeof...(Args)>;
 
-    template <auto N>
-    using nth_arg = boost::mp11::mp_at_c<args<boost::mp11::mp_list>, N>;
-    template <auto N>
-    using decayed_nth_arg =
-        boost::mp11::mp_at_c<decayed_args<boost::mp11::mp_list>, N>;
+    template <auto N> using nth_arg = nth_t<N, Args...>;
+    template <auto N> using decayed_nth_arg = std::decay_t<nth_arg<N>>;
 };
 } // namespace detail
 

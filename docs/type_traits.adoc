@@ -155,6 +155,26 @@ NOTE: Detecting structurality of a type is not yet possible in the general case,
 so there are certain structural types for which this trait will be `false`. In
 practice those types should be rare, and there should be no false positives.
 
+=== `nth_t`
+
+`nth_t` is a type alias that extracts the nth element from a pack of types (starting at 0 of course):
+
+[source,cpp]
+----
+// nth_t<Index, Ts...>
+static_assert(std::is_same_v<stdx::nth_t<1, int, float, bool>, float>);
+----
+
+=== `nth_v`
+
+`nth_v` is a `constexpr` variable template that extracts the nth element from a pack of values (starting at 0 of course):
+
+[source,cpp]
+----
+// nth_v<Index, Vs...>
+static_assert(stdx::nth_v<1, 6, 28, 496> == 28);
+----
+
 === `template_for_each`
 
 A xref:type_traits.adoc#_type_list_and_value_list[`type_list` or a `value_list`]

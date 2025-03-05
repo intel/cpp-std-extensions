@@ -258,3 +258,14 @@ TEST_CASE("type shrinkage", "[type_traits]") {
     static_assert(std::same_as<stdx::expand_t<X>, C>);
 }
 #endif
+
+TEST_CASE("nth type in pack", "[type_traits]") {
+    static_assert(
+        std::is_same_v<stdx::nth_t<2, bool, char, float, int>, float>);
+}
+
+#if __cplusplus >= 202002L
+TEST_CASE("nth value in pack", "[type_traits]") {
+    static_assert(stdx::nth_v<2, 0, true, 'b', 3> == 'b');
+}
+#endif
