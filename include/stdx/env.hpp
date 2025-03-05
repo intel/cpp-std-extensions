@@ -34,7 +34,7 @@ template <typename... Envs> struct env {
     CONSTEVAL static auto query(Q) noexcept {
         using I = boost::mp11::mp_find_if_q<boost::mp11::mp_list<Envs...>,
                                             _env::has_query<Q>>;
-        using E = boost::mp11::mp_at<boost::mp11::mp_list<Envs...>, I>;
+        using E = nth_t<I::value, Envs...>;
         return Q{}(E{});
     }
 };
@@ -61,18 +61,11 @@ template <std::size_t N> struct autowrap<str_lit_t<N>> {
 template <typename T> autowrap(T) -> autowrap<T>;
 template <std::size_t N> autowrap(str_lit_t<N>) -> autowrap<str_lit_t<N>>;
 
-template <auto V> struct wrap {
-    constexpr static auto value = V;
-};
-
 template <typename> struct for_each_pair;
 template <std::size_t... Is> struct for_each_pair<std::index_sequence<Is...>> {
     template <auto... Args>
-    using type = env<
-        _env::ct_prop<boost::mp11::mp_at_c<boost::mp11::mp_list<wrap<Args>...>,
-                                           2 * Is>::value.value,
-                      boost::mp11::mp_at_c<boost::mp11::mp_list<wrap<Args>...>,
-                                           (2 * Is) + 1>::value.value>...>;
+    using type = env<ct_prop<nth_v<2 * Is, Args...>.value,
+                             nth_v<(2 * Is) + 1, Args...>.value>...>;
 };
 
 template <envlike Env = env<>>

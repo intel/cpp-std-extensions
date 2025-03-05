@@ -1,5 +1,9 @@
 #pragma once
 
+#include <stdx/compiler.hpp>
+
+#include <boost/mp11/algorithm.hpp>
+
 #include <type_traits>
 #include <utility>
 
@@ -226,6 +230,44 @@ template <typename T>
 using shrink_t = decltype([]() -> T (*)() { return nullptr; });
 
 template <typename T> using expand_t = decltype(T{}()());
+#endif
+
+STDX_PRAGMA(diagnostic push)
+#ifdef __clang__
+STDX_PRAGMA(diagnostic ignored "-Wunknown-warning-option")
+STDX_PRAGMA(diagnostic ignored "-Wc++26-extensions")
+#endif
+template <unsigned int N, typename... Ts>
+using nth_t =
+#if __cpp_pack_indexing >= 202311L
+    Ts...[N];
+#elif __has_builtin(__type_pack_element)
+    __type_pack_element<N, Ts...>;
+#else
+    boost::mp11::mp_at_c<type_list<Ts...>, N>;
+#endif
+STDX_PRAGMA(diagnostic pop)
+
+#if __cplusplus >= 202002L
+namespace detail {
+template <auto V> struct value_wrapper {
+    constexpr static auto value = V;
+};
+} // namespace detail
+
+STDX_PRAGMA(diagnostic push)
+#ifdef __clang__
+STDX_PRAGMA(diagnostic ignored "-Wunknown-warning-option")
+STDX_PRAGMA(diagnostic ignored "-Wc++26-extensions")
+#endif
+template <unsigned int N, auto... Vs>
+constexpr auto nth_v =
+#if __cpp_pack_indexing >= 202311L
+    Vs...[N];
+#else
+    boost::mp11::mp_at_c<type_list<detail::value_wrapper<Vs>...>, N>::value;
+#endif
+STDX_PRAGMA(diagnostic pop)
 #endif
 } // namespace v1
 } // namespace stdx
