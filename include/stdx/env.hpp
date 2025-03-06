@@ -12,7 +12,9 @@ namespace stdx {
 inline namespace v1 {
 namespace _env {
 template <auto Query, auto Value> struct ct_prop {
-    [[nodiscard]] CONSTEVAL static auto query(decltype(Query)) noexcept {
+    using query_t = std::remove_cvref_t<decltype(Query)>;
+
+    [[nodiscard]] CONSTEVAL static auto query(query_t) noexcept {
         return Value;
     }
 };
@@ -61,6 +63,9 @@ template <std::size_t N> struct autowrap<str_lit_t<N>> {
 template <typename T> autowrap(T) -> autowrap<T>;
 template <std::size_t N> autowrap(str_lit_t<N>) -> autowrap<str_lit_t<N>>;
 
+template <typename T, typename U>
+using queries_equal = std::is_same<typename T::query_t, typename U::query_t>;
+
 template <typename> struct for_each_pair;
 template <std::size_t... Is> struct for_each_pair<std::index_sequence<Is...>> {
     template <auto... Args>
@@ -72,7 +77,8 @@ template <envlike Env = env<>>
 constexpr auto make_env = []<autowrap... Args> {
     using new_env_t = typename for_each_pair<
         std::make_index_sequence<sizeof...(Args) / 2>>::template type<Args...>;
-    return boost::mp11::mp_append<new_env_t, Env>{};
+    return boost::mp11::mp_unique_if<boost::mp11::mp_append<new_env_t, Env>,
+                                     queries_equal>{};
 };
 } // namespace _env
 
@@ -81,7 +87,9 @@ using extend_env_t =
     decltype(_env::make_env<Env>.template operator()<Args...>());
 
 template <envlike... Envs>
-using append_env_t = boost::mp11::mp_reverse<boost::mp11::mp_append<Envs...>>;
+using append_env_t = boost::mp11::mp_unique_if<
+    boost::mp11::mp_reverse<boost::mp11::mp_append<Envs...>>,
+    _env::queries_equal>;
 
 template <_env::autowrap... Args>
 using make_env_t = extend_env_t<env<>, Args...>;
