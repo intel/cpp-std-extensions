@@ -111,12 +111,12 @@ class span : public detail::span_base<T, Extent> {
                       "Span extends beyond available storage");
     }
 
+    // NOLINTNEXTLINE(*-avoid-c-arrays)
+    template <std::size_t N> using arr_t = type_identity_t<element_type> (&)[N];
+
     template <std::size_t N>
     // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr span(
-        // NOLINTNEXTLINE(*-avoid-c-arrays)
-        stdx::type_identity_t<element_type> (&arr)[N] LIFETIMEBOUND) noexcept
-        : ptr{std::data(arr)} {
+    constexpr span(arr_t<N> arr LIFETIMEBOUND) noexcept : ptr{std::data(arr)} {
         static_assert(Extent == dynamic_extent or Extent <= N,
                       "Span extends beyond available storage");
     }
