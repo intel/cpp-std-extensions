@@ -54,7 +54,8 @@ struct call_base {
 };
 
 template <typename, bool> struct callable_test : call_base {};
-template <typename F> struct callable_test<F, true> : F, call_base {};
+template <typename F>
+struct callable_test<F, true> : remove_cvref_t<F>, call_base {};
 
 template <typename F, typename = void> constexpr auto is_func_obj = true;
 template <typename F>
@@ -144,7 +145,7 @@ struct for_each_t<L<Vs...>> {
         (f.template operator()<Vs>(), ...);
     }
 };
-template <template <typename, auto...> typename L, typename T, T... Vs>
+template <template <typename X, X...> typename L, typename T, T... Vs>
 struct for_each_t<L<T, Vs...>> {
     template <typename F> constexpr auto operator()(F &&f) const {
         (f.template operator()<Vs>(), ...);
@@ -174,7 +175,7 @@ struct apply_sequence_t<L<Vs...>> {
         return f.template operator()<Vs...>();
     }
 };
-template <template <typename, auto...> typename L, typename T, T... Vs>
+template <template <typename X, X...> typename L, typename T, T... Vs>
 struct apply_sequence_t<L<T, Vs...>> {
     template <typename F> constexpr auto operator()(F &&f) const {
         return f.template operator()<Vs...>();

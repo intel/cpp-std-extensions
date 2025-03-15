@@ -33,7 +33,7 @@ template <typename Q> struct has_query {
 
 template <typename... Envs> struct env {
     template <_env::valid_query_over<Envs...> Q>
-    CONSTEVAL static auto query(Q) noexcept {
+    [[nodiscard]] CONSTEVAL static auto query(Q) noexcept {
         using I = boost::mp11::mp_find_if_q<boost::mp11::mp_list<Envs...>,
                                             _env::has_query<Q>>;
         using E = nth_t<I::value, Envs...>;
