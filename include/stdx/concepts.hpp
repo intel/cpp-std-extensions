@@ -41,6 +41,12 @@ constexpr auto derived_from =
 template <typename T, typename U>
 constexpr auto same_as = std::is_same_v<T, U> and std::is_same_v<U, T>;
 
+template <typename T, typename... Us>
+constexpr auto same_any = (... or same_as<T, Us>);
+
+template <typename T, typename... Us>
+constexpr auto same_none = not same_any<T, Us...>;
+
 template <typename T, typename U>
 constexpr auto same_as_unqualified =
     is_same_unqualified_v<T, U> and is_same_unqualified_v<U, T>;
@@ -129,6 +135,12 @@ concept derived_from =
 
 template <typename T, typename U>
 concept same_as = std::is_same_v<T, U> and std::is_same_v<U, T>;
+
+template <typename T, typename... Us>
+constexpr auto same_any = (... or same_as<T, Us>);
+
+template <typename T, typename... Us>
+constexpr auto same_none = not same_any<T, Us...>;
 
 template <typename T, typename U>
 concept same_as_unqualified =
@@ -222,6 +234,11 @@ concept same_as_unqualified =
 template <typename T>
 concept structural = is_structural_v<T>;
 
+template <typename T, typename... Us>
+constexpr auto same_any = (... or same_as<T, Us>);
+
+template <typename T, typename... Us>
+constexpr auto same_none = not same_any<T, Us...>;
 } // namespace v1
 } // namespace stdx
 
