@@ -30,6 +30,16 @@ TEST_CASE("same_as", "[concepts]") {
     static_assert(not stdx::same_as<float, int>);
 }
 
+TEST_CASE("same_any", "[concepts]") {
+    static_assert(stdx::same_any<int, float, bool, int>);
+    static_assert(not stdx::same_any<float, char, bool, int>);
+}
+
+TEST_CASE("same_none", "[concepts]") {
+    static_assert(stdx::same_none<int, float, bool, char>);
+    static_assert(not stdx::same_none<float, bool, char, float>);
+}
+
 TEST_CASE("same_as_unqualified", "[concepts]") {
     static_assert(stdx::same_as_unqualified<int, int>);
     static_assert(not stdx::same_as_unqualified<int, void>);
