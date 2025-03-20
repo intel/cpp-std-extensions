@@ -24,3 +24,9 @@ TEST_CASE("atomic works with overridden type", "[atomic_override]") {
     CHECK(!bs.exchange(true));
     CHECK(bs);
 }
+
+TEST_CASE("atomic config works with partial specialization",
+          "[atomic_override]") {
+    using elem_t = ::atomic::atomic_type_t<int *>;
+    static_assert(std::is_same_v<elem_t, uintptr_t>);
+}
