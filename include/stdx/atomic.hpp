@@ -27,12 +27,22 @@ template <typename T> class atomic {
     using elem_t = ::atomic::atomic_type_t<T>;
     constexpr static auto alignment = ::atomic::alignment_of<T>;
 
-    static_assert(std::is_convertible_v<elem_t, T>,
+    static_assert(std::is_trivially_copyable_v<T>,
+                  "value_type of atomic<T> must be trivially_copyable");
+    static_assert(std::is_trivially_copyable_v<elem_t>,
                   "::atomic::atomic_type_t specialization result must be "
-                  "convertible to T");
-    static_assert(std::is_convertible_v<T, elem_t>,
+                  "trivially_copyable");
+
+    static_assert(sizeof(elem_t) >= sizeof(T),
+                  "::atomic::atomic_type_t specialization result must be at "
+                  "least as big as T");
+    static_assert(alignof(elem_t) >= alignof(T),
                   "::atomic::atomic_type_t specialization result must be "
-                  "convertible from T");
+                  "alignment-compatible with T");
+
+    static_assert(alignof(elem_t) <= alignment,
+                  "::atomic::atomic_type_t specialization result must be "
+                  "alignment-compatible with alignment_of<T>");
 
     alignas(alignment) elem_t value;
 
