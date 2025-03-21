@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/utility.hpp>
@@ -340,37 +341,78 @@ template <typename To, typename From> constexpr auto bit_unpack(From arg) {
 }
 
 namespace detail {
-template <typename T, std::size_t Bit>
-constexpr auto mask_bits()
-    -> std::enable_if_t<Bit <= std::numeric_limits<T>::digits, T> {
-    if constexpr (Bit == std::numeric_limits<T>::digits) {
-        return std::numeric_limits<T>::max();
-    } else {
-        return static_cast<T>(T{1} << Bit) - T{1};
-    }
-}
+template <typename T> struct num_digits_t {
+    constexpr static std::size_t value = std::numeric_limits<T>::digits;
+};
+template <typename T> constexpr auto num_digits_v = num_digits_t<T>::value;
+template <typename T, std::size_t N> struct num_digits_t<std::array<T, N>> {
+    constexpr static std::size_t value = (N * num_digits_v<T>);
+};
 
-template <typename T> constexpr auto mask_bits(std::size_t Bit) -> T {
-    if (Bit == std::numeric_limits<T>::digits) {
-        return std::numeric_limits<T>::max();
+template <typename T> struct mask_bits_t {
+    static_assert(std::is_unsigned_v<T>,
+                  "bit_mask must be used with unsigned types");
+
+    constexpr auto operator()(std::size_t bit) const -> T {
+        if (bit == num_digits_v<T>) {
+            return std::numeric_limits<T>::max();
+        }
+        return static_cast<T>(T{1} << bit) - T{1};
     }
-    return static_cast<T>(T{1} << Bit) - T{1};
-}
+};
+
+template <typename T, std::size_t N> struct mask_bits_t<std::array<T, N>> {
+    constexpr auto operator()(std::size_t bit) const -> std::array<T, N> {
+        constexpr auto t_bits = num_digits_v<T>;
+        auto const quot = bit / t_bits;
+        auto const rem = bit % t_bits;
+
+        std::array<T, N> r{};
+        T *p = std::data(r);
+        for (auto i = std::size_t{}; i < quot; ++i) {
+            *p++ = mask_bits_t<T>{}(t_bits);
+        }
+        if (rem != 0) {
+            *p = mask_bits_t<T>{}(rem);
+        }
+        return r;
+    }
+};
+
+template <typename T> struct bitmask_subtract {
+    static_assert(std::is_unsigned_v<T>,
+                  "bit_mask must be used with unsigned types");
+    constexpr auto operator()(T x, T y) const -> T { return x ^ y; }
+};
+
+template <typename T, std::size_t N> struct bitmask_subtract<std::array<T, N>> {
+    constexpr auto operator()(std::array<T, N> const &x,
+                              std::array<T, N> const &y) const
+        -> std::array<T, N> {
+        std::array<T, N> r{};
+        for (auto i = std::size_t{}; i < N; ++i) {
+            r[i] = bitmask_subtract<T>{}(x[i], y[i]);
+        }
+        return r;
+    }
+};
 } // namespace detail
 
-template <typename T, std::size_t Msb = std::numeric_limits<T>::digits - 1,
+template <typename T, std::size_t Msb = detail::num_digits_v<T> - 1,
           std::size_t Lsb = 0>
-[[nodiscard]] constexpr auto bit_mask() noexcept
-    -> std::enable_if_t<std::is_unsigned_v<T> and Msb >= Lsb, T> {
-    static_assert(Msb < std::numeric_limits<T>::digits);
-    return detail::mask_bits<T, Msb + 1>() - detail::mask_bits<T, Lsb>();
+[[nodiscard]] CONSTEVAL auto bit_mask() noexcept -> T {
+    static_assert(Msb < detail::num_digits_v<T>,
+                  "bit_mask requested exceeds the range of the type");
+    static_assert(Msb >= Lsb, "bit_mask range is invalid");
+    return detail::bitmask_subtract<T>{}(detail::mask_bits_t<T>{}(Msb + 1),
+                                         detail::mask_bits_t<T>{}(Lsb));
 }
 
 template <typename T>
 [[nodiscard]] constexpr auto bit_mask(std::size_t Msb,
-                                      std::size_t Lsb = 0) noexcept
-    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
-    return detail::mask_bits<T>(Msb + 1) - detail::mask_bits<T>(Lsb);
+                                      std::size_t Lsb = 0) noexcept -> T {
+    return detail::bitmask_subtract<T>{}(detail::mask_bits_t<T>{}(Msb + 1),
+                                         detail::mask_bits_t<T>{}(Lsb));
 }
 
 template <typename T> constexpr auto bit_size() -> std::size_t {
