@@ -26,7 +26,15 @@ static_assert(z == std::uint8_t{0b1111'1111});
 ----
 
 `Msb` and `Lsb` denote a closed (inclusive) range where `Msb >= Lsb`. The first
-template argument must be an unsigned integral type.
+template argument must be an unsigned integral type or a `std::array` of
+unsigned integral types. In the case of an array, the elements are considered to
+be in order least significant to most significant.
+
+[source,cpp]
+----
+constexpr auto x = stdx::bit_mask<std::array<std::uint8_t, 3>, 19>>();
+// x == { 0xff, 0xff, 0x0f }
+----
 
 `bit_mask` is also available for use with "normal" value arguments rather than
 template arguments:

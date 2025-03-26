@@ -3,6 +3,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <array>
 #include <cstdint>
 #include <limits>
 #include <type_traits>
@@ -247,6 +248,49 @@ TEST_CASE("template bit_mask (single bit)", "[bit]") {
     constexpr auto m = stdx::bit_mask<std::uint8_t, 5, 5>();
     static_assert(m == 0b0010'0000);
     static_assert(std::is_same_v<decltype(m), std::uint8_t const>);
+}
+
+TEST_CASE("template bit_mask (array type whole range)", "[bit]") {
+    using A = std::array<std::uint8_t, 3>;
+    constexpr auto m = stdx::bit_mask<A>();
+    CHECK(m == A{0xff, 0xff, 0xff});
+}
+
+TEST_CASE("template bit_mask (array type low bits)", "[bit]") {
+    using A = std::array<std::uint8_t, 3>;
+    constexpr auto m = stdx::bit_mask<A, 1, 0>();
+    CHECK(m == A{0b0000'0011, 0, 0});
+}
+
+TEST_CASE("template bit_mask (array type mid bits)", "[bit]") {
+    using A = std::array<std::uint8_t, 3>;
+    constexpr auto m = stdx::bit_mask<A, 19, 4>();
+    CHECK(m == A{0b1111'0000, 0xff, 0b0000'1111});
+}
+
+TEST_CASE("template bit_mask (array type high bits)", "[bit]") {
+    using A = std::array<std::uint8_t, 3>;
+    constexpr auto m = stdx::bit_mask<A, 23, 20>();
+    CHECK(m == A{0, 0, 0b1111'0000});
+}
+
+TEST_CASE("template bit_mask (array type single bit)", "[bit]") {
+    using A = std::array<std::uint8_t, 3>;
+    constexpr auto m = stdx::bit_mask<A, 5, 5>();
+    CHECK(m == A{0b0010'0000, 0, 0});
+}
+
+TEST_CASE("template bit_mask (array of array type)", "[bit]") {
+    using A = std::array<std::uint8_t, 1>;
+    using B = std::array<A, 3>;
+    constexpr auto m = stdx::bit_mask<B, 19, 4>();
+    CHECK(m == B{A{0b1111'0000}, A{0xff}, A{0b0000'1111}});
+}
+
+TEST_CASE("template bit_mask (large array type)", "[bit]") {
+    using A = std::array<std::uint64_t, 4>;
+    constexpr auto m = stdx::bit_mask<A, 192, 192>();
+    CHECK(m == A{0, 0, 0, 1});
 }
 
 TEST_CASE("arg bit_mask (whole range)", "[bit]") {
