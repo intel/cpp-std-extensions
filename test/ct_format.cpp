@@ -218,3 +218,8 @@ TEST_CASE("format multiple mixed arguments with different type",
                                               string_constant>(),
                       stdx::make_tuple(42, "B"sv)});
 }
+
+TEST_CASE("num fmt specifiers", "[ct_format]") {
+    static_assert(stdx::num_fmt_specifiers<"{}"> == 1u);
+    static_assert(stdx::num_fmt_specifiers<"{} {}"> == 2u);
+}
