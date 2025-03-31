@@ -229,6 +229,10 @@ constexpr auto ct_format = [](auto &&...args) {
     return format_result{detail::convert_output<result.str.value, Output>(),
                          result.args};
 };
+
+template <ct_string Fmt>
+constexpr auto num_fmt_specifiers =
+    detail::count_specifiers(std::string_view{Fmt});
 } // namespace v1
 } // namespace stdx
 
