@@ -34,7 +34,7 @@ template <typename T> class byterator {
     using byte_t = std::remove_reference_t<forward_like_t<T, std::byte>>;
     byte_t *ptr;
 
-    [[nodiscard]] constexpr friend auto operator==(byterator const &x,
+    [[nodiscard]] friend constexpr auto operator==(byterator const &x,
                                                    byterator const &y) -> bool {
         return x.ptr == y.ptr;
     }
@@ -42,7 +42,7 @@ template <typename T> class byterator {
     template <typename It,
               std::enable_if_t<std::is_same_v<detail::iterator_value_t<It>, T>,
                                int> = 0>
-    [[nodiscard]] constexpr friend auto operator==(byterator const &x, It y)
+    [[nodiscard]] friend constexpr auto operator==(byterator const &x, It y)
         -> bool {
         return static_cast<void const *>(x.ptr) ==
                static_cast<void const *>(stdx::to_address(y));
@@ -60,34 +60,34 @@ template <typename T> class byterator {
     }
 
     template <typename It>
-    [[nodiscard]] constexpr friend auto operator==(It y, byterator const &x)
+    [[nodiscard]] friend constexpr auto operator==(It y, byterator const &x)
         -> bool {
         return x == y;
     }
     template <typename It>
-    [[nodiscard]] constexpr friend auto operator!=(byterator const &x, It y)
+    [[nodiscard]] friend constexpr auto operator!=(byterator const &x, It y)
         -> bool {
         return not(x == y);
     }
     template <typename It>
-    [[nodiscard]] constexpr friend auto operator!=(It y, byterator const &x)
+    [[nodiscard]] friend constexpr auto operator!=(It y, byterator const &x)
         -> bool {
         return not(x == y);
     }
 
-    [[nodiscard]] constexpr friend auto operator<(byterator const &x,
+    [[nodiscard]] friend constexpr auto operator<(byterator const &x,
                                                   byterator const &y) -> bool {
         return std::less{}(x.ptr, y.ptr);
     }
-    [[nodiscard]] constexpr friend auto operator<=(byterator const &x,
+    [[nodiscard]] friend constexpr auto operator<=(byterator const &x,
                                                    byterator const &y) -> bool {
         return std::less_equal{}(x.ptr, y.ptr);
     }
-    [[nodiscard]] constexpr friend auto operator>(byterator const &x,
+    [[nodiscard]] friend constexpr auto operator>(byterator const &x,
                                                   byterator const &y) -> bool {
         return std::greater{}(x.ptr, y.ptr);
     }
-    [[nodiscard]] constexpr friend auto operator>=(byterator const &x,
+    [[nodiscard]] friend constexpr auto operator>=(byterator const &x,
                                                    byterator const &y) -> bool {
         return std::greater_equal{}(x.ptr, y.ptr);
     }

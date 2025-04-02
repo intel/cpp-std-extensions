@@ -66,11 +66,11 @@ template <typename T> struct rollover_t {
     }
 
   private:
-    [[nodiscard]] constexpr friend auto operator==(rollover_t lhs,
+    [[nodiscard]] friend constexpr auto operator==(rollover_t lhs,
                                                    rollover_t rhs) -> bool {
         return lhs.value == rhs.value;
     }
-    [[nodiscard]] constexpr friend auto operator!=(rollover_t lhs,
+    [[nodiscard]] friend constexpr auto operator!=(rollover_t lhs,
                                                    rollover_t rhs) -> bool {
         return not(lhs == rhs);
     }
@@ -80,37 +80,37 @@ template <typename T> struct rollover_t {
     friend constexpr auto operator>(rollover_t, rollover_t) -> bool = delete;
     friend constexpr auto operator>=(rollover_t, rollover_t) -> bool = delete;
 
-    [[nodiscard]] constexpr friend auto cmp_less(rollover_t lhs, rollover_t rhs)
+    [[nodiscard]] friend constexpr auto cmp_less(rollover_t lhs, rollover_t rhs)
         -> bool {
         constexpr auto mid = static_cast<underlying_t>(~underlying_t{}) / 2;
         return static_cast<underlying_t>(lhs.value - rhs.value) > mid;
     }
 
-    [[nodiscard]] constexpr friend auto operator+(rollover_t lhs,
+    [[nodiscard]] friend constexpr auto operator+(rollover_t lhs,
                                                   rollover_t rhs)
         -> rollover_t {
         lhs += rhs;
         return lhs;
     }
-    [[nodiscard]] constexpr friend auto operator-(rollover_t lhs,
+    [[nodiscard]] friend constexpr auto operator-(rollover_t lhs,
                                                   rollover_t rhs)
         -> rollover_t {
         lhs -= rhs;
         return lhs;
     }
-    [[nodiscard]] constexpr friend auto operator*(rollover_t lhs,
+    [[nodiscard]] friend constexpr auto operator*(rollover_t lhs,
                                                   rollover_t rhs)
         -> rollover_t {
         lhs *= rhs;
         return lhs;
     }
-    [[nodiscard]] constexpr friend auto operator/(rollover_t lhs,
+    [[nodiscard]] friend constexpr auto operator/(rollover_t lhs,
                                                   rollover_t rhs)
         -> rollover_t {
         lhs /= rhs;
         return lhs;
     }
-    [[nodiscard]] constexpr friend auto operator%(rollover_t lhs,
+    [[nodiscard]] friend constexpr auto operator%(rollover_t lhs,
                                                   rollover_t rhs)
         -> rollover_t {
         lhs %= rhs;
