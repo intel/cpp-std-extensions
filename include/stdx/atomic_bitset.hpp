@@ -42,7 +42,7 @@ class atomic_bitset {
         return atomic::load(storage, order) & mask;
     }
 
-    [[nodiscard]] static constexpr auto value_from_string(std::string_view str,
+    [[nodiscard]] constexpr static auto value_from_string(std::string_view str,
                                                           std::size_t pos,
                                                           std::size_t n,
                                                           char one) -> elem_t {
