@@ -39,16 +39,16 @@ template <ct_string Fmt, auto... Args> constexpr auto static_format() {
 } // namespace v1
 } // namespace stdx
 
-STDX_PRAGMA(diagnostic push)
-#ifdef __clang__
-STDX_PRAGMA(diagnostic ignored "-Wunknown-warning-option")
-STDX_PRAGMA(diagnostic ignored "-Wc++26-extensions")
-#endif
 #if __cpp_static_assert >= 202306L
+// NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define STATIC_ASSERT(cond, ...)                                               \
     []<bool B>() -> bool {                                                     \
+        STDX_PRAGMA(diagnostic push)                                           \
+        STDX_PRAGMA(diagnostic ignored "-Wunknown-warning-option")             \
+        STDX_PRAGMA(diagnostic ignored "-Wc++26-extensions")                   \
         static_assert(                                                         \
             B, std::string_view{stdx::detail::static_format<__VA_ARGS__>()});  \
+        STDX_PRAGMA(diagnostic pop)                                            \
         return B;                                                              \
     }.template operator()<cond>()
 #else
@@ -58,8 +58,6 @@ STDX_PRAGMA(diagnostic ignored "-Wc++26-extensions")
         stdx::ct_check<B>.template emit<stdx::detail::static_format<__VA_ARGS__>()>(); \
         return B;                                                                      \
     }.template operator()<cond>()
-
 #endif
-STDX_PRAGMA(diagnostic pop)
 
 #endif
