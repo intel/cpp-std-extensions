@@ -105,11 +105,10 @@ template <std::size_t Index, typename T, typename... Ts> struct element {
     T value;
 
   private:
-    [[nodiscard]] friend constexpr auto operator==(element const &,
-                                                   element const &)
+    [[nodiscard]] friend auto operator==(element const &x, element const &y)
         -> bool = default;
-    [[nodiscard]] friend constexpr auto operator<=>(element const &,
-                                                    element const &) = default;
+    [[nodiscard]] friend auto operator<=>(element const &,
+                                          element const &) = default;
 };
 
 template <typename Op, typename Value> struct fold_helper {

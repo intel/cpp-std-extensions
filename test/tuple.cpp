@@ -239,7 +239,7 @@ TEST_CASE("equality comparable", "[tuple]") {
 
     REQUIRE(t == t);
     REQUIRE(t != stdx::tuple{5, 11});
-    static_assert(t == t); // NOLINT(misc-redundant-expression)
+    static_assert(t == stdx::tuple{5, 10});
     static_assert(t != stdx::tuple{5, 11});
 }
 
