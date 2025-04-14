@@ -14,23 +14,74 @@ variadic in its inputs.
 ----
 template <typename InputIt, typename Operation, typename... InputItN>
 constexpr auto for_each(InputIt first, InputIt last,
-                        Operation op, InputItN... first_n) -> Operation;
+                        Operation op, InputItN... first_n)
+    -> for_each_result<Operation, InputItN...>;
 ----
+
+The return value is equivalent to a `tuple<Operation, InputItN...>`.
+In C\\++20 and later this is a `stdx::tuple`, in C++17 a `std::tuple`.
 
 NOTE: `stdx::for_each` is `constexpr` in C++20 and later, because it uses
 https://en.cppreference.com/w/cpp/utility/functional/invoke[`std::invoke`].
 
 `stdx::for_each_n` is just like `stdx::for_each`, but instead of taking two
 iterators to delimit the input range, it takes an iterator and size.
+Correspondingly, its return value includes the advanced `InputIt`.
 
 [source,cpp]
 ----
 template <typename InputIt, typename Size, typename Operation,
           typename... InputItN>
 constexpr auto for_each_n(InputIt first, Size n,
-                          Operation op, InputItN... first_n) -> Operation;
+                          Operation op, InputItN... first_n);
+    -> for_each_result<Operation, InputIt, InputItN...>;
 ----
 
+=== `for_each_butlast`, `for_each_butlastn`
+
+`stdx::for_each_butlast` is like `for_each` but omits the last element of
+each range.
+
+[source,cpp]
+----
+template <typename FwdIt, typename Operation,
+          typename... FwdItN>
+constexpr auto for_each_butlast(FwdIt first, FwdIt last,
+                                Operation op, FwdItN... first_n)
+    -> for_each_result<Operation, FwdIt, FwdItN...>;
+----
+
+`stdx::for_each_butlastn` omits the last `n` elements of each range.
+
+[source,cpp]
+----
+template <typename FwdIt, typename Size, typename Operation,
+          typename... FwdItN>
+constexpr auto for_each_butlastn(FwdIt first, FwdIt last, N n,
+                                 Operation op, FwdItN... first_n)
+    -> for_each_result<Operation, FwdIt, FwdItN...>;
+----
+
+NOTE: `for_each_butlast` and `for_each_butlastn` are defined for forward
+iterators (or stronger) only.
+
+=== `initial_medial_final`
+
+`initial_medial_final` iterates over a range, calling one function
+for the initial element, another function for each of the medial elements, and a third
+function for the final element.
+
+[source,cpp]
+----
+template <typename FwdIt, typename IOp, typename MOp, typename FOp>
+CONSTEXPR_INVOKE auto initial_medial_final(FwdIt first, FwdIt last, IOp iop,
+                                           MOp mop, FOp fop)
+    -> for_each_result<IOp, MOp, FOp>;
+----
+
+If the range is only two elements, there are no medial elements, so `mop` is not
+called. If the range is only one element, `fop` is not called. And if the range
+is empty, no functions are called.
 
 === `transform` and `transform_n`
 
