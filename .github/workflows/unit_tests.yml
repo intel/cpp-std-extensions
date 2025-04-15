@@ -14,7 +14,7 @@ env:
   CMAKE_GENERATOR: Ninja
   DEFAULT_CXX_STANDARD: 20
   DEFAULT_LLVM_VERSION: 20
-  DEFAULT_GCC_VERSION: 13
+  DEFAULT_GCC_VERSION: 14
   MULL_LLVM_VERSION: 18
   MULL_VERSION: 0.24.0
   HYPOTHESIS_PROFILE: default
@@ -30,7 +30,7 @@ jobs:
       fail-fast: false
       matrix:
         compiler: [clang, gcc]
-        version: [12, 13, 16, 17, 18, 19, 20]
+        version: [12, 13, 14, 16, 17, 18, 19, 20]
         cxx_standard: [17, 20]
         stdlib: [libstdc++, libc++]
         build_type: [Debug]
@@ -87,6 +87,11 @@ jobs:
           - compiler: gcc
             toolchain_root: "/usr"
             cxx_flags: ""
+          - version: 14
+            compiler: gcc
+            install: sudo apt update && sudo apt install -y gcc-14 g++-14
+            cc: "gcc-14"
+            cxx: "g++-14"
           - version: 13
             compiler: gcc
             install: sudo apt update && sudo apt install -y gcc-13 g++-13
@@ -109,6 +114,8 @@ jobs:
             version: 17
           - compiler: gcc
             version: 16
+          - compiler: clang
+            version: 14
           - compiler: clang
             version: 13
           - compiler: clang
@@ -320,9 +327,9 @@ jobs:
             install: wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh 20
             toolchain_root: "/usr/lib/llvm-20"
           - compiler: gcc
-            cc: "gcc-13"
-            cxx: "g++-13"
-            install: sudo apt update && sudo apt install -y gcc-13 g++-13
+            cc: "gcc-14"
+            cxx: "g++-14"
+            install: sudo apt update && sudo apt install -y gcc-14 g++-14
             toolchain_root: "/usr"
 
     steps:
