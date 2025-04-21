@@ -127,11 +127,14 @@ CONSTEXPR_INVOKE auto initial_medial_final(FwdIt first, FwdIt last, IOp iop,
     -> for_each_result<IOp, MOp, FOp> {
     if (first != last) {
         iop(*first);
-        auto [op, it] = for_each_butlast(++first, last, mop);
-        if (it != last) {
+        auto r = for_each_butlast(++first, last, mop);
+#if __cplusplus < 202002L
+        using std::get;
+#endif
+        if (auto it = get<1>(r); it != last) {
             fop(*it);
         }
-        return {iop, op, fop};
+        return {iop, get<0>(r), fop};
     }
     return {iop, mop, fop};
 }
