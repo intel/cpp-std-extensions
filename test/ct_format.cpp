@@ -223,3 +223,18 @@ TEST_CASE("num fmt specifiers", "[ct_format]") {
     static_assert(stdx::num_fmt_specifiers<"{}"> == 1u);
     static_assert(stdx::num_fmt_specifiers<"{} {}"> == 2u);
 }
+
+namespace user {
+struct S {
+    int x;
+};
+
+constexpr auto ct_format_as(S const &s) {
+    return stdx::ct_format<"S: {}">(s.x);
+}
+} // namespace user
+
+TEST_CASE("user-defined formatting", "[ct_format]") {
+    auto r = stdx::ct_format<"Hello {}">(user::S{42});
+    CHECK(r == stdx::format_result{"Hello S: {}"_ctst, stdx::make_tuple(42)});
+}
