@@ -205,6 +205,11 @@ template <ct_string Fmt> struct fmt_data {
     constexpr static auto splits = split_specifiers<N + 1>(fmt);
     constexpr static auto last_cts = to_ct_string<splits[N].size()>(splits[N]);
 };
+
+template <typename T>
+constexpr auto ct_format_as(T const &t) -> decltype(auto) {
+    return (t);
+}
 } // namespace detail
 
 template <ct_string Fmt,
@@ -223,7 +228,8 @@ constexpr auto ct_format = [](auto &&...args) {
     };
 
     auto const result = [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return (format1.template operator()<Is>(FWD(args)) + ... +
+        using detail::ct_format_as;
+        return (format1.template operator()<Is>(ct_format_as(FWD(args))) + ... +
                 format_result{cts_t<data::last_cts>{}});
     }(std::make_index_sequence<data::N>{});
     return format_result{detail::convert_output<result.str.value, Output>(),
