@@ -21,6 +21,26 @@ TEST_CASE("equality comparable to iterator", "[byterator]") {
     CHECK((std::end(a) != b));
 }
 
+TEST_CASE("comparable to iterator", "[byterator]") {
+    auto const a = std::array{1, 2, 3, 4};
+    auto const b = stdx::byterator{std::begin(a)};
+    auto const c = std::next(b);
+
+    CHECK((b < std::end(a)));
+    CHECK((std::begin(a) < c));
+    CHECK((b <= std::end(a)));
+    CHECK((std::begin(a) <= c));
+    CHECK((b <= std::begin(a)));
+    CHECK((std::begin(a) <= b));
+
+    CHECK((std::end(a) > b));
+    CHECK((c > std::begin(a)));
+    CHECK((std::end(a) >= b));
+    CHECK((c >= std::begin(a)));
+    CHECK((b >= std::begin(a)));
+    CHECK((std::begin(a) >= b));
+}
+
 TEST_CASE("copy constructible", "[byterator]") {
     auto const a = std::array{stdx::to_be<std::uint16_t>(0x0102),
                               stdx::to_be<std::uint16_t>(0x0304)};
