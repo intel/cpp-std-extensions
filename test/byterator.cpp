@@ -219,6 +219,39 @@ TEST_CASE("write uint32_t", "[byterator]") {
     CHECK((i == std::end(a)));
 }
 
+TEST_CASE("peek uint64_t", "[byterator]") {
+    auto const a = std::array{
+        stdx::to_be<std::uint16_t>(0x0102), stdx::to_be<std::uint16_t>(0x0304),
+        stdx::to_be<std::uint16_t>(0x0506), stdx::to_be<std::uint16_t>(0x0708)};
+    auto i = stdx::byterator{std::begin(a)};
+    static_assert(std::is_same_v<decltype(i.readu64()), std::uint64_t>);
+    CHECK(i.peeku64() == stdx::to_be<std::uint64_t>(0x0102030405060708));
+    CHECK((i == std::begin(a)));
+}
+
+TEST_CASE("read uint64_t", "[byterator]") {
+    auto const a = std::array{
+        stdx::to_be<std::uint16_t>(0x0102), stdx::to_be<std::uint16_t>(0x0304),
+        stdx::to_be<std::uint16_t>(0x0506), stdx::to_be<std::uint16_t>(0x0708)};
+    auto i = stdx::byterator{std::begin(a)};
+    static_assert(std::is_same_v<decltype(i.readu64()), std::uint64_t>);
+    CHECK(i.readu64() == stdx::to_be<std::uint64_t>(0x0102030405060708));
+    CHECK((i == std::end(a)));
+}
+
+TEST_CASE("write uint64_t", "[byterator]") {
+    auto a = std::array{
+        stdx::to_be<std::uint16_t>(0x0102), stdx::to_be<std::uint16_t>(0x0304),
+        stdx::to_be<std::uint16_t>(0x0506), stdx::to_be<std::uint16_t>(0x0708)};
+    auto i = stdx::byterator{std::begin(a)};
+    i.writeu64(stdx::to_be<std::uint64_t>(0x05060708090A0B0C));
+    CHECK(a[0] == stdx::to_be<std::uint16_t>(0x0506));
+    CHECK(a[1] == stdx::to_be<std::uint16_t>(0x0708));
+    CHECK(a[2] == stdx::to_be<std::uint16_t>(0x090A));
+    CHECK(a[3] == stdx::to_be<std::uint16_t>(0x0B0C));
+    CHECK((i == std::end(a)));
+}
+
 namespace {
 enum struct E : std::uint8_t { A = 1, B = 2, C = 3 };
 }

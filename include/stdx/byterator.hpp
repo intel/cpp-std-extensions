@@ -274,6 +274,16 @@ template <typename T> class byterator {
     template <typename V> [[nodiscard]] auto writeu32(V &&v) {
         return write(static_cast<std::uint32_t>(std::forward<V>(v)));
     }
+
+    template <typename V = std::uint64_t> [[nodiscard]] auto peeku64() {
+        return peek<std::uint64_t, V>();
+    }
+    template <typename V = std::uint64_t> [[nodiscard]] auto readu64() {
+        return read<std::uint64_t, V>();
+    }
+    template <typename V> [[nodiscard]] auto writeu64(V &&v) {
+        return write(static_cast<std::uint64_t>(std::forward<V>(v)));
+    }
 };
 
 template <typename It, std::enable_if_t<detail::is_byteratorish_v<It>, int> = 0>
