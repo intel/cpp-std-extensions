@@ -72,6 +72,10 @@ i.writeu16(v16);        // write and advance
 auto v32 = i.peeku32(); // read value without advancing
 v32 = i.readu32();      // read and advance
 i.writeu32(v32);        // write and advance
+
+auto v64 = i.peeku64(); // read value without advancing
+v64 = i.readu64();      // read and advance
+i.writeu64(v64);        // write and advance
 ----
 
 These convenience functions are implemented by function templates that offer
