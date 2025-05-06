@@ -125,8 +125,8 @@ integral type that will fit a compile-time value.
 
 [source,cpp]
 ----
-constexpr auto x = stdx::smallest_uint<42>();   // std::uint8_t{}
-constexpr auto y = stdx::smallest_uint<1337>(); // std::uint16_t{}
+constexpr auto x = stdx::smallest_uint<42>();   // std::uint8_t{42}
+constexpr auto y = stdx::smallest_uint<1337>(); // std::uint16_t{1337}
 
 // smallest_uint_t is the type of a call to smallest_uint
 using T = stdx::smallest_uint_t<1337>; // std::uint16_t
