@@ -421,13 +421,13 @@ template <typename T> constexpr auto bit_size() -> std::size_t {
 
 template <std::size_t N> CONSTEVAL auto smallest_uint() {
     if constexpr (N <= std::numeric_limits<std::uint8_t>::digits) {
-        return std::uint8_t{};
+        return std::uint8_t{N};
     } else if constexpr (N <= std::numeric_limits<std::uint16_t>::digits) {
-        return std::uint16_t{};
+        return std::uint16_t{N};
     } else if constexpr (N <= std::numeric_limits<std::uint32_t>::digits) {
-        return std::uint32_t{};
+        return std::uint32_t{N};
     } else {
-        return std::uint64_t{};
+        return std::uint64_t{N};
     }
 }
 

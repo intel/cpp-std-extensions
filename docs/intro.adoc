@@ -21,8 +21,11 @@ The following compilers are supported:
 * clang 16
 * clang 17
 * clang 18
+* clang 19
+* clang 20
 * gcc 12
 * gcc 13
+* gcc 14
 
 In general, `stdx` supports the C++17 standard; however some functionality is
 available only in 20 and later.
