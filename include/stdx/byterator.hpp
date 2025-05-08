@@ -2,6 +2,7 @@
 
 #include <stdx/bit.hpp>
 #include <stdx/memory.hpp>
+#include <stdx/type_traits.hpp>
 #include <stdx/utility.hpp>
 
 #include <cstddef>
@@ -27,11 +28,13 @@ constexpr auto iterator_value_type()
     -> decltype(*std::declval<typename std::iterator_traits<It>::pointer>());
 
 template <typename It>
-using iterator_value_t = decltype(iterator_value_type<It>());
+using iterator_value_t =
+    std::remove_reference_t<decltype(iterator_value_type<It>())>;
 } // namespace detail
 
 template <typename T> class byterator {
-    using byte_t = std::remove_reference_t<forward_like_t<T, std::byte>>;
+    using byte_t =
+        stdx::conditional_t<std::is_const_v<T>, std::byte const, std::byte>;
     byte_t *ptr;
 
     [[nodiscard]] friend constexpr auto operator==(byterator const &x,
@@ -189,6 +192,10 @@ template <typename T> class byterator {
         ptr -= d;
         return *this;
     }
+    constexpr auto advance(difference_type d) -> byterator & {
+        ptr += d;
+        return *this;
+    }
 
     [[nodiscard]] friend constexpr auto operator+(byterator i,
                                                   difference_type d)
@@ -228,11 +235,15 @@ template <typename T> class byterator {
         return static_cast<R>(v);
     }
 
+    template <typename V = std::uint8_t> auto advance() -> decltype(auto) {
+        return advance(sizeof(V));
+    }
+
     template <typename V = std::uint8_t, typename R = V,
               std::enable_if_t<std::is_trivially_copyable_v<V>, int> = 0>
     [[nodiscard]] auto read() -> R {
         R ret = peek<V, R>();
-        ptr += sizeof(V);
+        advance<V>();
         return ret;
     }
 
@@ -242,11 +253,14 @@ template <typename T> class byterator {
     auto write(V &&v) -> void {
         using R = remove_cvref_t<V>;
         std::memcpy(ptr, std::addressof(v), sizeof(R));
-        ptr += sizeof(R);
+        advance<R>();
     }
 
     template <typename V = std::uint8_t> [[nodiscard]] auto peeku8() {
         return peek<std::uint8_t, V>();
+    }
+    template <typename V = std::uint8_t> auto advanceu8() -> decltype(auto) {
+        return advance<std::uint8_t>();
     }
     template <typename V = std::uint8_t> [[nodiscard]] auto readu8() {
         return read<std::uint8_t, V>();
@@ -258,6 +272,9 @@ template <typename T> class byterator {
     template <typename V = std::uint16_t> [[nodiscard]] auto peeku16() {
         return peek<std::uint16_t, V>();
     }
+    template <typename V = std::uint16_t> auto advanceu16() -> decltype(auto) {
+        return advance<std::uint16_t>();
+    }
     template <typename V = std::uint16_t> [[nodiscard]] auto readu16() {
         return read<std::uint16_t, V>();
     }
@@ -268,6 +285,9 @@ template <typename T> class byterator {
     template <typename V = std::uint32_t> [[nodiscard]] auto peeku32() {
         return peek<std::uint32_t, V>();
     }
+    template <typename V = std::uint32_t> auto advanceu32() -> decltype(auto) {
+        return advance<std::uint32_t>();
+    }
     template <typename V = std::uint32_t> [[nodiscard]] auto readu32() {
         return read<std::uint32_t, V>();
     }
@@ -277,6 +297,9 @@ template <typename T> class byterator {
 
     template <typename V = std::uint64_t> [[nodiscard]] auto peeku64() {
         return peek<std::uint64_t, V>();
+    }
+    template <typename V = std::uint64_t> auto advanceu64() -> decltype(auto) {
+        return advance<std::uint64_t>();
     }
     template <typename V = std::uint64_t> [[nodiscard]] auto readu64() {
         return read<std::uint64_t, V>();

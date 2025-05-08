@@ -63,18 +63,22 @@ auto value = i.readu16();
 ----
 auto v8 = i.peeku8();   // read value without advancing
 v8 = i.readu8();        // read and advance
+i.advanceu8();          // advance only
 i.writeu8(v8);          // write and advance
 
 auto v16 = i.peeku16(); // read value without advancing
 v16 = i.readu16();      // read and advance
+i.advanceu16();         // advance only
 i.writeu16(v16);        // write and advance
 
 auto v32 = i.peeku32(); // read value without advancing
 v32 = i.readu32();      // read and advance
+i.advanceu32();         // advance only
 i.writeu32(v32);        // write and advance
 
 auto v64 = i.peeku64(); // read value without advancing
 v64 = i.readu64();      // read and advance
+i.advanceu64();         // advance only
 i.writeu64(v64);        // write and advance
 ----
 
