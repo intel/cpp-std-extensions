@@ -99,6 +99,9 @@ template <ct_string S, template <typename C, C...> typename T>
     }(std::make_index_sequence<S.size()>{});
 }
 
+template <ct_string S, template <typename C, C...> typename T>
+using ct_string_to_type_t = decltype(ct_string_to_type<S, T>());
+
 template <ct_string S, char C> [[nodiscard]] consteval auto split() {
     constexpr auto it = [] {
         for (auto i = S.value.cbegin(); i != S.value.cend(); ++i) {

@@ -59,6 +59,12 @@ TEST_CASE("to type", "[ct_string]") {
                                  string_constant<char, 'A', 'B', 'C'> const>);
 }
 
+TEST_CASE("to type_t", "[ct_string]") {
+    constexpr auto s = stdx::ct_string{"ABC"};
+    using sc = stdx::ct_string_to_type_t<s, string_constant>;
+    static_assert(std::is_same_v<sc, string_constant<char, 'A', 'B', 'C'>>);
+}
+
 TEST_CASE("to string_view", "[ct_string]") {
     constexpr auto s = stdx::ct_string{"ABC"};
     auto const sv = static_cast<std::string_view>(s);
