@@ -12,6 +12,7 @@ template <typename T> struct rollover_t {
     using underlying_t = T;
 
     constexpr rollover_t() = default;
+    // NOLINTBEGIN(modernize-use-constraints)
     template <typename U,
               typename = std::enable_if_t<std::is_convertible_v<U, T>>>
     constexpr explicit rollover_t(U u) : value{static_cast<underlying_t>(u)} {}
@@ -19,6 +20,7 @@ template <typename T> struct rollover_t {
               typename = std::enable_if_t<std::is_convertible_v<U, T>>>
     constexpr explicit rollover_t(rollover_t<U> u)
         : rollover_t{static_cast<U>(u)} {}
+    // NOLINTEND(modernize-use-constraints)
 
     [[nodiscard]] constexpr auto as_underlying() const -> underlying_t {
         return value;

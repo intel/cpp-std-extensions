@@ -67,13 +67,16 @@ target_sources(
               include/stdx/intrusive_forward_list.hpp
               include/stdx/intrusive_list.hpp
               include/stdx/iterator.hpp
+              include/stdx/latched.hpp
               include/stdx/memory.hpp
               include/stdx/numeric.hpp
               include/stdx/optional.hpp
               include/stdx/panic.hpp
               include/stdx/priority.hpp
               include/stdx/ranges.hpp
+              include/stdx/rollover.hpp
               include/stdx/span.hpp
+              include/stdx/static_assert.hpp
               include/stdx/tuple_algorithms.hpp
               include/stdx/tuple_destructure.hpp
               include/stdx/tuple.hpp
