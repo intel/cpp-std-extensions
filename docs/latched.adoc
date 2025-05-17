@@ -1,0 +1,45 @@
+
+== `latched.hpp`
+
+A `latched` value represents a value that is computed on demand once, and
+latched (`const`) thereafter. It is constructed with a lambda expression that
+will compute the value when needed.
+
+A `latched` value is similar to a xref:cached.adoc#_cached_hpp[`cached`] value except that
+once computed, a `latched` value cannot be reset.
+
+[source,cpp]
+----
+constexpr auto c = stdx::latched{[] { return expensive_computation(); }};
+----
+
+A `latched` value is something like a `std::optional` and supports some similar
+functionality. Note though that any kind of "dereference" operation
+automatically computes the value if needed.
+
+[source,cpp]
+----
+// check whether the value is present
+auto b = c.has_value();
+
+// or, automatic bool conversion (explicit)
+if (c) {
+  // do something
+}
+
+// use the value (computing where necessary)
+auto value = *c;
+auto alt_value = c.value();
+auto value_member = c->member;
+----
+
+If needed, the type of the latched value can obtained  with `latched_value_t`.
+
+[source,cpp]
+----
+auto c = stdx::latched{[] { return expensive_computation(); }};
+using V = stdx::latched_value_t<decltype(c)>;
+----
+
+NOTE: You can also use `typename decltype(c)::value_type`, but if the type of `c`
+has cvref qualifiers, `latched_value_t` saves the bother of using `remove_cvref_t`.

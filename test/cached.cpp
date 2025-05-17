@@ -94,8 +94,8 @@ TEST_CASE("non-movable value", "[cached]") {
 TEST_CASE("preserving value categories", "[cached]") {
     {
         auto c = stdx::cached{[] { return 42; }};
-        static_assert(std::is_same_v<int &, decltype(*c)>);
-        static_assert(std::is_same_v<int &&, decltype(*std::move(c))>);
+        static_assert(std::is_same_v<int const &, decltype(*c)>);
+        static_assert(std::is_same_v<int const &&, decltype(*std::move(c))>);
     }
     {
         auto const c = stdx::cached{[] { return 42; }};

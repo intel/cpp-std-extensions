@@ -48,6 +48,7 @@ add_tests(
     intrusive_list_properties
     is_constant_evaluated
     iterator
+    latched
     memory
     numeric
     optional
