@@ -59,6 +59,7 @@ if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
 
     add_fail_tests(
         atomic_bool_dec
+        ct_format_mismatch
         dynamic_span_no_ct_capacity
         dynamic_container_no_ct_capacity
         tuple_index_out_of_bounds

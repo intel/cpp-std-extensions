@@ -221,6 +221,10 @@ constexpr auto ct_format = [](auto &&...args) {
 
     using data = detail::fmt_data<Fmt>;
 
+    static_assert(data::N == sizeof...(args),
+                  "Format string has a mismatch between the number of format "
+                  "specifiers and arguments.");
+
     [[maybe_unused]] auto const format1 = [&]<std::size_t I>(auto &&arg) {
         constexpr auto cts =
             detail::to_ct_string<data::splits[I].size()>(data::splits[I]);
