@@ -89,14 +89,14 @@ TEST_CASE("advance", "[byterator]") {
     CHECK((i - 1 == b));
     i.advance(-1);
     CHECK((i == b));
-    static_assert(std::is_same_v<decltype(i.advance()),
-                                 stdx::byterator<std::uint16_t const> &>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.advance()),
+                                  stdx::byterator<std::uint16_t const> &>);
 }
 
 TEST_CASE("equality comparable", "[byterator]") {
     auto const a = std::array{1, 2, 3, 4};
     auto x = stdx::byterator{std::begin(a)};
-    static_assert(stdx::equality_comparable<decltype(x)>);
+    STATIC_REQUIRE(stdx::equality_comparable<decltype(x)>);
     auto y = x;
     CHECK(x == y);
     ++y;
@@ -106,7 +106,7 @@ TEST_CASE("equality comparable", "[byterator]") {
 TEST_CASE("totally ordered", "[byterator]") {
     auto const a = std::array{1, 2, 3, 4};
     auto x = stdx::byterator{std::begin(a)};
-    static_assert(stdx::totally_ordered<decltype(x)>);
+    STATIC_REQUIRE(stdx::totally_ordered<decltype(x)>);
     auto y = std::next(x);
     CHECK(x < y);
     CHECK(x <= y);
@@ -153,7 +153,7 @@ TEST_CASE("peek uint8_t", "[byterator]") {
     auto const a = std::array{stdx::to_be<std::uint16_t>(0x0102),
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
-    static_assert(std::is_same_v<decltype(i.readu8()), std::uint8_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu8()), std::uint8_t>);
     CHECK(i.peeku8() == 1);
     CHECK((i == std::begin(a)));
 }
@@ -172,7 +172,7 @@ TEST_CASE("read uint8_t", "[byterator]") {
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
     auto j = std::next(i);
-    static_assert(std::is_same_v<decltype(i.readu8()), std::uint8_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu8()), std::uint8_t>);
     CHECK(i.readu8() == 1);
     CHECK((i == j));
 }
@@ -191,7 +191,7 @@ TEST_CASE("peek uint16_t", "[byterator]") {
     auto const a = std::array{stdx::to_be<std::uint16_t>(0x0102),
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
-    static_assert(std::is_same_v<decltype(i.readu16()), std::uint16_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu16()), std::uint16_t>);
     CHECK(i.peeku16() == stdx::to_be<std::uint16_t>(0x0102));
     CHECK((i == std::begin(a)));
 }
@@ -210,7 +210,7 @@ TEST_CASE("read uint16_t", "[byterator]") {
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
     auto j = i + 2;
-    static_assert(std::is_same_v<decltype(i.readu16()), std::uint16_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu16()), std::uint16_t>);
     CHECK(i.readu16() == stdx::to_be<std::uint16_t>(0x0102));
     CHECK((i == j));
 }
@@ -229,7 +229,7 @@ TEST_CASE("peek uint32_t", "[byterator]") {
     auto const a = std::array{stdx::to_be<std::uint16_t>(0x0102),
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
-    static_assert(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
     CHECK(i.peeku32() == stdx::to_be<std::uint32_t>(0x01020304));
     CHECK((i == std::begin(a)));
 }
@@ -246,7 +246,7 @@ TEST_CASE("read uint32_t", "[byterator]") {
     auto const a = std::array{stdx::to_be<std::uint16_t>(0x0102),
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
-    static_assert(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
     CHECK(i.readu32() == stdx::to_be<std::uint32_t>(0x01020304));
     CHECK((i == std::end(a)));
 }
@@ -266,7 +266,7 @@ TEST_CASE("peek uint64_t", "[byterator]") {
         stdx::to_be<std::uint16_t>(0x0102), stdx::to_be<std::uint16_t>(0x0304),
         stdx::to_be<std::uint16_t>(0x0506), stdx::to_be<std::uint16_t>(0x0708)};
     auto i = stdx::byterator{std::begin(a)};
-    static_assert(std::is_same_v<decltype(i.readu64()), std::uint64_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu64()), std::uint64_t>);
     CHECK(i.peeku64() == stdx::to_be<std::uint64_t>(0x0102030405060708));
     CHECK((i == std::begin(a)));
 }
@@ -285,7 +285,7 @@ TEST_CASE("read uint64_t", "[byterator]") {
         stdx::to_be<std::uint16_t>(0x0102), stdx::to_be<std::uint16_t>(0x0304),
         stdx::to_be<std::uint16_t>(0x0506), stdx::to_be<std::uint16_t>(0x0708)};
     auto i = stdx::byterator{std::begin(a)};
-    static_assert(std::is_same_v<decltype(i.readu64()), std::uint64_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu64()), std::uint64_t>);
     CHECK(i.readu64() == stdx::to_be<std::uint64_t>(0x0102030405060708));
     CHECK((i == std::end(a)));
 }
@@ -311,7 +311,7 @@ TEST_CASE("peek enum", "[byterator]") {
     auto const a = std::array{stdx::to_be<std::uint16_t>(0x0102),
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
-    static_assert(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
     CHECK(i.peek<E>() == E::A);
 }
 
@@ -328,7 +328,7 @@ TEST_CASE("read enum", "[byterator]") {
     auto const a = std::array{stdx::to_be<std::uint16_t>(0x0102),
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
-    static_assert(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
     CHECK(i.read<E>() == E::A);
 }
 
@@ -348,7 +348,7 @@ TEST_CASE("peek enum (constrained size)", "[byterator]") {
     auto const a = std::array{stdx::to_be<std::uint16_t>(0x0102),
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
-    static_assert(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
     CHECK(i.peek<std::uint8_t, E2>() == E2::A);
 }
 
@@ -357,7 +357,7 @@ TEST_CASE("read enum (constrained size)", "[byterator]") {
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
     auto j = std::next(i);
-    static_assert(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
     CHECK(i.read<std::uint8_t, E2>() == E2::A);
     CHECK((i == j));
 }
@@ -376,7 +376,7 @@ TEST_CASE("peek enum (constrained size alias)", "[byterator]") {
     auto const a = std::array{stdx::to_be<std::uint16_t>(0x0102),
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
-    static_assert(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
     CHECK(i.peeku8<E2>() == E2::A);
 }
 
@@ -385,7 +385,7 @@ TEST_CASE("read enum (constrained size alias)", "[byterator]") {
                               stdx::to_be<std::uint16_t>(0x0304)};
     auto i = stdx::byterator{std::begin(a)};
     auto j = std::next(i);
-    static_assert(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(i.readu32()), std::uint32_t>);
     CHECK(i.readu8<E2>() == E2::A);
     CHECK((i == j));
 }

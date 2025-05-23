@@ -8,7 +8,7 @@
 
 TEST_CASE("bind_front basic operation", "[bind]") {
     constexpr auto f = stdx::bind_front([](int x, int y) { return x - y; }, 42);
-    static_assert(f(17) == 25);
+    STATIC_REQUIRE(f(17) == 25);
 }
 
 TEST_CASE("bind_front with rvalue", "[bind]") {
@@ -35,7 +35,7 @@ TEST_CASE("bind_front with lambda template argument", "[bind]") {
 
 TEST_CASE("bind_back basic operation", "[bind]") {
     constexpr auto f = stdx::bind_back([](int x, int y) { return x - y; }, 17);
-    static_assert(f(42) == 25);
+    STATIC_REQUIRE(f(42) == 25);
 }
 
 TEST_CASE("bind_back with rvalue", "[bind]") {

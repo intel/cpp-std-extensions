@@ -22,7 +22,7 @@ struct injected_handler {
 #if __cplusplus >= 202002L
     template <stdx::ct_string Why, typename... Ts>
     static auto panic(Ts &&...) noexcept -> void {
-        static_assert(std::string_view{Why} == "uh-oh");
+        STATIC_REQUIRE(std::string_view{Why} == "uh-oh");
         ++compile_time_calls;
     }
 #endif

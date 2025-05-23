@@ -9,34 +9,34 @@
 
 TEST_CASE("atomic_bitset with explicit storage element type",
           "[atomic_bitset]") {
-    static_assert(sizeof(stdx::atomic_bitset<1, std::uint8_t>) ==
-                  sizeof(std::uint8_t));
-    static_assert(sizeof(stdx::atomic_bitset<8, std::uint8_t>) ==
-                  sizeof(std::uint8_t));
-    static_assert(sizeof(stdx::atomic_bitset<1, std::uint16_t>) ==
-                  sizeof(std::uint16_t));
-    static_assert(sizeof(stdx::atomic_bitset<16, std::uint16_t>) ==
-                  sizeof(std::uint16_t));
-    static_assert(sizeof(stdx::atomic_bitset<1, std::uint32_t>) ==
-                  sizeof(std::uint32_t));
-    static_assert(sizeof(stdx::atomic_bitset<32, std::uint32_t>) ==
-                  sizeof(std::uint32_t));
-    static_assert(sizeof(stdx::atomic_bitset<1, std::uint64_t>) ==
-                  sizeof(std::uint64_t));
-    static_assert(sizeof(stdx::atomic_bitset<64, std::uint64_t>) ==
-                  sizeof(std::uint64_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<1, std::uint8_t>) ==
+                   sizeof(std::uint8_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<8, std::uint8_t>) ==
+                   sizeof(std::uint8_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<1, std::uint16_t>) ==
+                   sizeof(std::uint16_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<16, std::uint16_t>) ==
+                   sizeof(std::uint16_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<1, std::uint32_t>) ==
+                   sizeof(std::uint32_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<32, std::uint32_t>) ==
+                   sizeof(std::uint32_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<1, std::uint64_t>) ==
+                   sizeof(std::uint64_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<64, std::uint64_t>) ==
+                   sizeof(std::uint64_t));
 }
 
 TEST_CASE("atomic_bitset with implicit storage element type",
           "[atomic_bitset]") {
-    static_assert(sizeof(stdx::atomic_bitset<1>) == sizeof(std::uint8_t));
-    static_assert(sizeof(stdx::atomic_bitset<8>) == sizeof(std::uint8_t));
-    static_assert(sizeof(stdx::atomic_bitset<9>) == sizeof(std::uint16_t));
-    static_assert(sizeof(stdx::atomic_bitset<16>) == sizeof(std::uint16_t));
-    static_assert(sizeof(stdx::atomic_bitset<17>) == sizeof(std::uint32_t));
-    static_assert(sizeof(stdx::atomic_bitset<32>) == sizeof(std::uint32_t));
-    static_assert(sizeof(stdx::atomic_bitset<33>) == sizeof(std::uint64_t));
-    static_assert(sizeof(stdx::atomic_bitset<64>) == sizeof(std::uint64_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<1>) == sizeof(std::uint8_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<8>) == sizeof(std::uint8_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<9>) == sizeof(std::uint16_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<16>) == sizeof(std::uint16_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<17>) == sizeof(std::uint32_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<32>) == sizeof(std::uint32_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<33>) == sizeof(std::uint64_t));
+    STATIC_REQUIRE(sizeof(stdx::atomic_bitset<64>) == sizeof(std::uint64_t));
 }
 
 TEMPLATE_TEST_CASE("index operation", "[atomic_bitset]", std::uint8_t,
@@ -162,7 +162,7 @@ TEST_CASE("to_natural returns smallest_uint", "[atomic_bitset]") {
     auto bs = stdx::atomic_bitset<4>{stdx::all_bits};
     auto value = bs.to_natural();
     CHECK(value == 0b1111);
-    static_assert(std::is_same_v<decltype(value), std::uint8_t>);
+    STATIC_REQUIRE(std::is_same_v<decltype(value), std::uint8_t>);
 }
 
 TEMPLATE_TEST_CASE("construct with a string_view", "[atomic_bitset]",
@@ -301,7 +301,7 @@ enum struct Bits : std::uint8_t { ZERO, ONE, TWO, THREE, MAX };
 
 TEST_CASE("use atomic_bitset with enum struct (construct)", "[atomic_bitset]") {
     constexpr auto bs = stdx::atomic_bitset<Bits::MAX>{};
-    static_assert(bs.size() == stdx::to_underlying(Bits::MAX));
+    STATIC_REQUIRE(bs.size() == stdx::to_underlying(Bits::MAX));
 }
 
 TEST_CASE("use atomic_bitset with enum struct (to)", "[atomic_bitset]") {

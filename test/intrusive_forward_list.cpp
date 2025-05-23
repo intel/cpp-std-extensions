@@ -22,9 +22,9 @@ struct bad_single_link_node {
 
 #if __cpp_concepts >= 201907L
 TEST_CASE("single_linkable", "[intrusive_forward_list]") {
-    static_assert(not stdx::single_linkable<int>);
-    static_assert(not stdx::single_linkable<bad_single_link_node>);
-    static_assert(stdx::single_linkable<single_link_node>);
+    STATIC_REQUIRE(not stdx::single_linkable<int>);
+    STATIC_REQUIRE(not stdx::single_linkable<bad_single_link_node>);
+    STATIC_REQUIRE(stdx::single_linkable<single_link_node>);
 }
 #endif
 
@@ -249,7 +249,7 @@ struct injected_handler {
 #if __cplusplus >= 202002L
     template <stdx::ct_string Why, typename... Ts>
     static auto panic(Ts &&...) noexcept -> void {
-        static_assert(std::string_view{Why} == "bad list node!");
+        STATIC_REQUIRE(std::string_view{Why} == "bad list node!");
         ++compile_time_calls;
     }
 #else

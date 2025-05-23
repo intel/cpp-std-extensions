@@ -26,9 +26,9 @@ TEST_CASE("put and contains", "[cx_multimap]") {
 TEST_CASE("constexpr empty", "[cx_multimap]") {
     constexpr auto t = stdx::cx_multimap<int, int, 64>{};
 
-    static_assert(t.empty());
-    static_assert(not t.contains(10));
-    static_assert(not t.contains(10, 10));
+    STATIC_REQUIRE(t.empty());
+    STATIC_REQUIRE(not t.contains(10));
+    STATIC_REQUIRE(not t.contains(10, 10));
 }
 
 TEST_CASE("put multiple values", "[cx_multimap]") {
@@ -82,17 +82,17 @@ TEST_CASE("constexpr populated map", "[cx_multimap]") {
         return t;
     }();
 
-    static_assert(not m.empty());
-    static_assert(m.size() == 2);
-    static_assert(m.contains(10));
-    static_assert(not m.get(10).empty());
-    static_assert(m.get(10).size() == 3);
-    static_assert(m.contains(10, 100));
-    static_assert(m.contains(10, 101));
-    static_assert(m.contains(10, 110));
-    static_assert(not m.contains(10, 50));
-    static_assert(not m.get(50).empty());
-    static_assert(m.get(50).size() == 1);
-    static_assert(m.contains(50, 1));
-    static_assert(not m.contains(50, 2));
+    STATIC_REQUIRE(not m.empty());
+    STATIC_REQUIRE(m.size() == 2);
+    STATIC_REQUIRE(m.contains(10));
+    STATIC_REQUIRE(not m.get(10).empty());
+    STATIC_REQUIRE(m.get(10).size() == 3);
+    STATIC_REQUIRE(m.contains(10, 100));
+    STATIC_REQUIRE(m.contains(10, 101));
+    STATIC_REQUIRE(m.contains(10, 110));
+    STATIC_REQUIRE(not m.contains(10, 50));
+    STATIC_REQUIRE(not m.get(50).empty());
+    STATIC_REQUIRE(m.get(50).size() == 1);
+    STATIC_REQUIRE(m.contains(50, 1));
+    STATIC_REQUIRE(not m.contains(50, 2));
 }

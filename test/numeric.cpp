@@ -46,7 +46,7 @@ TEST_CASE("transform_reduce with output fixed by template argument",
     auto v =
         stdx::transform_reduce<double>(std::cbegin(input), std::cend(input), 0,
                                        std::plus{}, [](auto n) { return n; });
-    static_assert(std::is_same_v<decltype(v), double>);
+    STATIC_REQUIRE(std::is_same_v<decltype(v), double>);
     CHECK(v == 12);
 }
 
@@ -69,26 +69,27 @@ TEST_CASE("saturate_cast cppreference example", "[numeric]") {
 }
 
 TEST_CASE("saturate_cast signed large From, small To", "[numeric]") {
-    static_assert(stdx::saturate_cast<std::int8_t>(std::int32_t{42}) == 42);
-    static_assert(stdx::saturate_cast<std::int8_t>(std::int32_t{1000}) == 127);
-    static_assert(stdx::saturate_cast<std::int8_t>(std::int32_t{-200}) == -128);
+    STATIC_REQUIRE(stdx::saturate_cast<std::int8_t>(std::int32_t{42}) == 42);
+    STATIC_REQUIRE(stdx::saturate_cast<std::int8_t>(std::int32_t{1000}) == 127);
+    STATIC_REQUIRE(stdx::saturate_cast<std::int8_t>(std::int32_t{-200}) ==
+                   -128);
 }
 
 TEST_CASE("saturate_cast signed small From, large To", "[numeric]") {
-    static_assert(stdx::saturate_cast<std::int32_t>(std::int8_t{42}) == 42);
+    STATIC_REQUIRE(stdx::saturate_cast<std::int32_t>(std::int8_t{42}) == 42);
 }
 
 TEST_CASE("saturate_cast unsigned From, signed To", "[numeric]") {
-    static_assert(stdx::saturate_cast<std::int8_t>(std::uint8_t{255u}) == 127);
-    static_assert(stdx::saturate_cast<std::int8_t>(std::uint8_t{42u}) == 42);
-    static_assert(stdx::saturate_cast<std::int8_t>(std::uint8_t{0u}) == 0);
+    STATIC_REQUIRE(stdx::saturate_cast<std::int8_t>(std::uint8_t{255u}) == 127);
+    STATIC_REQUIRE(stdx::saturate_cast<std::int8_t>(std::uint8_t{42u}) == 42);
+    STATIC_REQUIRE(stdx::saturate_cast<std::int8_t>(std::uint8_t{0u}) == 0);
 }
 
 TEST_CASE("saturate_cast signed From, unsigned To", "[numeric]") {
-    static_assert(stdx::saturate_cast<std::uint8_t>(std::int8_t{-1}) == 0);
-    static_assert(stdx::saturate_cast<std::uint8_t>(
-                      std::numeric_limits<std::int8_t>::min()) == 0);
-    static_assert(stdx::saturate_cast<std::uint8_t>(
-                      std::numeric_limits<std::int8_t>::max()) ==
-                  std::numeric_limits<std::int8_t>::max());
+    STATIC_REQUIRE(stdx::saturate_cast<std::uint8_t>(std::int8_t{-1}) == 0);
+    STATIC_REQUIRE(stdx::saturate_cast<std::uint8_t>(
+                       std::numeric_limits<std::int8_t>::min()) == 0);
+    STATIC_REQUIRE(stdx::saturate_cast<std::uint8_t>(
+                       std::numeric_limits<std::int8_t>::max()) ==
+                   std::numeric_limits<std::int8_t>::max());
 }

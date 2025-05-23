@@ -10,15 +10,15 @@ TEMPLATE_TEST_CASE("atomic size and alignment is the same as the data",
                    "[atomic]", bool, char, signed char, unsigned char,
                    short int, unsigned short int, int, unsigned int, long int,
                    unsigned long int) {
-    static_assert(sizeof(stdx::atomic<TestType>) == sizeof(TestType));
-    static_assert(alignof(stdx::atomic<TestType>) == alignof(TestType));
+    STATIC_REQUIRE(sizeof(stdx::atomic<TestType>) == sizeof(TestType));
+    STATIC_REQUIRE(alignof(stdx::atomic<TestType>) == alignof(TestType));
 }
 
 TEMPLATE_TEST_CASE("atomic is default constructible when data is", "[atomic]",
                    bool, char, signed char, unsigned char, short int,
                    unsigned short int, int, unsigned int, long int,
                    unsigned long int) {
-    static_assert(std::is_default_constructible_v<stdx::atomic<TestType>>);
+    STATIC_REQUIRE(std::is_default_constructible_v<stdx::atomic<TestType>>);
 }
 
 namespace {
@@ -29,22 +29,22 @@ struct non_dc {
 
 #if __cplusplus >= 202002L
 TEST_CASE("atomic is not default constructible when data is not", "[atomic]") {
-    static_assert(not std::is_default_constructible_v<stdx::atomic<non_dc>>);
+    STATIC_REQUIRE(not std::is_default_constructible_v<stdx::atomic<non_dc>>);
 }
 #endif
 
 TEST_CASE("atomic is not copyable or movable", "[atomic]") {
-    static_assert(not std::is_copy_constructible_v<stdx::atomic<int>>);
-    static_assert(not std::is_move_constructible_v<stdx::atomic<int>>);
-    static_assert(not std::is_copy_assignable_v<stdx::atomic<int>>);
-    static_assert(not std::is_move_assignable_v<stdx::atomic<int>>);
+    STATIC_REQUIRE(not std::is_copy_constructible_v<stdx::atomic<int>>);
+    STATIC_REQUIRE(not std::is_move_constructible_v<stdx::atomic<int>>);
+    STATIC_REQUIRE(not std::is_copy_assignable_v<stdx::atomic<int>>);
+    STATIC_REQUIRE(not std::is_move_assignable_v<stdx::atomic<int>>);
 }
 
 TEMPLATE_TEST_CASE("atomic supports value initialization", "[atomic]", bool,
                    char, signed char, unsigned char, short int,
                    unsigned short int, int, unsigned int, long int,
                    unsigned long int) {
-    static_assert(std::is_constructible_v<stdx::atomic<TestType>, TestType>);
+    STATIC_REQUIRE(std::is_constructible_v<stdx::atomic<TestType>, TestType>);
     [[maybe_unused]] auto x = stdx::atomic<TestType>{TestType{}};
 }
 

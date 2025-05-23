@@ -29,9 +29,9 @@ struct bad_double_link_node {
 
 #if __cpp_concepts >= 201907L
 TEST_CASE("double_linkable", "[intrusive_list]") {
-    static_assert(not stdx::double_linkable<int>);
-    static_assert(not stdx::double_linkable<bad_double_link_node>);
-    static_assert(stdx::double_linkable<double_link_node>);
+    STATIC_REQUIRE(not stdx::double_linkable<int>);
+    STATIC_REQUIRE(not stdx::double_linkable<bad_double_link_node>);
+    STATIC_REQUIRE(stdx::double_linkable<double_link_node>);
 }
 #endif
 
@@ -362,7 +362,7 @@ struct injected_handler {
 #if __cplusplus >= 202002L
     template <stdx::ct_string Why, typename... Ts>
     static auto panic(Ts &&...) noexcept -> void {
-        static_assert(std::string_view{Why} == "bad list node!");
+        STATIC_REQUIRE(std::string_view{Why} == "bad list node!");
         ++compile_time_calls;
     }
 #else
