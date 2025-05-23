@@ -1,5 +1,5 @@
 import pytest
-import hypothesis 
+import hypothesis
 import json
 import subprocess
 import tempfile
@@ -12,14 +12,42 @@ hypothesis.settings.register_profile("fast", max_examples=10)
 profile = os.environ.get("HYPOTHESIS_PROFILE", "fast")
 hypothesis.settings.load_profile(profile)
 
-def pytest_addoption(parser):
-    parser.addoption("--compiler", action="store", help="C++ compiler", default=None, required=False)
-    parser.addoption("--compiler-args", action="store", help="C++ compiler arguments", default="", required=False)
-    parser.addoption("--includes", action="store", help="C++ include directories", default="", required=False)
 
-    parser.addoption("--compile-commands", action="store", help="cmake compiler commands", default=None, required=False)
-    parser.addoption("--prototype-driver", action="store", help="Prototype .cpp filename to gather compilation command from", default=None, required=False)
-    
+def pytest_addoption(parser):
+    parser.addoption(
+        "--compiler", action="store", help="C++ compiler", default=None, required=False
+    )
+    parser.addoption(
+        "--compiler-args",
+        action="store",
+        help="C++ compiler arguments",
+        default="",
+        required=False,
+    )
+    parser.addoption(
+        "--includes",
+        action="store",
+        help="C++ include directories",
+        default="",
+        required=False,
+    )
+
+    parser.addoption(
+        "--compile-commands",
+        action="store",
+        help="cmake compiler commands",
+        default=None,
+        required=False,
+    )
+    parser.addoption(
+        "--prototype-driver",
+        action="store",
+        help="Prototype .cpp filename to gather compilation command from",
+        default=None,
+        required=False,
+    )
+
+
 @pytest.fixture(scope="module")
 def cmake_compilation_command(pytestconfig):
     compile_commands_filename = pytestconfig.getoption("compile_commands")
@@ -40,24 +68,27 @@ def cmake_compilation_command(pytestconfig):
 
     return f
 
+
 @pytest.fixture(scope="module")
 def args_compilation_command(pytestconfig):
     compiler = pytestconfig.getoption("compiler")
     if compiler is None:
         return None
 
-    include_dirs = [f"-I{i}" for i in pytestconfig.getoption("includes").split(",") if i]
-    compiler_args = [i for i in pytestconfig.getoption("compiler_args").split(",") if i]   
-    
-    def f(filename):
-        compile_command = [
-            compiler, temp_cpp_file_path, 
-            "-o", temp_cpp_file_path + ".o"
-        ] + compiler_args + include_args
-        return compile_command
-    
-    return f
+    include_dirs = [
+        f"-I{i}" for i in pytestconfig.getoption("includes").split(",") if i
+    ]
+    compiler_args = [i for i in pytestconfig.getoption("compiler_args").split(",") if i]
 
+    def f(filename):
+        compile_command = (
+            [compiler, temp_cpp_file_path, "-o", temp_cpp_file_path + ".o"]
+            + compiler_args
+            + include_args
+        )
+        return compile_command
+
+    return f
 
 
 @pytest.fixture(scope="module")
@@ -65,17 +96,19 @@ def compile(cmake_compilation_command, args_compilation_command):
     cmd = cmake_compilation_command
     if cmd is None:
         cmd = args_compilation_command
-        
+
     def f(code_str):
         code_str += "\n"
         with tempfile.NamedTemporaryFile(delete=False, suffix=".cpp") as temp_cpp_file:
-            temp_cpp_file.write(code_str.encode('utf-8'))
+            temp_cpp_file.write(code_str.encode("utf-8"))
             temp_cpp_file_path = temp_cpp_file.name
-        
+
         try:
             compile_command = cmd(temp_cpp_file_path)
-            result = subprocess.run(compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            
+            result = subprocess.run(
+                compile_command, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            )
+
             if result.returncode == 0:
                 return True
             else:
@@ -87,7 +120,7 @@ def compile(cmake_compilation_command, args_compilation_command):
                     f"Compiler stdout:\n{result.stdout.decode('utf-8')}\n"
                 )
                 pytest.fail(error_message)
-        
+
         except Exception as e:
             pytest.fail(str(e))
         finally:
@@ -96,4 +129,3 @@ def compile(cmake_compilation_command, args_compilation_command):
                 os.remove(temp_cpp_file_path + ".out")
 
     return f
-
