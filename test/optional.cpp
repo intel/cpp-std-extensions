@@ -36,63 +36,63 @@ template <> struct stdx::tombstone_traits<S> {
 
 TEST_CASE("sizeof(optional<T>) == sizeof(T)", "[optional]") {
     using O1 = stdx::optional<E>;
-    static_assert(sizeof(O1) == sizeof(E));
+    STATIC_REQUIRE(sizeof(O1) == sizeof(E));
     using O2 = stdx::optional<S>;
-    static_assert(sizeof(O2) == sizeof(S));
+    STATIC_REQUIRE(sizeof(O2) == sizeof(S));
 }
 
 TEST_CASE("alignof(optional<T>) == alignof(T)", "[optional]") {
     using O1 = stdx::optional<E>;
-    static_assert(alignof(O1) == alignof(E));
+    STATIC_REQUIRE(alignof(O1) == alignof(E));
     using O2 = stdx::optional<S>;
-    static_assert(alignof(O2) == alignof(S));
+    STATIC_REQUIRE(alignof(O2) == alignof(S));
 }
 
 TEST_CASE("optional exposes value_type", "[optional]") {
     using O = stdx::optional<E>;
-    static_assert(std::is_same_v<typename O::value_type, E>);
+    STATIC_REQUIRE(std::is_same_v<typename O::value_type, E>);
 }
 
 TEST_CASE("default construction", "[optional]") {
     constexpr auto o = stdx::optional<E>{};
-    static_assert(not o);
+    STATIC_REQUIRE(not o);
 }
 
 TEST_CASE("construction from nullopt", "[optional]") {
     constexpr auto o = stdx::optional<E>{std::nullopt};
-    static_assert(not o);
+    STATIC_REQUIRE(not o);
 }
 
 TEST_CASE("construction from value", "[optional]") {
     constexpr auto o = stdx::optional<E>{E::VALUE};
-    static_assert(o);
+    STATIC_REQUIRE(o);
 }
 
 TEST_CASE("trivially copy constructible", "[optional]") {
     using O = stdx::optional<E>;
-    static_assert(std::is_trivially_copy_constructible_v<O>);
+    STATIC_REQUIRE(std::is_trivially_copy_constructible_v<O>);
 }
 
 TEST_CASE("trivially move constructible", "[optional]") {
     using O = stdx::optional<E>;
-    static_assert(std::is_trivially_move_constructible_v<O>);
+    STATIC_REQUIRE(std::is_trivially_move_constructible_v<O>);
 }
 
 TEST_CASE("trivially destructible", "[optional]") {
     using O = stdx::optional<E>;
-    static_assert(std::is_trivially_destructible_v<O>);
+    STATIC_REQUIRE(std::is_trivially_destructible_v<O>);
 }
 
 TEST_CASE("in-place construction", "[optional]") {
     using O = stdx::optional<S>;
     constexpr O o{std::in_place, 42};
-    static_assert(o);
+    STATIC_REQUIRE(o);
 }
 
 TEST_CASE("in-place construction (no args)", "[optional]") {
     using O = stdx::optional<E>;
     constexpr O o{std::in_place};
-    static_assert(o);
+    STATIC_REQUIRE(o);
 }
 
 TEST_CASE("retrieve value", "[optional]") {
@@ -120,18 +120,18 @@ TEST_CASE("assignment from value", "[optional]") {
 
 TEST_CASE("trivially copy assignable", "[optional]") {
     using O = stdx::optional<E>;
-    static_assert(std::is_trivially_copy_assignable_v<O>);
+    STATIC_REQUIRE(std::is_trivially_copy_assignable_v<O>);
 }
 
 TEST_CASE("trivially move assignable", "[optional]") {
     using O = stdx::optional<E>;
-    static_assert(std::is_trivially_move_assignable_v<O>);
+    STATIC_REQUIRE(std::is_trivially_move_assignable_v<O>);
 }
 
 TEST_CASE("has_value and boolean conversion", "[optional]") {
     constexpr auto o = stdx::optional<E>{E::VALUE};
-    static_assert(o.has_value());
-    static_assert(o);
+    STATIC_REQUIRE(o.has_value());
+    STATIC_REQUIRE(o);
 }
 
 TEST_CASE("operator->", "[optional]") {
@@ -142,13 +142,13 @@ TEST_CASE("operator->", "[optional]") {
 TEST_CASE("value() preserves value categories", "[optional]") {
     {
         auto o = stdx::optional<E>{E::VALUE};
-        static_assert(std::is_same_v<E &, decltype(*o)>);
-        static_assert(std::is_same_v<E &&, decltype(*std::move(o))>);
+        STATIC_REQUIRE(std::is_same_v<E &, decltype(*o)>);
+        STATIC_REQUIRE(std::is_same_v<E &&, decltype(*std::move(o))>);
     }
     {
         auto const o = stdx::optional<E>{E::VALUE};
-        static_assert(std::is_same_v<E const &, decltype(*o)>);
-        static_assert(std::is_same_v<E const &&, decltype(*std::move(o))>);
+        STATIC_REQUIRE(std::is_same_v<E const &, decltype(*o)>);
+        STATIC_REQUIRE(std::is_same_v<E const &&, decltype(*std::move(o))>);
     }
 }
 
@@ -376,13 +376,13 @@ TEST_CASE("optional can hold non-movable types)", "[optional]") {
 
 TEST_CASE("CTAD", "[optional]") {
     [[maybe_unused]] auto o = stdx::optional{E::VALUE};
-    static_assert(std::is_same_v<decltype(o), stdx::optional<E>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(o), stdx::optional<E>>);
 }
 
 TEST_CASE("easy tombstone with value", "[optional]") {
     constexpr auto o = stdx::optional<int, stdx::tombstone_value<-1>>{};
-    static_assert(not o);
-    static_assert(*o == -1);
+    STATIC_REQUIRE(not o);
+    STATIC_REQUIRE(*o == -1);
 }
 
 TEST_CASE("optional floating-point value has default sentinel", "[optional]") {

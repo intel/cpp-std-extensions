@@ -15,7 +15,7 @@ TEMPLATE_TEST_CASE("default construction", "[rollover]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     using rollover_t = stdx::rollover_t<TestType>;
     constexpr rollover_t x;
-    static_assert(x == rollover_t{TestType{}});
+    STATIC_REQUIRE(x == rollover_t{TestType{}});
     CHECK(x == rollover_t{TestType{}});
 }
 
@@ -23,7 +23,7 @@ TEMPLATE_TEST_CASE("value construction", "[rollover]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     using rollover_t = stdx::rollover_t<TestType>;
     constexpr rollover_t x{};
-    static_assert(x == rollover_t{TestType{}});
+    STATIC_REQUIRE(x == rollover_t{TestType{}});
     CHECK(x == rollover_t{TestType{}});
 }
 
@@ -31,7 +31,7 @@ TEMPLATE_TEST_CASE("access to underlying value", "[rollover]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     using rollover_t = stdx::rollover_t<TestType>;
     constexpr rollover_t x;
-    static_assert(x.as_underlying() == TestType{});
+    STATIC_REQUIRE(x.as_underlying() == TestType{});
     CHECK(x.as_underlying() == TestType{});
 }
 
@@ -39,15 +39,15 @@ TEMPLATE_TEST_CASE("cast to underlying type", "[rollover]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     using rollover_t = stdx::rollover_t<TestType>;
     constexpr rollover_t x;
-    static_assert(static_cast<typename rollover_t::underlying_t>(x) ==
-                  TestType{});
+    STATIC_REQUIRE(static_cast<typename rollover_t::underlying_t>(x) ==
+                   TestType{});
     CHECK(static_cast<typename rollover_t::underlying_t>(x) == TestType{});
 }
 
 TEMPLATE_TEST_CASE("construction from convertible integral value", "[rollover]",
                    std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
     constexpr stdx::rollover_t<std::uint32_t> x{std::uint8_t{16}};
-    static_assert(x.as_underlying() == TestType{16});
+    STATIC_REQUIRE(x.as_underlying() == TestType{16});
     CHECK(x.as_underlying() == TestType{16});
 }
 
@@ -55,13 +55,13 @@ TEMPLATE_TEST_CASE("construction from convertible rollover_t", "[rollover]",
                    std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
     constexpr stdx::rollover_t<std::uint32_t> x{
         stdx::rollover_t<std::uint8_t>{16}};
-    static_assert(x.as_underlying() == TestType{16});
+    STATIC_REQUIRE(x.as_underlying() == TestType{16});
     CHECK(x.as_underlying() == TestType{16});
 }
 
 TEST_CASE("conversion with deduction guide", "[rollover]") {
     constexpr auto x = stdx::rollover_t{16u};
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(x), stdx::rollover_t<unsigned int> const>);
 }
 
@@ -76,14 +76,14 @@ TEMPLATE_TEST_CASE("equality", "[rollover]", std::uint8_t, std::uint16_t,
 TEMPLATE_TEST_CASE("unary plus", "[rollover]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     using rollover_t = stdx::rollover_t<TestType>;
-    static_assert(+rollover_t{1} == rollover_t{1});
+    STATIC_REQUIRE(+rollover_t{1} == rollover_t{1});
     CHECK(+rollover_t{1} == rollover_t{1});
 }
 
 TEMPLATE_TEST_CASE("unary minus", "[rollover]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     using rollover_t = stdx::rollover_t<TestType>;
-    static_assert(-rollover_t{1} == rollover_t{-1});
+    STATIC_REQUIRE(-rollover_t{1} == rollover_t{-1});
     CHECK(-rollover_t{1} == rollover_t{-1});
 }
 

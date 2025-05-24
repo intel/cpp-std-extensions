@@ -13,68 +13,68 @@ namespace {
 } // namespace
 
 TEST_CASE("function return type", "[function_traits]") {
-    static_assert(std::is_void_v<typename stdx::function_traits<
-                      decltype(func_no_args)>::return_type>);
-    static_assert(std::is_void_v<stdx::return_t<decltype(func_no_args)>>);
+    STATIC_REQUIRE(std::is_void_v<typename stdx::function_traits<
+                       decltype(func_no_args)>::return_type>);
+    STATIC_REQUIRE(std::is_void_v<stdx::return_t<decltype(func_no_args)>>);
 
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<
             typename stdx::function_traits<decltype(func_one_arg)>::return_type,
             int>);
-    static_assert(std::is_same_v<stdx::return_t<decltype(func_one_arg)>, int>);
+    STATIC_REQUIRE(std::is_same_v<stdx::return_t<decltype(func_one_arg)>, int>);
 }
 
 TEST_CASE("lambda return type", "[function_traits]") {
     [[maybe_unused]] auto const x = []() {};
     [[maybe_unused]] auto const y = []() mutable {};
 
-    static_assert(std::is_void_v<stdx::return_t<decltype(x)>>);
-    static_assert(std::is_void_v<stdx::return_t<decltype(y)>>);
+    STATIC_REQUIRE(std::is_void_v<stdx::return_t<decltype(x)>>);
+    STATIC_REQUIRE(std::is_void_v<stdx::return_t<decltype(y)>>);
 }
 
 TEST_CASE("function args", "[function_traits]") {
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<typename stdx::function_traits<
                            decltype(func_no_args)>::template args<std::tuple>,
                        std::tuple<>>);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<stdx::args_t<decltype(func_no_args), std::tuple>,
                        std::tuple<>>);
 
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<typename stdx::function_traits<
                            decltype(func_one_arg)>::template args<std::tuple>,
                        std::tuple<int>>);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<stdx::args_t<decltype(func_one_arg), std::tuple>,
                        std::tuple<int>>);
 }
 
 TEST_CASE("function decayed args", "[function_traits]") {
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<typename stdx::function_traits<decltype(func_ref_arg)>::
                            template decayed_args<std::tuple>,
                        std::tuple<int>>);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<stdx::decayed_args_t<decltype(func_ref_arg), std::tuple>,
                        std::tuple<int>>);
 }
 
 TEST_CASE("function nth arg", "[function_traits]") {
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<typename stdx::function_traits<
                            decltype(func_one_arg)>::template nth_arg<0>,
                        int>);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<stdx::nth_arg_t<decltype(func_one_arg), 0>, int>);
 }
 
 TEST_CASE("function decayed nth arg", "[function_traits]") {
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<typename stdx::function_traits<
                            decltype(func_ref_arg)>::template decayed_nth_arg<0>,
                        int>);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<stdx::decayed_nth_arg_t<decltype(func_ref_arg), 0>,
                        int>);
 }
@@ -83,16 +83,16 @@ TEST_CASE("lambda args", "[function_traits]") {
     [[maybe_unused]] auto const x = [](int) {};
     [[maybe_unused]] auto const y = [](int) mutable {};
 
-    static_assert(std::is_same_v<typename stdx::function_traits<
-                                     decltype(x)>::template args<std::tuple>,
-                                 std::tuple<int>>);
-    static_assert(
+    STATIC_REQUIRE(std::is_same_v<typename stdx::function_traits<
+                                      decltype(x)>::template args<std::tuple>,
+                                  std::tuple<int>>);
+    STATIC_REQUIRE(
         std::is_same_v<stdx::args_t<decltype(x), std::tuple>, std::tuple<int>>);
 
-    static_assert(std::is_same_v<typename stdx::function_traits<
-                                     decltype(y)>::template args<std::tuple>,
-                                 std::tuple<int>>);
-    static_assert(
+    STATIC_REQUIRE(std::is_same_v<typename stdx::function_traits<
+                                      decltype(y)>::template args<std::tuple>,
+                                  std::tuple<int>>);
+    STATIC_REQUIRE(
         std::is_same_v<stdx::args_t<decltype(y), std::tuple>, std::tuple<int>>);
 }
 
@@ -100,73 +100,74 @@ TEST_CASE("lambda decayed args", "[function_traits]") {
     [[maybe_unused]] auto const x = [](int &) {};
     [[maybe_unused]] auto const y = [](int &) mutable {};
 
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<typename stdx::function_traits<
                            decltype(x)>::template decayed_args<std::tuple>,
                        std::tuple<int>>);
-    static_assert(std::is_same_v<stdx::decayed_args_t<decltype(x), std::tuple>,
-                                 std::tuple<int>>);
+    STATIC_REQUIRE(std::is_same_v<stdx::decayed_args_t<decltype(x), std::tuple>,
+                                  std::tuple<int>>);
 
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<typename stdx::function_traits<
                            decltype(y)>::template decayed_args<std::tuple>,
                        std::tuple<int>>);
-    static_assert(std::is_same_v<stdx::decayed_args_t<decltype(y), std::tuple>,
-                                 std::tuple<int>>);
+    STATIC_REQUIRE(std::is_same_v<stdx::decayed_args_t<decltype(y), std::tuple>,
+                                  std::tuple<int>>);
 }
 
 TEST_CASE("lambda nth arg", "[function_traits]") {
     [[maybe_unused]] auto const x = [](int) {};
 
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<
             typename stdx::function_traits<decltype(x)>::template nth_arg<0>,
             int>);
-    static_assert(std::is_same_v<stdx::nth_arg_t<decltype(x), 0>, int>);
+    STATIC_REQUIRE(std::is_same_v<stdx::nth_arg_t<decltype(x), 0>, int>);
 }
 
 TEST_CASE("lambda decayed nth arg", "[function_traits]") {
     [[maybe_unused]] auto const x = [](int &) {};
 
-    static_assert(std::is_same_v<typename stdx::function_traits<
-                                     decltype(x)>::template decayed_nth_arg<0>,
-                                 int>);
-    static_assert(std::is_same_v<stdx::decayed_nth_arg_t<decltype(x), 0>, int>);
+    STATIC_REQUIRE(std::is_same_v<typename stdx::function_traits<
+                                      decltype(x)>::template decayed_nth_arg<0>,
+                                  int>);
+    STATIC_REQUIRE(
+        std::is_same_v<stdx::decayed_nth_arg_t<decltype(x), 0>, int>);
 }
 
 TEST_CASE("function arity", "[function_traits]") {
-    static_assert(stdx::function_traits<decltype(func_no_args)>::arity::value ==
-                  0u);
-    static_assert(stdx::function_traits<decltype(func_one_arg)>::arity::value ==
-                  1u);
-    static_assert(stdx::arity_t<decltype(func_no_args)>::value == 0u);
-    static_assert(stdx::arity_t<decltype(func_one_arg)>::value == 1u);
+    STATIC_REQUIRE(
+        stdx::function_traits<decltype(func_no_args)>::arity::value == 0u);
+    STATIC_REQUIRE(
+        stdx::function_traits<decltype(func_one_arg)>::arity::value == 1u);
+    STATIC_REQUIRE(stdx::arity_t<decltype(func_no_args)>::value == 0u);
+    STATIC_REQUIRE(stdx::arity_t<decltype(func_one_arg)>::value == 1u);
 
-    static_assert(stdx::arity_v<decltype(func_no_args)> == 0u);
-    static_assert(stdx::arity_v<decltype(func_one_arg)> == 1u);
+    STATIC_REQUIRE(stdx::arity_v<decltype(func_no_args)> == 0u);
+    STATIC_REQUIRE(stdx::arity_v<decltype(func_one_arg)> == 1u);
 }
 
 TEST_CASE("lambda arity", "[function_traits]") {
     [[maybe_unused]] auto const x = []() {};
     [[maybe_unused]] auto const y = [](int) {};
 
-    static_assert(stdx::function_traits<decltype(x)>::arity::value == 0u);
-    static_assert(stdx::function_traits<decltype(y)>::arity::value == 1u);
-    static_assert(stdx::arity_t<decltype(x)>::value == 0u);
-    static_assert(stdx::arity_t<decltype(y)>::value == 1u);
+    STATIC_REQUIRE(stdx::function_traits<decltype(x)>::arity::value == 0u);
+    STATIC_REQUIRE(stdx::function_traits<decltype(y)>::arity::value == 1u);
+    STATIC_REQUIRE(stdx::arity_t<decltype(x)>::value == 0u);
+    STATIC_REQUIRE(stdx::arity_t<decltype(y)>::value == 1u);
 
-    static_assert(stdx::arity_v<decltype(x)> == 0u);
-    static_assert(stdx::arity_v<decltype(y)> == 1u);
+    STATIC_REQUIRE(stdx::arity_v<decltype(x)> == 0u);
+    STATIC_REQUIRE(stdx::arity_v<decltype(y)> == 1u);
 }
 
 TEST_CASE("generic lambda arity", "[function_traits]") {
     [[maybe_unused]] auto const x = [](auto) {};
     [[maybe_unused]] auto const y = [](auto, auto) {};
-    static_assert(stdx::arity_t<decltype(x)>::value == 1u);
-    static_assert(stdx::arity_t<decltype(y)>::value == 2u);
+    STATIC_REQUIRE(stdx::arity_t<decltype(x)>::value == 1u);
+    STATIC_REQUIRE(stdx::arity_t<decltype(y)>::value == 2u);
 
-    static_assert(stdx::arity_v<decltype(x)> == 1u);
-    static_assert(stdx::arity_v<decltype(y)> == 2u);
+    STATIC_REQUIRE(stdx::arity_v<decltype(x)> == 1u);
+    STATIC_REQUIRE(stdx::arity_v<decltype(y)> == 2u);
 }
 
 namespace {

@@ -9,9 +9,9 @@ struct incomplete;
 
 TEST_CASE("type as string", "[ct_conversion]") {
     using namespace std::string_view_literals;
-    static_assert(stdx::type_as_string<int>() == "int"sv);
-    static_assert(stdx::type_as_string<complete>() == "complete"sv);
-    static_assert(stdx::type_as_string<incomplete>() == "incomplete"sv);
+    STATIC_REQUIRE(stdx::type_as_string<int>() == "int"sv);
+    STATIC_REQUIRE(stdx::type_as_string<complete>() == "complete"sv);
+    STATIC_REQUIRE(stdx::type_as_string<incomplete>() == "incomplete"sv);
 }
 
 namespace {
@@ -21,6 +21,6 @@ enum struct B { Y };
 
 TEST_CASE("enum as string", "[ct_conversion]") {
     using namespace std::string_view_literals;
-    static_assert(stdx::enum_as_string<X>() == "X"sv);
-    static_assert(stdx::enum_as_string<B::Y>() == "Y"sv);
+    STATIC_REQUIRE(stdx::enum_as_string<X>() == "X"sv);
+    STATIC_REQUIRE(stdx::enum_as_string<B::Y>() == "Y"sv);
 }

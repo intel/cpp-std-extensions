@@ -10,12 +10,12 @@ TEST_CASE("construction", "[latched]") {
 
 TEST_CASE("exposed value_type", "[latched]") {
     auto c = stdx::latched{[] { return 42; }};
-    static_assert(std::is_same_v<typename decltype(c)::value_type, int>);
+    STATIC_REQUIRE(std::is_same_v<typename decltype(c)::value_type, int>);
 }
 
 TEST_CASE("latched_value_t", "[latched]") {
     auto const c = stdx::latched{[] { return 42; }};
-    static_assert(std::is_same_v<stdx::latched_value_t<decltype(c)>, int>);
+    STATIC_REQUIRE(std::is_same_v<stdx::latched_value_t<decltype(c)>, int>);
 }
 
 TEST_CASE("automatic population", "[latched]") {
@@ -69,12 +69,12 @@ TEST_CASE("non-movable value", "[latched]") {
 TEST_CASE("preserving value categories", "[latched]") {
     {
         auto c = stdx::latched{[] { return 42; }};
-        static_assert(std::is_same_v<int const &, decltype(*c)>);
-        static_assert(std::is_same_v<int const &&, decltype(*std::move(c))>);
+        STATIC_REQUIRE(std::is_same_v<int const &, decltype(*c)>);
+        STATIC_REQUIRE(std::is_same_v<int const &&, decltype(*std::move(c))>);
     }
     {
         auto const c = stdx::latched{[] { return 42; }};
-        static_assert(std::is_same_v<int const &, decltype(*c)>);
-        static_assert(std::is_same_v<int const &&, decltype(*std::move(c))>);
+        STATIC_REQUIRE(std::is_same_v<int const &, decltype(*c)>);
+        STATIC_REQUIRE(std::is_same_v<int const &&, decltype(*std::move(c))>);
     }
 }

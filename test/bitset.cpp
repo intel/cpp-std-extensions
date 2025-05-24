@@ -8,35 +8,35 @@
 #include <type_traits>
 
 TEST_CASE("bitset storage rounds up to nearest element size", "[bitset]") {
-    static_assert(sizeof(stdx::bitset<1, std::uint8_t>) == 1);
-    static_assert(sizeof(stdx::bitset<8, std::uint8_t>) == 1);
-    static_assert(sizeof(stdx::bitset<9, std::uint8_t>) == 2);
+    STATIC_REQUIRE(sizeof(stdx::bitset<1, std::uint8_t>) == 1);
+    STATIC_REQUIRE(sizeof(stdx::bitset<8, std::uint8_t>) == 1);
+    STATIC_REQUIRE(sizeof(stdx::bitset<9, std::uint8_t>) == 2);
 
-    static_assert(sizeof(stdx::bitset<1, std::uint16_t>) == 2);
-    static_assert(sizeof(stdx::bitset<16, std::uint16_t>) == 2);
-    static_assert(sizeof(stdx::bitset<17, std::uint16_t>) == 4);
+    STATIC_REQUIRE(sizeof(stdx::bitset<1, std::uint16_t>) == 2);
+    STATIC_REQUIRE(sizeof(stdx::bitset<16, std::uint16_t>) == 2);
+    STATIC_REQUIRE(sizeof(stdx::bitset<17, std::uint16_t>) == 4);
 }
 
 TEST_CASE("bitset with implicit storage element type", "[bitset]") {
-    static_assert(sizeof(stdx::bitset<1>) == 1);
-    static_assert(sizeof(stdx::bitset<8>) == 1);
-    static_assert(sizeof(stdx::bitset<9>) == 2);
-    static_assert(sizeof(stdx::bitset<16>) == 2);
-    static_assert(sizeof(stdx::bitset<17>) == 4);
-    static_assert(sizeof(stdx::bitset<32>) == 4);
-    static_assert(sizeof(stdx::bitset<33>) == 8);
-    static_assert(sizeof(stdx::bitset<64>) == 8);
+    STATIC_REQUIRE(sizeof(stdx::bitset<1>) == 1);
+    STATIC_REQUIRE(sizeof(stdx::bitset<8>) == 1);
+    STATIC_REQUIRE(sizeof(stdx::bitset<9>) == 2);
+    STATIC_REQUIRE(sizeof(stdx::bitset<16>) == 2);
+    STATIC_REQUIRE(sizeof(stdx::bitset<17>) == 4);
+    STATIC_REQUIRE(sizeof(stdx::bitset<32>) == 4);
+    STATIC_REQUIRE(sizeof(stdx::bitset<33>) == 8);
+    STATIC_REQUIRE(sizeof(stdx::bitset<64>) == 8);
 }
 
 TEMPLATE_TEST_CASE("bitset size", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
-    static_assert(stdx::bitset<1, TestType>{}.size() == 1);
-    static_assert(stdx::bitset<8, TestType>{}.size() == 8);
+    STATIC_REQUIRE(stdx::bitset<1, TestType>{}.size() == 1);
+    STATIC_REQUIRE(stdx::bitset<8, TestType>{}.size() == 8);
 }
 
 TEMPLATE_TEST_CASE("index operation", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
-    static_assert(not stdx::bitset<1, TestType>{}[0]);
+    STATIC_REQUIRE(not stdx::bitset<1, TestType>{}[0]);
 }
 
 TEMPLATE_TEST_CASE("set single bit", "[bitset]", std::uint8_t, std::uint16_t,
@@ -100,34 +100,34 @@ TEMPLATE_TEST_CASE("flip all bits", "[bitset]", std::uint8_t, std::uint16_t,
 TEMPLATE_TEST_CASE("construct with a value", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     constexpr auto bs1 = stdx::bitset<1, TestType>{1ul};
-    static_assert(bs1[0]);
+    STATIC_REQUIRE(bs1[0]);
 
     constexpr auto bs2 = stdx::bitset<3, TestType>{255ul};
-    static_assert(bs2[0]);
-    static_assert(bs2[1]);
+    STATIC_REQUIRE(bs2[0]);
+    STATIC_REQUIRE(bs2[1]);
 }
 
 TEMPLATE_TEST_CASE("construct with values for bits", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     constexpr auto bs = stdx::bitset<8, TestType>{stdx::place_bits, 1, 3, 5};
-    static_assert(not bs[0]);
-    static_assert(bs[1]);
-    static_assert(bs[3]);
-    static_assert(bs[5]);
+    STATIC_REQUIRE(not bs[0]);
+    STATIC_REQUIRE(bs[1]);
+    STATIC_REQUIRE(bs[3]);
+    STATIC_REQUIRE(bs[5]);
 }
 
 TEMPLATE_TEST_CASE("construct with a string_view", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     using namespace std::string_view_literals;
-    static_assert(stdx::bitset<4, TestType>{"1010"sv} ==
-                  stdx::bitset<4, TestType>{0b1010ul});
+    STATIC_REQUIRE(stdx::bitset<4, TestType>{"1010"sv} ==
+                   stdx::bitset<4, TestType>{0b1010ul});
 }
 
 TEMPLATE_TEST_CASE("construct with a substring", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     using namespace std::string_view_literals;
-    static_assert(stdx::bitset<4, TestType>{"XOXOXO"sv, 2, 4, 'X'} ==
-                  stdx::bitset<4, TestType>{0b1010ul});
+    STATIC_REQUIRE(stdx::bitset<4, TestType>{"XOXOXO"sv, 2, 4, 'X'} ==
+                   stdx::bitset<4, TestType>{0b1010ul});
 }
 
 TEMPLATE_TEST_CASE("convert to unsigned integral type (same underlying type)",
@@ -135,8 +135,8 @@ TEMPLATE_TEST_CASE("convert to unsigned integral type (same underlying type)",
                    std::uint64_t) {
     constexpr auto bs = stdx::bitset<3, TestType>{255ul};
     constexpr auto val = bs.template to<TestType>();
-    static_assert(std::is_same_v<decltype(val), TestType const>);
-    static_assert(val == 7u);
+    STATIC_REQUIRE(std::is_same_v<decltype(val), TestType const>);
+    STATIC_REQUIRE(val == 7u);
 }
 
 TEMPLATE_TEST_CASE(
@@ -145,100 +145,100 @@ TEMPLATE_TEST_CASE(
     constexpr auto bs =
         stdx::bitset<11, std::uint8_t>{stdx::place_bits, 3, 7, 10};
     constexpr auto val = bs.to<TestType>();
-    static_assert(std::is_same_v<decltype(val), TestType const>);
-    static_assert(val == 0b100'1000'1000u);
+    STATIC_REQUIRE(std::is_same_v<decltype(val), TestType const>);
+    STATIC_REQUIRE(val == 0b100'1000'1000u);
 }
 
 TEST_CASE("convert to type that fits", "[bitset]") {
     constexpr auto bs =
         stdx::bitset<11, std::uint8_t>{stdx::place_bits, 3, 7, 10};
     constexpr auto val = bs.to_natural();
-    static_assert(std::is_same_v<decltype(val), std::uint16_t const>);
-    static_assert(val == 0b100'1000'1000u);
+    STATIC_REQUIRE(std::is_same_v<decltype(val), std::uint16_t const>);
+    STATIC_REQUIRE(val == 0b100'1000'1000u);
 }
 
 TEMPLATE_TEST_CASE("all", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     constexpr auto bs1 =
         stdx::bitset<8, TestType>{std::numeric_limits<TestType>::max()};
-    static_assert(bs1.all());
+    STATIC_REQUIRE(bs1.all());
 
     constexpr auto bs2 = stdx::bitset<9, TestType>{0x1fful};
-    static_assert(bs2.all());
+    STATIC_REQUIRE(bs2.all());
 
     constexpr auto bs3 = stdx::bitset<8, TestType>{0xf7ul};
-    static_assert(not bs3.all());
+    STATIC_REQUIRE(not bs3.all());
 }
 
 TEMPLATE_TEST_CASE("any", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     constexpr auto bs1 = stdx::bitset<8, TestType>{8ul};
-    static_assert(bs1.any());
+    STATIC_REQUIRE(bs1.any());
 
     constexpr auto bs2 = stdx::bitset<9, TestType>{0xfful};
-    static_assert(bs2.any());
+    STATIC_REQUIRE(bs2.any());
 
     constexpr auto bs3 = stdx::bitset<8, TestType>{};
-    static_assert(not bs3.any());
+    STATIC_REQUIRE(not bs3.any());
 }
 
 TEMPLATE_TEST_CASE("none", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     constexpr auto bs1 = stdx::bitset<8, TestType>{};
-    static_assert(bs1.none());
+    STATIC_REQUIRE(bs1.none());
 
     constexpr auto bs2 = stdx::bitset<8, TestType>{8ul};
-    static_assert(not bs2.none());
+    STATIC_REQUIRE(not bs2.none());
 }
 
 TEMPLATE_TEST_CASE("count", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     constexpr auto bs1 = stdx::bitset<8, TestType>{};
-    static_assert(bs1.count() == 0u);
+    STATIC_REQUIRE(bs1.count() == 0u);
 
     constexpr auto bs2 = stdx::bitset<8, TestType>{0b10101ul};
-    static_assert(bs2.count() == 3u);
+    STATIC_REQUIRE(bs2.count() == 3u);
 }
 
 TEMPLATE_TEST_CASE("or", "[bitset]", std::uint8_t, std::uint16_t, std::uint32_t,
                    std::uint64_t) {
     constexpr auto bs1 = stdx::bitset<3, TestType>{0b101ul};
     constexpr auto bs2 = stdx::bitset<3, TestType>{0b010ul};
-    static_assert((bs1 | bs2) == stdx::bitset<3, TestType>{0b111ul});
+    STATIC_REQUIRE((bs1 | bs2) == stdx::bitset<3, TestType>{0b111ul});
 }
 
 TEMPLATE_TEST_CASE("and", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     constexpr auto bs1 = stdx::bitset<3, TestType>{0b101ul};
     constexpr auto bs2 = stdx::bitset<3, TestType>{0b100ul};
-    static_assert((bs1 & bs2) == stdx::bitset<3, TestType>{0b100ul});
+    STATIC_REQUIRE((bs1 & bs2) == stdx::bitset<3, TestType>{0b100ul});
 }
 
 TEMPLATE_TEST_CASE("xor", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     constexpr auto bs1 = stdx::bitset<3, TestType>{0b101ul};
     constexpr auto bs2 = stdx::bitset<3, TestType>{0b010ul};
-    static_assert((bs1 ^ bs2) == stdx::bitset<3, TestType>{0b111ul});
+    STATIC_REQUIRE((bs1 ^ bs2) == stdx::bitset<3, TestType>{0b111ul});
 }
 
 TEMPLATE_TEST_CASE("not", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     constexpr auto bs = stdx::bitset<3, TestType>{0b101ul};
-    static_assert(~bs == stdx::bitset<3, TestType>{0b10ul});
+    STATIC_REQUIRE(~bs == stdx::bitset<3, TestType>{0b10ul});
 }
 
 TEMPLATE_TEST_CASE("difference", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     constexpr auto bs1 = stdx::bitset<3, TestType>{0b101ul};
     constexpr auto bs2 = stdx::bitset<3, TestType>{0b011ul};
-    static_assert(bs1 - bs2 == stdx::bitset<3, TestType>{0b100ul});
+    STATIC_REQUIRE(bs1 - bs2 == stdx::bitset<3, TestType>{0b100ul});
 }
 
 TEMPLATE_TEST_CASE("left shift", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     constexpr auto bs = stdx::bitset<3, TestType>{0b101ul};
-    static_assert(bs << 1u == stdx::bitset<3, TestType>{0b10ul});
-    static_assert(bs << 2u == stdx::bitset<3, TestType>{0b100ul});
+    STATIC_REQUIRE(bs << 1u == stdx::bitset<3, TestType>{0b10ul});
+    STATIC_REQUIRE(bs << 2u == stdx::bitset<3, TestType>{0b100ul});
 }
 
 TEMPLATE_TEST_CASE("left shift (equal to type size)", "[bitset]", std::uint8_t,
@@ -256,7 +256,7 @@ TEMPLATE_TEST_CASE("left shift (equal to type size)", "[bitset]", std::uint8_t,
 TEMPLATE_TEST_CASE("left shift (off end)", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     constexpr auto bs = stdx::bitset<3, TestType>{0b101ul};
-    static_assert(bs << 3u == stdx::bitset<3, TestType>{});
+    STATIC_REQUIRE(bs << 3u == stdx::bitset<3, TestType>{});
 }
 
 TEMPLATE_TEST_CASE("left shift (large shift)", "[bitset]", std::uint8_t,
@@ -264,17 +264,17 @@ TEMPLATE_TEST_CASE("left shift (large shift)", "[bitset]", std::uint8_t,
     constexpr auto sz = std::numeric_limits<TestType>::digits * 2;
     constexpr auto shift_amount = std::numeric_limits<TestType>::digits + 1;
     constexpr auto bs = stdx::bitset<sz, TestType>{0b101ul} << shift_amount;
-    static_assert(not bs[0]);
-    static_assert(bs[shift_amount]);
-    static_assert(not bs[shift_amount + 1]);
-    static_assert(bs[shift_amount + 2]);
+    STATIC_REQUIRE(not bs[0]);
+    STATIC_REQUIRE(bs[shift_amount]);
+    STATIC_REQUIRE(not bs[shift_amount + 1]);
+    STATIC_REQUIRE(bs[shift_amount + 2]);
 }
 
 TEMPLATE_TEST_CASE("right shift", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     constexpr auto bs = stdx::bitset<3, TestType>{0b101ul};
-    static_assert(bs >> 1u == stdx::bitset<3, TestType>{0b10ul});
-    static_assert(bs >> 2u == stdx::bitset<3, TestType>{0b1ul});
+    STATIC_REQUIRE(bs >> 1u == stdx::bitset<3, TestType>{0b10ul});
+    STATIC_REQUIRE(bs >> 2u == stdx::bitset<3, TestType>{0b1ul});
 }
 
 TEMPLATE_TEST_CASE("right shift (equal to type size)", "[bitset]", std::uint8_t,
@@ -292,7 +292,7 @@ TEMPLATE_TEST_CASE("right shift (equal to type size)", "[bitset]", std::uint8_t,
 TEMPLATE_TEST_CASE("right shift (off end)", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     constexpr auto bs = stdx::bitset<3, TestType>{0b101ul};
-    static_assert(bs >> 3u == stdx::bitset<3, TestType>{});
+    STATIC_REQUIRE(bs >> 3u == stdx::bitset<3, TestType>{});
 }
 
 TEMPLATE_TEST_CASE("right shift (large shift)", "[bitset]", std::uint8_t,
@@ -372,7 +372,7 @@ TEMPLATE_TEST_CASE("set range of bits (lsb, msb)", "[bitset]", std::uint8_t,
 TEMPLATE_TEST_CASE("construct with all bits set", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     constexpr auto bs = stdx::bitset<9, TestType>{stdx::all_bits};
-    static_assert(bs.all());
+    STATIC_REQUIRE(bs.all());
 }
 
 TEMPLATE_TEST_CASE("reset range of bits (lsb, length)", "[bitset]",
@@ -405,8 +405,8 @@ TEMPLATE_TEST_CASE("set/reset all bits with size at type capacity", "[bitset]",
     constexpr auto expected = std::numeric_limits<TestType>::max();
 
     constexpr auto bs1 = stdx::bitset<sz, TestType>{stdx::all_bits};
-    static_assert(bs1.all());
-    static_assert(bs1.template to<TestType>() == expected);
+    STATIC_REQUIRE(bs1.all());
+    STATIC_REQUIRE(bs1.template to<TestType>() == expected);
 
     auto bs2 = stdx::bitset<sz, TestType>{};
     bs2.set();
@@ -419,7 +419,7 @@ TEMPLATE_TEST_CASE("set/reset all bits with size at type capacity", "[bitset]",
 TEMPLATE_TEST_CASE("find lowest unset bit (element 0)", "[bitset]",
                    std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
     constexpr auto bs = stdx::bitset<4, TestType>{stdx::place_bits, 0, 1, 3};
-    static_assert(bs.lowest_unset() == 2);
+    STATIC_REQUIRE(bs.lowest_unset() == 2);
 }
 
 TEMPLATE_TEST_CASE("find lowest unset bit (element > 0)", "[bitset]",
@@ -434,7 +434,7 @@ TEMPLATE_TEST_CASE("find lowest unset bit (full)", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     constexpr auto sz = std::numeric_limits<TestType>::digits;
     constexpr auto bs = stdx::bitset<sz, TestType>{stdx::all_bits};
-    static_assert(bs.lowest_unset() == sz);
+    STATIC_REQUIRE(bs.lowest_unset() == sz);
 }
 
 namespace {
@@ -443,12 +443,12 @@ enum struct Bits : std::uint8_t { ZERO, ONE, TWO, THREE, MAX };
 
 TEST_CASE("use bitset with enum struct (default construct)", "[bitset]") {
     constexpr auto bs = stdx::bitset<Bits::MAX>{};
-    static_assert(bs.size() == stdx::to_underlying(Bits::MAX));
+    STATIC_REQUIRE(bs.size() == stdx::to_underlying(Bits::MAX));
 }
 
 TEST_CASE("use bitset with enum struct (to)", "[bitset]") {
     constexpr auto bs = stdx::bitset<Bits::MAX>{stdx::all_bits};
-    static_assert(bs.to<Bits>() == static_cast<Bits>(0b1111));
+    STATIC_REQUIRE(bs.to<Bits>() == static_cast<Bits>(0b1111));
 }
 
 TEST_CASE("use bitset with enum struct (set/flip)", "[bitset]") {
@@ -463,15 +463,15 @@ TEST_CASE("use bitset with enum struct (set/flip)", "[bitset]") {
 
 TEST_CASE("use bitset with enum struct (read index)", "[bitset]") {
     constexpr auto bs = stdx::bitset<Bits::MAX>{stdx::all_bits};
-    static_assert(bs[Bits::ZERO]);
-    static_assert(bs[Bits::ONE]);
-    static_assert(bs[Bits::TWO]);
-    static_assert(bs[Bits::THREE]);
+    STATIC_REQUIRE(bs[Bits::ZERO]);
+    STATIC_REQUIRE(bs[Bits::ONE]);
+    STATIC_REQUIRE(bs[Bits::TWO]);
+    STATIC_REQUIRE(bs[Bits::THREE]);
 }
 
 TEST_CASE("use bitset with enum struct (place_bits construct)", "[bitset]") {
     constexpr auto bs = stdx::bitset<Bits::MAX>{stdx::place_bits, Bits::ZERO};
-    static_assert(bs.to_natural() == 1);
+    STATIC_REQUIRE(bs.to_natural() == 1);
 }
 
 TEST_CASE("use bitset with enum struct (for_each)", "[bitset]") {
@@ -493,9 +493,9 @@ TEST_CASE("use bitset with enum struct (lowest_unset)", "[bitset]") {
 #if __cplusplus >= 202002L
 TEST_CASE("construct with a ct_string", "[bitset]") {
     using namespace stdx::literals;
-    static_assert(stdx::bitset{"1010"_cts} ==
-                  stdx::bitset<4ul, std::uint8_t>{0b1010ul});
-    static_assert(stdx::bitset{"101010101"_cts} ==
-                  stdx::bitset<9ul, std::uint16_t>{0b101010101ul});
+    STATIC_REQUIRE(stdx::bitset{"1010"_cts} ==
+                   stdx::bitset<4ul, std::uint8_t>{0b1010ul});
+    STATIC_REQUIRE(stdx::bitset{"101010101"_cts} ==
+                   stdx::bitset<9ul, std::uint16_t>{0b101010101ul});
 }
 #endif

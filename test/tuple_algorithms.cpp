@@ -12,29 +12,29 @@
 #include <utility>
 
 TEST_CASE("unary transform", "[tuple_algorithms]") {
-    static_assert(stdx::transform([](auto) { return 1; }, stdx::tuple{}) ==
-                  stdx::tuple{});
+    STATIC_REQUIRE(stdx::transform([](auto) { return 1; }, stdx::tuple{}) ==
+                   stdx::tuple{});
     constexpr auto t = stdx::tuple{1, 2, 3};
     constexpr auto u = stdx::transform([](auto x) { return x + 1; }, t);
-    static_assert(u == stdx::tuple{2, 3, 4});
+    STATIC_REQUIRE(u == stdx::tuple{2, 3, 4});
 }
 
 TEST_CASE("unary type transform", "[tuple_algorithms]") {
-    static_assert(stdx::transform([](auto) { return 1; }, stdx::tuple{}) ==
-                  stdx::tuple{});
+    STATIC_REQUIRE(stdx::transform([](auto) { return 1; }, stdx::tuple{}) ==
+                   stdx::tuple{});
     constexpr auto t = stdx::tuple{1, 0, 3};
     constexpr auto u =
         stdx::transform([](auto x) -> bool { return x != 0; }, t);
-    static_assert(u == stdx::tuple{true, false, true});
+    STATIC_REQUIRE(u == stdx::tuple{true, false, true});
 }
 
 TEST_CASE("n-ary transform", "[tuple_algorithms]") {
-    static_assert(stdx::transform([](auto, auto) { return 1; }, stdx::tuple{},
-                                  stdx::tuple{}) == stdx::tuple{});
+    STATIC_REQUIRE(stdx::transform([](auto, auto) { return 1; }, stdx::tuple{},
+                                   stdx::tuple{}) == stdx::tuple{});
     constexpr auto t = stdx::tuple{1, 2, 3};
     constexpr auto u =
         stdx::transform([](auto x, auto y) { return x + y; }, t, t);
-    static_assert(u == stdx::tuple{2, 4, 6});
+    STATIC_REQUIRE(u == stdx::tuple{2, 4, 6});
 }
 
 TEST_CASE("rvalue transform", "[tuple_algorithms]") {
@@ -57,8 +57,8 @@ TEST_CASE("transform preserves references", "[tuple_algorithms]") {
 }
 
 TEST_CASE("transform stops at smallest tuple length", "[tuple_algorithms]") {
-    static_assert(stdx::transform(std::plus{}, stdx::tuple{1, 2, 3},
-                                  stdx::tuple{1, 2}) == stdx::tuple{2, 4});
+    STATIC_REQUIRE(stdx::transform(std::plus{}, stdx::tuple{1, 2, 3},
+                                   stdx::tuple{1, 2}) == stdx::tuple{2, 4});
 }
 
 namespace {
@@ -75,14 +75,14 @@ TEST_CASE("transform with index", "[tuple_algorithms]") {
     struct X;
     constexpr auto t = stdx::transform<key_for>(
         [](auto value) { return map_entry<X, int>{value}; }, stdx::tuple{42});
-    static_assert(stdx::get<X>(t).value == 42);
+    STATIC_REQUIRE(stdx::get<X>(t).value == 42);
 }
 
 TEST_CASE("apply", "[tuple_algorithms]") {
-    static_assert(stdx::apply([](auto... xs) { return (0 + ... + xs); },
-                              stdx::tuple{}) == 0);
-    static_assert(stdx::apply([](auto... xs) { return (0 + ... + xs); },
-                              stdx::tuple{1, 2, 3}) == 6);
+    STATIC_REQUIRE(stdx::apply([](auto... xs) { return (0 + ... + xs); },
+                               stdx::tuple{}) == 0);
+    STATIC_REQUIRE(stdx::apply([](auto... xs) { return (0 + ... + xs); },
+                               stdx::tuple{1, 2, 3}) == 6);
 }
 
 TEST_CASE("apply handles a stateful function properly", "[tuple_algorithms]") {
@@ -92,8 +92,8 @@ TEST_CASE("apply handles a stateful function properly", "[tuple_algorithms]") {
 }
 
 TEST_CASE("apply handles move-only types", "[tuple_algorithms]") {
-    static_assert(stdx::apply([](auto x) { return x.value; },
-                              stdx::tuple{move_only{42}}) == 42);
+    STATIC_REQUIRE(stdx::apply([](auto x) { return x.value; },
+                               stdx::tuple{move_only{42}}) == 42);
 }
 
 TEST_CASE("apply handles tuples of references", "[tuple_algorithms]") {
@@ -115,10 +115,10 @@ TEST_CASE("apply preserves argument order", "[tuple_algorithms]") {
 }
 
 TEST_CASE("variadic apply", "[tuple_algorithms]") {
-    static_assert(stdx::apply([](auto... xs) { return (0 + ... + xs); }) == 0);
-    static_assert(stdx::apply([](auto... xs) { return (0 + ... + xs); },
-                              stdx::tuple{1, 2, 3},
-                              stdx::tuple{4, 5, 6}) == 21);
+    STATIC_REQUIRE(stdx::apply([](auto... xs) { return (0 + ... + xs); }) == 0);
+    STATIC_REQUIRE(stdx::apply([](auto... xs) { return (0 + ... + xs); },
+                               stdx::tuple{1, 2, 3},
+                               stdx::tuple{4, 5, 6}) == 21);
 }
 
 TEST_CASE("variadic apply handles a stateful function properly",
@@ -129,9 +129,9 @@ TEST_CASE("variadic apply handles a stateful function properly",
 }
 
 TEST_CASE("variadic apply handles move-only types", "[tuple_algorithms]") {
-    static_assert(stdx::apply([](auto x, auto y) { return x.value + y.value; },
-                              stdx::tuple{move_only{42}},
-                              stdx::tuple{move_only{17}}) == 59);
+    STATIC_REQUIRE(stdx::apply([](auto x, auto y) { return x.value + y.value; },
+                               stdx::tuple{move_only{42}},
+                               stdx::tuple{move_only{17}}) == 59);
 }
 
 TEST_CASE("variadic apply handles tuples of references", "[tuple_algorithms]") {
@@ -161,9 +161,9 @@ TEST_CASE("variadic apply preserves argument order", "[tuple_algorithms]") {
 
 TEST_CASE("join", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 2, 3};
-    static_assert(t.join(std::plus{}) == 6);
-    static_assert(stdx::tuple{1, 2, 3}.join(std::plus{}) == 6);
-    static_assert(
+    STATIC_REQUIRE(t.join(std::plus{}) == 6);
+    STATIC_REQUIRE(stdx::tuple{1, 2, 3}.join(std::plus{}) == 6);
+    STATIC_REQUIRE(
         stdx::tuple{move_only{42}}
             .join([](auto x, auto y) { return move_only{x.value + y.value}; })
             .value == 42);
@@ -171,13 +171,13 @@ TEST_CASE("join", "[tuple_algorithms]") {
 
 TEST_CASE("join (single element)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1};
-    static_assert(t.join(std::plus{}) == 1);
+    STATIC_REQUIRE(t.join(std::plus{}) == 1);
 }
 
 TEST_CASE("join with default for empty tuple", "[tuple_algorithms]") {
-    static_assert(stdx::tuple{}.join(42, std::plus{}) == 42);
-    static_assert(stdx::tuple{1}.join(42, std::plus{}) == 1);
-    static_assert(stdx::tuple{1, 2, 3}.join(42, std::plus{}) == 6);
+    STATIC_REQUIRE(stdx::tuple{}.join(42, std::plus{}) == 42);
+    STATIC_REQUIRE(stdx::tuple{1}.join(42, std::plus{}) == 1);
+    STATIC_REQUIRE(stdx::tuple{1, 2, 3}.join(42, std::plus{}) == 6);
 }
 
 TEST_CASE("for_each", "[tuple_algorithms]") {
@@ -233,30 +233,30 @@ TEST_CASE("unrolled_for_each on arrays", "[tuple_algorithms]") {
 }
 
 TEST_CASE("tuple_cat", "[tuple_algorithms]") {
-    static_assert(stdx::tuple_cat() == stdx::tuple{});
-    static_assert(stdx::tuple_cat(stdx::tuple{}, stdx::tuple{}) ==
-                  stdx::tuple{});
-    static_assert(stdx::tuple_cat(stdx::tuple{1, 2}, stdx::tuple{}) ==
-                  stdx::tuple{1, 2});
-    static_assert(stdx::tuple_cat(stdx::tuple{}, stdx::tuple{1, 2}) ==
-                  stdx::tuple{1, 2});
-    static_assert(stdx::tuple_cat(stdx::tuple{1, 2}, stdx::tuple{3, 4}) ==
-                  stdx::tuple{1, 2, 3, 4});
-    static_assert(stdx::tuple_cat(stdx::tuple{1, 2}, stdx::tuple{3, 4},
-                                  stdx::tuple{5, 6}) ==
-                  stdx::tuple{1, 2, 3, 4, 5, 6});
-    static_assert(
+    STATIC_REQUIRE(stdx::tuple_cat() == stdx::tuple{});
+    STATIC_REQUIRE(stdx::tuple_cat(stdx::tuple{}, stdx::tuple{}) ==
+                   stdx::tuple{});
+    STATIC_REQUIRE(stdx::tuple_cat(stdx::tuple{1, 2}, stdx::tuple{}) ==
+                   stdx::tuple{1, 2});
+    STATIC_REQUIRE(stdx::tuple_cat(stdx::tuple{}, stdx::tuple{1, 2}) ==
+                   stdx::tuple{1, 2});
+    STATIC_REQUIRE(stdx::tuple_cat(stdx::tuple{1, 2}, stdx::tuple{3, 4}) ==
+                   stdx::tuple{1, 2, 3, 4});
+    STATIC_REQUIRE(stdx::tuple_cat(stdx::tuple{1, 2}, stdx::tuple{3, 4},
+                                   stdx::tuple{5, 6}) ==
+                   stdx::tuple{1, 2, 3, 4, 5, 6});
+    STATIC_REQUIRE(
         stdx::tuple_cat(stdx::tuple{1, 2}, stdx::tuple{}, stdx::tuple{3, 4}) ==
         stdx::tuple{1, 2, 3, 4});
 
     auto t = stdx::tuple_cat(stdx::tuple{1}, stdx::tuple{2});
-    static_assert(std::is_same_v<decltype(t), stdx::tuple<int, int>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<int, int>>);
 }
 
 TEST_CASE("tuple_cat (move only)", "[tuple_algorithms]") {
     auto t =
         stdx::tuple_cat(stdx::tuple{move_only{5}}, stdx::tuple{move_only{10}});
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(t), stdx::tuple<move_only, move_only>>);
     CHECK(t == stdx::tuple{move_only{5}, move_only{10}});
 }
@@ -264,7 +264,7 @@ TEST_CASE("tuple_cat (move only)", "[tuple_algorithms]") {
 TEST_CASE("tuple_cat (references)", "[tuple_algorithms]") {
     auto x = 1;
     auto t = stdx::tuple_cat(stdx::tuple<int &>{x}, stdx::tuple<int &>{x});
-    static_assert(std::is_same_v<decltype(t), stdx::tuple<int &, int &>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<int &, int &>>);
     CHECK(std::addressof(x) == std::addressof(t[stdx::index<0>]));
     CHECK(std::addressof(x) == std::addressof(t[stdx::index<1>]));
     CHECK(x == 1);
@@ -278,7 +278,7 @@ TEST_CASE("tuple_cat (const references)", "[tuple_algorithms]") {
     auto x = 1;
     auto t = stdx::tuple_cat(stdx::tuple<int const &>{x},
                              stdx::tuple<int const &>{x});
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(t), stdx::tuple<int const &, int const &>>);
     CHECK(std::addressof(x) == std::addressof(t[stdx::index<0>]));
     CHECK(std::addressof(x) == std::addressof(t[stdx::index<1>]));
@@ -293,7 +293,7 @@ TEST_CASE("tuple_cat (rvalue references)", "[tuple_algorithms]") {
     auto y = 1;
     auto t = stdx::tuple_cat(stdx::tuple<int &&>{std::move(x)},
                              stdx::tuple<int &&>{std::move(y)});
-    static_assert(std::is_same_v<decltype(t), stdx::tuple<int &&, int &&>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<int &&, int &&>>);
     CHECK(std::addressof(x) == std::addressof(t[stdx::index<0>]));
     CHECK(std::addressof(y) == std::addressof(t[stdx::index<1>]));
     CHECK(x == 1);
@@ -307,13 +307,13 @@ TEST_CASE("tuple_cat (rvalue references)", "[tuple_algorithms]") {
 
 TEST_CASE("fold_left", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 2, 3};
-    static_assert(t.fold_left(0, std::minus{}) == (((0 - 1) - 2) - 3));
-    static_assert(stdx::tuple{move_only{1}, move_only{2}, move_only{3}}
-                      .fold_left(move_only{0},
-                                 [](move_only &&x, move_only &&y) {
-                                     return move_only{x.value + y.value};
-                                 })
-                      .value == 6);
+    STATIC_REQUIRE(t.fold_left(0, std::minus{}) == (((0 - 1) - 2) - 3));
+    STATIC_REQUIRE(stdx::tuple{move_only{1}, move_only{2}, move_only{3}}
+                       .fold_left(move_only{0},
+                                  [](move_only &&x, move_only &&y) {
+                                      return move_only{x.value + y.value};
+                                  })
+                       .value == 6);
 
     int calls{};
     auto stateful = [&](auto x, auto y) mutable {
@@ -326,11 +326,11 @@ TEST_CASE("fold_left", "[tuple_algorithms]") {
 
 TEST_CASE("fold_left (heterogeneous types in fold)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 2, 3};
-    static_assert(t.fold_left(stdx::tuple{}, [](auto acc, auto n) {
+    STATIC_REQUIRE(t.fold_left(stdx::tuple{}, [](auto acc, auto n) {
         return stdx::tuple_cat(acc, stdx::tuple{n});
     }) == t);
 
-    static_assert(
+    STATIC_REQUIRE(
         stdx::tuple{1, 2, 3}.fold_left(stdx::tuple{}, [](auto acc, auto n) {
             return stdx::tuple_cat(acc, stdx::tuple{n});
         }) == t);
@@ -345,18 +345,18 @@ template <auto X, auto Y> constexpr auto operator+(addend<X>, addend<Y>) {
 
 TEST_CASE("fold_left (heterogeneous types in tuple)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{addend<1>{}, addend<2>{}};
-    static_assert(t.fold_left(addend<0>{}, std::plus{}) == addend<3>{});
+    STATIC_REQUIRE(t.fold_left(addend<0>{}, std::plus{}) == addend<3>{});
 }
 
 TEST_CASE("fold_right", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 2, 3};
-    static_assert(t.fold_right(4, std::minus{}) == (1 - (2 - (3 - 4))));
-    static_assert(stdx::tuple{move_only{1}, move_only{2}, move_only{3}}
-                      .fold_right(move_only{0},
-                                  [](move_only &&x, move_only &&y) {
-                                      return move_only{x.value + y.value};
-                                  })
-                      .value == 6);
+    STATIC_REQUIRE(t.fold_right(4, std::minus{}) == (1 - (2 - (3 - 4))));
+    STATIC_REQUIRE(stdx::tuple{move_only{1}, move_only{2}, move_only{3}}
+                       .fold_right(move_only{0},
+                                   [](move_only &&x, move_only &&y) {
+                                       return move_only{x.value + y.value};
+                                   })
+                       .value == 6);
 
     int calls{};
     auto stateful = [&](auto x, auto y) mutable {
@@ -369,11 +369,11 @@ TEST_CASE("fold_right", "[tuple_algorithms]") {
 
 TEST_CASE("fold_right (heterogeneous types in fold)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 2, 3};
-    static_assert(t.fold_right(stdx::tuple{}, [](auto n, auto acc) {
+    STATIC_REQUIRE(t.fold_right(stdx::tuple{}, [](auto n, auto acc) {
         return stdx::tuple_cat(stdx::tuple{n}, acc);
     }) == t);
 
-    static_assert(
+    STATIC_REQUIRE(
         stdx::tuple{1, 2, 3}.fold_right(stdx::tuple{}, [](auto n, auto acc) {
             return stdx::tuple_cat(stdx::tuple{n}, acc);
         }) == t);
@@ -381,7 +381,7 @@ TEST_CASE("fold_right (heterogeneous types in fold)", "[tuple_algorithms]") {
 
 TEST_CASE("fold_right (heterogeneous types in tuple)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{addend<1>{}, addend<2>{}};
-    static_assert(t.fold_right(addend<0>{}, std::plus{}) == addend<3>{});
+    STATIC_REQUIRE(t.fold_right(addend<0>{}, std::plus{}) == addend<3>{});
 }
 
 template <typename T> struct is_even {
@@ -393,8 +393,8 @@ TEST_CASE("filter", "[tuple_algorithms]") {
         std::integral_constant<int, 1>{}, std::integral_constant<int, 2>{},
         std::integral_constant<int, 3>{}, std::integral_constant<int, 4>{}};
     constexpr auto u = stdx::filter<is_even>(t);
-    static_assert(u == stdx::tuple{std::integral_constant<int, 2>{},
-                                   std::integral_constant<int, 4>{}});
+    STATIC_REQUIRE(u == stdx::tuple{std::integral_constant<int, 2>{},
+                                    std::integral_constant<int, 4>{}});
 }
 
 TEST_CASE("copy/move behavior for tuple_cat", "[tuple_algorithms]") {
@@ -428,40 +428,41 @@ TEST_CASE("copy/move behavior for filter", "[tuple_algorithms]") {
 
 TEST_CASE("all_of", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 2, 3};
-    static_assert(stdx::all_of([](auto n) { return n > 0; }, t));
-    static_assert(
+    STATIC_REQUIRE(stdx::all_of([](auto n) { return n > 0; }, t));
+    STATIC_REQUIRE(
         stdx::all_of([](auto x, auto y) { return (x + y) % 2 == 0; }, t, t));
 
-    static_assert(stdx::all_of([](auto x, auto y) { return (x + y) % 2 == 0; },
-                               stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
+    STATIC_REQUIRE(stdx::all_of([](auto x, auto y) { return (x + y) % 2 == 0; },
+                                stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
 }
 
 TEST_CASE("any_of", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 2, 3};
-    static_assert(stdx::any_of([](auto n) { return n % 2 == 0; }, t));
-    static_assert(
+    STATIC_REQUIRE(stdx::any_of([](auto n) { return n % 2 == 0; }, t));
+    STATIC_REQUIRE(
         stdx::any_of([](auto x, auto y) { return (x + y) % 2 == 0; }, t, t));
 
-    static_assert(stdx::any_of([](auto x, auto y) { return (x + y) % 2 == 0; },
-                               stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
+    STATIC_REQUIRE(stdx::any_of([](auto x, auto y) { return (x + y) % 2 == 0; },
+                                stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
 }
 
 TEST_CASE("none_of", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 3, 5};
-    static_assert(stdx::none_of([](auto n) { return n % 2 == 0; }, t));
-    static_assert(
+    STATIC_REQUIRE(stdx::none_of([](auto n) { return n % 2 == 0; }, t));
+    STATIC_REQUIRE(
         stdx::none_of([](auto x, auto y) { return (x + y) % 2 != 0; }, t, t));
 
-    static_assert(stdx::none_of([](auto x, auto y) { return (x + y) % 2 != 0; },
-                                stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
+    STATIC_REQUIRE(
+        stdx::none_of([](auto x, auto y) { return (x + y) % 2 != 0; },
+                      stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
 }
 
 TEST_CASE("contains_type", "[tuple_algorithms]") {
     using T = stdx::tuple<int, bool, int &>;
-    static_assert(stdx::contains_type<T, int>);
-    static_assert(stdx::contains_type<T, bool>);
-    static_assert(stdx::contains_type<T, int &>);
-    static_assert(not stdx::contains_type<T, float>);
+    STATIC_REQUIRE(stdx::contains_type<T, int>);
+    STATIC_REQUIRE(stdx::contains_type<T, bool>);
+    STATIC_REQUIRE(stdx::contains_type<T, int &>);
+    STATIC_REQUIRE(not stdx::contains_type<T, float>);
 }
 
 TEST_CASE("contains_type (indexed)", "[tuple_algorithms]") {
@@ -470,23 +471,23 @@ TEST_CASE("contains_type (indexed)", "[tuple_algorithms]") {
     using T = stdx::indexed_tuple<stdx::detail::index_function_list<key_for>,
                                   map_entry<X, int>, map_entry<Y, int>>;
 
-    static_assert(stdx::contains_type<T, map_entry<X, int>>);
-    static_assert(stdx::contains_type<T, X>);
-    static_assert(not stdx::contains_type<T, float>);
+    STATIC_REQUIRE(stdx::contains_type<T, map_entry<X, int>>);
+    STATIC_REQUIRE(stdx::contains_type<T, X>);
+    STATIC_REQUIRE(not stdx::contains_type<T, float>);
 }
 
 TEST_CASE("sort (empty tuple)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{};
     [[maybe_unused]] constexpr auto sorted = stdx::sort(t);
-    static_assert(std::is_same_v<decltype(sorted), stdx::tuple<> const>);
+    STATIC_REQUIRE(std::is_same_v<decltype(sorted), stdx::tuple<> const>);
 }
 
 TEST_CASE("sort", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 1.0, true};
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(t), stdx::tuple<int, double, bool> const>);
     constexpr auto sorted = stdx::sort(t);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(sorted), stdx::tuple<bool, double, int> const>);
     CHECK(sorted == stdx::tuple{true, 1.0, 1});
 }
@@ -495,18 +496,18 @@ TEST_CASE("sort preserves references", "[tuple_algorithms]") {
     int x{1};
     double d{2.0};
     auto t = stdx::forward_as_tuple(x, d);
-    static_assert(std::is_same_v<decltype(t), stdx::tuple<int &, double &>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<int &, double &>>);
     auto sorted = stdx::sort(t);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(sorted), stdx::tuple<double &, int &>>);
     CHECK(sorted == stdx::tuple{2.0, 1});
 }
 
 TEST_CASE("sort with move only types", "[tuple_algorithms]") {
     auto t = stdx::tuple{move_only{1}, 1.0};
-    static_assert(std::is_same_v<decltype(t), stdx::tuple<move_only, double>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<move_only, double>>);
     auto sorted = stdx::sort(std::move(t));
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(sorted), stdx::tuple<double, move_only>>);
     CHECK(sorted == stdx::tuple{1, move_only{1}});
 }
@@ -514,33 +515,33 @@ TEST_CASE("sort with move only types", "[tuple_algorithms]") {
 TEST_CASE("chunk (empty tuple)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{};
     [[maybe_unused]] constexpr auto chunked = stdx::chunk(t);
-    static_assert(std::is_same_v<decltype(chunked), stdx::tuple<> const>);
+    STATIC_REQUIRE(std::is_same_v<decltype(chunked), stdx::tuple<> const>);
 }
 
 TEST_CASE("chunk (1-element tuple)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1};
     constexpr auto chunked = stdx::chunk(t);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(chunked), stdx::tuple<stdx::tuple<int>> const>);
     CHECK(chunked == stdx::make_tuple(stdx::tuple{1}));
 }
 
 TEST_CASE("count chunks", "[tuple_algorithms]") {
-    static_assert(stdx::detail::count_chunks<stdx::tuple<int, int>>() == 1);
-    static_assert(stdx::detail::count_chunks<stdx::tuple<int, float>>() == 2);
-    static_assert(stdx::detail::count_chunks<stdx::tuple<int, int, float>>() ==
-                  2);
-    static_assert(
+    STATIC_REQUIRE(stdx::detail::count_chunks<stdx::tuple<int, int>>() == 1);
+    STATIC_REQUIRE(stdx::detail::count_chunks<stdx::tuple<int, float>>() == 2);
+    STATIC_REQUIRE(stdx::detail::count_chunks<stdx::tuple<int, int, float>>() ==
+                   2);
+    STATIC_REQUIRE(
         stdx::detail::count_chunks<stdx::tuple<int, float, float>>() == 2);
 }
 
 TEST_CASE("create chunks", "[tuple_algorithms]") {
-    static_assert(stdx::detail::create_chunks<stdx::tuple<int, int>>() ==
-                  std::array{stdx::detail::chunk{0, 2}});
-    static_assert(
+    STATIC_REQUIRE(stdx::detail::create_chunks<stdx::tuple<int, int>>() ==
+                   std::array{stdx::detail::chunk{0, 2}});
+    STATIC_REQUIRE(
         stdx::detail::create_chunks<stdx::tuple<int, int, float>>() ==
         std::array{stdx::detail::chunk{0, 2}, stdx::detail::chunk{2, 1}});
-    static_assert(
+    STATIC_REQUIRE(
         stdx::detail::create_chunks<
             stdx::tuple<int, int, float, int, int, float>>() ==
         std::array{stdx::detail::chunk{0, 2}, stdx::detail::chunk{2, 1},
@@ -550,7 +551,7 @@ TEST_CASE("create chunks", "[tuple_algorithms]") {
 TEST_CASE("chunk (general case)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 2, 3, 1.0, 2.0, true};
     constexpr auto chunked = stdx::chunk(t);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<
             decltype(chunked),
             stdx::tuple<stdx::tuple<int, int, int>, stdx::tuple<double, double>,
@@ -564,51 +565,52 @@ TEST_CASE("chunk preserves references", "[tuple_algorithms]") {
     int y{2};
     auto t = stdx::tuple<int &, int &>{x, y};
     auto chunked = stdx::chunk(t);
-    static_assert(std::is_same_v<decltype(chunked),
-                                 stdx::tuple<stdx::tuple<int &, int &>>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(chunked),
+                                  stdx::tuple<stdx::tuple<int &, int &>>>);
     CHECK(get<0>(chunked) == stdx::tuple{1, 2});
 }
 
 TEST_CASE("chunk with move only types", "[tuple_algorithms]") {
     auto t = stdx::tuple{move_only{1}};
     auto chunked = stdx::chunk(std::move(t));
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(chunked), stdx::tuple<stdx::tuple<move_only>>>);
     CHECK(get<0>(chunked) == stdx::tuple{move_only{1}});
 }
 
 TEST_CASE("cartesian product (no tuples)", "[tuple_algorithms]") {
     constexpr auto c = stdx::cartesian_product_copy();
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(c), stdx::tuple<stdx::tuple<>> const>);
 }
 
 TEST_CASE("cartesian product (one tuple)", "[tuple_algorithms]") {
     using namespace stdx::literals;
     constexpr auto c = stdx::cartesian_product_copy(stdx::tuple{1, 2, 3});
-    static_assert(std::is_same_v<decltype(c),
-                                 stdx::tuple<stdx::tuple<int>, stdx::tuple<int>,
-                                             stdx::tuple<int>> const>);
-    static_assert(c[0_idx][0_idx] == 1);
-    static_assert(c[1_idx][0_idx] == 2);
-    static_assert(c[2_idx][0_idx] == 3);
+    STATIC_REQUIRE(
+        std::is_same_v<decltype(c),
+                       stdx::tuple<stdx::tuple<int>, stdx::tuple<int>,
+                                   stdx::tuple<int>> const>);
+    STATIC_REQUIRE(c[0_idx][0_idx] == 1);
+    STATIC_REQUIRE(c[1_idx][0_idx] == 2);
+    STATIC_REQUIRE(c[2_idx][0_idx] == 3);
 }
 
 TEST_CASE("cartesian product (two tuples)", "[tuple_algorithms]") {
     using namespace stdx::literals;
     constexpr auto c =
         stdx::cartesian_product_copy(stdx::tuple{1}, stdx::tuple{2});
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(c), stdx::tuple<stdx::tuple<int, int>> const>);
-    static_assert(c[0_idx][0_idx] == 1);
-    static_assert(c[0_idx][1_idx] == 2);
+    STATIC_REQUIRE(c[0_idx][0_idx] == 1);
+    STATIC_REQUIRE(c[0_idx][1_idx] == 2);
 }
 
 TEST_CASE("cartesian product (general case)", "[tuple_algorithms]") {
     using namespace stdx::literals;
     constexpr auto c = stdx::cartesian_product_copy(
         stdx::tuple{1, 2}, stdx::tuple{'a', 'b'}, stdx::tuple{1.1f, 2.2f});
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<
             decltype(c),
             stdx::tuple<
@@ -617,14 +619,14 @@ TEST_CASE("cartesian product (general case)", "[tuple_algorithms]") {
                 stdx::tuple<int, char, float>, stdx::tuple<int, char, float>,
                 stdx::tuple<int, char, float>,
                 stdx::tuple<int, char, float>> const>);
-    static_assert(c[0_idx] == stdx::tuple{1, 'a', 1.1f});
-    static_assert(c[1_idx] == stdx::tuple{1, 'a', 2.2f});
-    static_assert(c[2_idx] == stdx::tuple{1, 'b', 1.1f});
-    static_assert(c[3_idx] == stdx::tuple{1, 'b', 2.2f});
-    static_assert(c[4_idx] == stdx::tuple{2, 'a', 1.1f});
-    static_assert(c[5_idx] == stdx::tuple{2, 'a', 2.2f});
-    static_assert(c[6_idx] == stdx::tuple{2, 'b', 1.1f});
-    static_assert(c[7_idx] == stdx::tuple{2, 'b', 2.2f});
+    STATIC_REQUIRE(c[0_idx] == stdx::tuple{1, 'a', 1.1f});
+    STATIC_REQUIRE(c[1_idx] == stdx::tuple{1, 'a', 2.2f});
+    STATIC_REQUIRE(c[2_idx] == stdx::tuple{1, 'b', 1.1f});
+    STATIC_REQUIRE(c[3_idx] == stdx::tuple{1, 'b', 2.2f});
+    STATIC_REQUIRE(c[4_idx] == stdx::tuple{2, 'a', 1.1f});
+    STATIC_REQUIRE(c[5_idx] == stdx::tuple{2, 'a', 2.2f});
+    STATIC_REQUIRE(c[6_idx] == stdx::tuple{2, 'b', 1.1f});
+    STATIC_REQUIRE(c[7_idx] == stdx::tuple{2, 'b', 2.2f});
 }
 
 TEST_CASE("cartesian product of references", "[tuple_algorithms]") {
@@ -633,20 +635,20 @@ TEST_CASE("cartesian product of references", "[tuple_algorithms]") {
     constexpr static auto t2 = stdx::tuple{2};
 
     constexpr auto c = stdx::cartesian_product(t1, t2);
-    static_assert(std::is_same_v<
-                  decltype(c),
-                  stdx::tuple<stdx::tuple<int const &, int const &>> const>);
-    static_assert(c[0_idx][0_idx] == 1);
-    static_assert(c[0_idx][1_idx] == 2);
+    STATIC_REQUIRE(std::is_same_v<
+                   decltype(c),
+                   stdx::tuple<stdx::tuple<int const &, int const &>> const>);
+    STATIC_REQUIRE(c[0_idx][0_idx] == 1);
+    STATIC_REQUIRE(c[0_idx][1_idx] == 2);
 }
 
 TEST_CASE("unique", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 1.0, 2.0, true, false};
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(t),
                        stdx::tuple<int, double, double, bool, bool> const>);
     constexpr auto u = stdx::unique(t);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(u), stdx::tuple<int, double, bool> const>);
     CHECK(u == stdx::tuple{1, 1.0, true});
 }
@@ -655,27 +657,27 @@ TEST_CASE("unique preserves references", "[tuple_algorithms]") {
     int x{1};
     int y{2};
     auto t = stdx::forward_as_tuple(x, y);
-    static_assert(std::is_same_v<decltype(t), stdx::tuple<int &, int &>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<int &, int &>>);
     CHECK(t == stdx::tuple{1, 2});
     auto u = stdx::unique(t);
-    static_assert(std::is_same_v<decltype(u), stdx::tuple<int &>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(u), stdx::tuple<int &>>);
     CHECK(u == stdx::tuple{1});
     CHECK(std::addressof(x) == std::addressof(u[stdx::index<0>]));
 }
 
 TEST_CASE("unique with move only types", "[tuple_algorithms]") {
     auto t = stdx::tuple{move_only{1}, move_only{2}};
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(t), stdx::tuple<move_only, move_only>>);
     auto u = stdx::unique(std::move(t));
-    static_assert(std::is_same_v<decltype(u), stdx::tuple<move_only>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(u), stdx::tuple<move_only>>);
     CHECK(u == stdx::tuple{move_only{1}});
 }
 
 TEST_CASE("to_sorted_set", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 1.0, true, 2.0, false};
     constexpr auto u = stdx::to_sorted_set(t);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(u), stdx::tuple<bool, double, int> const>);
     CHECK(u == stdx::tuple{true, 1.0, 1});
 }
@@ -683,7 +685,7 @@ TEST_CASE("to_sorted_set", "[tuple_algorithms]") {
 TEST_CASE("to_sorted_set with move only types", "[tuple_algorithms]") {
     auto t = stdx::tuple{1, move_only{1}, true, move_only{2}, false};
     auto u = stdx::to_sorted_set(std::move(t));
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(u), stdx::tuple<bool, int, move_only>>);
     CHECK(u == stdx::tuple{true, 1, move_only{1}});
 }
@@ -694,12 +696,12 @@ TEST_CASE("to_sorted_set preserves references", "[tuple_algorithms]") {
     double a{3.0};
     double b{4.0};
     auto t = stdx::forward_as_tuple(x, y, a, b);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(t),
                        stdx::tuple<int &, int &, double &, double &>>);
     CHECK(t == stdx::tuple{1, 2, 3.0, 4.0});
     auto u = stdx::to_sorted_set(t);
-    static_assert(std::is_same_v<decltype(u), stdx::tuple<double &, int &>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(u), stdx::tuple<double &, int &>>);
     CHECK(u == stdx::tuple{3.0, 1});
     CHECK(std::addressof(a) == std::addressof(u[stdx::index<0>]));
     CHECK(std::addressof(x) == std::addressof(u[stdx::index<1>]));
@@ -708,7 +710,7 @@ TEST_CASE("to_sorted_set preserves references", "[tuple_algorithms]") {
 TEST_CASE("to_unsorted_set", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 1.0, true, 2.0, false};
     constexpr auto u = stdx::to_unsorted_set(t);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(u), stdx::tuple<int, double, bool> const>);
     CHECK(u == stdx::tuple{1, 1.0, true});
 }
@@ -719,12 +721,12 @@ TEST_CASE("to_unsorted_set preserves references", "[tuple_algorithms]") {
     double a{3.0};
     double b{4.0};
     auto t = stdx::forward_as_tuple(x, y, a, b);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(t),
                        stdx::tuple<int &, int &, double &, double &>>);
     CHECK(t == stdx::tuple{1, 2, 3.0, 4.0});
     auto u = stdx::to_unsorted_set(t);
-    static_assert(std::is_same_v<decltype(u), stdx::tuple<int &, double &>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(u), stdx::tuple<int &, double &>>);
     CHECK(u == stdx::tuple{1, 3.0});
     CHECK(std::addressof(x) == std::addressof(u[stdx::index<0>]));
     CHECK(std::addressof(a) == std::addressof(u[stdx::index<1>]));
@@ -733,7 +735,7 @@ TEST_CASE("to_unsorted_set preserves references", "[tuple_algorithms]") {
 TEST_CASE("to_unsorted_set with move only types", "[tuple_algorithms]") {
     auto t = stdx::tuple{1, move_only{1}, true, move_only{2}, false};
     auto u = stdx::to_unsorted_set(std::move(t));
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(u), stdx::tuple<int, move_only, bool>>);
     CHECK(u == stdx::tuple{1, move_only{1}, true});
 }
@@ -759,24 +761,24 @@ TEST_CASE("unrolled enumerate on arrays", "[tuple_algorithms]") {
 TEST_CASE("gather (empty tuple)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{};
     [[maybe_unused]] constexpr auto gathered = stdx::gather(t);
-    static_assert(std::is_same_v<decltype(gathered), stdx::tuple<> const>);
+    STATIC_REQUIRE(std::is_same_v<decltype(gathered), stdx::tuple<> const>);
 }
 
 TEST_CASE("gather (1-element tuple)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1};
     constexpr auto gathered = stdx::gather(t);
-    static_assert(std::is_same_v<decltype(gathered),
-                                 stdx::tuple<stdx::tuple<int>> const>);
+    STATIC_REQUIRE(std::is_same_v<decltype(gathered),
+                                  stdx::tuple<stdx::tuple<int>> const>);
     CHECK(gathered == stdx::make_tuple(stdx::tuple{1}));
 }
 
 TEST_CASE("gather (general case)", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 1.0, 2, 1.0, 3, true};
     constexpr auto gathered = stdx::gather(t);
-    static_assert(std::is_same_v<
-                  decltype(gathered),
-                  stdx::tuple<stdx::tuple<bool>, stdx::tuple<double, double>,
-                              stdx::tuple<int, int, int>> const>);
+    STATIC_REQUIRE(std::is_same_v<
+                   decltype(gathered),
+                   stdx::tuple<stdx::tuple<bool>, stdx::tuple<double, double>,
+                               stdx::tuple<int, int, int>> const>);
     // NB: the subtuples are not necessarily ordered the same way as originally
     CHECK(stdx::get<0>(gathered) == stdx::tuple{true});
     CHECK(stdx::get<1>(gathered).fold_left(0.0, std::plus{}) == 2.0);
@@ -788,16 +790,16 @@ TEST_CASE("gather preserves references", "[tuple_algorithms]") {
     int y{2};
     auto t = stdx::tuple<int &, int &>{x, y};
     auto gathered = stdx::gather(t);
-    static_assert(std::is_same_v<decltype(gathered),
-                                 stdx::tuple<stdx::tuple<int &, int &>>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(gathered),
+                                  stdx::tuple<stdx::tuple<int &, int &>>>);
     CHECK(get<0>(gathered) == stdx::tuple{1, 2});
 }
 
 TEST_CASE("gather with move only types", "[tuple_algorithms]") {
     auto t = stdx::tuple{move_only{1}};
     auto gathered = stdx::gather(std::move(t));
-    static_assert(std::is_same_v<decltype(gathered),
-                                 stdx::tuple<stdx::tuple<move_only>>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(gathered),
+                                  stdx::tuple<stdx::tuple<move_only>>>);
     CHECK(get<0>(gathered) == stdx::tuple{move_only{1}});
 }
 
@@ -818,7 +820,7 @@ TEST_CASE("gather_by with projection", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{named_int<C>{3}, named_int<B>{11},
                                    named_int<A>{0}, named_int<B>{12}};
     constexpr auto gathered = stdx::gather_by<name_of_t>(t);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(gathered),
                        stdx::tuple<stdx::tuple<named_int<A>>,
                                    stdx::tuple<named_int<B>, named_int<B>>,
@@ -830,14 +832,14 @@ TEST_CASE("gather_by with projection", "[tuple_algorithms]") {
 }
 
 TEST_CASE("tuple_cons", "[tuple_algorithms]") {
-    static_assert(stdx::tuple_cons(1, stdx::tuple{}) == stdx::tuple{1});
+    STATIC_REQUIRE(stdx::tuple_cons(1, stdx::tuple{}) == stdx::tuple{1});
     auto t = stdx::tuple_cons(1, stdx::tuple{});
-    static_assert(std::is_same_v<decltype(t), stdx::tuple<int>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<int>>);
 }
 
 TEST_CASE("tuple_cons (move only)", "[tuple_algorithms]") {
     auto t = stdx::tuple_cons(move_only{5}, stdx::tuple{move_only{10}});
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(t), stdx::tuple<move_only, move_only>>);
     CHECK(t == stdx::tuple{move_only{5}, move_only{10}});
 }
@@ -845,20 +847,20 @@ TEST_CASE("tuple_cons (move only)", "[tuple_algorithms]") {
 TEST_CASE("tuple_cons (references)", "[tuple_algorithms]") {
     auto x = 1;
     auto t = stdx::tuple_cons(1, stdx::tuple<int &>{x});
-    static_assert(std::is_same_v<decltype(t), stdx::tuple<int, int &>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<int, int &>>);
     CHECK(t == stdx::tuple{1, 1});
     CHECK(std::addressof(x) == std::addressof(t[stdx::index<1>]));
 }
 
 TEST_CASE("tuple_snoc", "[tuple_algorithms]") {
-    static_assert(stdx::tuple_snoc(stdx::tuple{}, 1) == stdx::tuple{1});
+    STATIC_REQUIRE(stdx::tuple_snoc(stdx::tuple{}, 1) == stdx::tuple{1});
     auto t = stdx::tuple_snoc(stdx::tuple{}, 1);
-    static_assert(std::is_same_v<decltype(t), stdx::tuple<int>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<int>>);
 }
 
 TEST_CASE("tuple_snoc (move only)", "[tuple_algorithms]") {
     auto t = stdx::tuple_snoc(stdx::tuple{move_only{10}}, move_only{5});
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<decltype(t), stdx::tuple<move_only, move_only>>);
     CHECK(t == stdx::tuple{move_only{10}, move_only{5}});
 }
@@ -866,15 +868,15 @@ TEST_CASE("tuple_snoc (move only)", "[tuple_algorithms]") {
 TEST_CASE("tuple_snoc (references)", "[tuple_algorithms]") {
     auto x = 1;
     auto t = stdx::tuple_snoc(stdx::tuple<int &>{x}, 1);
-    static_assert(std::is_same_v<decltype(t), stdx::tuple<int &, int>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<int &, int>>);
     CHECK(t == stdx::tuple{1, 1});
     CHECK(std::addressof(x) == std::addressof(t[stdx::index<0>]));
 }
 
 TEST_CASE("tuple_push_front", "[tuple_algorithms]") {
-    static_assert(stdx::tuple_push_front(1, stdx::tuple{}) == stdx::tuple{1});
+    STATIC_REQUIRE(stdx::tuple_push_front(1, stdx::tuple{}) == stdx::tuple{1});
 }
 
 TEST_CASE("tuple_push_back", "[tuple_algorithms]") {
-    static_assert(stdx::tuple_push_back(stdx::tuple{}, 1) == stdx::tuple{1});
+    STATIC_REQUIRE(stdx::tuple_push_back(stdx::tuple{}, 1) == stdx::tuple{1});
 }

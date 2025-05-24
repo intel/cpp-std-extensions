@@ -9,7 +9,7 @@
 TEST_CASE("to_address for pointer (constexpr)", "[memory]") {
     constexpr static int a{};
     constexpr static auto p = &a;
-    static_assert(stdx::to_address(p) == p);
+    STATIC_REQUIRE(stdx::to_address(p) == p);
 }
 
 TEST_CASE("to_address for pointer (runtime)", "[memory]") {

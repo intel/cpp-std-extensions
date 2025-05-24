@@ -6,56 +6,56 @@
 #include <type_traits>
 
 TEST_CASE("integral", "[concepts]") {
-    static_assert(stdx::integral<int>);
-    static_assert(not stdx::integral<float>);
+    STATIC_REQUIRE(stdx::integral<int>);
+    STATIC_REQUIRE(not stdx::integral<float>);
 }
 
 TEST_CASE("floating_point", "[concepts]") {
-    static_assert(stdx::floating_point<float>);
-    static_assert(not stdx::floating_point<int>);
+    STATIC_REQUIRE(stdx::floating_point<float>);
+    STATIC_REQUIRE(not stdx::floating_point<int>);
 }
 
 TEST_CASE("signed_integral", "[concepts]") {
-    static_assert(stdx::signed_integral<int>);
-    static_assert(not stdx::signed_integral<unsigned int>);
+    STATIC_REQUIRE(stdx::signed_integral<int>);
+    STATIC_REQUIRE(not stdx::signed_integral<unsigned int>);
 }
 
 TEST_CASE("unsigned_integral", "[concepts]") {
-    static_assert(stdx::unsigned_integral<unsigned int>);
-    static_assert(not stdx::unsigned_integral<int>);
+    STATIC_REQUIRE(stdx::unsigned_integral<unsigned int>);
+    STATIC_REQUIRE(not stdx::unsigned_integral<int>);
 }
 
 TEST_CASE("same_as", "[concepts]") {
-    static_assert(stdx::same_as<int, int>);
-    static_assert(not stdx::same_as<float, int>);
+    STATIC_REQUIRE(stdx::same_as<int, int>);
+    STATIC_REQUIRE(not stdx::same_as<float, int>);
 }
 
 TEST_CASE("same_any", "[concepts]") {
-    static_assert(stdx::same_any<int, float, bool, int>);
-    static_assert(not stdx::same_any<float, char, bool, int>);
+    STATIC_REQUIRE(stdx::same_any<int, float, bool, int>);
+    STATIC_REQUIRE(not stdx::same_any<float, char, bool, int>);
 }
 
 TEST_CASE("same_none", "[concepts]") {
-    static_assert(stdx::same_none<int, float, bool, char>);
-    static_assert(not stdx::same_none<float, bool, char, float>);
+    STATIC_REQUIRE(stdx::same_none<int, float, bool, char>);
+    STATIC_REQUIRE(not stdx::same_none<float, bool, char, float>);
 }
 
 TEST_CASE("same_as_unqualified", "[concepts]") {
-    static_assert(stdx::same_as_unqualified<int, int>);
-    static_assert(not stdx::same_as_unqualified<int, void>);
-    static_assert(stdx::same_as_unqualified<int, int &>);
-    static_assert(stdx::same_as_unqualified<int, int const &>);
-    static_assert(stdx::same_as_unqualified<int, int &&>);
-    static_assert(stdx::same_as_unqualified<int, int const &&>);
-    static_assert(stdx::same_as_unqualified<int &, int>);
-    static_assert(stdx::same_as_unqualified<int const &, int>);
-    static_assert(stdx::same_as_unqualified<int &&, int>);
-    static_assert(stdx::same_as_unqualified<int const &&, int>);
+    STATIC_REQUIRE(stdx::same_as_unqualified<int, int>);
+    STATIC_REQUIRE(not stdx::same_as_unqualified<int, void>);
+    STATIC_REQUIRE(stdx::same_as_unqualified<int, int &>);
+    STATIC_REQUIRE(stdx::same_as_unqualified<int, int const &>);
+    STATIC_REQUIRE(stdx::same_as_unqualified<int, int &&>);
+    STATIC_REQUIRE(stdx::same_as_unqualified<int, int const &&>);
+    STATIC_REQUIRE(stdx::same_as_unqualified<int &, int>);
+    STATIC_REQUIRE(stdx::same_as_unqualified<int const &, int>);
+    STATIC_REQUIRE(stdx::same_as_unqualified<int &&, int>);
+    STATIC_REQUIRE(stdx::same_as_unqualified<int const &&, int>);
 }
 
 TEST_CASE("convertible_to", "[concepts]") {
-    static_assert(stdx::convertible_to<char, int>);
-    static_assert(not stdx::convertible_to<float *, int *>);
+    STATIC_REQUIRE(stdx::convertible_to<char, int>);
+    STATIC_REQUIRE(not stdx::convertible_to<float *, int *>);
 }
 
 namespace {
@@ -63,13 +63,13 @@ struct S {};
 } // namespace
 
 TEST_CASE("equality_comparable", "[concepts]") {
-    static_assert(stdx::equality_comparable<int>);
-    static_assert(not stdx::equality_comparable<S>);
+    STATIC_REQUIRE(stdx::equality_comparable<int>);
+    STATIC_REQUIRE(not stdx::equality_comparable<S>);
 }
 
 TEST_CASE("totally_ordered", "[concepts]") {
-    static_assert(stdx::totally_ordered<int>);
-    static_assert(not stdx::totally_ordered<S>);
+    STATIC_REQUIRE(stdx::totally_ordered<int>);
+    STATIC_REQUIRE(not stdx::totally_ordered<S>);
 }
 
 namespace {
@@ -79,10 +79,10 @@ struct C : private A {};
 } // namespace
 
 TEST_CASE("derived_from", "[concepts]") {
-    static_assert(stdx::derived_from<A, A>);
-    static_assert(stdx::derived_from<B, A>);
-    static_assert(not stdx::derived_from<C, A>);
-    static_assert(not stdx::derived_from<int, int>);
+    STATIC_REQUIRE(stdx::derived_from<A, A>);
+    STATIC_REQUIRE(stdx::derived_from<B, A>);
+    STATIC_REQUIRE(not stdx::derived_from<C, A>);
+    STATIC_REQUIRE(not stdx::derived_from<int, int>);
 }
 
 TEST_CASE("invocable", "[concepts]") {
@@ -91,15 +91,15 @@ TEST_CASE("invocable", "[concepts]") {
     [[maybe_unused]] constexpr auto l_invocable_no_args = [] {};
     [[maybe_unused]] constexpr auto l_invocable_int = [](int) {};
 
-    static_assert(not stdx::invocable<int>);
-    static_assert(stdx::invocable<invocable_no_args>);
-    static_assert(not stdx::invocable<invocable_no_args, int>);
-    static_assert(stdx::invocable<invocable_int, int>);
-    static_assert(not stdx::invocable<invocable_int>);
-    static_assert(stdx::invocable<decltype(l_invocable_no_args)>);
-    static_assert(not stdx::invocable<decltype(l_invocable_no_args), int>);
-    static_assert(stdx::invocable<decltype(l_invocable_int), int>);
-    static_assert(not stdx::invocable<decltype(l_invocable_int)>);
+    STATIC_REQUIRE(not stdx::invocable<int>);
+    STATIC_REQUIRE(stdx::invocable<invocable_no_args>);
+    STATIC_REQUIRE(not stdx::invocable<invocable_no_args, int>);
+    STATIC_REQUIRE(stdx::invocable<invocable_int, int>);
+    STATIC_REQUIRE(not stdx::invocable<invocable_int>);
+    STATIC_REQUIRE(stdx::invocable<decltype(l_invocable_no_args)>);
+    STATIC_REQUIRE(not stdx::invocable<decltype(l_invocable_no_args), int>);
+    STATIC_REQUIRE(stdx::invocable<decltype(l_invocable_int), int>);
+    STATIC_REQUIRE(not stdx::invocable<decltype(l_invocable_int)>);
 }
 
 TEST_CASE("predicate (negative cases)", "[concepts]") {
@@ -108,10 +108,10 @@ TEST_CASE("predicate (negative cases)", "[concepts]") {
     [[maybe_unused]] constexpr auto l_not_predicate_no_args = [] {};
     [[maybe_unused]] constexpr auto l_not_predicate_int = [](int) {};
 
-    static_assert(not stdx::predicate<not_predicate_no_args>);
-    static_assert(not stdx::predicate<not_predicate_int, int>);
-    static_assert(not stdx::predicate<decltype(l_not_predicate_no_args)>);
-    static_assert(not stdx::predicate<decltype(l_not_predicate_int), int>);
+    STATIC_REQUIRE(not stdx::predicate<not_predicate_no_args>);
+    STATIC_REQUIRE(not stdx::predicate<not_predicate_int, int>);
+    STATIC_REQUIRE(not stdx::predicate<decltype(l_not_predicate_no_args)>);
+    STATIC_REQUIRE(not stdx::predicate<decltype(l_not_predicate_int), int>);
 }
 
 TEST_CASE("predicate (positive cases)", "[concepts]") {
@@ -126,12 +126,12 @@ TEST_CASE("predicate (positive cases)", "[concepts]") {
         return std::true_type{};
     };
 
-    static_assert(stdx::predicate<predicate_no_args>);
-    static_assert(stdx::predicate<predicate_int, int>);
-    static_assert(stdx::predicate<decltype(l_predicate_no_args)>);
-    static_assert(stdx::predicate<decltype(l_predicate_int), int>);
-    static_assert(stdx::predicate<decltype(convert_predicate_no_args)>);
-    static_assert(stdx::predicate<decltype(convert_predicate_int), int>);
+    STATIC_REQUIRE(stdx::predicate<predicate_no_args>);
+    STATIC_REQUIRE(stdx::predicate<predicate_int, int>);
+    STATIC_REQUIRE(stdx::predicate<decltype(l_predicate_no_args)>);
+    STATIC_REQUIRE(stdx::predicate<decltype(l_predicate_int), int>);
+    STATIC_REQUIRE(stdx::predicate<decltype(convert_predicate_no_args)>);
+    STATIC_REQUIRE(stdx::predicate<decltype(convert_predicate_int), int>);
 }
 
 namespace {
@@ -151,19 +151,19 @@ TEST_CASE("callable", "[concepts]") {
     [[maybe_unused]] constexpr auto l_callable_int = [](int) {};
     [[maybe_unused]] constexpr auto l_callable_generic = [](auto) {};
 
-    static_assert(not stdx::callable<int>);
-    static_assert(stdx::callable<decltype(func_no_args)>);
-    static_assert(stdx::callable<decltype(func_one_arg)>);
-    static_assert(stdx::callable<funcobj>);
-    static_assert(stdx::callable<generic_funcobj>);
-    static_assert(stdx::callable<decltype(l_callable_no_args)>);
-    static_assert(stdx::callable<decltype(l_callable_int)>);
-    static_assert(stdx::callable<decltype(l_callable_generic)>);
+    STATIC_REQUIRE(not stdx::callable<int>);
+    STATIC_REQUIRE(stdx::callable<decltype(func_no_args)>);
+    STATIC_REQUIRE(stdx::callable<decltype(func_one_arg)>);
+    STATIC_REQUIRE(stdx::callable<funcobj>);
+    STATIC_REQUIRE(stdx::callable<generic_funcobj>);
+    STATIC_REQUIRE(stdx::callable<decltype(l_callable_no_args)>);
+    STATIC_REQUIRE(stdx::callable<decltype(l_callable_int)>);
+    STATIC_REQUIRE(stdx::callable<decltype(l_callable_generic)>);
 }
 
 TEST_CASE("models_trait", "[concepts]") {
-    static_assert(stdx::has_trait<int *, std::is_pointer>);
-    static_assert(not stdx::has_trait<int, std::is_pointer>);
+    STATIC_REQUIRE(stdx::has_trait<int *, std::is_pointer>);
+    STATIC_REQUIRE(not stdx::has_trait<int, std::is_pointer>);
 }
 
 namespace {
@@ -173,6 +173,6 @@ struct non_structural {
 } // namespace
 
 TEST_CASE("structural", "[type_traits]") {
-    static_assert(stdx::structural<int>);
-    static_assert(not stdx::structural<non_structural>);
+    STATIC_REQUIRE(stdx::structural<int>);
+    STATIC_REQUIRE(not stdx::structural<non_structural>);
 }

@@ -101,8 +101,8 @@ TEST_CASE("non-empty iterators", "[cx_map]") {
 
 TEST_CASE("constexpr empty and size", "[cx_map]") {
     constexpr auto m = stdx::cx_map<int, int, 64>{};
-    static_assert(m.size() == 0);
-    static_assert(m.empty());
+    STATIC_REQUIRE(m.size() == 0);
+    STATIC_REQUIRE(m.empty());
 }
 
 TEST_CASE("constexpr populated map", "[cx_map]") {
@@ -113,12 +113,12 @@ TEST_CASE("constexpr populated map", "[cx_map]") {
         return t;
     }();
 
-    static_assert(not m.empty());
-    static_assert(m.contains(10));
-    static_assert(m.get(10) == 50);
-    static_assert(m.contains(11));
-    static_assert(m.get(11) == 100);
-    static_assert(not m.contains(12));
+    STATIC_REQUIRE(not m.empty());
+    STATIC_REQUIRE(m.contains(10));
+    STATIC_REQUIRE(m.get(10) == 50);
+    STATIC_REQUIRE(m.contains(11));
+    STATIC_REQUIRE(m.get(11) == 100);
+    STATIC_REQUIRE(not m.contains(12));
 }
 
 TEST_CASE("constexpr erase", "[cx_map]") {
@@ -131,10 +131,10 @@ TEST_CASE("constexpr erase", "[cx_map]") {
         return t;
     }();
 
-    static_assert(not m.empty());
-    static_assert(m.contains(10));
-    static_assert(m.get(10) == 50);
-    static_assert(not m.contains(11));
+    STATIC_REQUIRE(not m.empty());
+    STATIC_REQUIRE(m.contains(10));
+    STATIC_REQUIRE(m.get(10) == 50);
+    STATIC_REQUIRE(not m.contains(11));
 }
 
 TEST_CASE("constexpr update value", "[cx_map]") {
@@ -145,9 +145,9 @@ TEST_CASE("constexpr update value", "[cx_map]") {
         return t;
     }();
 
-    static_assert(not m.empty());
-    static_assert(m.contains(10));
-    static_assert(m.get(10) == 100);
+    STATIC_REQUIRE(not m.empty());
+    STATIC_REQUIRE(m.contains(10));
+    STATIC_REQUIRE(m.get(10) == 100);
 }
 
 TEST_CASE("constexpr erase first", "[cx_map]") {
@@ -159,8 +159,8 @@ TEST_CASE("constexpr erase first", "[cx_map]") {
         return t;
     }();
 
-    static_assert(not m.empty());
-    static_assert(m.contains(11));
-    static_assert(m.get(11) == 100);
-    static_assert(not m.contains(10));
+    STATIC_REQUIRE(not m.empty());
+    STATIC_REQUIRE(m.contains(11));
+    STATIC_REQUIRE(m.get(11) == 100);
+    STATIC_REQUIRE(not m.contains(10));
 }

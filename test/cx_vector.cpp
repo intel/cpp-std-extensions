@@ -9,12 +9,12 @@ TEST_CASE("empty vector", "[cx_vector]") {
     stdx::cx_vector<uint32_t, 3> const v{};
     CHECK(0u == v.size());
     CHECK(v.empty());
-    static_assert(3u == v.capacity());
+    STATIC_REQUIRE(3u == v.capacity());
 }
 
 TEST_CASE("CTAD", "[cx_vector]") {
     stdx::cx_vector v{1, 2, 3, 4, 5, 6};
-    static_assert(std::is_same_v<decltype(v), stdx::cx_vector<int, 6>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(v), stdx::cx_vector<int, 6>>);
 }
 
 TEST_CASE("mutable vector", "[cx_vector]") {
@@ -161,7 +161,7 @@ TEST_CASE("inequality", "[cx_vector]") {
 TEST_CASE("zero capacity", "[cx_vector]") {
     stdx::cx_vector<int, 0> const v{};
     CHECK(0u == v.size());
-    static_assert(0u == v.capacity());
+    STATIC_REQUIRE(0u == v.capacity());
     CHECK(v.empty());
     CHECK(v.full());
     CHECK(v.begin() == v.end());

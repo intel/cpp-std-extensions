@@ -10,12 +10,12 @@ TEST_CASE("construction", "[cached]") {
 
 TEST_CASE("exposed value_type", "[cached]") {
     auto c = stdx::cached{[] { return 42; }};
-    static_assert(std::is_same_v<typename decltype(c)::value_type, int>);
+    STATIC_REQUIRE(std::is_same_v<typename decltype(c)::value_type, int>);
 }
 
 TEST_CASE("cached_value_t", "[cached]") {
     auto const c = stdx::cached{[] { return 42; }};
-    static_assert(std::is_same_v<stdx::cached_value_t<decltype(c)>, int>);
+    STATIC_REQUIRE(std::is_same_v<stdx::cached_value_t<decltype(c)>, int>);
 }
 
 TEST_CASE("automatic population", "[cached]") {
@@ -63,7 +63,7 @@ TEST_CASE("refresh immediately repopulates value", "[cached]") {
 
 TEST_CASE("refresh returns a reference to value", "[cached]") {
     auto c = stdx::cached{[] { return 42; }};
-    static_assert(std::is_same_v<decltype(c.refresh()), int &>);
+    STATIC_REQUIRE(std::is_same_v<decltype(c.refresh()), int &>);
     CHECK(c.refresh() == 42);
 }
 
@@ -94,12 +94,12 @@ TEST_CASE("non-movable value", "[cached]") {
 TEST_CASE("preserving value categories", "[cached]") {
     {
         auto c = stdx::cached{[] { return 42; }};
-        static_assert(std::is_same_v<int const &, decltype(*c)>);
-        static_assert(std::is_same_v<int const &&, decltype(*std::move(c))>);
+        STATIC_REQUIRE(std::is_same_v<int const &, decltype(*c)>);
+        STATIC_REQUIRE(std::is_same_v<int const &&, decltype(*std::move(c))>);
     }
     {
         auto const c = stdx::cached{[] { return 42; }};
-        static_assert(std::is_same_v<int const &, decltype(*c)>);
-        static_assert(std::is_same_v<int const &&, decltype(*std::move(c))>);
+        STATIC_REQUIRE(std::is_same_v<int const &, decltype(*c)>);
+        STATIC_REQUIRE(std::is_same_v<int const &&, decltype(*std::move(c))>);
     }
 }

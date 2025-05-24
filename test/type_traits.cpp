@@ -14,28 +14,28 @@ template <typename T> struct derived_t : unary_t<T> {};
 } // namespace
 
 TEST_CASE("detect specializations", "[type_traits]") {
-    static_assert(stdx::is_specialization_of_v<unary_t<int>, unary_t>);
-    static_assert(stdx::is_type_specialization_of_v<unary_t<int>, unary_t>);
-    static_assert(stdx::is_specialization_of<unary_t<int>, unary_t>());
+    STATIC_REQUIRE(stdx::is_specialization_of_v<unary_t<int>, unary_t>);
+    STATIC_REQUIRE(stdx::is_type_specialization_of_v<unary_t<int>, unary_t>);
+    STATIC_REQUIRE(stdx::is_specialization_of<unary_t<int>, unary_t>());
 
-    static_assert(not stdx::is_specialization_of_v<int, unary_t>);
-    static_assert(not stdx::is_type_specialization_of_v<int, unary_t>);
-    static_assert(not stdx::is_specialization_of<int, unary_t>());
+    STATIC_REQUIRE(not stdx::is_specialization_of_v<int, unary_t>);
+    STATIC_REQUIRE(not stdx::is_type_specialization_of_v<int, unary_t>);
+    STATIC_REQUIRE(not stdx::is_specialization_of<int, unary_t>());
 
-    static_assert(stdx::is_specialization_of_v<variadic_t<>, variadic_t>);
-    static_assert(stdx::is_type_specialization_of_v<variadic_t<>, variadic_t>);
-    static_assert(stdx::is_specialization_of<variadic_t<>, variadic_t>());
+    STATIC_REQUIRE(stdx::is_specialization_of_v<variadic_t<>, variadic_t>);
+    STATIC_REQUIRE(stdx::is_type_specialization_of_v<variadic_t<>, variadic_t>);
+    STATIC_REQUIRE(stdx::is_specialization_of<variadic_t<>, variadic_t>());
 
-    static_assert(not stdx::is_specialization_of_v<int, variadic_t>);
-    static_assert(not stdx::is_type_specialization_of_v<int, variadic_t>);
-    static_assert(not stdx::is_specialization_of<int, variadic_t>());
+    STATIC_REQUIRE(not stdx::is_specialization_of_v<int, variadic_t>);
+    STATIC_REQUIRE(not stdx::is_type_specialization_of_v<int, variadic_t>);
+    STATIC_REQUIRE(not stdx::is_specialization_of<int, variadic_t>());
 }
 
 TEST_CASE("derived types are not specializations", "[type_traits]") {
-    static_assert(not stdx::is_specialization_of_v<derived_t<int>, unary_t>);
-    static_assert(
+    STATIC_REQUIRE(not stdx::is_specialization_of_v<derived_t<int>, unary_t>);
+    STATIC_REQUIRE(
         not stdx::is_type_specialization_of_v<derived_t<int>, unary_t>);
-    static_assert(not stdx::is_specialization_of<derived_t<int>, unary_t>());
+    STATIC_REQUIRE(not stdx::is_specialization_of<derived_t<int>, unary_t>());
 }
 
 namespace {
@@ -45,29 +45,29 @@ template <auto V> struct value_derived_t : value_unary_t<V> {};
 } // namespace
 
 TEST_CASE("detect specializations (value templates)", "[type_traits]") {
-    static_assert(
+    STATIC_REQUIRE(
         stdx::is_value_specialization_of_v<value_unary_t<0>, value_unary_t>);
-    static_assert(
+    STATIC_REQUIRE(
         stdx::is_specialization_of<value_unary_t<0>, value_unary_t>());
 
-    static_assert(not stdx::is_value_specialization_of_v<int, value_unary_t>);
-    static_assert(not stdx::is_specialization_of<int, value_unary_t>());
+    STATIC_REQUIRE(not stdx::is_value_specialization_of_v<int, value_unary_t>);
+    STATIC_REQUIRE(not stdx::is_specialization_of<int, value_unary_t>());
 
-    static_assert(stdx::is_value_specialization_of_v<value_variadic_t<>,
-                                                     value_variadic_t>);
-    static_assert(
+    STATIC_REQUIRE(stdx::is_value_specialization_of_v<value_variadic_t<>,
+                                                      value_variadic_t>);
+    STATIC_REQUIRE(
         stdx::is_specialization_of<value_variadic_t<>, value_variadic_t>());
 
-    static_assert(
+    STATIC_REQUIRE(
         not stdx::is_value_specialization_of_v<int, value_variadic_t>);
-    static_assert(not stdx::is_specialization_of<int, value_variadic_t>());
+    STATIC_REQUIRE(not stdx::is_specialization_of<int, value_variadic_t>());
 }
 
 TEST_CASE("derived types are not specializations (value templates)",
           "[type_traits]") {
-    static_assert(not stdx::is_value_specialization_of_v<value_derived_t<0>,
-                                                         value_unary_t>);
-    static_assert(
+    STATIC_REQUIRE(not stdx::is_value_specialization_of_v<value_derived_t<0>,
+                                                          value_unary_t>);
+    STATIC_REQUIRE(
         not stdx::is_specialization_of<value_derived_t<0>, value_unary_t>());
 }
 
@@ -77,25 +77,25 @@ enum struct E2 {};
 } // namespace
 
 TEST_CASE("is_scoped_enum", "[type_traits]") {
-    static_assert(not stdx::is_scoped_enum_v<int>);
-    static_assert(not stdx::is_scoped_enum_v<E1>);
-    static_assert(stdx::is_scoped_enum_v<E2>);
+    STATIC_REQUIRE(not stdx::is_scoped_enum_v<int>);
+    STATIC_REQUIRE(not stdx::is_scoped_enum_v<E1>);
+    STATIC_REQUIRE(stdx::is_scoped_enum_v<E2>);
 
-    static_assert(not stdx::is_scoped_enum<int>::value);
-    static_assert(not stdx::is_scoped_enum<E1>::value);
-    static_assert(stdx::is_scoped_enum<E2>::value);
+    STATIC_REQUIRE(not stdx::is_scoped_enum<int>::value);
+    STATIC_REQUIRE(not stdx::is_scoped_enum<E1>::value);
+    STATIC_REQUIRE(stdx::is_scoped_enum<E2>::value);
 }
 
 TEST_CASE("type_identity", "[type_traits]") {
-    static_assert(std::is_same_v<stdx::type_identity_t<void>, void>);
+    STATIC_REQUIRE(std::is_same_v<stdx::type_identity_t<void>, void>);
 }
 
 TEST_CASE("type_or_t", "[type_traits]") {
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<stdx::type_or_t<std::is_void, void, int>, void>);
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<stdx::type_or_t<std::is_void, int, float>, float>);
-    static_assert(std::is_same_v<stdx::type_or_t<std::is_void, int>, void>);
+    STATIC_REQUIRE(std::is_same_v<stdx::type_or_t<std::is_void, int>, void>);
 }
 
 namespace {
@@ -169,16 +169,16 @@ TEST_CASE("apply_sequence with index sequence", "[type_traits]") {
 }
 
 TEST_CASE("is_same_unqualified", "[type_traits]") {
-    static_assert(stdx::is_same_unqualified_v<int, int>);
-    static_assert(not stdx::is_same_unqualified_v<int, void>);
-    static_assert(stdx::is_same_unqualified_v<int, int &>);
-    static_assert(stdx::is_same_unqualified_v<int, int const &>);
-    static_assert(stdx::is_same_unqualified_v<int, int &&>);
-    static_assert(stdx::is_same_unqualified_v<int, int const &&>);
-    static_assert(stdx::is_same_unqualified_v<int &, int>);
-    static_assert(stdx::is_same_unqualified_v<int const &, int>);
-    static_assert(stdx::is_same_unqualified_v<int &&, int>);
-    static_assert(stdx::is_same_unqualified_v<int const &&, int>);
+    STATIC_REQUIRE(stdx::is_same_unqualified_v<int, int>);
+    STATIC_REQUIRE(not stdx::is_same_unqualified_v<int, void>);
+    STATIC_REQUIRE(stdx::is_same_unqualified_v<int, int &>);
+    STATIC_REQUIRE(stdx::is_same_unqualified_v<int, int const &>);
+    STATIC_REQUIRE(stdx::is_same_unqualified_v<int, int &&>);
+    STATIC_REQUIRE(stdx::is_same_unqualified_v<int, int const &&>);
+    STATIC_REQUIRE(stdx::is_same_unqualified_v<int &, int>);
+    STATIC_REQUIRE(stdx::is_same_unqualified_v<int const &, int>);
+    STATIC_REQUIRE(stdx::is_same_unqualified_v<int &&, int>);
+    STATIC_REQUIRE(stdx::is_same_unqualified_v<int const &&, int>);
 }
 
 // for a taxonomy of structural types below, see
@@ -215,21 +215,21 @@ using union_t = union {
 } // namespace structural
 
 TEST_CASE("structural types", "[type_traits]") {
-    static_assert(stdx::is_structural_v<int &>);
-    static_assert(stdx::is_structural_v<int>);
-    static_assert(stdx::is_structural_v<int *>);
-    static_assert(stdx::is_structural_v<structural::pmd_t>);
-    static_assert(stdx::is_structural_v<structural::pmf_t>);
-    static_assert(stdx::is_structural_v<structural::enum_t>);
-    static_assert(stdx::is_structural_v<std::nullptr_t>);
+    STATIC_REQUIRE(stdx::is_structural_v<int &>);
+    STATIC_REQUIRE(stdx::is_structural_v<int>);
+    STATIC_REQUIRE(stdx::is_structural_v<int *>);
+    STATIC_REQUIRE(stdx::is_structural_v<structural::pmd_t>);
+    STATIC_REQUIRE(stdx::is_structural_v<structural::pmf_t>);
+    STATIC_REQUIRE(stdx::is_structural_v<structural::enum_t>);
+    STATIC_REQUIRE(stdx::is_structural_v<std::nullptr_t>);
 
 #if __cpp_nontype_template_args >= 201911L
-    static_assert(stdx::is_structural_v<structural::base_t>);
-    static_assert(stdx::is_structural_v<structural::derived_t>);
-    static_assert(stdx::is_structural_v<structural::class_t>);
-    static_assert(stdx::is_structural_v<structural::lambda_t>);
-    static_assert(stdx::is_structural_v<structural::union_t>);
-    static_assert(stdx::is_structural_v<float>);
+    STATIC_REQUIRE(stdx::is_structural_v<structural::base_t>);
+    STATIC_REQUIRE(stdx::is_structural_v<structural::derived_t>);
+    STATIC_REQUIRE(stdx::is_structural_v<structural::class_t>);
+    STATIC_REQUIRE(stdx::is_structural_v<structural::lambda_t>);
+    STATIC_REQUIRE(stdx::is_structural_v<structural::union_t>);
+    STATIC_REQUIRE(stdx::is_structural_v<float>);
 #endif
 }
 
@@ -240,7 +240,7 @@ struct S {
 } // namespace non_structural
 
 TEST_CASE("non-structural types", "[type_traits]") {
-    static_assert(not stdx::is_structural_v<non_structural::S>);
+    STATIC_REQUIRE(not stdx::is_structural_v<non_structural::S>);
 }
 
 #if __cplusplus >= 202002L
@@ -253,19 +253,19 @@ TEST_CASE("type shrinkage", "[type_traits]") {
     using B = long_type_name<A, A, A, A, A, A, A, A>;
     using C = long_type_name<B, B, B, B, B, B, B, B>;
     using X = stdx::shrink_t<C>;
-    static_assert(stdx::type_as_string<X>().size() <
-                  stdx::type_as_string<C>().size());
-    static_assert(std::same_as<stdx::expand_t<X>, C>);
+    STATIC_REQUIRE(stdx::type_as_string<X>().size() <
+                   stdx::type_as_string<C>().size());
+    STATIC_REQUIRE(std::same_as<stdx::expand_t<X>, C>);
 }
 #endif
 
 TEST_CASE("nth type in pack", "[type_traits]") {
-    static_assert(
+    STATIC_REQUIRE(
         std::is_same_v<stdx::nth_t<2, bool, char, float, int>, float>);
 }
 
 #if __cplusplus >= 202002L
 TEST_CASE("nth value in pack", "[type_traits]") {
-    static_assert(stdx::nth_v<2, 0, true, 'b', 3> == 'b');
+    STATIC_REQUIRE(stdx::nth_v<2, 0, true, 'b', 3> == 'b');
 }
 #endif

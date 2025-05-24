@@ -8,13 +8,13 @@ TEST_CASE("empty and size", "[cx_set]") {
     CHECK(s.empty());
 
     constexpr auto cs = stdx::cx_set<int, 64>{};
-    static_assert(cs.size() == 0);
-    static_assert(cs.empty());
+    STATIC_REQUIRE(cs.size() == 0);
+    STATIC_REQUIRE(cs.empty());
 }
 
 TEST_CASE("CTAD", "[cx_set]") {
     stdx::cx_set set{1, 2, 3, 4, 5, 6};
-    static_assert(std::is_same_v<decltype(set), stdx::cx_set<int, 6>>);
+    STATIC_REQUIRE(std::is_same_v<decltype(set), stdx::cx_set<int, 6>>);
 }
 
 TEST_CASE("contains", "[cx_set]") {
@@ -85,9 +85,9 @@ TEST_CASE("constexpr populated set", "[cx_set]") {
         return t;
     }();
 
-    static_assert(not populatedSetTest.empty());
-    static_assert(populatedSetTest.contains(10));
-    static_assert(not populatedSetTest.contains(11));
+    STATIC_REQUIRE(not populatedSetTest.empty());
+    STATIC_REQUIRE(populatedSetTest.contains(10));
+    STATIC_REQUIRE(not populatedSetTest.contains(11));
 }
 
 TEST_CASE("constexpr erase", "[cx_set]") {
@@ -102,13 +102,13 @@ TEST_CASE("constexpr erase", "[cx_set]") {
         return t;
     }();
 
-    static_assert(not testSetRemove.empty());
-    static_assert(testSetRemove.contains(12));
-    static_assert(testSetRemove.contains(40));
-    static_assert(testSetRemove.contains(42));
+    STATIC_REQUIRE(not testSetRemove.empty());
+    STATIC_REQUIRE(testSetRemove.contains(12));
+    STATIC_REQUIRE(testSetRemove.contains(40));
+    STATIC_REQUIRE(testSetRemove.contains(42));
 
-    static_assert(not testSetRemove.contains(10));
-    static_assert(not testSetRemove.contains(11));
-    static_assert(not testSetRemove.contains(32));
-    static_assert(not testSetRemove.contains(56));
+    STATIC_REQUIRE(not testSetRemove.contains(10));
+    STATIC_REQUIRE(not testSetRemove.contains(11));
+    STATIC_REQUIRE(not testSetRemove.contains(32));
+    STATIC_REQUIRE(not testSetRemove.contains(56));
 }

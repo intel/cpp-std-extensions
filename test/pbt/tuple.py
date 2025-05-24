@@ -1,21 +1,28 @@
 from hypothesis import strategies as st, given, settings, event, assume
 
+
 def unpack(l):
     return ", ".join([str(i) for i in l])
 
+
 small_ints = st.integers(min_value=-100, max_value=100)
+
 
 @st.composite
 def tuples(draw, children):
     values = draw(st.lists(children))
     return f"stdx::make_tuple({unpack(values)})"
 
+
 @st.composite
 def list_trees(draw, leaves=st.integers(), max_leaves=100):
-    l = draw(st.recursive(leaves, lambda children: st.lists(children), max_leaves=max_leaves))
+    l = draw(
+        st.recursive(leaves, lambda children: st.lists(children), max_leaves=max_leaves)
+    )
     if not isinstance(l, list):
         l = [l]
     return l
+
 
 def as_tuple_tree(value):
     if isinstance(value, list):
@@ -24,14 +31,17 @@ def as_tuple_tree(value):
     else:
         return value
 
+
 @st.composite
 def tuple_trees(draw, leaves=st.integers()):
     return draw(st.recursive(leaves, lambda children: tuples(children)))
 
+
 @settings(deadline=50000)
 @given(tuple_trees(small_ints))
 def test_tuple_trees(compile, t):
-    assert compile(f"""
+    assert compile(
+        f"""
         #include <stdx/tuple.hpp>
 
         [[maybe_unused]] constexpr auto t = {t};
@@ -39,13 +49,16 @@ def test_tuple_trees(compile, t):
         int main() {{
             return 0;
         }}
-    """)
+    """
+    )
+
 
 @settings(deadline=50000)
 @given(list_trees(small_ints))
 def test_tuple_size(compile, l):
     t = as_tuple_tree(l)
-    assert compile(f"""
+    assert compile(
+        f"""
         #include <stdx/tuple.hpp>
 
         constexpr auto t = {t};
@@ -55,7 +68,8 @@ def test_tuple_size(compile, l):
         int main() {{
             return 0;
         }}
-    """)
+    """
+    )
 
 
 @settings(deadline=50000)
@@ -67,7 +81,8 @@ def test_get_by_index(compile, l, i):
 
     expected_v = as_tuple_tree(l[i])
 
-    assert compile(f"""
+    assert compile(
+        f"""
         #include <stdx/tuple.hpp>
 
         using namespace stdx::literals;
@@ -84,7 +99,8 @@ def test_get_by_index(compile, l, i):
         int main() {{
             return 0;
         }}
-    """)
+    """
+    )
 
 
 @settings(deadline=50000)
@@ -95,7 +111,8 @@ def test_tuple_cat(compile, ls):
     flattened_ls = [i for subl in ls for i in subl]
     expected = as_tuple_tree(flattened_ls)
 
-    assert compile(f"""
+    assert compile(
+        f"""
         #include <stdx/tuple.hpp>
         #include <stdx/tuple_algorithms.hpp>
 
@@ -104,7 +121,8 @@ def test_tuple_cat(compile, ls):
         int main() {{
             return 0;
         }}
-    """)
+    """
+    )
 
 
 @settings(deadline=50000)
@@ -120,7 +138,8 @@ def test_push(compile, l, elem):
 
     t = as_tuple_tree(l)
 
-    assert compile(f"""
+    assert compile(
+        f"""
         #include <stdx/tuple.hpp>
         #include <stdx/tuple_algorithms.hpp>
 
@@ -138,15 +157,19 @@ def test_push(compile, l, elem):
         int main() {{
             return 0;
         }}
-    """)
+    """
+    )
+
 
 from itertools import product
+
 
 def put_in_list(i):
     if isinstance(i, list):
         return i
     else:
         return [i]
+
 
 @settings(deadline=50000)
 @given(list_trees(small_ints, max_leaves=15))
@@ -155,7 +178,8 @@ def test_cartesian_product(compile, ls):
     ts = [as_tuple_tree(l) for l in ls]
     expected = as_tuple_tree([list(p) for p in product(*ls)])
 
-    assert compile(f"""
+    assert compile(
+        f"""
         #include <stdx/tuple.hpp>
         #include <stdx/tuple_algorithms.hpp>
 
@@ -164,9 +188,12 @@ def test_cartesian_product(compile, ls):
         int main() {{
             return 0;
         }}
-    """)
+    """
+    )
+
 
 from functools import reduce
+
 
 @settings(deadline=50000)
 @given(st.lists(small_ints))
@@ -177,7 +204,8 @@ def test_star_of(compile, l):
 
     t = as_tuple_tree(l)
 
-    assert compile(f"""
+    assert compile(
+        f"""
         #include <stdx/tuple.hpp>
         #include <stdx/tuple_algorithms.hpp>
 
@@ -190,4 +218,5 @@ def test_star_of(compile, l):
         int main() {{
             return 0;
         }}
-    """)
+    """
+    )

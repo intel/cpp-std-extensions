@@ -18,37 +18,37 @@ struct T {
 
 TEST_CASE("is_function", "[type_traits]") {
     auto x = []() {};
-    static_assert(not stdx::is_function_v<int>);
-    static_assert(not stdx::is_function_v<int &>);
-    static_assert(not stdx::is_function_v<decltype(x)>);
-    static_assert(stdx::is_function_v<decltype(func_no_args)>);
-    static_assert(stdx::is_function_v<decltype(func_one_arg)>);
+    STATIC_REQUIRE(not stdx::is_function_v<int>);
+    STATIC_REQUIRE(not stdx::is_function_v<int &>);
+    STATIC_REQUIRE(not stdx::is_function_v<decltype(x)>);
+    STATIC_REQUIRE(stdx::is_function_v<decltype(func_no_args)>);
+    STATIC_REQUIRE(stdx::is_function_v<decltype(func_one_arg)>);
 }
 
 TEST_CASE("is_function_object", "[type_traits]") {
     auto x = []() {};
     auto y = [](int) {};
     auto z = [](auto) {};
-    static_assert(not stdx::is_function_object_v<int>);
-    static_assert(not stdx::is_function_object_v<decltype(func_no_args)>);
-    static_assert(not stdx::is_function_object_v<decltype(func_one_arg)>);
-    static_assert(stdx::is_function_object_v<decltype(x)>);
-    static_assert(stdx::is_function_object_v<decltype(y)>);
-    static_assert(stdx::is_function_object_v<decltype(z)>);
-    static_assert(stdx::is_function_object_v<S>);
-    static_assert(stdx::is_function_object_v<T>);
+    STATIC_REQUIRE(not stdx::is_function_object_v<int>);
+    STATIC_REQUIRE(not stdx::is_function_object_v<decltype(func_no_args)>);
+    STATIC_REQUIRE(not stdx::is_function_object_v<decltype(func_one_arg)>);
+    STATIC_REQUIRE(stdx::is_function_object_v<decltype(x)>);
+    STATIC_REQUIRE(stdx::is_function_object_v<decltype(y)>);
+    STATIC_REQUIRE(stdx::is_function_object_v<decltype(z)>);
+    STATIC_REQUIRE(stdx::is_function_object_v<S>);
+    STATIC_REQUIRE(stdx::is_function_object_v<T>);
 }
 
 TEST_CASE("is_callable", "[type_traits]") {
     auto x = []() {};
     auto y = [](int) {};
     auto z = [](auto) {};
-    static_assert(not stdx::is_callable_v<int>);
-    static_assert(stdx::is_callable_v<decltype(func_no_args)>);
-    static_assert(stdx::is_callable_v<decltype(func_one_arg)>);
-    static_assert(stdx::is_callable_v<decltype(x)>);
-    static_assert(stdx::is_callable_v<decltype(y)>);
-    static_assert(stdx::is_callable_v<decltype(z)>);
-    static_assert(stdx::is_callable_v<S>);
-    static_assert(stdx::is_callable_v<T>);
+    STATIC_REQUIRE(not stdx::is_callable_v<int>);
+    STATIC_REQUIRE(stdx::is_callable_v<decltype(func_no_args)>);
+    STATIC_REQUIRE(stdx::is_callable_v<decltype(func_one_arg)>);
+    STATIC_REQUIRE(stdx::is_callable_v<decltype(x)>);
+    STATIC_REQUIRE(stdx::is_callable_v<decltype(y)>);
+    STATIC_REQUIRE(stdx::is_callable_v<decltype(z)>);
+    STATIC_REQUIRE(stdx::is_callable_v<S>);
+    STATIC_REQUIRE(stdx::is_callable_v<T>);
 }
