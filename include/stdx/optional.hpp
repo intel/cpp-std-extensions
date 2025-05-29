@@ -15,9 +15,12 @@
 namespace stdx {
 inline namespace v1 {
 template <typename T, typename = void> struct tombstone_traits {
-    static_assert(
-        stdx::always_false_v<T>,
-        "To use stdx::optional you must specialize stdx::tombstone_traits");
+    using unspecialized = int;
+    constexpr auto operator()() const {
+        static_assert(
+            stdx::always_false_v<T>,
+            "To use stdx::optional you must specialize stdx::tombstone_traits");
+    }
 };
 
 template <typename T>
@@ -47,6 +50,7 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
                       not stdx::is_specialization_of_v<TS, tombstone_traits>,
                   "Don't define tombstone traits for plain integral types");
     constexpr static inline auto traits = TS{};
+    using check_specialization_t [[maybe_unused]] = decltype(traits());
     T val{traits()};
 
   public:
