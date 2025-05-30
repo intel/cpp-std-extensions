@@ -147,6 +147,18 @@ TEST_CASE("sized<T> in (upsize not divisible)", "[utility]") {
     STATIC_REQUIRE(stdx::sized<T>{3}.in<std::uint32_t>() == 3);
 }
 
+TEST_CASE("sized<T> in (downsize, mod > 1)", "[utility]") {
+    using T = std::array<char, 6>;
+    using U = std::array<char, 4>;
+    STATIC_REQUIRE(stdx::sized<T>{1}.in<U>() == 2);
+}
+
+TEST_CASE("sized<T> in (upsize, mod > 1)", "[utility]") {
+    using T = std::array<char, 6>;
+    using U = std::array<char, 4>;
+    STATIC_REQUIRE(stdx::sized<U>{2}.in<T>() == 2);
+}
+
 TEST_CASE("CX_VALUE structural value", "[utility]") {
     auto x = CX_VALUE(42);
     STATIC_REQUIRE(x() == 42);
