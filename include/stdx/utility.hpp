@@ -97,14 +97,14 @@ template <typename T, typename U>
 using forward_like_t = decltype(forward_like<T>(std::declval<U>()));
 
 template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
-[[nodiscard]] auto as_unsigned(T t) {
+[[nodiscard]] constexpr auto as_unsigned(T t) {
     static_assert(not std::is_same_v<T, bool>,
                   "as_unsigned is not applicable to bool");
     return static_cast<std::make_unsigned_t<T>>(t);
 }
 
 template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
-[[nodiscard]] auto as_signed(T t) {
+[[nodiscard]] constexpr auto as_signed(T t) {
     static_assert(not std::is_same_v<T, bool>,
                   "as_signed is not applicable to bool");
     return static_cast<std::make_signed_t<T>>(t);

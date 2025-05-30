@@ -32,12 +32,14 @@ TEST_CASE("as_unsigned (changed)", "[utility]") {
                                   std::uint32_t>);
     STATIC_REQUIRE(std::is_same_v<decltype(stdx::as_unsigned(std::int64_t{})),
                                   std::uint64_t>);
+    STATIC_REQUIRE(stdx::as_unsigned(std::int8_t{17}) == 17);
 }
 
 TEMPLATE_TEST_CASE("as_unsigned (unchanged)", "[utility]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     STATIC_REQUIRE(
         std::is_same_v<decltype(stdx::as_unsigned(TestType{})), TestType>);
+    STATIC_REQUIRE(stdx::as_unsigned(TestType{17}) == 17);
 }
 
 TEST_CASE("as_signed (changed)", "[utility]") {
@@ -49,12 +51,14 @@ TEST_CASE("as_signed (changed)", "[utility]") {
                                   std::int32_t>);
     STATIC_REQUIRE(std::is_same_v<decltype(stdx::as_signed(std::uint64_t{})),
                                   std::int64_t>);
+    STATIC_REQUIRE(stdx::as_signed(std::uint8_t{17}) == 17);
 }
 
 TEMPLATE_TEST_CASE("as_signed (unchanged)", "[utility]", std::int8_t,
                    std::int16_t, std::int32_t, std::int64_t) {
     STATIC_REQUIRE(
         std::is_same_v<decltype(stdx::as_signed(TestType{})), TestType>);
+    STATIC_REQUIRE(stdx::as_signed(TestType{17}) == 17);
 }
 
 TEMPLATE_TEST_CASE("sized<T> in (uint8_t zero/one/two case)", "[utility]",
