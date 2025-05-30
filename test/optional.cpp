@@ -427,3 +427,19 @@ TEST_CASE("tombstone with non-structural value", "[optional]") {
     CHECK(*o == std::string_view{});
 }
 #endif
+
+#if __cplusplus >= 202002L
+namespace {
+template <typename T>
+using my_optional = stdx::conditional_t<requires {
+    typename stdx::tombstone_traits<T>::unspecialized;
+}, std::optional<T>, stdx::optional<T>>;
+} // namespace
+
+TEST_CASE("select optional implementation based on whether tombstone traits "
+          "are present",
+          "[optional]") {
+    static_assert(std::is_same_v<my_optional<S>, stdx::optional<S>>);
+    static_assert(std::is_same_v<my_optional<int>, std::optional<int>>);
+}
+#endif
