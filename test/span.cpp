@@ -141,6 +141,22 @@ TEST_CASE("span is constructible from std::array (non const data)", "[span]") {
     STATIC_REQUIRE(std::size(s) == 4);
 }
 
+TEST_CASE("dynamic span is constructible from std::array (const data)",
+          "[span]") {
+    constexpr static auto a = std::array{1, 2, 3, 4};
+    auto s = [](stdx::span<int const> x) { return x; }(a);
+    CHECK(std::data(s) == std::data(a));
+    CHECK(std::size(s) == std::size(a));
+}
+
+TEST_CASE("dynamic span is constructible from std::array (non const data)",
+          "[span]") {
+    auto a = std::array{1, 2, 3, 4};
+    auto s = [](stdx::span<int> x) { return x; }(a);
+    CHECK(std::data(s) == std::data(a));
+    CHECK(std::size(s) == std::size(a));
+}
+
 TEST_CASE("span is constructible from C-style array (const data)", "[span]") {
     constexpr static int a[] = {1, 2, 3, 4};
     constexpr auto s = stdx::span{a};
@@ -155,6 +171,22 @@ TEST_CASE("span is constructible from C-style array (non const data)",
     int a[] = {1, 2, 3, 4};
     auto s = stdx::span{a};
     STATIC_REQUIRE(std::is_same_v<decltype(s), stdx::span<int, 4u>>);
+    CHECK(std::data(s) == std::data(a));
+    CHECK(std::size(s) == std::size(a));
+}
+
+TEST_CASE("dynamic span is constructible from C-style array (const data)",
+          "[span]") {
+    constexpr static int a[] = {1, 2, 3, 4};
+    auto s = [](stdx::span<int const> x) { return x; }(a);
+    CHECK(std::data(s) == std::data(a));
+    CHECK(std::size(s) == std::size(a));
+}
+
+TEST_CASE("dynamic span is constructible from C-style array (non const data)",
+          "[span]") {
+    int a[] = {1, 2, 3, 4};
+    auto s = [](stdx::span<int> x) { return x; }(a);
     CHECK(std::data(s) == std::data(a));
     CHECK(std::size(s) == std::size(a));
 }
