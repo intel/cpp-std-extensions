@@ -98,7 +98,7 @@ class span : public detail::span_base<T, Extent> {
     template <typename U, std::size_t N>
     // NOLINTNEXTLINE(google-explicit-constructor)
     constexpr span(std::array<U, N> &arr LIFETIMEBOUND) noexcept
-        : ptr{std::data(arr)} {
+        : base_t{std::data(arr), N}, ptr{std::data(arr)} {
         static_assert(Extent == dynamic_extent or Extent <= N,
                       "Span extends beyond available storage");
     }
@@ -106,7 +106,7 @@ class span : public detail::span_base<T, Extent> {
     template <typename U, std::size_t N>
     // NOLINTNEXTLINE(google-explicit-constructor)
     constexpr span(std::array<U, N> const &arr LIFETIMEBOUND) noexcept
-        : ptr{std::data(arr)} {
+        : base_t{std::data(arr), N}, ptr{std::data(arr)} {
         static_assert(Extent == dynamic_extent or Extent <= N,
                       "Span extends beyond available storage");
     }
@@ -116,7 +116,8 @@ class span : public detail::span_base<T, Extent> {
 
     template <std::size_t N>
     // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr span(arr_t<N> arr LIFETIMEBOUND) noexcept : ptr{std::data(arr)} {
+    constexpr span(arr_t<N> arr LIFETIMEBOUND) noexcept
+        : base_t{std::data(arr), N}, ptr{std::data(arr)} {
         static_assert(Extent == dynamic_extent or Extent <= N,
                       "Span extends beyond available storage");
     }
