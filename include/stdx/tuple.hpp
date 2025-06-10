@@ -444,7 +444,7 @@ template <typename T, tuplelike Tuple>
 }
 
 template <typename... Ts> [[nodiscard]] constexpr auto make_tuple(Ts &&...ts) {
-    return tuple<std::remove_cvref_t<Ts>...>{std::forward<Ts>(ts)...};
+    return tuple<std::decay_t<Ts>...>{std::forward<Ts>(ts)...};
 }
 
 template <template <typename> typename... Fs>
