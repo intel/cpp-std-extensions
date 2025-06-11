@@ -141,7 +141,7 @@ TEST_CASE("tuple of lvalue references", "[tuple]") {
 
 TEST_CASE("tuple of lambdas", "[tuple]") {
     auto x = 1;
-    auto t = stdx::make_tuple([&] { x += 2; }, [&] { x += 3; });
+    auto t = stdx::tuple{[&] { x += 2; }, [&] { x += 3; }};
     get<0>(t)();
     CHECK(x == 3);
 }
@@ -392,9 +392,15 @@ TEST_CASE("copy/move behavior for tuple", "[tuple]") {
     CHECK(counter::copies == 0);
 }
 
+auto func_no_args() -> void;
+auto func_one_arg(int) -> void;
+
 TEST_CASE("make_tuple", "[tuple]") {
     STATIC_REQUIRE(stdx::make_tuple() == stdx::tuple{});
     STATIC_REQUIRE(stdx::make_tuple(1, 2, 3) == stdx::tuple{1, 2, 3});
+    STATIC_REQUIRE(
+        std::is_same_v<decltype(stdx::make_tuple(func_no_args, func_one_arg)),
+                       stdx::tuple<void (*)(), void (*)(int)>>);
 
     constexpr auto t = stdx::make_tuple(stdx::tuple{});
     using T = std::remove_const_t<decltype(t)>;
