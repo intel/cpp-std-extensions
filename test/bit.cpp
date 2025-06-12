@@ -421,3 +421,14 @@ TEST_CASE("bit_pack/unpack round trip 64 <-> 32", "[bit]") {
     auto const [a, b] = stdx::bit_unpack<std::uint32_t>(x);
     CHECK(stdx::bit_pack<std::uint64_t>(a, b) == x);
 }
+
+TEST_CASE("smallest_uint", "[bit]") {
+    STATIC_REQUIRE(std::is_same_v<stdx::smallest_uint_t<8>, std::uint8_t>);
+    STATIC_REQUIRE(std::is_same_v<stdx::smallest_uint_t<9>, std::uint16_t>);
+    STATIC_REQUIRE(std::is_same_v<stdx::smallest_uint_t<16>, std::uint16_t>);
+    STATIC_REQUIRE(std::is_same_v<stdx::smallest_uint_t<17>, std::uint32_t>);
+    STATIC_REQUIRE(std::is_same_v<stdx::smallest_uint_t<32>, std::uint32_t>);
+    STATIC_REQUIRE(std::is_same_v<stdx::smallest_uint_t<33>, std::uint64_t>);
+    STATIC_REQUIRE(std::is_same_v<stdx::smallest_uint_t<64>, std::uint64_t>);
+    STATIC_REQUIRE(std::is_same_v<stdx::smallest_uint_t<65>, std::uint64_t>);
+}

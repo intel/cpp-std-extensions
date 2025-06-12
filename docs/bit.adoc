@@ -121,16 +121,19 @@ static_assert(stdx::bit_pack<std::uint32_t>(a[0], a[1]) == 0x1234'5678u);
 === `smallest_uint`
 
 `smallest_uint` is a function template that selects the smallest unsigned
-integral type that will fit a compile-time value.
+integral type that will fit a number of bits.
 
 [source,cpp]
 ----
-constexpr auto x = stdx::smallest_uint<42>();   // std::uint8_t{42}
-constexpr auto y = stdx::smallest_uint<1337>(); // std::uint16_t{1337}
+constexpr auto x = stdx::smallest_uint<4>();   // std::uint8_t{}
+constexpr auto y = stdx::smallest_uint<9>(); // std::uint16_t{}
 
 // smallest_uint_t is the type of a call to smallest_uint
-using T = stdx::smallest_uint_t<1337>; // std::uint16_t
+using T = stdx::smallest_uint_t<9>; // std::uint16_t
 ----
+
+NOTE: Giving `smallest_uint_t` any bit size over 64 will still return a
+`std::uint64_t`.
 
 === `to_be`, `from_be`, `to_le`, `from_le`
 
