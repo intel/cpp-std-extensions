@@ -84,3 +84,14 @@ However, for interfacing with legacy functions, a null terminator can be useful.
 
 See https://github.com/intel/compile-time-init-build/tree/main/include/sc[cib
 documentation] for details about the cib string constant class.
+
+Sometimes it is useful to wrap a `ct_string` in a type to preserve compile-time
+properties. For this, there is `cts_t` and a corresponding user-defined literal.
+[source,cpp]
+----
+using namespace stdx::literals;
+
+constexpr auto s = "hello"_ctst;
+// s is a stdx::cts_t<"hello">
+----
+Think of `cts_t` relating to `ct_string` as `std::integral_constant` relates to `int`.
