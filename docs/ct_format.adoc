@@ -11,12 +11,12 @@ The format string is provided as a template argument, and the arguments to be
 formatted as regular function arguments.
 
 The result type is a `stdx::format_result` containing two members: the
-xref:ct_string.adoc#_ct_string_hpp[`ct_string`] and a
+xref:ct_string.adoc#_ct_string_hpp[`ct_string`] (wrapped in a `cts_t`) and a
 xref:tuple.adoc#_tuple_hpp[`tuple`] of the format arguments.
 [source,cpp]
 ----
 auto s = stdx::ct_format<"Hello {} {}">(42, 17);
-// s is stdx::format_result{"Hello {} {}"_cts, stdx::tuple{42, 17}}
+// s is stdx::format_result{"Hello {} {}"_ctst, stdx::tuple{42, 17}}
 ----
 
 When format arguments are available at compile-time, wrapping them in
@@ -24,14 +24,21 @@ When format arguments are available at compile-time, wrapping them in
 [source,cpp]
 ----
 auto s = stdx::ct_format<"Hello {} {}">(CX_VALUE(42), 17);
-// s is stdx::format_result{"Hello 42 {}"_cts, stdx::tuple{17}}
+// s is stdx::format_result{"Hello 42 {}"_ctst, stdx::tuple{17}}
 ----
 
-If there are no runtime arguments, the result is just a `stdx::ct_string`:
+If there are no runtime arguments, the result is a `format_result` with an empty tuple...
 [source,cpp]
 ----
 auto s = stdx::ct_format<"Hello {} {}">(CX_VALUE(42), CX_VALUE(17));
-// s is "Hello 42 17"_cts
+// s is stdx::format_result{"Hello 42 17"_ctst, stdx::tuple{}}
+----
+...and a `format_result` like this without an runtime arguments is implicitly convertible back to a `ct_string`:
+[source,cpp]
+----
+template <stdx::ct_string S> auto f() { ... };
+
+f<stdx::ct_format<"Hello {}">(CX_VALUE(42))>(); // equivalent to f<"Hello 42">()
 ----
 
 Types and compile-time enumeration values are stringified thus:
@@ -39,25 +46,11 @@ Types and compile-time enumeration values are stringified thus:
 ----
 enum struct E { value };
 auto s = stdx::ct_format<"Hello {} {}">(CX_VALUE(int), CX_VALUE(E::value));
-// s is "Hello int value"_cts
+// s is stdx::format_result{"Hello int value"_ctst, stdx::tuple{}}
 ----
 
 NOTE: Compile-time formatting is done with https://github.com/fmtlib/fmt[fmtlib]
 and supports the same formatting DSL. Positional arguments are not supported.
-
-`ct_format` is designed for use with a logging backend like the one in
-https://github.com/intel/compile-time-init-build. Hence `stdx::format_result`
-allows lazy runtime formatting. For the same reason, compile-time formatting can
-output string information in a
-https://github.com/intel/compile-time-init-build/tree/main/include/sc[suitable
-type] rather than as a value. This is done by passing the template as a second
-template argument to `ct_format`.
-
-[source,cpp]
-----
-auto s = stdx::ct_format<"{}", sc::string_constant>(CX_VALUE(42));
-// s is sc::string_constant<char, '4', '2'>{}
-----
 
 When formatting a compile-time `stdx::format_result`, the strings and argument
 tuples are collapsed to a single `stdx::format_result`:
@@ -65,8 +58,8 @@ tuples are collapsed to a single `stdx::format_result`:
 [source,cpp]
 ----
 constexpr static auto a = stdx::ct_format<"The answer is {}">(42);
-// a is stdx::format_result{"The answer is {}", stdx::tuple{42}}
+// a is stdx::format_result{"The answer is {}"_ctst, stdx::tuple{42}}
 
 constexpr static auto q = stdx::ct_format<"{}. But what is the question?">(CX_VALUE(a));
-// q is stdx::format_result{"The answer is {}. But what is the question?", stdx::tuple{42}}
+// q is stdx::format_result{"The answer is {}. But what is the question?"_ctst, stdx::tuple{42}}
 ----
