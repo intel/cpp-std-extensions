@@ -15,6 +15,34 @@ auto x = 1729;                 // int
 auto y = stdx::as_unsigned(x); // unsigned int
 ----
 
+=== `ct`
+
+`ct` is a function template that produces a
+https://en.cppreference.com/w/cpp/types/integral_constant.html[`std::integral_constant`]
+from a compile-time integral or enumeration type:
+
+[source,cpp]
+----
+constexpr auto x = stdx::ct<42>();      // std::integral_constant<int, 42>{}
+
+enum struct E { A, B, C };
+constexpr auto y = stdx::ct<E::A>();    // std::integral_constant<E, E::A>{}
+----
+
+Or, when given a type, it produces a `stdx::type_identity`:
+
+[source,cpp]
+----
+constexpr auto z = stdx::ct<int>();     // stdx::type_identity<int>{}
+----
+
+Or, when given a string literal, it produces a xref:ct_string.adoc#_cts_t[`stdx::cts_t`]:
+
+[source,cpp]
+----
+constexpr auto s = stdx::ct<"Hello">(); // stdx::cts_t<"Hello">{}
+----
+
 === `CX_VALUE`
 
 `CX_VALUE` is a macro that wraps its argument in a constexpr callable, which can

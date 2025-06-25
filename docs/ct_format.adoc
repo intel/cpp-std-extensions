@@ -33,13 +33,19 @@ If there are no runtime arguments, the result is a `format_result` with an empty
 auto s = stdx::ct_format<"Hello {} {}">(CX_VALUE(42), CX_VALUE(17));
 // s is stdx::format_result{"Hello 42 17"_ctst, stdx::tuple{}}
 ----
-...and a `format_result` like this without an runtime arguments is implicitly convertible back to a `ct_string`:
+
+...and a `format_result` like this without an runtime arguments is implicitly convertible back
+to a `ct_string`, or explicitly convertible using unary `operator+`:
 [source,cpp]
 ----
 template <stdx::ct_string S> auto f() { ... };
 
 f<stdx::ct_format<"Hello {}">(CX_VALUE(42))>(); // equivalent to f<"Hello 42">()
++stdx::ct_format<"Hello {}">(CX_VALUE(42));     // equivalent to stdx::ct_string{"Hello 42"}
 ----
+
+NOTE: Using `operator+` on a `format_result` that has a non-empty tuple of
+runtime arguments is a compilation error.
 
 Types and compile-time enumeration values are stringified thus:
 [source,cpp]
