@@ -32,6 +32,18 @@ template <typename Str, typename Args> struct format_result {
     [[no_unique_address]] Str str;
     [[no_unique_address]] Args args{};
 
+    friend constexpr auto operator+(format_result const &fr)
+        requires(decltype(ct_string_convertible())::value)
+    {
+        return ct_string{fr.str.value};
+    }
+
+    friend constexpr auto operator+(format_result const &) {
+        static_assert(decltype(ct_string_convertible())::value,
+                      "Unary operator+ can only be used on a format_result "
+                      "without any runtime arguments");
+    }
+
   private:
     friend constexpr auto operator==(format_result const &,
                                      format_result const &) -> bool = default;

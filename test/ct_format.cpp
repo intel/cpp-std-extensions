@@ -160,6 +160,12 @@ TEST_CASE("empty format_result can implicitly convert to ct_string",
     STATIC_REQUIRE(conversion_success<stdx::ct_format<"Hello">()>);
 }
 
+TEST_CASE("empty format_result can explicitly convert to ct_string",
+          "[ct_format]") {
+    using namespace std::string_view_literals;
+    STATIC_REQUIRE(+stdx::ct_format<"Hello">() == "Hello"_cts);
+}
+
 namespace {
 template <typename T, T...> struct string_constant {
   private:

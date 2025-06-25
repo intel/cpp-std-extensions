@@ -85,6 +85,8 @@ However, for interfacing with legacy functions, a null terminator can be useful.
 See https://github.com/intel/compile-time-init-build/tree/main/include/sc[cib
 documentation] for details about the cib string constant class.
 
+=== `cts_t`
+
 Sometimes it is useful to wrap a `ct_string` in a type to preserve compile-time
 properties. For this, there is `cts_t` and a corresponding user-defined literal.
 [source,cpp]
