@@ -517,3 +517,19 @@ TEST_CASE("insert use case", "[intrusive_list]") {
     ++it;
     CHECK(it == std::cend(list));
 }
+
+TEST_CASE("intrusive_list can be instantiated with incomplete types",
+          "[intrusive_list]") {
+    struct incomplete_int_node;
+    stdx::intrusive_list<incomplete_int_node> list{};
+
+    struct incomplete_int_node {
+        int value{};
+        incomplete_int_node *prev{};
+        incomplete_int_node *next{};
+    };
+
+    incomplete_int_node n1{1};
+    list.push_back(&n1);
+    CHECK(list.pop_front() == &n1);
+}

@@ -270,5 +270,10 @@ constexpr auto nth_v =
 #endif
 STDX_PRAGMA(diagnostic pop)
 #endif
+
+template <typename T, typename = void> constexpr auto is_complete_v = false;
+template <typename T>
+constexpr auto is_complete_v<T, detail::void_v<sizeof(T)>> = true;
+
 } // namespace v1
 } // namespace stdx

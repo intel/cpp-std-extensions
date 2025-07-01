@@ -33,6 +33,12 @@ l.clear();
 bool b = l.empty();
 ----
 
+NOTE: An `intrusive_list` requires its node type to have `prev` and `next`
+pointers of the appropriate type, and this is enforced by concept constraints
+after C++20. However, an `intrusive_list` can also be instantiated with an
+incomplete type. Of course the type must be complete at the point of using the
+list.
+
 === Node validity checking
 
 An `intrusive_list` has a second template parameter which is whether to operate

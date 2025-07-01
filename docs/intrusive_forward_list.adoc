@@ -31,3 +31,7 @@ bool b = l.empty();
 `intrusive_forward_list` supports the same
 xref:intrusive_list.adoc#_node_validity_checking[node validation policy]
 arguments as `intrusive_list`.
+
+Like `intrusive_list`, `intrusive_forward_list` requires its node type to have a
+`next` pointer of the appropriate type. But it can also be instantiated with an
+incomplete type.
