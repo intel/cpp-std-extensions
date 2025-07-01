@@ -46,6 +46,18 @@ auto generic_lambda = [] (auto i) { return i + 1; };
 static_assert(stdx::callable<decltype(generic_lambda)>);
 ----
 
+=== `complete`
+
+`complete` is a concept modelled by complete types.
+
+[source,cpp]
+----
+struct incomplete; // not yet defined, not complete
+
+static_assert(not stdx::complete<incomplete>);
+static_assert(stdx::complete<int>);
+----
+
 === `has_trait`
 
 `has_trait` is used to turn a type trait (standard or otherwise) into a concept.

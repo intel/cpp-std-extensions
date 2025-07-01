@@ -108,6 +108,8 @@ constexpr auto has_trait = TypeTrait<T>::value;
 
 template <typename T> constexpr auto structural = is_structural_v<T>;
 
+template <typename T> constexpr auto complete = is_complete_v<T>;
+
 #else
 
 // After C++20, we can define concepts that are lacking in the library
@@ -194,6 +196,9 @@ concept has_trait = TypeTrait<T>::value;
 template <typename T>
 concept structural = is_structural_v<T>;
 
+template <typename T>
+concept complete = is_complete_v<T>;
+
 #endif
 
 } // namespace v1
@@ -233,6 +238,9 @@ concept same_as_unqualified =
 
 template <typename T>
 concept structural = is_structural_v<T>;
+
+template <typename T>
+concept complete = is_complete_v<T>;
 
 template <typename T, typename... Us>
 constexpr auto same_any = (... or same_as<T, Us>);

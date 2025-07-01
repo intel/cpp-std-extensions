@@ -269,3 +269,9 @@ TEST_CASE("nth value in pack", "[type_traits]") {
     STATIC_REQUIRE(stdx::nth_v<2, 0, true, 'b', 3> == 'b');
 }
 #endif
+
+TEST_CASE("is_complete_v", "[type_traits]") {
+    struct incomplete;
+    STATIC_REQUIRE(stdx::is_complete_v<int>);
+    STATIC_REQUIRE(not stdx::is_complete_v<incomplete>);
+}

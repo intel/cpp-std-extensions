@@ -2,6 +2,7 @@
 
 #include <stdx/concepts.hpp>
 #include <stdx/panic.hpp>
+#include <stdx/type_traits.hpp>
 
 #include <type_traits>
 #include <utility>
@@ -23,13 +24,13 @@ concept base_double_linkable = base_single_linkable<T> and requires(T node) {
 } // namespace detail
 
 template <typename T>
-concept single_linkable = requires(T *node) {
+concept single_linkable = not complete<T> or requires(T *node) {
     requires detail::base_single_linkable<
         std::remove_cvref_t<decltype(node->next)>>;
 };
 
 template <typename T>
-concept double_linkable = requires(T *node) {
+concept double_linkable = not complete<T> or requires(T *node) {
     requires detail::base_double_linkable<
         std::remove_cvref_t<decltype(node->next)>>;
     requires detail::base_double_linkable<

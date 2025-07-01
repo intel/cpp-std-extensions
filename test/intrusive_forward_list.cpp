@@ -111,7 +111,7 @@ TEST_CASE("begin", "[intrusive_forward_list]") {
     CHECK(std::cbegin(list)->value == 1);
 }
 
-TEST_CASE("front and back", "[intrusive_list]") {
+TEST_CASE("front and back", "[intrusive_forward_list]") {
     stdx::intrusive_forward_list<int_node> list{};
     int_node n1{1};
     int_node n2{2};
@@ -226,7 +226,8 @@ TEST_CASE("checked operation clears pointers on pop",
     CHECK(n1.next == nullptr);
 }
 
-TEST_CASE("checked operation clears pointers on clear", "[intrusive_list]") {
+TEST_CASE("checked operation clears pointers on clear",
+          "[intrusive_forward_list]") {
     stdx::intrusive_forward_list<int_node> list{};
     int_node n1{1};
     int_node n2{2};
@@ -265,7 +266,8 @@ struct injected_handler {
 template <> inline auto stdx::panic_handler<> = injected_handler{};
 
 #if __cplusplus >= 202002L
-TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
+TEST_CASE("checked panic when pushing populated node",
+          "[intrusive_forward_list]") {
     stdx::intrusive_forward_list<int_node> list{};
     int_node n{5};
 
@@ -281,7 +283,8 @@ TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
     CHECK(compile_time_calls == 1);
 }
 #else
-TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
+TEST_CASE("checked panic when pushing populated node",
+          "[intrusive_forward_list]") {
     stdx::intrusive_forward_list<int_node> list{};
     int_node n{5};
 
@@ -298,7 +301,8 @@ TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
 }
 #endif
 
-TEST_CASE("unchecked operation doesn't clear pointers", "[intrusive_list]") {
+TEST_CASE("unchecked operation doesn't clear pointers",
+          "[intrusive_forward_list]") {
     stdx::intrusive_forward_list<int_node, stdx::node_policy::unchecked> list{};
     int_node n1{1};
     int_node n2{2};
@@ -308,4 +312,19 @@ TEST_CASE("unchecked operation doesn't clear pointers", "[intrusive_list]") {
     auto before = n1.next;
     CHECK(list.pop_front() == &n1);
     CHECK(n1.next == before);
+}
+
+TEST_CASE("intrusive_forward_list can be instantiated with incomplete types",
+          "[intrusive_forward_list]") {
+    struct incomplete_int_node;
+    stdx::intrusive_forward_list<incomplete_int_node> list{};
+
+    struct incomplete_int_node {
+        int value{};
+        incomplete_int_node *next{};
+    };
+
+    incomplete_int_node n1{1};
+    list.push_back(&n1);
+    CHECK(list.pop_front() == &n1);
 }

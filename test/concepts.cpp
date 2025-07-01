@@ -176,3 +176,9 @@ TEST_CASE("structural", "[type_traits]") {
     STATIC_REQUIRE(stdx::structural<int>);
     STATIC_REQUIRE(not stdx::structural<non_structural>);
 }
+
+TEST_CASE("complete", "[type_traits]") {
+    struct incomplete;
+    STATIC_REQUIRE(stdx::complete<int>);
+    STATIC_REQUIRE(not stdx::complete<incomplete>);
+}

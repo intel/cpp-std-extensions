@@ -68,6 +68,19 @@ auto y = stdx::apply_sequence<L3>([&] <auto... Vs> () { y += V; });
 NOTE: If the function iterates the pack by folding over `operator,` then
 xref:type_traits.adoc#_template_for_each[`template_for_each`] is probably what you want.
 
+=== `is_complete_v`
+
+`is_complete_v` is a variable template that is true for complete types and false
+for incomplete types.
+
+[source,cpp]
+----
+struct incomplete; // not yet defined, not complete
+
+static_assert(not stdx::is_complete_v<incomplete>);
+static_assert(stdx::is_complete_v<int>);
+----
+
 === `is_function_object_v`
 
 `is_function_object_v` is a variable template that detects whether a type is a
