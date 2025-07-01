@@ -55,7 +55,7 @@ template <typename Str> format_result(Str) -> format_result<Str, tuple<>>;
 
 inline namespace literals {
 inline namespace ct_string_literals {
-template <ct_string S> CONSTEVAL auto operator""_fmt_res() {
+template <ct_string S> CONSTEVAL_UDL auto operator""_fmt_res() {
     return format_result{cts_t<S>{}};
 }
 } // namespace ct_string_literals

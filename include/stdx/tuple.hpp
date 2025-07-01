@@ -18,7 +18,7 @@ using index_constant = std::integral_constant<std::size_t, I>;
 template <std::size_t I> constexpr static index_constant<I> index{};
 
 inline namespace literals {
-template <char... Chars> CONSTEVAL auto operator""_idx() {
+template <char... Chars> CONSTEVAL_UDL auto operator""_idx() {
     return index<parse_literal<std::size_t, Chars...>()>;
 }
 } // namespace literals

@@ -78,7 +78,7 @@ template <auto I> using constant = std::integral_constant<decltype(I), I>;
 template <auto I> constexpr static constant<I> _c{};
 
 inline namespace literals {
-template <char... Chars> CONSTEVAL auto operator""_c() {
+template <char... Chars> CONSTEVAL_UDL auto operator""_c() {
     return _c<parse_literal<std::uint32_t, Chars...>()>;
 }
 } // namespace literals
@@ -89,50 +89,52 @@ enum struct length_t : std::uint32_t {};
 
 inline namespace literals {
 // NOLINTBEGIN(google-runtime-int)
-CONSTEVAL auto operator""_lsb(unsigned long long int n) -> lsb_t {
+CONSTEVAL_UDL auto operator""_lsb(unsigned long long int n) -> lsb_t {
     return static_cast<lsb_t>(n);
 }
-CONSTEVAL auto operator""_msb(unsigned long long int n) -> msb_t {
+CONSTEVAL_UDL auto operator""_msb(unsigned long long int n) -> msb_t {
     return static_cast<msb_t>(n);
 }
-CONSTEVAL auto operator""_len(unsigned long long int n) -> length_t {
+CONSTEVAL_UDL auto operator""_len(unsigned long long int n) -> length_t {
     return static_cast<length_t>(n);
 }
 // NOLINTEND(google-runtime-int)
 } // namespace literals
 
 inline namespace literals {
-CONSTEVAL auto operator""_b(char const *, std::size_t) -> bool { return true; }
-CONSTEVAL auto operator""_true(char const *, std::size_t) -> bool {
+CONSTEVAL_UDL auto operator""_b(char const *, std::size_t) -> bool {
     return true;
 }
-CONSTEVAL auto operator""_false(char const *, std::size_t) -> bool {
+CONSTEVAL_UDL auto operator""_true(char const *, std::size_t) -> bool {
+    return true;
+}
+CONSTEVAL_UDL auto operator""_false(char const *, std::size_t) -> bool {
     return false;
 }
 
 // NOLINTBEGIN(google-runtime-int)
-CONSTEVAL auto operator""_k(unsigned long long int n)
+CONSTEVAL_UDL auto operator""_k(unsigned long long int n)
     -> unsigned long long int {
     return n * 1'000u;
 }
-CONSTEVAL auto operator""_M(unsigned long long int n)
+CONSTEVAL_UDL auto operator""_M(unsigned long long int n)
     -> unsigned long long int {
     return n * 1'000'000u;
 }
-CONSTEVAL auto operator""_G(unsigned long long int n)
+CONSTEVAL_UDL auto operator""_G(unsigned long long int n)
     -> unsigned long long int {
     return n * 1'000'000'000u;
 }
 
-CONSTEVAL auto operator""_ki(unsigned long long int n)
+CONSTEVAL_UDL auto operator""_ki(unsigned long long int n)
     -> unsigned long long int {
     return n * 1'024u;
 }
-CONSTEVAL auto operator""_Mi(unsigned long long int n)
+CONSTEVAL_UDL auto operator""_Mi(unsigned long long int n)
     -> unsigned long long int {
     return n * 1'024ull * 1'024ull;
 }
-CONSTEVAL auto operator""_Gi(unsigned long long int n)
+CONSTEVAL_UDL auto operator""_Gi(unsigned long long int n)
     -> unsigned long long int {
     return n * 1'024ull * 1'024ull * 1'024ull;
 }
@@ -140,7 +142,7 @@ CONSTEVAL auto operator""_Gi(unsigned long long int n)
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
 #define STDX_SMALL_INT_LITERAL_DEF(x)                                          \
-    CONSTEVAL auto operator""_##x(char const *, std::size_t)                   \
+    CONSTEVAL_UDL auto operator""_##x(char const *, std::size_t)               \
         ->std::integral_constant<std::size_t, x##u> {                          \
         return {};                                                             \
     }

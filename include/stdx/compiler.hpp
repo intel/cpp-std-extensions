@@ -22,6 +22,14 @@
 #endif
 #endif
 
+#ifndef CONSTEVAL_UDL
+#if defined(__clang__)
+#define CONSTEVAL_UDL constexpr
+#else
+#define CONSTEVAL_UDL CONSTEVAL
+#endif
+#endif
+
 #ifndef USING_ATTR_NS
 #if defined(__clang__)
 #define USING_ATTR_NS using clang:

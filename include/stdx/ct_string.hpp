@@ -162,9 +162,11 @@ template <ct_string Value> CONSTEVAL auto ct() { return cts_t<Value>{}; }
 
 inline namespace literals {
 inline namespace ct_string_literals {
-template <ct_string S> CONSTEVAL auto operator""_cts() { return S; }
+template <ct_string S> CONSTEVAL_UDL auto operator""_cts() { return S; }
 
-template <ct_string S> CONSTEVAL auto operator""_ctst() { return cts_t<S>{}; }
+template <ct_string S> CONSTEVAL_UDL auto operator""_ctst() {
+    return cts_t<S>{};
+}
 } // namespace ct_string_literals
 } // namespace literals
 } // namespace v1
