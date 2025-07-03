@@ -209,6 +209,12 @@ template <detail::ct_helper Value> CONSTEVAL auto ct() {
 }
 template <typename T> CONSTEVAL auto ct() { return type_identity<T>{}; }
 
+template <typename> constexpr auto is_ct_v = false;
+template <typename T, T V>
+constexpr auto is_ct_v<std::integral_constant<T, V>> = true;
+template <typename T> constexpr auto is_ct_v<type_identity<T>> = true;
+template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
+
 #endif
 } // namespace v1
 } // namespace stdx
@@ -242,6 +248,23 @@ template <typename T> CONSTEVAL auto ct() { return type_identity<T>{}; }
         }                                                                      \
         STDX_PRAGMA(diagnostic pop)                                            \
     }()
+#endif
+
+#if __cplusplus >= 202002L
+
+#define CT_WRAP(X)                                                             \
+    [&](auto f) {                                                              \
+        if constexpr (::stdx::is_ct_v<decltype(f())>) {                        \
+            return f();                                                        \
+        } else if constexpr (requires {                                        \
+                                 ::stdx::ct<[&]() constexpr { return X; }()>;  \
+                             }) {                                              \
+            return ::stdx::ct<[&]() constexpr { return X; }()>();              \
+        } else {                                                               \
+            return f();                                                        \
+        }                                                                      \
+    }([&] { return X; })
+
 #endif
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
