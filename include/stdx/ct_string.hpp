@@ -173,6 +173,8 @@ template <std::size_t N> struct ct_helper<ct_string<N>>;
 
 template <ct_string Value> CONSTEVAL auto ct() { return cts_t<Value>{}; }
 
+template <ct_string Value> constexpr auto is_ct_v<cts_t<Value>> = true;
+
 inline namespace literals {
 inline namespace ct_string_literals {
 template <ct_string S> CONSTEVAL_UDL auto operator""_cts() { return S; }

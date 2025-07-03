@@ -271,4 +271,38 @@ TEST_CASE("ct (type)", "[utility]") {
     STATIC_REQUIRE(std::is_same_v<decltype(v), stdx::type_identity<int> const>);
 }
 
+TEST_CASE("is_ct", "[utility]") {
+    constexpr auto x1 = stdx::ct<42>();
+    STATIC_REQUIRE(stdx::is_ct_v<decltype(x1)>);
+    constexpr auto x2 = stdx::ct<int>();
+    STATIC_REQUIRE(stdx::is_ct_v<decltype(x2)>);
+}
+
+TEST_CASE("CT_WRAP", "[utility]") {
+    auto x1 = 17;
+    STATIC_REQUIRE(std::is_same_v<decltype(CT_WRAP(x1)), int>);
+    CHECK(CT_WRAP(x1) == 17);
+
+    auto x2 = stdx::ct<17>();
+    STATIC_REQUIRE(
+        std::is_same_v<decltype(CT_WRAP(x2)), std::integral_constant<int, 17>>);
+    STATIC_REQUIRE(CT_WRAP(x2).value == 17);
+
+    auto const x3 = 17;
+    STATIC_REQUIRE(
+        std::is_same_v<decltype(CT_WRAP(x3)), std::integral_constant<int, 17>>);
+    STATIC_REQUIRE(CT_WRAP(x3).value == 17);
+
+    constexpr static auto x4 = 17;
+    STATIC_REQUIRE(
+        std::is_same_v<decltype(CT_WRAP(x4)), std::integral_constant<int, 17>>);
+    STATIC_REQUIRE(CT_WRAP(x4).value == 17);
+
+    []<auto X>() {
+        STATIC_REQUIRE(std::is_same_v<decltype(CT_WRAP(X)),
+                                      std::integral_constant<int, 17>>);
+        STATIC_REQUIRE(CT_WRAP(X).value == 17);
+    }.template operator()<17>();
+}
+
 #endif

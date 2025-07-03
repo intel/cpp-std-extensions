@@ -165,3 +165,30 @@ TEST_CASE("operator+ works to concat cts_t and ct_string", "[ct_string]") {
     STATIC_REQUIRE("Hello"_ctst + " world"_cts == "Hello world"_cts);
     STATIC_REQUIRE("Hello"_cts + " world"_ctst == "Hello world"_cts);
 }
+
+TEST_CASE("is_ct (ct_string)", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    constexpr auto v1 = stdx::ct<"Hello">();
+    STATIC_REQUIRE(stdx::is_ct_v<decltype(v1)>);
+}
+
+TEST_CASE("CT_WRAP", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    auto x1 = "hello"_cts;
+    STATIC_REQUIRE(std::is_same_v<decltype(CT_WRAP(x1)), stdx::ct_string<6>>);
+    CHECK(CT_WRAP(x1) == "hello"_cts);
+
+    auto x2 = "hello"_ctst;
+    STATIC_REQUIRE(std::is_same_v<decltype(CT_WRAP(x2)), stdx::cts_t<"hello">>);
+    STATIC_REQUIRE(CT_WRAP(x2) == "hello"_ctst);
+
+    constexpr static auto x3 = "hello"_cts;
+    STATIC_REQUIRE(std::is_same_v<decltype(CT_WRAP(x3)), stdx::cts_t<"hello">>);
+    STATIC_REQUIRE(CT_WRAP(x3) == "hello"_ctst);
+
+    []<stdx::ct_string X>() {
+        STATIC_REQUIRE(
+            std::is_same_v<decltype(CT_WRAP(X)), stdx::cts_t<"hello">>);
+        STATIC_REQUIRE(CT_WRAP(X) == "hello"_ctst);
+    }.template operator()<"hello">();
+}
