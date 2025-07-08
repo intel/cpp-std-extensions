@@ -62,8 +62,8 @@ target_sources(
               include/stdx/detail/list_common.hpp
               include/stdx/env.hpp
               include/stdx/for_each_n_args.hpp
-              include/stdx/functional.hpp
               include/stdx/function_traits.hpp
+              include/stdx/functional.hpp
               include/stdx/intrusive_forward_list.hpp
               include/stdx/intrusive_list.hpp
               include/stdx/iterator.hpp
@@ -72,14 +72,15 @@ target_sources(
               include/stdx/numeric.hpp
               include/stdx/optional.hpp
               include/stdx/panic.hpp
+              include/stdx/pp_map.hpp
               include/stdx/priority.hpp
               include/stdx/ranges.hpp
               include/stdx/rollover.hpp
               include/stdx/span.hpp
               include/stdx/static_assert.hpp
+              include/stdx/tuple.hpp
               include/stdx/tuple_algorithms.hpp
               include/stdx/tuple_destructure.hpp
-              include/stdx/tuple.hpp
               include/stdx/type_traits.hpp
               include/stdx/udls.hpp
               include/stdx/utility.hpp)
