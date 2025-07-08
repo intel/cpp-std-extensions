@@ -305,4 +305,63 @@ TEST_CASE("CT_WRAP", "[utility]") {
     }.template operator()<17>();
 }
 
+TEST_CASE("CX_WRAP integer runtime arg", "[utility]") {
+    auto x = 17;
+    STATIC_REQUIRE(std::is_same_v<decltype(CX_WRAP(x)), int>);
+    CHECK(CX_WRAP(x) == 17);
+}
+
+TEST_CASE("CX_WRAP string_view runtime arg", "[utility]") {
+    auto x = std::string_view{"hello"};
+    STATIC_REQUIRE(std::is_same_v<decltype(CX_WRAP(x)), std::string_view>);
+    CHECK(CX_WRAP(x) == std::string_view{"hello"});
+}
+
+TEST_CASE("CX_WRAP const integral type", "[utility]") {
+    auto const x = 17;
+    STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP(x))>);
+    STATIC_REQUIRE(CX_WRAP(x)() == 17);
+}
+
+TEST_CASE("CX_WRAP constexpr integral type", "[utility]") {
+    constexpr auto x = 17;
+    STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP(x))>);
+    STATIC_REQUIRE(CX_WRAP(x)() == 17);
+}
+
+TEST_CASE("CX_WRAP constexpr non-structural type", "[utility]") {
+    constexpr static auto x = std::string_view{"hello"};
+    STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP(x))>);
+    STATIC_REQUIRE(CX_WRAP(x)() == std::string_view{"hello"});
+}
+
+TEST_CASE("CX_WRAP integer literal", "[utility]") {
+    STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP(17))>);
+    STATIC_REQUIRE(CX_WRAP(17)() == 17);
+}
+
+TEST_CASE("CX_WRAP string literal", "[utility]") {
+    STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP("hello"))>);
+    STATIC_REQUIRE(CX_WRAP("hello")() == std::string_view{"hello"});
+}
+
+TEST_CASE("CX_WRAP existing CX_VALUE", "[utility]") {
+    auto x = CX_VALUE(17);
+    STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP(x))>);
+    STATIC_REQUIRE(CX_WRAP(x)() == 17);
+}
+
+TEST_CASE("CX_WRAP template argument", "[utility]") {
+    []<int x> {
+        STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP(x))>);
+        STATIC_REQUIRE(CX_WRAP(x)() == 17);
+    }.template operator()<17>();
+}
+
+TEST_CASE("CX_WRAP type argument", "[utility]") {
+    STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP(int))>);
+    STATIC_REQUIRE(
+        std::is_same_v<decltype(CX_WRAP(int)()), stdx::type_identity<int>>);
+}
+
 #endif

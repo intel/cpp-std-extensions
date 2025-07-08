@@ -8,6 +8,7 @@
 #include <stdx/ct_string.hpp>
 #include <stdx/tuple.hpp>
 #include <stdx/tuple_algorithms.hpp>
+#include <stdx/type_traits.hpp>
 #include <stdx/utility.hpp>
 
 #include <fmt/compile.h>
@@ -107,8 +108,8 @@ template <std::size_t N> CONSTEVAL auto split_specifiers(std::string_view fmt) {
 }
 
 template <typename T>
-concept cx_value = requires { typename T::cx_value_t; } or
-                   requires(T t) { ct_string_from_type(t); };
+concept fmt_cx_value =
+    is_cx_value_v<T> or requires(T t) { ct_string_from_type(t); };
 
 template <typename T, T V>
 CONSTEVAL auto arg_value(std::integral_constant<T, V>) {
@@ -125,7 +126,7 @@ template <typename T> CONSTEVAL auto arg_value(type_identity<T>) {
 
 template <ct_string S> CONSTEVAL auto arg_value(cts_t<S>) { return S; }
 
-CONSTEVAL auto arg_value(cx_value auto a) {
+CONSTEVAL auto arg_value(fmt_cx_value auto a) {
     if constexpr (requires { ct_string_from_type(a); }) {
         return ct_string_from_type(a);
     } else if constexpr (std::is_enum_v<decltype(a())>) {
