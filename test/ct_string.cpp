@@ -150,3 +150,12 @@ TEST_CASE("ct (ct_string)", "[ct_string]") {
     constexpr auto v2 = stdx::ct<"Hello"_cts>();
     STATIC_REQUIRE(v2 == "Hello"_ctst);
 }
+
+namespace {
+template <stdx::ct_string> constexpr auto conversion_success = true;
+} // namespace
+
+TEST_CASE("cts_t can implicitly convert to ct_string", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    STATIC_REQUIRE(conversion_success<"Hello"_ctst>);
+}

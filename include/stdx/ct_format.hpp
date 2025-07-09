@@ -35,7 +35,7 @@ template <typename Str, typename Args> struct format_result {
     friend constexpr auto operator+(format_result const &fr)
         requires(decltype(ct_string_convertible())::value)
     {
-        return ct_string{fr.str.value};
+        return +fr.str;
     }
 
     friend constexpr auto operator+(format_result const &) {
