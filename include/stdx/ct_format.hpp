@@ -6,6 +6,7 @@
 #include <stdx/concepts.hpp>
 #include <stdx/ct_conversions.hpp>
 #include <stdx/ct_string.hpp>
+#include <stdx/pp_map.hpp>
 #include <stdx/tuple.hpp>
 #include <stdx/tuple_algorithms.hpp>
 #include <stdx/type_traits.hpp>
@@ -258,5 +259,12 @@ constexpr auto num_fmt_specifiers =
     detail::count_specifiers(std::string_view{Fmt});
 } // namespace v1
 } // namespace stdx
+
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
+#define STDX_CT_FORMAT(S, ...)                                                 \
+    stdx::ct_format<S>(STDX_MAP(CX_WRAP __VA_OPT__(, ) __VA_ARGS__))
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
 
 #endif
