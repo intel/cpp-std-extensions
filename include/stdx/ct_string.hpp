@@ -22,7 +22,7 @@ namespace detail {
 template <typename T>
 concept format_convertible = requires(T t) {
     { T::ct_string_convertible() } -> std::same_as<std::true_type>;
-    { ct_string{t.str.value} };
+    { ct_string{+t} };
 };
 } // namespace detail
 
@@ -39,7 +39,7 @@ template <std::size_t N> struct ct_string {
 
     template <detail::format_convertible T>
     // NOLINTNEXTLINE(google-explicit-constructor)
-    CONSTEVAL explicit(false) ct_string(T t) : ct_string(t.str.value) {}
+    CONSTEVAL explicit(false) ct_string(T t) : ct_string(+t) {}
 
     CONSTEVAL explicit(true) ct_string(char const *str, std::size_t sz) {
         for (auto i = std::size_t{}; i < sz; ++i) {
@@ -78,7 +78,7 @@ template <std::size_t N> struct ct_string {
 };
 
 template <detail::format_convertible T>
-ct_string(T) -> ct_string<decltype(std::declval<T>().str.value)::capacity()>;
+ct_string(T) -> ct_string<decltype(+std::declval<T>())::capacity()>;
 
 template <std::size_t N, std::size_t M>
 [[nodiscard]] constexpr auto operator==(ct_string<N> const &lhs,
@@ -142,6 +142,9 @@ template <std::size_t N, std::size_t M>
 template <ct_string S> struct cts_t {
     using value_type = decltype(S);
     constexpr static auto value = S;
+
+    CONSTEVAL static auto ct_string_convertible() -> std::true_type;
+    friend constexpr auto operator+(cts_t const &) { return value; }
 };
 
 template <ct_string X, ct_string Y>
