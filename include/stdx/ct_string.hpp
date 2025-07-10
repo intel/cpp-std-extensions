@@ -157,6 +157,16 @@ constexpr auto operator+(cts_t<X>, cts_t<Y>) {
     return cts_t<X + Y>{};
 }
 
+template <std::size_t N, ct_string S>
+[[nodiscard]] constexpr auto operator+(ct_string<N> const &lhs, cts_t<S> rhs) {
+    return lhs + +rhs;
+}
+
+template <ct_string S, std::size_t N>
+[[nodiscard]] constexpr auto operator+(cts_t<S> lhs, ct_string<N> const &rhs) {
+    return +lhs + rhs;
+}
+
 namespace detail {
 template <std::size_t N> struct ct_helper<ct_string<N>>;
 } // namespace detail

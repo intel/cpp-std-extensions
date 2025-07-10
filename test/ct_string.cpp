@@ -159,3 +159,9 @@ TEST_CASE("cts_t can implicitly convert to ct_string", "[ct_string]") {
     using namespace stdx::ct_string_literals;
     STATIC_REQUIRE(conversion_success<"Hello"_ctst>);
 }
+
+TEST_CASE("operator+ works to concat cts_t and ct_string", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    STATIC_REQUIRE("Hello"_ctst + " world"_cts == "Hello world"_cts);
+    STATIC_REQUIRE("Hello"_cts + " world"_ctst == "Hello world"_cts);
+}
