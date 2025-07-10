@@ -234,7 +234,7 @@ template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
 
 #ifndef CX_VALUE
 #define CX_VALUE(...)                                                          \
-    [&]() constexpr {                                                          \
+    []() constexpr {                                                           \
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
         STDX_PRAGMA(diagnostic ignored "-Wunused-value")                       \
@@ -274,7 +274,10 @@ template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
     }([&] { return X; })
 
 #ifdef __clang__
-#define CX_DETECT(X) std::is_empty_v<decltype(CX_VALUE(X))>
+#define CX_DETECT(X)                                                           \
+    std::is_empty_v<decltype([&] {                                             \
+        return (X) + ::stdx::cxv_detail::type_val{};                           \
+    })>
 #else
 namespace stdx {
 inline namespace v1 {
@@ -290,10 +293,11 @@ constexpr auto cx_detect1(auto) { return 0; }
 #endif
 
 #define CX_WRAP(X)                                                             \
-    [&]<typename F>(F f) {                                                     \
+    [&](auto f) {                                                              \
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
-        if constexpr (::stdx::is_cx_value_v<std::invoke_result_t<F>>) {        \
+        if constexpr (::stdx::is_cx_value_v<                                   \
+                          std::invoke_result_t<decltype(f)>>) {                \
             return f();                                                        \
         } else if constexpr (CX_DETECT(X)) {                                   \
             if constexpr (decltype(::stdx::cxv_detail::is_type<                \
