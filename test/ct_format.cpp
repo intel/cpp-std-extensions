@@ -242,6 +242,52 @@ constexpr auto ct_format_as(S const &s) {
 } // namespace user
 
 TEST_CASE("user-defined formatting", "[ct_format]") {
-    auto r = stdx::ct_format<"Hello {}">(user::S{42});
-    CHECK(r == stdx::format_result{"Hello S: {}"_ctst, stdx::make_tuple(42)});
+    auto r = stdx::ct_format<"Hello {}">(user::S{17});
+    CHECK(r == stdx::format_result{"Hello S: {}"_ctst, stdx::make_tuple(17)});
+}
+
+TEST_CASE("FORMAT with no arguments", "[ct_format]") {
+    STATIC_REQUIRE(STDX_CT_FORMAT("Hello") == "Hello"_fmt_res);
+}
+
+TEST_CASE("FORMAT a compile-time string argument", "[ct_format]") {
+    STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", "world") ==
+                   "Hello world"_fmt_res);
+}
+
+TEST_CASE("FORMAT a compile-time int argument", "[ct_format]") {
+    STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", 17) == "Hello 17"_fmt_res);
+}
+
+TEST_CASE("FORMAT a type argument", "[ct_format]") {
+    STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", int) == "Hello int"_fmt_res);
+}
+
+TEST_CASE("FORMAT a constexpr string argument", "[ct_format]") {
+    constexpr static auto S = "world"_cts;
+    STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", S) == "Hello world"_fmt_res);
+}
+
+TEST_CASE("FORMAT a constexpr int argument", "[ct_format]") {
+    constexpr static auto I = 17;
+    STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", I) == "Hello 17"_fmt_res);
+}
+
+#ifdef __clang__
+TEST_CASE("FORMAT a constexpr nonstatic string_view argument", "[ct_format]") {
+    constexpr auto S = std::string_view{"world"};
+    constexpr auto expected =
+        stdx::format_result{"Hello {}"_ctst, stdx::make_tuple(S)};
+    STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", S) == expected);
+}
+#endif
+
+TEST_CASE("FORMAT a constexpr string_view argument", "[ct_format]") {
+    constexpr static auto S = std::string_view{"world"};
+    STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", S) == "Hello world"_fmt_res);
+}
+
+TEST_CASE("FORMAT an integral_constant argument", "[ct_format]") {
+    constexpr static auto I = std::integral_constant<int, 17>{};
+    STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", I) == "Hello 17"_fmt_res);
 }

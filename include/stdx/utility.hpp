@@ -148,14 +148,18 @@ struct from_any {
 struct type_val {
     template <typename T, typename U,
               typename = std::enable_if_t<same_as_unqualified<type_val, U>>>
-    friend constexpr auto operator+(T &&t, U &&) -> T {
+    friend constexpr auto operator+(T t, U const &) -> T {
         return t;
     }
     friend constexpr auto operator+(type_val const &f) -> type_val { return f; }
     // NOLINTNEXTLINE(google-explicit-constructor)
     template <typename T> constexpr operator T() const {
-        extern auto cxv_type_val_get_t(T *) -> T;
-        return cxv_type_val_get_t(nullptr);
+        if constexpr (std::is_default_constructible_v<T>) {
+            return T{};
+        } else {
+            extern auto cxv_type_val_get_t(T *) -> T;
+            return cxv_type_val_get_t(nullptr);
+        }
     }
 };
 
@@ -202,12 +206,21 @@ template <typename T> struct ct_helper {
     T value;
 };
 template <typename T> ct_helper(T) -> ct_helper<T>;
+
+template <auto> CONSTEVAL auto cx_detect0() {}
+CONSTEVAL auto cx_detect1(auto) { return 0; }
 } // namespace detail
 
 template <detail::ct_helper Value> CONSTEVAL auto ct() {
     return std::integral_constant<decltype(Value.value), Value.value>{};
 }
 template <typename T> CONSTEVAL auto ct() { return type_identity<T>{}; }
+
+template <typename> constexpr auto is_ct_v = false;
+template <typename T, T V>
+constexpr auto is_ct_v<std::integral_constant<T, V>> = true;
+template <typename T> constexpr auto is_ct_v<type_identity<T>> = true;
+template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
 
 #endif
 } // namespace v1
@@ -221,27 +234,91 @@ template <typename T> CONSTEVAL auto ct() { return type_identity<T>{}; }
 
 #ifndef CX_VALUE
 #define CX_VALUE(...)                                                          \
-    []() constexpr {                                                           \
+    [&]() constexpr {                                                          \
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
         STDX_PRAGMA(diagnostic ignored "-Wunused-value")                       \
-        if constexpr (decltype(stdx::cxv_detail::is_type<                      \
-                               stdx::cxv_detail::from_any(                     \
+        if constexpr (decltype(::stdx::cxv_detail::is_type<                    \
+                               ::stdx::cxv_detail::from_any(                   \
                                    __VA_ARGS__)>())::value) {                  \
-            return stdx::overload{stdx::cxv_detail::cx_base{}, [] {            \
-                                      return stdx::type_identity<              \
-                                          decltype(stdx::cxv_detail::type_of<  \
-                                                   stdx::cxv_detail::from_any( \
-                                                       __VA_ARGS__)>())>{};    \
-                                  }};                                          \
+            return ::stdx::overload{                                           \
+                ::stdx::cxv_detail::cx_base{}, [&] {                           \
+                    return ::stdx::type_identity<                              \
+                        decltype(::stdx::cxv_detail::type_of<                  \
+                                 ::stdx::cxv_detail::from_any(                 \
+                                     __VA_ARGS__)>())>{};                      \
+                }};                                                            \
         } else {                                                               \
-            return stdx::overload{stdx::cxv_detail::cx_base{}, [] {            \
-                                      return (__VA_ARGS__) +                   \
-                                             stdx::cxv_detail::type_val{};     \
-                                  }};                                          \
+            return ::stdx::overload{::stdx::cxv_detail::cx_base{}, [&] {       \
+                                        return (__VA_ARGS__) +                 \
+                                               ::stdx::cxv_detail::type_val{}; \
+                                    }};                                        \
         }                                                                      \
         STDX_PRAGMA(diagnostic pop)                                            \
     }()
+#endif
+
+#if __cplusplus >= 202002L
+
+#define CT_WRAP(X)                                                             \
+    [&](auto f) {                                                              \
+        if constexpr (::stdx::is_ct_v<decltype(f())>) {                        \
+            return f();                                                        \
+        } else if constexpr (requires {                                        \
+                                 ::stdx::ct<[&]() constexpr { return X; }()>;  \
+                             }) {                                              \
+            return ::stdx::ct<[&]() constexpr { return X; }()>();              \
+        } else {                                                               \
+            return f();                                                        \
+        }                                                                      \
+    }([&] { return X; })
+
+#ifdef __clang__
+#define CX_DETECT(X) std::is_empty_v<decltype(CX_VALUE(X))>
+#else
+namespace stdx {
+inline namespace v1 {
+template <auto> constexpr auto cx_detect0() {}
+constexpr auto cx_detect1(auto) { return 0; }
+} // namespace v1
+} // namespace stdx
+#define CX_DETECT(X)                                                           \
+    requires {                                                                 \
+        ::stdx::cx_detect0<::stdx::cx_detect1(                                 \
+            (X) + ::stdx::cxv_detail::type_val{})>;                            \
+    }
+#endif
+
+#define CX_WRAP(X)                                                             \
+    [&]<typename F>(F f) {                                                     \
+        STDX_PRAGMA(diagnostic push)                                           \
+        STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
+        if constexpr (::stdx::is_cx_value_v<std::invoke_result_t<F>>) {        \
+            return f();                                                        \
+        } else if constexpr (CX_DETECT(X)) {                                   \
+            if constexpr (decltype(::stdx::cxv_detail::is_type<                \
+                                   ::stdx::cxv_detail::from_any(               \
+                                       X)>())::value) {                        \
+                return ::stdx::overload{                                       \
+                    ::stdx::cxv_detail::cx_base{}, [&] {                       \
+                        return ::stdx::type_identity<                          \
+                            decltype(::stdx::cxv_detail::type_of<              \
+                                     ::stdx::cxv_detail::from_any(X)>())>{};   \
+                    }};                                                        \
+            } else {                                                           \
+                return ::stdx::overload{::stdx::cxv_detail::cx_base{}, f};     \
+            }                                                                  \
+        } else {                                                               \
+            return f();                                                        \
+        }                                                                      \
+        STDX_PRAGMA(diagnostic pop)                                            \
+    }([&] {                                                                    \
+        STDX_PRAGMA(diagnostic push)                                           \
+        STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
+        return (X) + ::stdx::cxv_detail::type_val{};                           \
+        STDX_PRAGMA(diagnostic pop)                                            \
+    })
+
 #endif
 
 // NOLINTEND(cppcoreguidelines-macro-usage)

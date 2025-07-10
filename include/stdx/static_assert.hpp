@@ -26,7 +26,7 @@ template <bool B> constexpr auto ct_check = ct_check_t<B>{};
 namespace detail {
 template <ct_string Fmt, auto... Args> constexpr auto static_format() {
     constexpr auto make_ct = []<auto V>() {
-        if constexpr (cx_value<decltype(V)>) {
+        if constexpr (fmt_cx_value<decltype(V)>) {
             return V;
         } else {
             return CX_VALUE(V);

@@ -54,6 +54,7 @@ add_tests(
     optional
     overload
     panic
+    pp_map
     priority
     ranges
     remove_cvref
