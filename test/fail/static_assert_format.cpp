@@ -4,7 +4,7 @@
 // EXPECT: hello world int 123
 
 template <typename T> constexpr auto f() {
-    STATIC_ASSERT(false, "hello {} {} {}", CX_VALUE("world"), CX_VALUE(T), 123);
+    STATIC_ASSERT(false, "hello {} {} {}", "world", T, 123);
 }
 
 auto main() -> int { f<int>(); }

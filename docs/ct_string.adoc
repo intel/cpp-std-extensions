@@ -97,3 +97,19 @@ constexpr auto s = "hello"_ctst;
 // s is a stdx::cts_t<"hello">
 ----
 Think of `cts_t` relating to `ct_string` as `std::integral_constant` relates to `int`.
+
+A `cts_t` is implicitly convertible to a `ct_string`, or can be explicitly
+converted with unary `operator+`:
+
+
+[source,cpp]
+----
+using namespace stdx::literals;
+
+template <stdx::ct_string S>
+constexpr bool always_true = true;
+
+constexpr auto s = "hello"_ctst;
+static_assert(always_true<s>);    // implicit conversion
+static_assert(always_true<+s>);   // explicit conversion with +
+----

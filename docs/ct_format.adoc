@@ -1,6 +1,8 @@
 
 == `ct_format.hpp`
 
+=== ct_format
+
 https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ct_format.hpp[`ct_format.hpp`]
 provides `ct_format`, a compile-time function for formatting strings.
 
@@ -20,7 +22,7 @@ auto s = stdx::ct_format<"Hello {} {}">(42, 17);
 ----
 
 When format arguments are available at compile-time, wrapping them in
-`CX_VALUE(...)` means they will get compile-time formatted.
+xref:utility.adoc#_cx_value[`CX_VALUE(...)`] means they will get compile-time formatted.
 [source,cpp]
 ----
 auto s = stdx::ct_format<"Hello {} {}">(CX_VALUE(42), 17);
@@ -69,3 +71,31 @@ constexpr static auto a = stdx::ct_format<"The answer is {}">(42);
 constexpr static auto q = stdx::ct_format<"{}. But what is the question?">(CX_VALUE(a));
 // q is stdx::format_result{"The answer is {}. But what is the question?"_ctst, stdx::tuple{42}}
 ----
+
+=== STDX_CT_FORMAT
+
+The macro `STDX_CT_FORMAT` will automatically wrap compile-time-friendly
+arguments, so manual wrapping with `CX_VALUE` is not required.
+[source,cpp]
+----
+auto s = STDX_CT_FORMAT("Hello {} {}", 42, int);
+// equivalent to stdx::ct_format<"Hello {} {}">(CX_VALUE(42), CX_VALUE(int));
+// s is stdx::format_result{"Hello 42 int"_ctst, stdx::tuple{}}
+----
+
+If any arguments are _not_ available at compile time, they will be "regular" runtime format arguments.
+[source,cpp]
+----
+auto x = 42;
+auto s = STDX_CT_FORMAT("Hello {} {}", x, int);
+// equivalent to stdx::ct_format<"Hello {} {}">(x, CX_VALUE(int));
+// s is stdx::format_result{"Hello {} int"_ctst, stdx::tuple{42}}
+----
+
+Things that are "compile-time-friendly" include:
+
+* `constexpr static` variables
+* `const` integral variables
+* template arguments
+* literals
+* types
