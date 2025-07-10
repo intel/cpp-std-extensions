@@ -8,15 +8,13 @@
 template <typename T>
 constexpr auto f() {
   STATIC_ASSERT(std::is_integral<T>,
-                "f() must take an integral type, received {}", CX_VALUE(T));
+                "f() must take an integral type, received {}", T);
 }
 
 f<float>(); // produces compile-time error
 ----
 
-The arguments to be formatted (if any) must be wrapped in
-xref:utility.adoc#_cx_value[`CX_VALUE`] if they are not admissible as template
-arguments.
+NOTE: The arguments to be formatted must be compile-time, of course.
 
 The output from this (which varies by compiler) will contain the formatted
 string, and could be something like:
@@ -33,3 +31,15 @@ include/stdx/static_assert.hpp:16:18: note: because
 
 NOTE: clang produces these "string-formatted" errors from version 15 onwards; GCC
 produces them from version 13.2 onwards.
+
+After C++26,
+https://en.cppreference.com/w/cpp/language/static_assert.html[`static_assert`]
+in the language means that formatted `STATIC_ASSERT` produces a slightly nicer
+error message; something like:
+
+[source,bash]
+----
+main.cpp:14:27: error: static assertion failed: f() must take an integral type, received float
+   16 |         STATIC_ASSERT(std::is_integral<T>,
+      |         ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+----

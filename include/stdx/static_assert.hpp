@@ -22,41 +22,31 @@ template <> struct ct_check_t<true> {
     }
 };
 template <bool B> constexpr auto ct_check = ct_check_t<B>{};
-
-namespace detail {
-template <ct_string Fmt, auto... Args> constexpr auto static_format() {
-    constexpr auto make_ct = []<auto V>() {
-        if constexpr (fmt_cx_value<decltype(V)>) {
-            return V;
-        } else {
-            return CX_VALUE(V);
-        }
-    };
-    return ct_format<Fmt>(make_ct.template operator()<Args>()...).str.value;
-}
-} // namespace detail
-
 } // namespace v1
 } // namespace stdx
 
 #if __cpp_static_assert >= 202306L
+
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define STATIC_ASSERT(cond, ...)                                               \
     []<bool B>() -> bool {                                                     \
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wunknown-warning-option")             \
         STDX_PRAGMA(diagnostic ignored "-Wc++26-extensions")                   \
-        static_assert(                                                         \
-            B, std::string_view{stdx::detail::static_format<__VA_ARGS__>()});  \
+        constexpr auto S = STDX_CT_FORMAT(__VA_ARGS__);                        \
+        static_assert(B, std::string_view{+S.str});                            \
         STDX_PRAGMA(diagnostic pop)                                            \
         return B;                                                              \
     }.template operator()<cond>()
+
 #else
+
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
-#define STATIC_ASSERT(cond, ...)                                                       \
-    []<bool B>() -> bool {                                                             \
-        stdx::ct_check<B>.template emit<stdx::detail::static_format<__VA_ARGS__>()>(); \
-        return B;                                                                      \
+#define STATIC_ASSERT(cond, ...)                                               \
+    []<bool B>() -> bool {                                                     \
+        constexpr auto S = STDX_CT_FORMAT(__VA_ARGS__);                        \
+        stdx::ct_check<B>.template emit<S>();                                  \
+        return B;                                                              \
     }.template operator()<cond>()
 #endif
 
