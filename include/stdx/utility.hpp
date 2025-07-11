@@ -242,14 +242,14 @@ template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
                                ::stdx::cxv_detail::from_any(                   \
                                    __VA_ARGS__)>())::value) {                  \
             return ::stdx::overload{                                           \
-                ::stdx::cxv_detail::cx_base{}, [&] {                           \
+                ::stdx::cxv_detail::cx_base{}, [] {                            \
                     return ::stdx::type_identity<                              \
                         decltype(::stdx::cxv_detail::type_of<                  \
                                  ::stdx::cxv_detail::from_any(                 \
                                      __VA_ARGS__)>())>{};                      \
                 }};                                                            \
         } else {                                                               \
-            return ::stdx::overload{::stdx::cxv_detail::cx_base{}, [&] {       \
+            return ::stdx::overload{::stdx::cxv_detail::cx_base{}, [] {        \
                                         return (__VA_ARGS__) +                 \
                                                ::stdx::cxv_detail::type_val{}; \
                                     }};                                        \
