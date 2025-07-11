@@ -52,6 +52,24 @@ template <typename Str, typename Args> struct format_result {
 };
 
 template <typename Str, typename Args>
+    requires(Args::size() == 0 and is_cx_value_v<Str>)
+struct format_result<Str, Args> {
+    CONSTEVAL static auto ct_string_convertible() -> std::true_type;
+
+    [[no_unique_address]] Str str;
+    [[no_unique_address]] Args args{};
+
+    friend constexpr auto operator+(format_result const &fr) { return +fr.str; }
+
+    constexpr auto operator()() const noexcept { return +(*this); }
+    using cx_value_t [[maybe_unused]] = void;
+
+  private:
+    friend constexpr auto operator==(format_result const &,
+                                     format_result const &) -> bool = default;
+};
+
+template <typename Str, typename Args>
 format_result(Str, Args) -> format_result<Str, Args>;
 template <typename Str> format_result(Str) -> format_result<Str, tuple<>>;
 

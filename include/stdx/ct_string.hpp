@@ -145,6 +145,8 @@ template <ct_string S> struct cts_t {
 
     CONSTEVAL static auto ct_string_convertible() -> std::true_type;
     friend constexpr auto operator+(cts_t const &) { return value; }
+    constexpr auto operator()() const noexcept { return value; }
+    using cx_value_t [[maybe_unused]] = void;
 };
 
 template <ct_string X, ct_string Y>
