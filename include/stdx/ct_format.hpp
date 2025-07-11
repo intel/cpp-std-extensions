@@ -41,7 +41,7 @@ template <typename Str, typename Args> struct format_result {
     }
 
     friend constexpr auto operator+(format_result const &) {
-        static_assert(decltype(ct_string_convertible())::value,
+        static_assert(always_false_v<format_result>,
                       "Unary operator+ can only be used on a format_result "
                       "without any runtime arguments");
     }
