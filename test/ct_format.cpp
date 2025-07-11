@@ -263,8 +263,18 @@ TEST_CASE("FORMAT a type argument", "[ct_format]") {
     STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", int) == "Hello int"_fmt_res);
 }
 
-TEST_CASE("FORMAT a constexpr string argument", "[ct_format]") {
+TEST_CASE("FORMAT a constexpr ct_string argument", "[ct_format]") {
     constexpr static auto S = "world"_cts;
+    STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", S) == "Hello world"_fmt_res);
+}
+
+TEST_CASE("FORMAT a cts_t argument", "[ct_format]") {
+    auto S = "world"_ctst;
+    STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", S) == "Hello world"_fmt_res);
+}
+
+TEST_CASE("FORMAT a format_result argument", "[ct_format]") {
+    auto S = "world"_fmt_res;
     STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", S) == "Hello world"_fmt_res);
 }
 
