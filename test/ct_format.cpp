@@ -298,6 +298,6 @@ TEST_CASE("FORMAT a constexpr string_view argument", "[ct_format]") {
 }
 
 TEST_CASE("FORMAT an integral_constant argument", "[ct_format]") {
-    constexpr static auto I = std::integral_constant<int, 17>{};
+    auto I = std::integral_constant<int, 17>{};
     STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", I) == "Hello 17"_fmt_res);
 }
