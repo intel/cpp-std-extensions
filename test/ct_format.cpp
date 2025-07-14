@@ -301,3 +301,18 @@ TEST_CASE("FORMAT an integral_constant argument", "[ct_format]") {
     auto I = std::integral_constant<int, 17>{};
     STATIC_REQUIRE(STDX_CT_FORMAT("Hello {}", I) == "Hello 17"_fmt_res);
 }
+
+#ifdef __clang__
+namespace {
+struct expression_test {
+    int f(int x) { return x; }
+};
+} // namespace
+
+TEST_CASE("FORMAT non-constexpr expression", "[utility]") {
+    auto x = 17;
+    constexpr auto expected =
+        stdx::format_result{"Hello {}"_ctst, stdx::make_tuple(17)};
+    CHECK(STDX_CT_FORMAT("Hello {}", expression_test{}.f(x)) == expected);
+}
+#endif

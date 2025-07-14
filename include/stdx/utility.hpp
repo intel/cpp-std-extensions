@@ -163,10 +163,14 @@ struct type_val {
     }
 };
 
-template <int> constexpr auto is_type() -> std::false_type;
-template <typename> constexpr auto is_type() -> std::true_type;
+template <typename>
+constexpr inline auto is_type = [] { return std::true_type{}; };
+template <>
+constexpr inline auto is_type<from_any> = [] { return std::false_type{}; };
 
-template <typename> struct typer;
+template <typename> struct typer {
+    using type = void;
+};
 template <typename T> struct typer<from_any(T)> {
     using type = T;
 };
@@ -239,8 +243,8 @@ template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
         STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
         STDX_PRAGMA(diagnostic ignored "-Wunused-value")                       \
         if constexpr (decltype(::stdx::cxv_detail::is_type<                    \
-                               ::stdx::cxv_detail::from_any(                   \
-                                   __VA_ARGS__)>())::value) {                  \
+                               __typeof__(::stdx::cxv_detail::from_any(        \
+                                   __VA_ARGS__))>())::value) {                 \
             return ::stdx::overload{                                           \
                 ::stdx::cxv_detail::cx_base{}, [] {                            \
                     return ::stdx::type_identity<                              \
@@ -299,14 +303,14 @@ constexpr auto cx_detect1(auto) { return 0; }
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
         if constexpr (decltype(::stdx::cxv_detail::is_type<                    \
-                               ::stdx::cxv_detail::from_any(                   \
-                                   __VA_ARGS__)>())::value) {                  \
+                               __typeof__(::stdx::cxv_detail::from_any(        \
+                                   __VA_ARGS__))>())::value) {                 \
             return ::stdx::overload{                                           \
                 ::stdx::cxv_detail::cx_base{}, [&] {                           \
                     return ::stdx::type_identity<                              \
-                        decltype(::stdx::cxv_detail::type_of<                  \
-                                 ::stdx::cxv_detail::from_any(                 \
-                                     __VA_ARGS__)>())>{};                      \
+                        typename ::stdx::cxv_detail::typer<                    \
+                            __typeof__(::stdx::cxv_detail::from_any(           \
+                                __VA_ARGS__))>::type>{};                       \
                 }};                                                            \
         } else if constexpr (::stdx::is_cx_value_v<                            \
                                  std::invoke_result_t<decltype(f)>> or         \
