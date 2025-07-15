@@ -359,16 +359,14 @@ TEST_CASE("CX_WRAP template argument", "[utility]") {
 }
 
 TEST_CASE("CX_WRAP type argument", "[utility]") {
-    STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP(int))>);
     STATIC_REQUIRE(
-        std::is_same_v<decltype(CX_WRAP(int)()), stdx::type_identity<int>>);
+        std::is_same_v<decltype(CX_WRAP(int)), stdx::type_identity<int>>);
 }
 
 TEST_CASE("CX_WRAP empty type argument", "[utility]") {
     using X = std::integral_constant<int, 17>;
-    STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP(X))>);
     STATIC_REQUIRE(
-        std::is_same_v<decltype(CX_WRAP(X)()), stdx::type_identity<X>>);
+        std::is_same_v<decltype(CX_WRAP(X)), stdx::type_identity<X>>);
 }
 
 TEST_CASE("CX_WRAP integral_constant arg", "[utility]") {

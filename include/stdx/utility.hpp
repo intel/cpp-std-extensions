@@ -297,10 +297,7 @@ constexpr auto cx_detect1(auto) { return 0; }
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
         if constexpr (STDX_IS_TYPE(__VA_ARGS__)) {                             \
-            return ::stdx::overload{                                           \
-                ::stdx::cxv_detail::cx_base{}, [&] {                           \
-                    return ::stdx::type_identity<__typeof__(__VA_ARGS__)>{};   \
-                }};                                                            \
+            return ::stdx::type_identity<__typeof__(__VA_ARGS__)>{};           \
         } else if constexpr (::stdx::is_cx_value_v<                            \
                                  std::invoke_result_t<decltype(f)>> or         \
                              std::is_empty_v<                                  \
