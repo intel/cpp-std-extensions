@@ -163,20 +163,8 @@ struct type_val {
     }
 };
 
-template <typename>
-constexpr inline auto is_type = [] { return std::true_type{}; };
-template <>
-constexpr inline auto is_type<from_any> = [] { return std::false_type{}; };
-
-template <typename> struct typer {
-    using type = void;
-};
-template <typename T> struct typer<from_any(T)> {
-    using type = T;
-};
-
-template <int> constexpr auto type_of() -> void;
-template <typename T> constexpr auto type_of() -> typename typer<T>::type;
+template <typename> constexpr inline auto is_type = true;
+template <> constexpr inline auto is_type<from_any> = false;
 
 class cx_base {
     struct unusable {};
@@ -236,21 +224,22 @@ template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
 #define FWD(x) std::forward<decltype(x)>(x)
 #endif
 
+#ifndef STDX_IS_TYPE
+#define STDX_IS_TYPE(...)                                                      \
+    ::stdx::cxv_detail::is_type<__typeof__(::stdx::cxv_detail::from_any(       \
+        __VA_ARGS__))>
+#endif
+
 #ifndef CX_VALUE
 #define CX_VALUE(...)                                                          \
     []() constexpr {                                                           \
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
         STDX_PRAGMA(diagnostic ignored "-Wunused-value")                       \
-        if constexpr (decltype(::stdx::cxv_detail::is_type<                    \
-                               __typeof__(::stdx::cxv_detail::from_any(        \
-                                   __VA_ARGS__))>())::value) {                 \
+        if constexpr (STDX_IS_TYPE(__VA_ARGS__)) {                             \
             return ::stdx::overload{                                           \
                 ::stdx::cxv_detail::cx_base{}, [] {                            \
-                    return ::stdx::type_identity<                              \
-                        decltype(::stdx::cxv_detail::type_of<                  \
-                                 ::stdx::cxv_detail::from_any(                 \
-                                     __VA_ARGS__)>())>{};                      \
+                    return ::stdx::type_identity<__typeof__(__VA_ARGS__)>{};   \
                 }};                                                            \
         } else {                                                               \
             return ::stdx::overload{::stdx::cxv_detail::cx_base{}, [] {        \
@@ -264,6 +253,7 @@ template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
 
 #if __cplusplus >= 202002L
 
+#ifndef CT_WRAP
 #define CT_WRAP(...)                                                           \
     [&](auto f) {                                                              \
         if constexpr (::stdx::is_ct_v<decltype(f())>) {                        \
@@ -278,7 +268,9 @@ template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
             return f();                                                        \
         }                                                                      \
     }([&] { return __VA_ARGS__; })
+#endif
 
+#ifndef CX_DETECT
 #ifdef __clang__
 #define CX_DETECT(...)                                                         \
     std::is_empty_v<decltype([&] {                                             \
@@ -297,20 +289,17 @@ constexpr auto cx_detect1(auto) { return 0; }
             (__VA_ARGS__) + ::stdx::cxv_detail::type_val{})>;                  \
     }
 #endif
+#endif
 
+#ifndef CX_WRAP
 #define CX_WRAP(...)                                                           \
     [&]([[maybe_unused]] auto f) {                                             \
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
-        if constexpr (decltype(::stdx::cxv_detail::is_type<                    \
-                               __typeof__(::stdx::cxv_detail::from_any(        \
-                                   __VA_ARGS__))>())::value) {                 \
+        if constexpr (STDX_IS_TYPE(__VA_ARGS__)) {                             \
             return ::stdx::overload{                                           \
                 ::stdx::cxv_detail::cx_base{}, [&] {                           \
-                    return ::stdx::type_identity<                              \
-                        typename ::stdx::cxv_detail::typer<                    \
-                            __typeof__(::stdx::cxv_detail::from_any(           \
-                                __VA_ARGS__))>::type>{};                       \
+                    return ::stdx::type_identity<__typeof__(__VA_ARGS__)>{};   \
                 }};                                                            \
         } else if constexpr (::stdx::is_cx_value_v<                            \
                                  std::invoke_result_t<decltype(f)>> or         \
@@ -330,6 +319,7 @@ constexpr auto cx_detect1(auto) { return 0; }
         STDX_PRAGMA(diagnostic pop)                                            \
     })
 
+#endif
 #endif
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
