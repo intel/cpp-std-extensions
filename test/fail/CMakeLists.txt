@@ -27,36 +27,7 @@ add_fail_tests(
     template_for_each_not_list
     to_address_undefined_on_function)
 
-function(add_formatted_error_tests)
-    add_fail_tests(ct_check)
-    add_fail_tests(static_assert)
-    add_fail_tests(static_assert_format)
-endfunction()
-
-function(add_26_formatted_error_tests)
-    add_compile_fail_test("static_assert.cpp" NAME static_assert_26 LIBRARIES
-                          stdx)
-    add_compile_fail_test("static_assert_format.cpp" NAME
-                          static_assert_format_26 LIBRARIES stdx)
-    target_compile_features(EXPECT_FAIL.static_assert_26 PRIVATE cxx_std_26)
-    target_compile_features(EXPECT_FAIL.static_assert_format_26
-                            PRIVATE cxx_std_26)
-endfunction()
-
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
-    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "Clang"
-       AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL 15)
-        add_formatted_error_tests()
-    endif()
-    if(${CMAKE_CXX_COMPILER_ID} STREQUAL "GNU" AND ${CMAKE_CXX_COMPILER_VERSION}
-                                                   VERSION_GREATER_EQUAL 13.2)
-        add_formatted_error_tests()
-    endif()
-
-    if("cxx_std_26" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
-        add_26_formatted_error_tests()
-    endif()
-
     add_fail_tests(
         atomic_bool_dec
         ct_format_mismatch
@@ -69,3 +40,32 @@ if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
         tuple_spaceship_with_element
         tuple_type_not_found)
 endif()
+
+function(add_test_by_compiler CPP_NAME CXX_VERSION COMPILER_ID COMPILER_VERSION)
+    if("cxx_std_${CXX_VERSION}" IN_LIST CMAKE_CXX_COMPILE_FEATURES)
+        if(${CMAKE_CXX_COMPILER_ID} STREQUAL "${COMPILER_ID}"
+           AND ${CMAKE_CXX_COMPILER_VERSION} VERSION_GREATER_EQUAL
+               ${COMPILER_VERSION})
+            set(TEST_NAME "${CPP_NAME}_${COMPILER_ID}_${COMPILER_VERSION}")
+            add_compile_fail_test("${CPP_NAME}.cpp" NAME ${TEST_NAME} LIBRARIES
+                                  stdx)
+            target_compile_features("EXPECT_FAIL.${TEST_NAME}"
+                                    PRIVATE "cxx_std_${CXX_VERSION}")
+        endif()
+    endif()
+endfunction()
+
+add_test_by_compiler(ct_check 20 Clang 15)
+add_test_by_compiler(ct_check 20 GNU 13.2)
+add_test_by_compiler(static_assert 20 Clang 15)
+add_test_by_compiler(static_assert 20 GNU 13.2)
+add_test_by_compiler(static_assert_format 20 Clang 15)
+add_test_by_compiler(static_assert_format 20 GNU 13.2)
+
+add_test_by_compiler(static_assert 26 Clang 17)
+add_test_by_compiler(static_assert 26 GNU 14)
+add_test_by_compiler(static_assert_format 26 Clang 17)
+add_test_by_compiler(static_assert_format 26 GNU 14)
+
+add_test_by_compiler(rollover_less_than_26 26 Clang 19)
+add_test_by_compiler(rollover_less_than_26 26 GNU 15)

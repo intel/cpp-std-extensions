@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
 
 #include <type_traits>
@@ -77,10 +78,26 @@ template <typename T> struct rollover_t {
         return not(lhs == rhs);
     }
 
-    friend constexpr auto operator<(rollover_t, rollover_t) -> bool = delete;
-    friend constexpr auto operator<=(rollover_t, rollover_t) -> bool = delete;
-    friend constexpr auto operator>(rollover_t, rollover_t) -> bool = delete;
-    friend constexpr auto operator>=(rollover_t, rollover_t) -> bool = delete;
+    friend constexpr auto operator<(rollover_t, rollover_t)
+        -> bool STDX_DELETED(
+            "Comparison operators on rollover_t are deleted because "
+            "they are non-transitive. If you know your data is safe, "
+            "you can use cmp_less(rollover_t, rollover_t).");
+    friend constexpr auto operator<=(rollover_t, rollover_t)
+        -> bool STDX_DELETED(
+            "Comparison operators on rollover_t are deleted because "
+            "they are non-transitive. If you know your data is safe, "
+            "you can use cmp_less(rollover_t, rollover_t).");
+    friend constexpr auto operator>(rollover_t, rollover_t)
+        -> bool STDX_DELETED(
+            "Comparison operators on rollover_t are deleted because "
+            "they are non-transitive. If you know your data is safe, "
+            "you can use cmp_less(rollover_t, rollover_t).");
+    friend constexpr auto operator>=(rollover_t, rollover_t)
+        -> bool STDX_DELETED(
+            "Comparison operators on rollover_t are deleted because "
+            "they are non-transitive. If you know your data is safe, "
+            "you can use cmp_less(rollover_t, rollover_t).");
 
     [[nodiscard]] friend constexpr auto cmp_less(rollover_t lhs, rollover_t rhs)
         -> bool {
