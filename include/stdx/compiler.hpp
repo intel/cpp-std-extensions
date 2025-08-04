@@ -67,10 +67,26 @@
 #endif
 
 #define STDX_DO_PRAGMA(X) _Pragma(#X)
-#ifdef __clang__
+#if defined(__clang__)
 #define STDX_PRAGMA(X) STDX_DO_PRAGMA(clang X)
 #else
 #define STDX_PRAGMA(X) STDX_DO_PRAGMA(GCC X)
+#endif
+
+#ifndef STDX_DELETED
+#if __cpp_deleted_function >= 202403L
+#if defined(__clang__)
+#define STDX_DELETED(R)                                                        \
+    STDX_PRAGMA(diagnostic push)                                               \
+    STDX_PRAGMA(diagnostic ignored "-Wunknown-warning-option")                 \
+    STDX_PRAGMA(diagnostic ignored "-Wc++26-extensions") =                     \
+        delete (R)STDX_PRAGMA(diagnostic pop)
+#else
+#define STDX_DELETED(R) = delete (R)
+#endif
+#else
+#define STDX_DELETED(R) = delete
+#endif
 #endif
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
