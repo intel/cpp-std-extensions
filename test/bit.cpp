@@ -432,3 +432,24 @@ TEST_CASE("smallest_uint", "[bit]") {
     STATIC_REQUIRE(std::is_same_v<stdx::smallest_uint_t<64>, std::uint64_t>);
     STATIC_REQUIRE(std::is_same_v<stdx::smallest_uint_t<65>, std::uint64_t>);
 }
+
+TEST_CASE("bit_destructure (degenerate case)", "[bit]") {
+    constexpr auto x = std::uint16_t{0b1111'1111'0000'0000u};
+    auto [a] = stdx::bit_destructure(x);
+    CHECK(a == x);
+}
+
+TEST_CASE("bit_destructure (split in two)", "[bit]") {
+    constexpr auto x = std::uint16_t{0xa5'5au};
+    auto [a, b] = stdx::bit_destructure<8>(x);
+    CHECK(a == 0x5au);
+    CHECK(b == 0xa5u);
+}
+
+TEST_CASE("bit_destructure (split in three)", "[bit]") {
+    constexpr auto x = std::uint32_t{0x1234'5678u};
+    auto [a, b, c] = stdx::bit_destructure<8, 24>(x);
+    CHECK(a == 0x78u);
+    CHECK(b == 0x3456u);
+    CHECK(c == 0x12u);
+}
