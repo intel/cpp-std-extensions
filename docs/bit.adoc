@@ -6,6 +6,26 @@ provides an implementation that mirrors
 https://en.cppreference.com/w/cpp/header/bit[`<bit>`], but is
 `constexpr` in C++17. It is mostly based on intrinsics.
 
+=== `bit_destructure`
+
+`bit_destructure` is a function for unpacking an unsigned integral value into multiple
+smaller bit width values. It is a more general case of xref:bit.adoc#_bit_unpack[`bit_unpack`].
+
+[source,cpp]
+----
+auto const [a, b, c] = stdx::bit_destructure<8, 24>(0x1234'5678u);
+assert(a == 0x78u);   // bits [0-8)
+assert(b == 0x3456u); // bits [8-24)
+assert(c == 0x12u);   // bits [24-32)
+----
+
+The `value_type` of the returned array is the same as the type of the value that
+is pass to `bit_destructure`.
+
+NOTE: Unlike `bit_unpack`, `bit_destructure` returns the elements in
+_increasing_ order of significance, and the template arguments representing the
+split boundaries must be in increasing order.
+
 === `bit_mask`
 
 `bit_mask` is a function for constructing a bit mask between most-significant
@@ -71,7 +91,7 @@ static_assert(y == x);
 - to pack 4 `std::uint16_t`​s into a `std::uint64_t`
 - to pack 8 `std::uint8_t`​s into a `std::uint64_t`
 
-The arguments are listed in order of significance, i.e. for the binary
+The arguments are listed in order of _decreasing_ significance, i.e. for the binary
 overloads, the first argument is the high bits, and the second argument the low
 bits.
 
@@ -109,7 +129,7 @@ assert(b == 0x5678u);
 - to unpack a `std::uint64_t`  into 8 `std::uint8_t`​s
 
 The return value of `bit_unpack` is actually a `std::array` with elements in
-order of significance. In this way `bit_unpack` followed by `bit_pack` produces
+order of _decreasing_ significance. In this way `bit_unpack` followed by `bit_pack` produces
 the original value.
 
 [source,cpp]

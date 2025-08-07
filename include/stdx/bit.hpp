@@ -8,6 +8,7 @@
 #include <array>
 #include <climits>
 #include <cstdint>
+#include <iterator>
 #include <limits>
 #include <type_traits>
 
@@ -432,6 +433,40 @@ template <std::size_t N> CONSTEVAL auto smallest_uint() {
 }
 
 template <std::size_t N> using smallest_uint_t = decltype(smallest_uint<N>());
+
+namespace bit_detail {
+template <std::size_t... Offsets>
+constexpr auto shifts = [] {
+    constexpr auto offsets = std::array{std::size_t{}, Offsets...};
+    auto s = std::array<std::size_t, sizeof...(Offsets) + 1>{};
+    for (auto i = std::size_t{}; i < sizeof...(Offsets); ++i) {
+        s[i + 1] = offsets[i + 1] - offsets[i];
+    }
+    return s;
+}();
+
+template <std::size_t Shift, std::size_t Msb, typename T>
+constexpr auto shift_extract(T &t) -> T {
+    t = static_cast<T>(t >> Shift);
+    constexpr auto mask = bit_mask<T, Msb>();
+    return static_cast<T>(t & mask);
+}
+
+template <std::size_t... Offsets, typename T, std::size_t... Is>
+constexpr auto bit_destructure_impl(T t, std::index_sequence<Is...>) {
+    return std::array{
+        shift_extract<shifts<Offsets...>[Is], shifts<Offsets...>[Is + 1] - 1>(
+            t)...};
+}
+} // namespace bit_detail
+
+template <std::size_t... Offsets, typename T>
+constexpr auto bit_destructure(T t)
+    -> std::enable_if_t<unsigned_integral<T>,
+                        std::array<T, sizeof...(Offsets) + 1>> {
+    return bit_detail::bit_destructure_impl<Offsets..., bit_size<T>()>(
+        t, std::make_index_sequence<sizeof...(Offsets) + 1>{});
+}
 } // namespace v1
 } // namespace stdx
 
