@@ -255,19 +255,16 @@ template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
 
 #ifndef CT_WRAP
 #define CT_WRAP(...)                                                           \
-    [&](auto f) {                                                              \
+    [&](auto f) constexpr {                                                    \
         if constexpr (::stdx::is_ct_v<decltype(f())>) {                        \
             return f();                                                        \
-        } else if constexpr (requires {                                        \
-                                 ::stdx::ct<[&]() constexpr {                  \
-                                     return __VA_ARGS__;                       \
-                                 }()>;                                         \
-                             }) {                                              \
-            return ::stdx::ct<[&]() constexpr { return __VA_ARGS__; }()>();    \
+        } else if constexpr (requires { ::stdx::ct<f()>(); } or                \
+                             std::is_empty_v<decltype(f)>) {                   \
+            return ::stdx::ct<f()>();                                          \
         } else {                                                               \
             return f();                                                        \
         }                                                                      \
-    }([&] { return __VA_ARGS__; })
+    }([&]() constexpr { return __VA_ARGS__; })
 #endif
 
 #ifndef CX_DETECT

@@ -372,7 +372,7 @@ class bitset {
     [[nodiscard]] constexpr auto operator~() const -> bitset {
         bitset result{};
         for (auto i = std::size_t{}; i < storage_size; ++i) {
-            result.storage[i] = ~storage[i];
+            result.storage[i] = static_cast<elem_t>(~storage[i]);
         }
         return result;
     }
