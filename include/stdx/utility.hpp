@@ -145,6 +145,8 @@ struct from_any {
     constexpr operator int() const { return 0; }
 };
 
+struct value_marker {};
+
 struct type_val {
     template <typename T, typename U,
               typename = std::enable_if_t<same_as_unqualified<type_val, U>>>
@@ -152,6 +154,14 @@ struct type_val {
         return t;
     }
     friend constexpr auto operator+(type_val const &f) -> type_val { return f; }
+
+    template <typename T, typename U,
+              typename = std::enable_if_t<same_as_unqualified<type_val, U>>>
+    friend constexpr auto operator*(T, U const &) -> value_marker {
+        return {};
+    }
+    friend constexpr auto operator*(type_val const &f) -> type_val { return f; }
+
     // NOLINTNEXTLINE(google-explicit-constructor)
     template <typename T> constexpr operator T() const {
         if constexpr (std::is_default_constructible_v<T>) {
@@ -164,7 +174,7 @@ struct type_val {
 };
 
 template <typename> constexpr inline auto is_type = true;
-template <> constexpr inline auto is_type<from_any> = false;
+template <> constexpr inline auto is_type<value_marker> = false;
 
 class cx_base {
     struct unusable {};
@@ -226,8 +236,8 @@ template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
 
 #ifndef STDX_IS_TYPE
 #define STDX_IS_TYPE(...)                                                      \
-    ::stdx::cxv_detail::is_type<__typeof__(::stdx::cxv_detail::from_any(       \
-        __VA_ARGS__))>
+    ::stdx::cxv_detail::is_type<decltype((__VA_ARGS__) *                       \
+                                         ::stdx::cxv_detail::type_val{})>
 #endif
 
 #ifndef CX_VALUE
