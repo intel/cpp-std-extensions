@@ -317,6 +317,26 @@ TEST_CASE("CX_WRAP string_view runtime arg", "[utility]") {
     CHECK(CX_WRAP(x) == std::string_view{"hello"});
 }
 
+namespace {
+auto at_init_time() { return 17; }
+auto nc_var = at_init_time();
+} // namespace
+
+TEST_CASE("CX_WRAP static runtime arg", "[utility]") {
+    STATIC_REQUIRE(std::is_same_v<decltype(CX_WRAP(nc_var)), decltype(nc_var)>);
+    CHECK(CX_WRAP(nc_var) == 17);
+}
+
+namespace {
+constexpr auto at_compile_time() { return 17; }
+constexpr auto c_var = at_compile_time();
+} // namespace
+
+TEST_CASE("CX_WRAP static constexpr arg", "[utility]") {
+    STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP(c_var))>);
+    STATIC_REQUIRE(CX_WRAP(c_var)() == 17);
+}
+
 TEST_CASE("CX_WRAP const integral type", "[utility]") {
     auto const x = 17;
     STATIC_REQUIRE(stdx::is_cx_value_v<decltype(CX_WRAP(x))>);
@@ -378,7 +398,7 @@ TEST_CASE("CX_WRAP integral_constant arg", "[utility]") {
 #ifdef __clang__
 namespace {
 struct expression_test {
-    int f(int x) { return x; }
+    auto f(int x) -> int { return x; }
 };
 } // namespace
 
