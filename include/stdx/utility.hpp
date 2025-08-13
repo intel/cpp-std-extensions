@@ -277,26 +277,23 @@ template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
     }([&]() constexpr { return __VA_ARGS__; })
 #endif
 
-#ifndef CX_DETECT
-#ifdef __clang__
-#define CX_DETECT(...)                                                         \
-    std::is_empty_v<decltype([&] {                                             \
-        return (__VA_ARGS__) + ::stdx::cxv_detail::type_val{};                 \
-    })>
-#else
 namespace stdx {
 inline namespace v1 {
-template <auto> constexpr auto cx_detect0() {}
-constexpr auto cx_detect1(auto) { return 0; }
+namespace cxv_detail {
+template <auto> constexpr auto cx_sfinae = std::true_type{};
+
+#ifdef __clang__
+auto cx_detect(auto f) -> decltype(cx_sfinae<from_any{f()}>);
+auto cx_detect(...) -> std::false_type;
+#else
+auto cx_detect(auto f) {
+    constexpr auto b = requires { cx_sfinae<from_any{f()}>; };
+    return std::bool_constant<b>{};
+}
+#endif
+} // namespace cxv_detail
 } // namespace v1
 } // namespace stdx
-#define CX_DETECT(...)                                                         \
-    requires {                                                                 \
-        ::stdx::cx_detect0<::stdx::cx_detect1(                                 \
-            (__VA_ARGS__) + ::stdx::cxv_detail::type_val{})>;                  \
-    }
-#endif
-#endif
 
 #ifndef CX_WRAP
 #define CX_WRAP(...)                                                           \
@@ -310,7 +307,8 @@ constexpr auto cx_detect1(auto) { return 0; }
                              std::is_empty_v<                                  \
                                  std::invoke_result_t<decltype(f)>>) {         \
             return f();                                                        \
-        } else if constexpr (CX_DETECT(__VA_ARGS__)) {                         \
+        } else if constexpr (decltype(::stdx::cxv_detail::cx_detect(           \
+                                 f))::value) {                                 \
             return ::stdx::overload{::stdx::cxv_detail::cx_base{}, f};         \
         } else {                                                               \
             return f();                                                        \
