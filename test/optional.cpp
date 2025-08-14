@@ -34,6 +34,14 @@ template <> struct stdx::tombstone_traits<S> {
     constexpr auto operator()() const { return S{-1}; }
 };
 
+TEST_CASE("tombstone detection", "[optional]") {
+    STATIC_REQUIRE(stdx::has_tombstone_v<E>);
+    STATIC_REQUIRE(stdx::has_tombstone_v<S>);
+    STATIC_REQUIRE(stdx::has_tombstone_v<float>);
+    STATIC_REQUIRE(stdx::has_tombstone_v<int *>);
+    STATIC_REQUIRE(not stdx::has_tombstone_v<int>);
+}
+
 TEST_CASE("sizeof(optional<T>) == sizeof(T)", "[optional]") {
     using O1 = stdx::optional<E>;
     STATIC_REQUIRE(sizeof(O1) == sizeof(E));
@@ -428,18 +436,31 @@ TEST_CASE("tombstone with non-structural value", "[optional]") {
 }
 #endif
 
-#if __cplusplus >= 202002L
 namespace {
 template <typename T>
-using my_optional = stdx::conditional_t<requires {
-    typename stdx::tombstone_traits<T>::unspecialized;
-}, std::optional<T>, stdx::optional<T>>;
+using my_optional = stdx::conditional_t<stdx::has_tombstone_v<T>,
+                                        stdx::optional<T>, std::optional<T>>;
 } // namespace
 
 TEST_CASE("select optional implementation based on whether tombstone traits "
           "are present",
           "[optional]") {
-    static_assert(std::is_same_v<my_optional<S>, stdx::optional<S>>);
-    static_assert(std::is_same_v<my_optional<int>, std::optional<int>>);
+    STATIC_REQUIRE(std::is_same_v<my_optional<S>, stdx::optional<S>>);
+    STATIC_REQUIRE(std::is_same_v<my_optional<int>, std::optional<int>>);
 }
-#endif
+
+TEST_CASE("product types have tombstones iff their components do",
+          "[optional]") {
+    STATIC_REQUIRE(not stdx::has_tombstone_v<std::tuple<>>);
+    STATIC_REQUIRE(stdx::has_tombstone_v<std::tuple<E, S>>);
+    STATIC_REQUIRE(not stdx::has_tombstone_v<std::tuple<int>>);
+    STATIC_REQUIRE(stdx::has_tombstone_v<std::pair<E, S>>);
+}
+
+TEST_CASE("tombstone traits for product types come from components",
+          "[optional]") {
+    constexpr auto o = stdx::optional<std::tuple<E, S, float>>{};
+    STATIC_REQUIRE(not o);
+    STATIC_REQUIRE(*o == std::tuple{E{0xffu}, S{-1},
+                                    std::numeric_limits<float>::infinity()});
+}
