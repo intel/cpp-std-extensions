@@ -27,8 +27,36 @@ The following compilers are supported:
 * gcc 13
 * gcc 14
 
-In general, `stdx` supports the C++17 standard; however some functionality is
-available only in 20 and later.
+In general, `stdx` supports the C\\++17 standard; however some functionality is
+available only in C++20 and later.
+
+=== Dependencies
+
+`stdx` depends on:
+
+* https://www.boost.org/libs/mp11/[boost mp11]
+* https://github.com/fmtlib/fmt[fmtlib]
+* https://github.com/intel/cpp-baremetal-concurrency/[baremetal-concurrency]
+
+NOTE: `libfmt` is used at compile-time only; there is no runtime formatting in
+`stdx`.
+
+=== Getting Started
+
+`stdx` is a header-only library, so you can get started by cloning the
+repository (or bringing it in as a submodule) and adding the include directory
+to your build target. Depending on which part(s) of `stdx` you are using, you
+may also need to pull in the dependencies.
+
+Alternatively, consuming `stdx` with https://github.com/cpm-cmake/CPM.cmake[CPM]
+can be a one-liner:
+
+[source,cmake]
+----
+cpmaddpackage("gh:intel/cpp-std-extensions#1abcdef")
+----
+
+Where `1abcdef` is the git hash.
 
 === Synopsis
 
@@ -54,16 +82,19 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/cx_queue.hpp[`cx_queue.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/cx_set.hpp[`cx_set.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/cx_vector.hpp[`cx_vector.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/env.hpp[`env.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/for_each_n_args.hpp[`for_each_n_args.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/function_traits.hpp[`function_traits.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/functional.hpp[`functional.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/intrusive_forward_list.hpp[`intrusive_forward_list.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/intrusive_list.hpp[`intrusive_list.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/iterator.hpp[`iterator.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/latched.hpp[`latched.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/memory.hpp[`memory.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/numeric.hpp[`numeric.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/optional.hpp[`optional.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/panic.hpp[`panic.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/pp_map.hpp[`pp_map.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/priority.hpp[`priority.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/ranges.hpp[`ranges.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/rollover.hpp[`rollover.hpp`]
