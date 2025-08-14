@@ -23,6 +23,11 @@ template <typename T, typename = void> struct tombstone_traits {
     }
 };
 
+template <typename T, typename = void> constexpr auto has_tombstone_v = true;
+template <typename T>
+constexpr auto has_tombstone_v<
+    T, std::void_t<typename tombstone_traits<T>::unspecialized>> = false;
+
 template <typename T>
 struct tombstone_traits<T, std::enable_if_t<std::is_floating_point_v<T>>> {
     constexpr auto operator()() const {
@@ -33,6 +38,17 @@ struct tombstone_traits<T, std::enable_if_t<std::is_floating_point_v<T>>> {
 template <typename T>
 struct tombstone_traits<T, std::enable_if_t<std::is_pointer_v<T>>> {
     constexpr auto operator()() const { return nullptr; }
+};
+
+template <template <typename...> typename L, typename T, typename... Ts>
+struct tombstone_traits<
+    L<T, Ts...>,
+    std::enable_if_t<std::is_constructible_v<L<T, Ts...>, T, Ts...> and
+                     (has_tombstone_v<T> and ... and has_tombstone_v<Ts>)>> {
+    constexpr auto operator()() const {
+        return L<T, Ts...>{tombstone_traits<T>{}(),
+                           tombstone_traits<Ts>{}()...};
+    }
 };
 
 template <auto V> struct tombstone_value {
