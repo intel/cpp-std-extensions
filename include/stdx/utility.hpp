@@ -157,10 +157,10 @@ struct type_val {
 
     template <typename T, typename U,
               typename = std::enable_if_t<same_as_unqualified<type_val, U>>>
-    friend constexpr auto operator*(T, U const &) -> value_marker {
+    friend constexpr auto operator-(T, U const &) -> value_marker {
         return {};
     }
-    friend constexpr auto operator*(type_val const &f) -> type_val { return f; }
+    friend constexpr auto operator-(type_val const &f) -> type_val { return f; }
 
     // NOLINTNEXTLINE(google-explicit-constructor)
     template <typename T> constexpr operator T() const {
@@ -236,7 +236,7 @@ template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
 
 #ifndef STDX_IS_TYPE
 #define STDX_IS_TYPE(...)                                                      \
-    ::stdx::cxv_detail::is_type<decltype((__VA_ARGS__) *                       \
+    ::stdx::cxv_detail::is_type<decltype((__VA_ARGS__) -                       \
                                          ::stdx::cxv_detail::type_val{})>
 #endif
 
