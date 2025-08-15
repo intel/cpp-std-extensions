@@ -61,6 +61,37 @@ template <auto V> struct tombstone_value {
     }
 };
 
+namespace optional_detail {
+template <typename Func, typename Arg, typename = void> struct unwrap_invoker {
+    template <typename F, typename A>
+    constexpr static auto invoke(F &&f, A &&a) {
+        return [&] { return std::forward<F>(f)(std::forward<A>(a)); };
+    }
+};
+
+template <typename Func, template <typename...> typename L, typename... Ts>
+struct unwrap_invoker<Func, L<Ts...>,
+                      std::void_t<decltype(apply(std::declval<Func>(),
+                                                 std::declval<L<Ts...>>()))>> {
+    template <typename F, typename A>
+    constexpr static auto invoke(F &&f, A &&a) {
+        return [&] { return apply(std::forward<F>(f), std::forward<A>(a)); };
+    }
+};
+
+template <typename F, typename Arg>
+constexpr auto unwrap_invoke(F &&f, Arg &&arg) {
+    return unwrap_invoker<stdx::remove_cvref_t<F>,
+                          stdx::remove_cvref_t<Arg>>::invoke(std::forward<F>(f),
+                                                             std::forward<Arg>(
+                                                                 arg));
+}
+
+template <typename F, typename Arg>
+using unwrap_invoke_result_t =
+    decltype(unwrap_invoke(std::declval<F>(), std::declval<Arg>())());
+} // namespace optional_detail
+
 template <typename T, typename TS = tombstone_traits<T>> class optional {
     static_assert(not std::is_integral_v<T> or
                       not stdx::is_specialization_of_v<TS, tombstone_traits>,
@@ -169,32 +200,34 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
     }
 
     template <typename F> constexpr auto transform(F &&f) & {
-        using func_t = stdx::remove_cvref_t<F>;
-        using U = std::invoke_result_t<func_t, value_type &>;
-        return *this ? optional<U>{with_result_of{
-                           [&] { return std::forward<F>(f)(val); }}}
-                     : optional<U>{};
+        using U = optional_detail::unwrap_invoke_result_t<F, value_type &>;
+        return *this
+                   ? optional<U>{with_result_of{optional_detail::unwrap_invoke(
+                         std::forward<F>(f), val)}}
+                   : optional<U>{};
     }
     template <typename F> constexpr auto transform(F &&f) const & {
-        using func_t = stdx::remove_cvref_t<F>;
-        using U = std::invoke_result_t<func_t, value_type const &>;
-        return *this ? optional<U>{with_result_of{
-                           [&] { return std::forward<F>(f)(val); }}}
-                     : optional<U>{};
+        using U =
+            optional_detail::unwrap_invoke_result_t<F, value_type const &>;
+        return *this
+                   ? optional<U>{with_result_of{optional_detail::unwrap_invoke(
+                         std::forward<F>(f), val)}}
+                   : optional<U>{};
     }
     template <typename F> constexpr auto transform(F &&f) && {
-        using func_t = stdx::remove_cvref_t<F>;
-        using U = std::invoke_result_t<func_t, value_type &&>;
-        return *this ? optional<U>{with_result_of{
-                           [&] { return std::forward<F>(f)(std::move(val)); }}}
-                     : optional<U>{};
+        using U = optional_detail::unwrap_invoke_result_t<F, value_type &&>;
+        return *this
+                   ? optional<U>{with_result_of{optional_detail::unwrap_invoke(
+                         std::forward<F>(f), std::move(val))}}
+                   : optional<U>{};
     }
     template <typename F> constexpr auto transform(F &&f) const && {
-        using func_t = stdx::remove_cvref_t<F>;
-        using U = std::invoke_result_t<func_t, value_type const &&>;
-        return *this ? optional<U>{with_result_of{
-                           [&] { return std::forward<F>(f)(std::move(val)); }}}
-                     : optional<U>{};
+        using U =
+            optional_detail::unwrap_invoke_result_t<F, value_type const &&>;
+        return *this
+                   ? optional<U>{with_result_of{optional_detail::unwrap_invoke(
+                         std::forward<F>(f), std::move(val))}}
+                   : optional<U>{};
     }
 
     template <typename F> constexpr auto or_else(F &&f) const & -> optional {
@@ -205,24 +238,28 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
     }
 
     template <typename F> constexpr auto and_then(F &&f) & {
-        using func_t = stdx::remove_cvref_t<F>;
-        using U = std::invoke_result_t<func_t, value_type &>;
-        return *this ? std::forward<F>(f)(val) : U{};
+        using U = optional_detail::unwrap_invoke_result_t<F, value_type &>;
+        return *this ? optional_detail::unwrap_invoke(std::forward<F>(f), val)()
+                     : U{};
     }
     template <typename F> constexpr auto and_then(F &&f) const & {
-        using func_t = stdx::remove_cvref_t<F>;
-        using U = std::invoke_result_t<func_t, value_type const &>;
-        return *this ? std::forward<F>(f)(val) : U{};
+        using U =
+            optional_detail::unwrap_invoke_result_t<F, value_type const &>;
+        return *this ? optional_detail::unwrap_invoke(std::forward<F>(f), val)()
+                     : U{};
     }
     template <typename F> constexpr auto and_then(F &&f) && {
-        using func_t = stdx::remove_cvref_t<F>;
-        using U = std::invoke_result_t<func_t, value_type &&>;
-        return *this ? std::forward<F>(f)(std::move(val)) : U{};
+        using U = optional_detail::unwrap_invoke_result_t<F, value_type &&>;
+        return *this ? optional_detail::unwrap_invoke(std::forward<F>(f),
+                                                      std::move(val))()
+                     : U{};
     }
     template <typename F> constexpr auto and_then(F &&f) const && {
-        using func_t = stdx::remove_cvref_t<F>;
-        using U = std::invoke_result_t<func_t, value_type &&>;
-        return *this ? std::forward<F>(f)(std::move(val)) : U{};
+        using U =
+            optional_detail::unwrap_invoke_result_t<F, value_type const &&>;
+        return *this ? optional_detail::unwrap_invoke(std::forward<F>(f),
+                                                      std::move(val))()
+                     : U{};
     }
 
   private:
@@ -259,6 +296,23 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
                                                    optional const &rhs)
         -> bool {
         return not(lhs < rhs);
+    }
+
+    template <typename F>
+    [[nodiscard]] friend constexpr auto operator|(optional const &lhs, F &&f) {
+        return lhs.and_then(std::forward<F>(f));
+    }
+    template <typename F>
+    [[nodiscard]] friend constexpr auto operator|(optional &lhs, F &&f) {
+        return lhs.and_then(std::forward<F>(f));
+    }
+    template <typename F>
+    [[nodiscard]] friend constexpr auto operator|(optional &&lhs, F &&f) {
+        return std::move(lhs).and_then(std::forward<F>(f));
+    }
+    template <typename F>
+    [[nodiscard]] friend constexpr auto operator|(optional const &&lhs, F &&f) {
+        return std::move(lhs).and_then(std::forward<F>(f));
     }
 };
 

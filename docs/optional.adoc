@@ -90,6 +90,15 @@ tombstone value. At first thought,
 https://en.cppreference.com/w/cpp/numeric/math/isnan[NaN] is the obvious
 tombstone, but NaNs never compare equal to anything, not even themselves.
 
+For tuple-like types, if all of their component parts provide tombstone values,
+a tombstone value for them is synthesized:
+
+[source,cpp]
+----
+// S has a tombstone value, therefore so does std::tuple<S, S>
+auto o = stdx::optional{std::tuple{S{42}, S{17}}};
+----
+
 === Multi-argument `transform`
 
 `stdx::optional` provides one extra feature over `std::optional`: the ability to
@@ -112,3 +121,17 @@ auto opt_sum = transform(
 This flavor of `transform` returns the result of the function only if all of its
 `stdx::optional` arguments are engaged. If any one is not, a disengaged
 `stdx::optional` is returned.
+
+=== Unpacking `transform` and `and_then`
+
+When the contained `value_type` supports the tuple protocol with `apply`,
+`transform` (or `and_then`) can unpack it to pass arguments to a function:
+
+[source,cpp]
+----
+auto opt1 = stdx::optional{std::tuple{S{42}, S{17}}};
+auto opt_sum = transform(
+    [](S const &x, S const &y) { return S{x.value + y.value}; },
+    opt1);
+// result is stdx::optional{S{59}}
+----

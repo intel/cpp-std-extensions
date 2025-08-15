@@ -6,6 +6,7 @@
 #include <cstdint>
 #include <optional>
 #include <string_view>
+#include <tuple>
 #include <type_traits>
 #include <utility>
 
@@ -463,4 +464,42 @@ TEST_CASE("tombstone traits for product types come from components",
     STATIC_REQUIRE(not o);
     STATIC_REQUIRE(*o == std::tuple{E{0xffu}, S{-1},
                                     std::numeric_limits<float>::infinity()});
+}
+
+TEST_CASE("transform unpacks tuples if necessary", "[optional]") {
+    constexpr auto o1 = stdx::optional{std::tuple{S{42}, S{17}}};
+    constexpr auto o2 =
+        o1.transform([](auto s1, auto s2) { return S{s1.value + s2.value}; });
+    STATIC_REQUIRE(o2->value == 59);
+}
+
+TEST_CASE("transform unpacks tuple-protocol types if necessary", "[optional]") {
+    constexpr auto o1 = stdx::optional{std::pair{S{42}, S{17}}};
+    constexpr auto o2 =
+        o1.transform([](auto s1, auto s2) { return S{s1.value + s2.value}; });
+    STATIC_REQUIRE(o2->value == 59);
+}
+
+TEST_CASE("and_then unpacks tuples if necessary", "[optional]") {
+    constexpr auto o1 = stdx::optional{std::tuple{S{42}, S{17}}};
+    constexpr auto o2 = o1.and_then([](auto s1, auto s2) {
+        return stdx::optional{S{s1.value + s2.value}};
+    });
+    STATIC_REQUIRE(o2->value == 59);
+}
+
+TEST_CASE("and_then unpacks tuple-protocol types if necessary", "[optional]") {
+    constexpr auto o1 = stdx::optional{std::pair{S{42}, S{17}}};
+    constexpr auto o2 = o1.and_then([](auto s1, auto s2) {
+        return stdx::optional{S{s1.value + s2.value}};
+    });
+    STATIC_REQUIRE(o2->value == 59);
+}
+
+TEST_CASE("and_then is pipeable", "[optional]") {
+    constexpr auto const o1 = stdx::optional{std::tuple{S{42}, S{17}}};
+    constexpr auto const o2 = o1 | [](auto s1, auto s2) {
+        return stdx::optional{S{s1.value + s2.value}};
+    };
+    STATIC_REQUIRE(o2->value == 59);
 }
