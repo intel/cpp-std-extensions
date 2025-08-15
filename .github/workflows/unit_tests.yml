@@ -16,7 +16,7 @@ env:
   DEFAULT_LLVM_VERSION: 20
   DEFAULT_GCC_VERSION: 14
   MULL_LLVM_VERSION: 18
-  MULL_VERSION: 0.24.0
+  MULL_VERSION: 0.26.1
   HYPOTHESIS_PROFILE: default
 
 concurrency:
@@ -473,8 +473,8 @@ jobs:
 
       - name: Install mull
         run: |
-          wget https://github.com/mull-project/mull/releases/download/${{env.MULL_VERSION}}/Mull-${{env.MULL_LLVM_VERSION}}-${{env.MULL_VERSION}}-LLVM-${{env.MULL_LLVM_VERSION}}.1-ubuntu-24.04.deb
-          sudo dpkg -i Mull-${{env.MULL_LLVM_VERSION}}-${{env.MULL_VERSION}}-LLVM-${{env.MULL_LLVM_VERSION}}.1-ubuntu-24.04.deb
+          wget https://github.com/mull-project/mull/releases/download/${{env.MULL_VERSION}}/Mull-${{env.MULL_LLVM_VERSION}}-${{env.MULL_VERSION}}-LLVM-${{env.MULL_LLVM_VERSION}}.1-ubuntu-x86_64-24.04.deb
+          sudo dpkg -i Mull-${{env.MULL_LLVM_VERSION}}-${{env.MULL_VERSION}}-LLVM-${{env.MULL_LLVM_VERSION}}.1-ubuntu-x86_64-24.04.deb
 
       - name: Restore CPM cache
         env:
