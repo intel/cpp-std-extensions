@@ -1,5 +1,6 @@
 #include "detail/tuple_types.hpp"
 
+#include <stdx/span.hpp>
 #include <stdx/tuple_algorithms.hpp>
 
 #include <catch2/catch_template_test_macros.hpp>
@@ -228,6 +229,19 @@ TEST_CASE("unrolled_for_each on arrays", "[tuple_algorithms]") {
             x--;
         },
         a, a);
+    CHECK(sum == 12);
+    CHECK(a == std::array{0, 1, 2});
+}
+
+TEST_CASE("unrolled_for_each on spans", "[tuple_algorithms]") {
+    auto a = std::array{1, 2, 3};
+    auto sum = 0;
+    stdx::unrolled_for_each(
+        [&](auto &x, auto y) {
+            sum += x + y;
+            x--;
+        },
+        stdx::span{a}, stdx::span{a});
     CHECK(sum == 12);
     CHECK(a == std::array{0, 1, 2});
 }
