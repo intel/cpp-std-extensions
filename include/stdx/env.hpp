@@ -93,6 +93,20 @@ using append_env_t = boost::mp11::mp_unique_if<
 
 template <_env::autowrap... Args>
 using make_env_t = extend_env_t<env<>, Args...>;
+
+template <envlike Env, typename Q> constexpr auto query(Q q) -> decltype(auto) {
+    return q(Env{});
+}
+
+template <envlike Env, typename Q, typename Default>
+constexpr auto query(Q q, [[maybe_unused]] Default &&d) -> decltype(auto) {
+    if constexpr (requires { q(Env{}); }) {
+        return q(Env{});
+    } else {
+        return std::forward<Default>(d);
+    }
+}
+
 } // namespace v1
 } // namespace stdx
 
