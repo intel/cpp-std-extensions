@@ -18,8 +18,27 @@ namespace {
 } custom;
 } // namespace
 
-TEST_CASE("lookup query with default", "[env]") {
+TEST_CASE("lookup query with internal default", "[env]") {
     STATIC_REQUIRE(custom(stdx::env<>{}) == 42);
+}
+
+TEST_CASE("lookup query with default (free function)", "[env]") {
+    STATIC_REQUIRE(stdx::query<stdx::env<>>(custom) == 42);
+}
+
+namespace {
+[[maybe_unused]] constexpr inline struct custom_no_default_t {
+    template <typename T>
+    [[nodiscard]] CONSTEVAL auto operator()(T &&t) const
+        noexcept(noexcept(std::forward<T>(t).query(std::declval<custom_t>())))
+            -> decltype(std::forward<T>(t).query(*this)) {
+        return std::forward<T>(t).query(*this);
+    }
+} custom_no_default;
+} // namespace
+
+TEST_CASE("lookup query with external default", "[env]") {
+    STATIC_REQUIRE(stdx::query<stdx::env<>>(custom_no_default, 42) == 42);
 }
 
 TEST_CASE("make an environment", "[env]") {
