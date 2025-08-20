@@ -399,21 +399,24 @@ template <typename T, std::size_t N> struct bitmask_subtract<std::array<T, N>> {
 };
 } // namespace detail
 
-template <typename T, std::size_t Msb = detail::num_digits_v<T> - 1,
+template <typename T,
+          std::size_t Msb = detail::num_digits_v<underlying_type_t<T>> - 1,
           std::size_t Lsb = 0>
 [[nodiscard]] CONSTEVAL auto bit_mask() noexcept -> T {
-    static_assert(Msb < detail::num_digits_v<T>,
+    using U = underlying_type_t<T>;
+    static_assert(Msb < detail::num_digits_v<U>,
                   "bit_mask requested exceeds the range of the type");
     static_assert(Msb >= Lsb, "bit_mask range is invalid");
-    return detail::bitmask_subtract<T>{}(detail::mask_bits_t<T>{}(Msb + 1),
-                                         detail::mask_bits_t<T>{}(Lsb));
+    return static_cast<T>(detail::bitmask_subtract<U>{}(
+        detail::mask_bits_t<U>{}(Msb + 1), detail::mask_bits_t<U>{}(Lsb)));
 }
 
 template <typename T>
 [[nodiscard]] constexpr auto bit_mask(std::size_t Msb,
                                       std::size_t Lsb = 0) noexcept -> T {
-    return detail::bitmask_subtract<T>{}(detail::mask_bits_t<T>{}(Msb + 1),
-                                         detail::mask_bits_t<T>{}(Lsb));
+    using U = underlying_type_t<T>;
+    return static_cast<T>(detail::bitmask_subtract<U>{}(
+        detail::mask_bits_t<U>{}(Msb + 1), detail::mask_bits_t<U>{}(Lsb)));
 }
 
 template <typename T> constexpr auto bit_size() -> std::size_t {

@@ -296,6 +296,15 @@ TEST_CASE("template bit_mask (large array type)", "[bit]") {
     CHECK(m == A{0, 0, 0, 1});
 }
 
+namespace {
+enum struct scoped_enum : std::uint8_t { A, B, C };
+} // namespace
+
+TEST_CASE("template bit_mask (enum type)", "[bit]") {
+    constexpr auto m = stdx::bit_mask<scoped_enum>();
+    STATIC_REQUIRE(m == scoped_enum{0xffu});
+}
+
 TEST_CASE("arg bit_mask (whole range)", "[bit]") {
     constexpr auto m = stdx::bit_mask<std::uint64_t>(63);
     STATIC_REQUIRE(m == std::numeric_limits<std::uint64_t>::max());
@@ -324,6 +333,11 @@ TEST_CASE("arg bit_mask (single bit)", "[bit]") {
     constexpr auto m = stdx::bit_mask<std::uint8_t>(5, 5);
     STATIC_REQUIRE(m == 0b0010'0000);
     STATIC_REQUIRE(std::is_same_v<decltype(m), std::uint8_t const>);
+}
+
+TEST_CASE("arg bit_mask (enum type)", "[bit]") {
+    constexpr auto m = stdx::bit_mask<scoped_enum>(1);
+    STATIC_REQUIRE(m == scoped_enum{0b11u});
 }
 
 TEMPLATE_TEST_CASE("bit_size", "[bit]", std::uint8_t, std::uint16_t,
