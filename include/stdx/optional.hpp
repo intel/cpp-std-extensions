@@ -318,21 +318,38 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
 
 template <typename T> optional(T) -> optional<T>;
 
-template <typename F, typename... Ts,
+namespace detail {
+template <typename T>
+constexpr bool optional_like =
+    stdx::is_specialization_of_v<stdx::remove_cvref_t<T>, optional> or
+    stdx::is_specialization_of_v<stdx::remove_cvref_t<T>, std::optional>;
+
+template <typename R, typename... Ts,
           typename = std::enable_if_t<
               (... and stdx::is_specialization_of_v<stdx::remove_cvref_t<Ts>,
                                                     optional>)>>
+auto convert_optional(Ts const &...) -> optional<R>;
+template <typename R, typename... Ts,
+          typename = std::enable_if_t<
+              (... and stdx::is_specialization_of_v<stdx::remove_cvref_t<Ts>,
+                                                    std::optional>)>>
+auto convert_optional(Ts const &...) -> std::optional<R>;
+} // namespace detail
+
+template <typename F, typename... Ts,
+          typename = std::enable_if_t<(... and detail::optional_like<Ts>)>>
 constexpr auto transform(F &&f, Ts &&...ts) {
     using func_t = stdx::remove_cvref_t<F>;
     using R = std::invoke_result_t<
         func_t,
         forward_like_t<Ts, typename stdx::remove_cvref_t<Ts>::value_type>...>;
+    using O = decltype(detail::convert_optional<R>(ts...));
     if ((... and ts.has_value())) {
-        return optional<R>{with_result_of{[&] {
+        return O{with_result_of{[&] {
             return std::forward<F>(f)(std::forward<Ts>(ts).value()...);
         }}};
     }
-    return optional<R>{};
+    return O{};
 }
 } // namespace v1
 } // namespace stdx
