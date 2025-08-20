@@ -334,6 +334,16 @@ TEST_CASE("transform (multi-arg)", "[optional]") {
     auto o3 =
         transform([](S &x, S &y) { return S{x.value + y.value}; }, o1, o2);
     CHECK(o3->value == 59);
+    STATIC_REQUIRE(std::is_same_v<decltype(o3), stdx::optional<S>>);
+}
+
+TEST_CASE("multi-arg transform works on std::optional", "[optional]") {
+    auto o1 = std::optional<S>{17};
+    auto o2 = std::optional<S>{42};
+    auto o3 = stdx::transform([](S &x, S &y) { return S{x.value + y.value}; },
+                              o1, o2);
+    CHECK(o3->value == 59);
+    STATIC_REQUIRE(std::is_same_v<decltype(o3), std::optional<S>>);
 }
 
 namespace {
@@ -425,6 +435,13 @@ TEST_CASE("transform (multi-arg nonmovable)", "[optional]") {
         [](auto &x, auto &y) { return non_movable{x.value + y.value}; }, o1,
         o2);
     CHECK(o3->value == 59);
+}
+
+TEST_CASE("transform (non-default tombstone)", "[optional]") {
+    constexpr auto o1 = stdx::optional<int, stdx::tombstone_value<-1>>{17};
+    constexpr auto o2 = transform([](auto x) { return S{x}; }, o1);
+    STATIC_REQUIRE(o2);
+    STATIC_REQUIRE(o2->value == 17);
 }
 
 #if __cpp_nontype_template_args >= 201911L
