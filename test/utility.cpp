@@ -159,6 +159,21 @@ TEST_CASE("sized<T> in (upsize, mod > 1)", "[utility]") {
     STATIC_REQUIRE(stdx::sized<U>{2}.in<T>() == 2);
 }
 
+TEST_CASE("terse size conversion with UDLs", "[utility]") {
+    using namespace stdx::literals;
+    STATIC_REQUIRE(1_z8->z8 == 1);
+    STATIC_REQUIRE(2_z8->z16 == 1);
+    STATIC_REQUIRE(4_z8->z32 == 1);
+    STATIC_REQUIRE(8_z8->z64 == 1);
+
+    STATIC_REQUIRE(1_z16->z8 == 2);
+    STATIC_REQUIRE(1_z32->z8 == 4);
+    STATIC_REQUIRE(1_z64->z8 == 8);
+
+    STATIC_REQUIRE(1_z64->in<std::uint16_t> == 4);
+    STATIC_REQUIRE(1_z64->in<std::uint32_t> == 2);
+}
+
 TEST_CASE("CX_VALUE structural value", "[utility]") {
     auto x = CX_VALUE(42);
     STATIC_REQUIRE(x() == 42);

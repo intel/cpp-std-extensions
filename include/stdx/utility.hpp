@@ -3,6 +3,7 @@
 #include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
 #include <stdx/type_traits.hpp>
+#include <stdx/udls.hpp>
 
 #include <cstddef>
 #include <cstdint>
@@ -136,6 +137,33 @@ using sized8 = sized<std::uint8_t>;
 using sized16 = sized<std::uint16_t>;
 using sized32 = sized<std::uint32_t>;
 using sized64 = sized<std::uint64_t>;
+
+template <typename T, std::size_t N> struct udl_sized {
+    template <typename U = std::uint8_t>
+    constexpr static auto in = detail::size_conversion<T, U>(N);
+
+    constexpr static auto z8 = in<std::uint8_t>;
+    constexpr static auto z16 = in<std::uint16_t>;
+    constexpr static auto z32 = in<std::uint32_t>;
+    constexpr static auto z64 = in<std::uint64_t>;
+
+    constexpr auto operator->() const -> udl_sized const * { return this; }
+};
+
+inline namespace literals {
+template <char... Chars> CONSTEVAL_UDL auto operator""_z8() {
+    return udl_sized<std::uint8_t, parse_literal<std::size_t, Chars...>()>{};
+}
+template <char... Chars> CONSTEVAL_UDL auto operator""_z16() {
+    return udl_sized<std::uint16_t, parse_literal<std::size_t, Chars...>()>{};
+}
+template <char... Chars> CONSTEVAL_UDL auto operator""_z32() {
+    return udl_sized<std::uint32_t, parse_literal<std::size_t, Chars...>()>{};
+}
+template <char... Chars> CONSTEVAL_UDL auto operator""_z64() {
+    return udl_sized<std::uint64_t, parse_literal<std::size_t, Chars...>()>{};
+}
+} // namespace literals
 
 namespace cxv_detail {
 struct from_any {
