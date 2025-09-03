@@ -4,7 +4,7 @@
 
 #ifndef CONSTINIT
 #ifndef __cpp_constinit
-#if defined(__clang__)
+#ifdef __clang__
 #define CONSTINIT [[clang::require_constant_initialization]]
 #else
 #define CONSTINIT
@@ -23,7 +23,7 @@
 #endif
 
 #ifndef CONSTEVAL_UDL
-#if defined(__clang__)
+#ifdef __clang__
 #define CONSTEVAL_UDL constexpr
 #else
 #define CONSTEVAL_UDL CONSTEVAL
@@ -31,7 +31,7 @@
 #endif
 
 #ifndef USING_ATTR_NS
-#if defined(__clang__)
+#ifdef __clang__
 #define USING_ATTR_NS using clang:
 #else
 #define USING_ATTR_NS using gnu:
@@ -51,7 +51,7 @@
 #endif
 
 #ifndef MUSTTAIL
-#if defined(__clang__)
+#ifdef __clang__
 #define MUSTTAIL [[clang::musttail]]
 #else
 #define MUSTTAIL
@@ -59,7 +59,7 @@
 #endif
 
 #ifndef LIFETIMEBOUND
-#if defined(__clang__)
+#ifdef __clang__
 #define LIFETIMEBOUND [[clang::lifetimebound]]
 #else
 #define LIFETIMEBOUND
@@ -67,7 +67,7 @@
 #endif
 
 #define STDX_DO_PRAGMA(X) _Pragma(#X)
-#if defined(__clang__)
+#ifdef __clang__
 #define STDX_PRAGMA(X) STDX_DO_PRAGMA(clang X)
 #else
 #define STDX_PRAGMA(X) STDX_DO_PRAGMA(GCC X)
@@ -75,7 +75,7 @@
 
 #ifndef STDX_DELETED
 #if __cpp_deleted_function >= 202403L
-#if defined(__clang__)
+#ifdef __clang__
 #define STDX_DELETED(R)                                                        \
     STDX_PRAGMA(diagnostic push)                                               \
     STDX_PRAGMA(diagnostic ignored "-Wunknown-warning-option")                 \

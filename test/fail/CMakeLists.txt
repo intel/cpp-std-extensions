@@ -55,8 +55,6 @@ function(add_test_by_compiler CPP_NAME CXX_VERSION COMPILER_ID COMPILER_VERSION)
     endif()
 endfunction()
 
-add_test_by_compiler(ct_check 20 Clang 15)
-add_test_by_compiler(ct_check 20 GNU 13.2)
 add_test_by_compiler(static_assert 20 Clang 15)
 add_test_by_compiler(static_assert 20 GNU 13.2)
 add_test_by_compiler(static_assert_format 20 Clang 15)

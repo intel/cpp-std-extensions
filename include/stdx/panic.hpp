@@ -35,7 +35,7 @@ auto panic(Args &&...args) -> void {
 
 #if __cplusplus >= 202002L
 #define STDX_PANIC(MSG, ...)                                                   \
-    [] {                                                                       \
+    []() -> void {                                                             \
         using stdx::ct_string_literals::operator""_cts;                        \
         stdx::panic<MSG##_cts>(__VA_ARGS__);                                   \
     }()
