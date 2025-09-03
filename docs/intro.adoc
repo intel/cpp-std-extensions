@@ -23,6 +23,7 @@ The following compilers are supported:
 * clang 18
 * clang 19
 * clang 20
+* clang 21
 * gcc 12
 * gcc 13
 * gcc 14

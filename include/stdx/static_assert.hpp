@@ -8,6 +8,7 @@
 
 namespace stdx {
 inline namespace v1 {
+namespace detail {
 struct ct_check_value {};
 
 template <bool B> struct ct_check_t {
@@ -22,6 +23,7 @@ template <> struct ct_check_t<true> {
     }
 };
 template <bool B> constexpr auto ct_check = ct_check_t<B>{};
+} // namespace detail
 } // namespace v1
 } // namespace stdx
 
@@ -45,7 +47,7 @@ template <bool B> constexpr auto ct_check = ct_check_t<B>{};
 #define STATIC_ASSERT(cond, ...)                                               \
     [&]<bool B>() -> bool {                                                    \
         constexpr auto S = STDX_CT_FORMAT(__VA_ARGS__);                        \
-        stdx::ct_check<B>.template emit<S>();                                  \
+        stdx::detail::ct_check<B>.template emit<S>();                          \
         return B;                                                              \
     }.template operator()<cond>()
 #endif
