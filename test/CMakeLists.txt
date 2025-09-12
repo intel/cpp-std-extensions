@@ -78,6 +78,7 @@ target_compile_definitions(
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
     add_tests(
         FILES
+        call_by_need
         ct_format
         ct_string
         env

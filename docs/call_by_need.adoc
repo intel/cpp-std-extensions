@@ -1,0 +1,128 @@
+
+== `call_by_need.hpp`
+
+`call_by_need` is a function that takes a xref:tuple.adoc#_tuple_hpp[tuple] of
+functions and a tuple of arguments, and applies the functions to the arguments
+as needed. It returns a tuple of results, with any unused arguments forwarded as
+if by a call to
+https://en.cppreference.com/w/cpp/utility/functional/identity.html[`std::identity`].
+
+NOTE: `call_by_need` is available only in C++20 and later.
+
+This is best explained with examples. The simplest example is when arguments
+match up with functions exactly, unambiguously and without conversions:
+[source,cpp]
+----
+// using strongly typed arguments for clarity
+template <auto> struct arg {};
+
+auto funcs = stdx::tuple{[] (arg<0>) { return 17; },
+                         [] (arg<1>) { return 42; }};
+auto args = stdx::tuple{arg<0>{}, arg<1>{}};
+
+auto r = stdx::call_by_need(funcs, args); // tuple{17, 42}
+----
+
+If multiple functions take the same argument, that works too:
+[source,cpp]
+----
+auto funcs = stdx::tuple{[] (arg<0>) { return 17; },
+                         [] (arg<0>) { return 42; }};
+auto args = stdx::tuple{arg<0>{}};
+
+auto r = stdx::call_by_need(funcs, args); // tuple{17, 42}
+----
+
+If arguments are unused, they are treated as if `std::identity` was appended to
+the set of functions:
+[source,cpp]
+----
+auto funcs = stdx::tuple{[] (arg<0>) { return 17; }};
+auto args = stdx::tuple{arg<0>{}, arg<1>{}}; // arg<1>{} is unused
+
+auto r = stdx::call_by_need(funcs, args); // tuple{17, arg<1>{}}
+----
+
+Arguments and functions do not have to be in corresponding order; the results will be
+in the same order as the functions.
+[source,cpp]
+----
+auto funcs = stdx::tuple{[] (arg<0>) { return 17; },
+                         [] (arg<1>) { return 42; }};
+auto args = stdx::tuple{arg<2>{}, arg<1>{}, arg<0>{}}; // arg<2>{} is unused
+
+auto r = stdx::call_by_need(funcs, args); // tuple{17, 42, arg<2>{}}
+----
+
+Functions taking multiple arguments require them to be contiguous in the
+argument set, but they may overlap:
+[source,cpp]
+----
+auto funcs = stdx::tuple{[] (arg<0>, arg<1>) { return 17; },
+                         [] (arg<1>, arg<2>) { return 42; }};
+auto args = stdx::tuple{arg<0>{}, arg<1>{}, arg<2>{}}; // arg<1>{} is used twice
+
+auto r = stdx::call_by_need(funcs, args); // tuple{17, 42}
+----
+
+Functions returning `void` are called, but the result cannot contain `void` of course:
+[source,cpp]
+----
+auto funcs = stdx::tuple{[] (arg<0>) { /* called but returns void */ },
+                         [] (arg<1>) { return 42; }};
+auto args = stdx::tuple{arg<0>{}, arg<1>{}};
+
+auto r = stdx::call_by_need(funcs, args); // tuple{42}
+----
+
+Functions with default arguments will have them provided if possible:
+[source,cpp]
+----
+auto funcs = stdx::tuple{[] (arg<0>, int i = 17) { return i; }};
+
+auto r1 = stdx::call_by_need(funcs, stdx::tuple{arg<0>{}});     // tuple{17} (using default arg)
+auto r2 = stdx::call_by_need(funcs, stdx::tuple{arg<0>{}, 18}); // tuple{18} (using provided arg)
+----
+
+If a call cannot be made, it's a compile-time error:
+[source,cpp]
+----
+auto funcs = stdx::tuple{[] (int) {}};
+
+auto r = stdx::call_by_need(funcs, stdx::tuple{}); // error! (no argument for int parameter)
+// static_assert: call_by_need could not find calls for all given functions
+----
+
+
+The actual algorithm implemented by `call_by_need` is as follows:
+
+1. For each function:
+  * Try to call it with all arguments `0 ... N-1`.
+  * If that fails, try to call it with arguments `0 ... N-2`, etc until a call succeeds.
+  * If all such calls fail, repeat with arguments `1 ... N-1`, etc.
+2. The results of the discovered well-formed calls (with `void` filtered out) become the `tuple` of results.
+3. Any unused arguments are appended to the `tuple` of results, keeping their original order stable.
+
+NOTE: The elements of the results `tuple` must be movable.
+
+CAUTION: The calls made by `call_by_need` are subject to the usual C++ argument
+conversion rules.
+
+The following does not call either function with the second given argument
+(`42`) even though it looks like there is a correspondence between functions and
+arguments:
+
+[source,cpp]
+----
+auto funcs = stdx::tuple{[] (char) { return 17; },
+                         [] (int) { return 18; }};
+auto args = stdx::tuple{'a', 42};
+
+auto r = stdx::call_by_need(funcs, args); // tuple{17, 18, 42}
+----
+
+Because the second function can be called with `'a'` (and that call possibility
+is found first by the above algorithm), `42` is passed through without
+participating in a call. Situations like this may in turn provoke conversion
+warnings (although in this case, `char` may be promoted to `int` without
+warning).
