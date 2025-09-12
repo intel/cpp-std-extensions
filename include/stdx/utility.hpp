@@ -31,7 +31,12 @@ template <auto V> struct value_t {
 };
 } // namespace detail
 
-template <typename K, typename V> struct type_pair {};
+template <typename K, typename V> struct type_pair {
+    using first_type = K;
+    using second_type = V;
+    using key_type = K;
+    using value_type = V;
+};
 template <typename K, typename V> using tt_pair = type_pair<K, V>;
 template <auto K, typename V> using vt_pair = tt_pair<detail::value_t<K>, V>;
 template <typename K, auto V> using tv_pair = tt_pair<K, detail::value_t<V>>;
