@@ -334,11 +334,13 @@ template <typename To, typename From> constexpr auto bit_unpack(From arg) {
                   "bit_unpack is undefined for those types");
 
     constexpr auto sz = sized<From>{1}.template in<To>();
-    auto r = bit_cast<std::array<To, sz>>(to_be(arg));
-    for (auto &elem : r) {
-        elem = from_be(elem);
-    }
-    return r;
+    return [&]() -> std::array<To, sz> {
+        auto r = bit_cast<std::array<To, sz>>(to_be(arg));
+        for (auto &elem : r) {
+            elem = from_be(elem);
+        }
+        return r;
+    }();
 }
 
 namespace detail {
@@ -436,14 +438,16 @@ template <std::size_t N> using smallest_uint_t = decltype(smallest_uint<N>());
 
 namespace bit_detail {
 template <std::size_t... Offsets>
-constexpr auto shifts = [] {
+constexpr auto shifts =
+    []() -> std::array<std::size_t, sizeof...(Offsets) + 1> {
     constexpr auto offsets = std::array{std::size_t{}, Offsets...};
     auto s = std::array<std::size_t, sizeof...(Offsets) + 1>{};
     for (auto i = std::size_t{}; i < sizeof...(Offsets); ++i) {
         s[i + 1] = offsets[i + 1] - offsets[i];
     }
     return s;
-}();
+}
+();
 
 template <std::size_t Shift, std::size_t Msb, typename T>
 constexpr auto shift_extract(T &t) -> T {

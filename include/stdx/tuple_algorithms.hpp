@@ -20,7 +20,8 @@ template <typename F, tuplelike... Ts> constexpr auto apply(F &&f, Ts &&...ts) {
     constexpr auto total_num_elements =
         (std::size_t{} + ... + stdx::tuple_size_v<std::remove_cvref_t<Ts>>);
 
-    [[maybe_unused]] constexpr auto element_indices = [&] {
+    [[maybe_unused]] constexpr auto element_indices =
+        [&]() -> std::array<detail::index_pair, total_num_elements> {
         std::array<detail::index_pair, total_num_elements> indices{};
         [[maybe_unused]] auto p = indices.data();
         ((p = std::remove_cvref_t<Ts>::fill_inner_indices(p)), ...);
@@ -48,7 +49,8 @@ template <tuplelike... Ts> [[nodiscard]] constexpr auto tuple_cat(Ts &&...ts) {
         constexpr auto total_num_elements =
             (std::size_t{} + ... + stdx::tuple_size_v<std::remove_cvref_t<Ts>>);
 
-        [[maybe_unused]] constexpr auto element_indices = [&] {
+        [[maybe_unused]] constexpr auto element_indices =
+            [&]() -> std::array<detail::index_pair, total_num_elements> {
             std::array<detail::index_pair, total_num_elements> indices{};
             auto p = indices.data();
             ((p = std::remove_cvref_t<Ts>::fill_inner_indices(p)), ...);
@@ -112,7 +114,7 @@ template <template <typename T> typename Pred, tuplelike T>
             (std::size_t{} + ... +
              (Pred<stdx::tuple_element_t<Is, tuple_t>>::value ? std::size_t{1}
                                                               : std::size_t{}));
-        constexpr auto indices = [] {
+        constexpr auto indices = []() -> std::array<std::size_t, num_matches> {
             auto a = std::array<std::size_t, num_matches>{};
             [[maybe_unused]] auto it = a.begin();
             [[maybe_unused]] auto copy_index =
@@ -286,7 +288,8 @@ struct chunk {
 
 template <tuplelike T, template <typename> typename Proj = std::type_identity_t>
     requires(tuple_size_v<T> > 1)
-[[nodiscard]] constexpr auto create_chunks() {
+[[nodiscard]] constexpr auto create_chunks()
+    -> std::array<chunk, count_chunks<T, Proj>()> {
     auto index = std::size_t{};
     std::array<chunk, count_chunks<T, Proj>()> chunks{};
     ++chunks[index].size;
@@ -410,11 +413,11 @@ template <template <typename> typename Proj = std::type_identity_t,
                         sorted_idxs[Is], sorted_idxs[Is + 1]>...};
             }(std::make_index_sequence<stdx::tuple_size_v<tuple_t> - 1>{});
 
-        constexpr auto chunks = [&] {
-            constexpr auto chunk_count =
-                std::count(std::begin(tests), std::end(tests), false) + 1;
+        constexpr auto chunk_count =
+            std::count(std::begin(tests), std::end(tests), false) + 1;
+        constexpr auto chunks =
+            [&]() -> std::array<detail::chunk, chunk_count> {
             std::array<detail::chunk, chunk_count> cs{};
-
             auto index = std::size_t{};
             ++cs[index].size;
             for (auto i = std::size_t{}; i < std::size(tests); ++i) {
