@@ -5,6 +5,8 @@ https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/function_trai
 contains type traits for introspecting function signatures. It works with
 functions, lambda expressions, and classes with `operator()`.
 
+IMPORTANT: Function traits are not yet available on freestanding implementations.
+
 Examples:
 [source,cpp]
 ----
