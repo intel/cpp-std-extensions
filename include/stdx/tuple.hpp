@@ -369,14 +369,16 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
             using C =
                 std::common_comparison_category_t<decltype(lhs[index<Is>] <=>
                                                            rhs[index<Is>])...>;
-            C result = lhs[index<0>] <=> rhs[index<0>];
-            auto const compare_at = [&]<std::size_t I>() {
-                result = lhs[index<I>] <=> rhs[index<I>];
-                return result != 0;
-            };
-            [[maybe_unused]] auto b =
-                (compare_at.template operator()<Is>() or ...);
-            return result;
+            return [&]() -> C {
+                C result = lhs[index<0>] <=> rhs[index<0>];
+                auto const compare_at = [&]<std::size_t I>() {
+                    result = lhs[index<I>] <=> rhs[index<I>];
+                    return result != 0;
+                };
+                [[maybe_unused]] auto b =
+                    (compare_at.template operator()<Is>() or ...);
+                return result;
+            }();
         }
     }
 };
