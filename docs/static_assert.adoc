@@ -3,6 +3,8 @@
 
 `STATIC_ASSERT` is a way to produce compile-time errors using formatted strings.
 
+IMPORTANT: `STATIC_ASSERT` is not yet available on freestanding implementations.
+
 [source,cpp]
 ----
 template <typename T>
