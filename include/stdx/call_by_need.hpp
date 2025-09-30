@@ -9,13 +9,9 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
-#include <functional>
 #include <iterator>
 #include <type_traits>
 #include <utility>
-
-template <auto...> struct undef_v;
-template <typename...> struct undef_t;
 
 namespace stdx {
 inline namespace v1 {
@@ -145,6 +141,10 @@ template <typename... Fs> struct by_need {
         return concat(given_calls, extra_calls);
     }
 };
+
+struct safe_forward {
+    template <typename T> constexpr auto operator()(T &&t) -> T { return t; }
+};
 } // namespace cbn_detail
 
 template <tuplelike Fs, tuplelike Args>
@@ -160,13 +160,18 @@ constexpr auto call_by_need(Fs &&fs, Args &&args) {
           std::make_index_sequence<tuple_size_v<remove_cvref_t<Args>>>{});
 
     auto new_fs = [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return tuple{get<Is>(std::forward<Fs>(fs))..., std::identity{}};
+        return tuple{get<Is>(std::forward<Fs>(fs))...,
+                     cbn_detail::safe_forward{}};
     }(std::make_index_sequence<tuple_size_v<Fs>>{});
 
     auto ret = [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return tuple{cbn_detail::invoke<calls[Is].arg_base, calls[Is].arg_len>(
-            get<calls[Is].fn_idx>(std::move(new_fs)),
-            std::forward<Args>(args))...};
+        return tuple<
+            decltype(cbn_detail::invoke<calls[Is].arg_base, calls[Is].arg_len>(
+                get<calls[Is].fn_idx>(std::move(new_fs)),
+                std::forward<Args>(args)))...>{
+            cbn_detail::invoke<calls[Is].arg_base, calls[Is].arg_len>(
+                get<calls[Is].fn_idx>(std::move(new_fs)),
+                std::forward<Args>(args))...};
     }(std::make_index_sequence<calls.size()>{});
     return stdx::filter<cbn_detail::is_nonvoid_t>(std::move(ret));
 }

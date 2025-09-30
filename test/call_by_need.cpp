@@ -138,6 +138,14 @@ TEST_CASE("move-only return", "[call_by_need]") {
     STATIC_REQUIRE(get<0>(r).value == 17);
 }
 
+TEST_CASE("move-only function", "[call_by_need]") {
+    constexpr auto r = stdx::call_by_need(
+        stdx::tuple{[m = move_only{17}](int) mutable { return std::move(m); }},
+        stdx::tuple{17});
+    STATIC_REQUIRE(std::is_same_v<decltype(r), stdx::tuple<move_only> const>);
+    STATIC_REQUIRE(get<0>(r) == move_only{17});
+}
+
 TEST_CASE("converted arguments", "[call_by_need]") {
     auto const r = stdx::call_by_need(stdx::tuple{[](char c) {
                                                       CHECK(c == 'a');
@@ -196,4 +204,13 @@ TEST_CASE("no functions given", "[call_by_need]") {
     constexpr auto r = stdx::call_by_need(stdx::tuple{}, stdx::tuple{17});
     STATIC_REQUIRE(std::is_same_v<decltype(r), stdx::tuple<int> const>);
     STATIC_REQUIRE(get<0>(r) == 17);
+}
+
+TEST_CASE("function returning reference", "[call_by_need]") {
+    int value{17};
+    auto const r = stdx::call_by_need(
+        stdx::tuple{[&](arg_t<0>) -> int & { return value; }},
+        stdx::tuple{arg<0>});
+    STATIC_REQUIRE(std::is_same_v<decltype(r), stdx::tuple<int &> const>);
+    CHECK(get<0>(r) == 17);
 }

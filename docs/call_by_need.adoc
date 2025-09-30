@@ -3,9 +3,7 @@
 
 `call_by_need` is a function that takes a xref:tuple.adoc#_tuple_hpp[tuple] of
 functions and a tuple of arguments, and applies the functions to the arguments
-as needed. It returns a tuple of results, with any unused arguments forwarded as
-if by a call to
-https://en.cppreference.com/w/cpp/utility/functional/identity.html[`std::identity`].
+as needed. It returns a tuple of results, with any unused arguments also sent along.
 
 NOTE: `call_by_need` is available only in C++20 and later.
 
@@ -33,15 +31,21 @@ auto args = stdx::tuple{arg<0>{}};
 auto r = stdx::call_by_need(funcs, args); // tuple{17, 42}
 ----
 
-If arguments are unused, they are treated as if `std::identity` was appended to
-the set of functions:
+If arguments are unused, they are treated as if by a call to `safe_forward`:
 [source,cpp]
 ----
+template <typename T>
+constexpr auto safe_forward(T&& t) -> T { return t; }
+
 auto funcs = stdx::tuple{[] (arg<0>) { return 17; }};
 auto args = stdx::tuple{arg<0>{}, arg<1>{}}; // arg<1>{} is unused
 
 auto r = stdx::call_by_need(funcs, args); // tuple{17, arg<1>{}}
 ----
+
+NOTE: `safe_forward` forwards rvalue references so that they are
+moved into the results tuple as owned values, but preserves lvalue references so
+that they appear in the results tuple as lvalue references.
 
 Arguments and functions do not have to be in corresponding order; the results will be
 in the same order as the functions.
