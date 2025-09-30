@@ -48,6 +48,7 @@ target_sources(
               include/stdx/bitset.hpp
               include/stdx/byterator.hpp
               include/stdx/cached.hpp
+              include/stdx/call_by_need.hpp
               include/stdx/compiler.hpp
               include/stdx/concepts.hpp
               include/stdx/ct_conversions.hpp

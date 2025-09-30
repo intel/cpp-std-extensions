@@ -30,6 +30,7 @@ add_fail_tests(
 if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
     add_fail_tests(
         atomic_bool_dec
+        call_by_need
         ct_format_mismatch
         dynamic_span_no_ct_capacity
         dynamic_container_no_ct_capacity
