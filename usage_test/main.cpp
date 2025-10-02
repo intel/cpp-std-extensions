@@ -19,10 +19,8 @@
 #include <stdx/cx_set.hpp>
 #include <stdx/cx_vector.hpp>
 #include <stdx/env.hpp>
-#ifndef SIMULATE_FREESTANDING
 #include <stdx/for_each_n_args.hpp>
 #include <stdx/function_traits.hpp>
-#endif
 #include <stdx/functional.hpp>
 #include <stdx/intrusive_forward_list.hpp>
 #include <stdx/intrusive_list.hpp>
