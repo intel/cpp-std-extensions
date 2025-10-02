@@ -438,8 +438,7 @@ template <std::size_t N> using smallest_uint_t = decltype(smallest_uint<N>());
 
 namespace bit_detail {
 template <std::size_t... Offsets>
-constexpr auto shifts =
-    []() -> std::array<std::size_t, sizeof...(Offsets) + 1> {
+constexpr auto shifts = []()->std::array<std::size_t, sizeof...(Offsets) + 1> {
     constexpr auto offsets = std::array{std::size_t{}, Offsets...};
     auto s = std::array<std::size_t, sizeof...(Offsets) + 1>{};
     for (auto i = std::size_t{}; i < sizeof...(Offsets); ++i) {
