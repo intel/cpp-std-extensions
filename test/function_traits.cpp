@@ -24,6 +24,33 @@ TEST_CASE("function return type", "[function_traits]") {
     STATIC_REQUIRE(std::is_same_v<stdx::return_t<decltype(func_one_arg)>, int>);
 }
 
+TEST_CASE("function pointer return type", "[function_traits]") {
+    STATIC_REQUIRE(
+        std::is_void_v<typename stdx::function_traits<
+            std::add_pointer_t<decltype(func_no_args)>>::return_type>);
+    STATIC_REQUIRE(std::is_void_v<
+                   stdx::return_t<std::add_pointer_t<decltype(func_no_args)>>>);
+
+    STATIC_REQUIRE(
+        std::is_same_v<typename stdx::function_traits<std::add_pointer_t<
+                           decltype(func_one_arg)>>::return_type,
+                       int>);
+    STATIC_REQUIRE(
+        std::is_same_v<
+            stdx::return_t<std::add_pointer_t<decltype(func_one_arg)>>, int>);
+}
+
+TEST_CASE("qualified function pointer return type", "[function_traits]") {
+    STATIC_REQUIRE(
+        std::is_void_v<
+            stdx::return_t<std::add_pointer_t<decltype(func_no_args)> const>>);
+    STATIC_REQUIRE(std::is_void_v<stdx::return_t<
+                       std::add_pointer_t<decltype(func_no_args)> volatile>>);
+    STATIC_REQUIRE(
+        std::is_void_v<stdx::return_t<
+            std::add_pointer_t<decltype(func_no_args)> const volatile>>);
+}
+
 TEST_CASE("lambda return type", "[function_traits]") {
     [[maybe_unused]] auto const x = []() {};
     [[maybe_unused]] auto const y = []() mutable {};
@@ -196,4 +223,154 @@ TEST_CASE("SFINAE friendly", "[function_traits]") {
     CHECK(called_2 == 0);
     call_f(f2, stdx::priority<1>);
     CHECK(called_2 == 1);
+}
+
+namespace {
+struct S {
+    [[maybe_unused]] auto f() -> void {}
+};
+struct S_C {
+    [[maybe_unused]] auto f() const -> void {}
+};
+struct S_V {
+    [[maybe_unused]] auto f() volatile -> void {}
+};
+struct S_CV {
+    [[maybe_unused]] auto f() const volatile -> void {}
+};
+
+struct S_LV {
+    [[maybe_unused]] auto f() & -> void {}
+};
+struct S_RV {
+    [[maybe_unused]] auto f() && -> void {}
+};
+struct S_CLV {
+    [[maybe_unused]] auto f() const & -> void {}
+};
+struct S_CRV {
+    [[maybe_unused]] auto f() const && -> void {}
+};
+
+struct S_VLV {
+    [[maybe_unused]] auto f() volatile & -> void {}
+};
+struct S_VRV {
+    [[maybe_unused]] auto f() volatile && -> void {}
+};
+
+struct S_CVLV {
+    [[maybe_unused]] auto f() const volatile & -> void {}
+};
+struct S_CVRV {
+    [[maybe_unused]] auto f() const volatile && -> void {}
+};
+} // namespace
+
+TEST_CASE("member function return type", "[function_traits]") {
+    STATIC_REQUIRE(std::is_void_v<stdx::return_t<decltype(&S::f)>>);
+    STATIC_REQUIRE(std::is_void_v<stdx::return_t<decltype(&S_C::f)>>);
+    STATIC_REQUIRE(std::is_void_v<stdx::return_t<decltype(&S_V::f)>>);
+    STATIC_REQUIRE(std::is_void_v<stdx::return_t<decltype(&S_CV::f)>>);
+}
+
+TEST_CASE("member function arity", "[function_traits]") {
+    STATIC_REQUIRE(stdx::arity_v<decltype(&S::f)> == 0);
+    STATIC_REQUIRE(stdx::arity_v<decltype(&S_C::f)> == 0);
+    STATIC_REQUIRE(stdx::arity_v<decltype(&S_V::f)> == 0);
+    STATIC_REQUIRE(stdx::arity_v<decltype(&S_CV::f)> == 0);
+}
+
+TEST_CASE("object argument types (const/volatile)", "[function_traits]") {
+    STATIC_REQUIRE(std::is_void_v<stdx::obj_arg_t<decltype(&func_no_args)>>);
+    STATIC_REQUIRE(std::is_same_v<S, stdx::obj_arg_t<decltype(&S::f)>>);
+    STATIC_REQUIRE(
+        std::is_same_v<S_C const, stdx::obj_arg_t<decltype(&S_C::f)>>);
+    STATIC_REQUIRE(
+        std::is_same_v<S_V volatile, stdx::obj_arg_t<decltype(&S_V::f)>>);
+    STATIC_REQUIRE(std::is_same_v<S_CV const volatile,
+                                  stdx::obj_arg_t<decltype(&S_CV::f)>>);
+}
+
+TEST_CASE("object argument types (value categories)", "[function_traits]") {
+    STATIC_REQUIRE(std::is_same_v<S_LV &, stdx::obj_arg_t<decltype(&S_LV::f)>>);
+    STATIC_REQUIRE(
+        std::is_same_v<S_RV &&, stdx::obj_arg_t<decltype(&S_RV::f)>>);
+    STATIC_REQUIRE(
+        std::is_same_v<S_CLV const &, stdx::obj_arg_t<decltype(&S_CLV::f)>>);
+    STATIC_REQUIRE(
+        std::is_same_v<S_CRV const &&, stdx::obj_arg_t<decltype(&S_CRV::f)>>);
+
+    STATIC_REQUIRE(
+        std::is_same_v<S_VLV volatile &, stdx::obj_arg_t<decltype(&S_VLV::f)>>);
+    STATIC_REQUIRE(std::is_same_v<S_VRV volatile &&,
+                                  stdx::obj_arg_t<decltype(&S_VRV::f)>>);
+    STATIC_REQUIRE(std::is_same_v<S_CVLV const volatile &,
+                                  stdx::obj_arg_t<decltype(&S_CVLV::f)>>);
+    STATIC_REQUIRE(std::is_same_v<S_CVRV const volatile &&,
+                                  stdx::obj_arg_t<decltype(&S_CVRV::f)>>);
+}
+
+TEST_CASE("object argument type (lambda)", "[function_traits]") {
+    [[maybe_unused]] auto const x = [](int) {};
+    STATIC_REQUIRE(std::is_same_v<decltype(x), stdx::obj_arg_t<decltype(x)>>);
+}
+
+namespace {
+struct TS {
+    template <typename T> auto operator()(T) -> void {}
+};
+struct TS_C {
+    template <typename T> auto operator()(T) const -> void {}
+};
+struct TS_V {
+    template <typename T> auto operator()(T) volatile -> void {}
+};
+struct TS_CV {
+    template <typename T> auto operator()(T) const volatile -> void {}
+};
+
+struct TS_LV {
+    template <typename T> auto operator()(T) & -> void {}
+};
+struct TS_RV {
+    template <typename T> auto operator()(T) && -> void {}
+};
+struct TS_CLV {
+    template <typename T> auto operator()(T) const & -> void {}
+};
+struct TS_CRV {
+    template <typename T> auto operator()(T) const && -> void {}
+};
+
+struct TS_VLV {
+    template <typename T> auto operator()(T) volatile & -> void {}
+};
+struct TS_VRV {
+    template <typename T> auto operator()(T) volatile && -> void {}
+};
+
+struct TS_CVLV {
+    template <typename T> auto operator()(T) const volatile & -> void {}
+};
+struct TS_CVRV {
+    template <typename T> auto operator()(T) const volatile && -> void {}
+};
+} // namespace
+
+TEST_CASE("member function template arity", "[function_traits]") {
+    STATIC_REQUIRE(stdx::arity_v<TS> == 1);
+    STATIC_REQUIRE(stdx::arity_v<TS_C> == 1);
+    STATIC_REQUIRE(stdx::arity_v<TS_V> == 1);
+    STATIC_REQUIRE(stdx::arity_v<TS_CV> == 1);
+
+    STATIC_REQUIRE(stdx::arity_v<TS_LV> == 1);
+    STATIC_REQUIRE(stdx::arity_v<TS_RV> == 1);
+    STATIC_REQUIRE(stdx::arity_v<TS_CLV> == 1);
+    STATIC_REQUIRE(stdx::arity_v<TS_CRV> == 1);
+
+    STATIC_REQUIRE(stdx::arity_v<TS_VLV> == 1);
+    STATIC_REQUIRE(stdx::arity_v<TS_VRV> == 1);
+    STATIC_REQUIRE(stdx::arity_v<TS_CVLV> == 1);
+    STATIC_REQUIRE(stdx::arity_v<TS_CVRV> == 1);
 }

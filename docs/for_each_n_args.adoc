@@ -5,8 +5,6 @@ https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/for_each_n_ar
 provides a method for calling a function (or other callable) with batches of
 arguments from a parameter pack.
 
-IMPORTANT: `for_each_n_args` is not yet available on freestanding implementations.
-
 Examples:
 [source,cpp]
 ----
