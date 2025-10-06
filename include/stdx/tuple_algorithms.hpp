@@ -230,7 +230,7 @@ constexpr auto contains_type(
 template <tuplelike T, template <typename> typename Proj = std::type_identity_t>
 [[nodiscard]] constexpr auto sorted_indices() {
     return []<std::size_t... Is>(std::index_sequence<Is...>)
-               -> std::array<std::size_t, sizeof...(Is)> {
+        ->std::array<std::size_t, sizeof...(Is)> {
         using P = std::pair<std::string_view, std::size_t>;
         auto a = std::array<P, sizeof...(Is)>{
             P{stdx::type_as_string<Proj<tuple_element_t<Is, T>>>(), Is}...};
