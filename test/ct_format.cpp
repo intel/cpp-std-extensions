@@ -3,6 +3,11 @@
 
 #include <catch2/catch_test_macros.hpp>
 
+#include <array>
+#include <limits>
+#include <string_view>
+#include <type_traits>
+
 using namespace stdx::ct_string_literals;
 
 TEST_CASE("detect string format specifiers", "[ct_format]") {
@@ -58,6 +63,29 @@ TEST_CASE("format a compile-time integral argument (CX_VALUE)", "[ct_format]") {
                    "Hello 42"_fmt_res);
 }
 
+TEST_CASE("format a negative compile-time integral argument (CX_VALUE)",
+          "[ct_format]") {
+    STATIC_REQUIRE(stdx::ct_format<"Hello {}">(CX_VALUE(-42)) ==
+                   "Hello -42"_fmt_res);
+}
+
+TEST_CASE("format most negative compile-time integral argument (CX_VALUE)",
+          "[ct_format]") {
+    STATIC_REQUIRE(stdx::ct_format<"Hello {}">(
+                       CX_VALUE(std::numeric_limits<int>::min())) ==
+                   "Hello -2147483648"_fmt_res);
+}
+
+TEST_CASE("format zero (CX_VALUE)", "[ct_format]") {
+    STATIC_REQUIRE(stdx::ct_format<"Hello {}">(CX_VALUE(0)) ==
+                   "Hello 0"_fmt_res);
+}
+
+TEST_CASE("format a char (CX_VALUE)", "[ct_format]") {
+    STATIC_REQUIRE(stdx::ct_format<"Hello {}orld">(CX_VALUE('w')) ==
+                   "Hello world"_fmt_res);
+}
+
 TEST_CASE("format a compile-time integral argument (ct)", "[ct_format]") {
     STATIC_REQUIRE(stdx::ct_format<"Hello {}">(stdx::ct<42>()) ==
                    "Hello 42"_fmt_res);
@@ -73,10 +101,17 @@ TEST_CASE("format a type argument (ct)", "[ct_format]") {
                    "Hello int"_fmt_res);
 }
 
+TEST_CASE("format a compile-time argument with different base", "[ct_format]") {
+    STATIC_REQUIRE(stdx::ct_format<"Hello 0x{:x}">(CX_VALUE(42)) ==
+                   "Hello 0x2a"_fmt_res);
+}
+
+#if not STDX_FMT_FREESTANDING
 TEST_CASE("format a compile-time argument with fmt spec", "[ct_format]") {
     STATIC_REQUIRE(stdx::ct_format<"Hello {:*>#6x}">(CX_VALUE(42)) ==
                    "Hello **0x2a"_fmt_res);
 }
+#endif
 
 namespace {
 enum struct E { A };

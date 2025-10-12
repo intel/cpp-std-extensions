@@ -85,6 +85,17 @@ if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
         indexed_tuple
         tuple
         tuple_algorithms)
+
+    add_unit_test(
+        "ct_format_freestanding_test"
+        CATCH2
+        FILES
+        "ct_format.cpp"
+        LIBRARIES
+        warnings
+        stdx)
+    target_compile_definitions(ct_format_freestanding_test
+                               PRIVATE -DSTDX_FMT_FREESTANDING=1)
 endif()
 
 add_subdirectory(fail)
