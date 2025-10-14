@@ -3,7 +3,8 @@
 
 `STATIC_ASSERT` is a way to produce compile-time errors using formatted strings.
 
-IMPORTANT: `STATIC_ASSERT` is not yet available on freestanding implementations.
+IMPORTANT: `STATIC_ASSERT` is limited on freestanding implementations in the
+same way as xref:ct_format.adoc#_ct_format_hpp[`ct_format`].
 
 [source,cpp]
 ----

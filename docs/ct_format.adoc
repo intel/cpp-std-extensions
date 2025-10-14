@@ -9,7 +9,8 @@ provides `ct_format`, a compile-time function for formatting strings.
 NOTE: Like xref:ct_string.adoc#_ct_string_hpp[`ct_string`], `ct_format` is
 available only in C++20 and later.
 
-IMPORTANT: `ct_format` is not yet available on freestanding implementations.
+IMPORTANT: `ct_format` is limited on freestanding implementations: format
+specifiers are limited to `{}` and `{:x}`.
 
 The format string is provided as a template argument, and the arguments to be
 formatted as regular function arguments.

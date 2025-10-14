@@ -6,14 +6,12 @@
 #include <stdx/concepts.hpp>
 #include <stdx/ct_conversions.hpp>
 #include <stdx/ct_string.hpp>
+#include <stdx/detail/fmt.hpp>
 #include <stdx/pp_map.hpp>
 #include <stdx/tuple.hpp>
 #include <stdx/tuple_algorithms.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/utility.hpp>
-
-#include <fmt/compile.h>
-#include <fmt/format.h>
 
 #include <algorithm>
 #include <array>
@@ -207,7 +205,7 @@ CONSTEVAL auto perform_format(auto s, auto v) -> ct_string<N + 1> {
 
 template <ct_string Fmt, typename Arg> constexpr auto format1(Arg arg) {
     if constexpr (requires { arg_value(arg); }) {
-        constexpr auto fmtstr = FMT_COMPILE(std::string_view{Fmt});
+        constexpr auto fmtstr = STDX_FMT_COMPILE(Fmt);
         constexpr auto a = arg_value(arg);
         if constexpr (is_specialization_of_v<std::remove_cv_t<decltype(a)>,
                                              format_result>) {

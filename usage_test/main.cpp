@@ -9,9 +9,7 @@
 #include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
 #include <stdx/ct_conversions.hpp>
-#ifndef SIMULATE_FREESTANDING
 #include <stdx/ct_format.hpp>
-#endif
 #include <stdx/ct_string.hpp>
 #include <stdx/cx_map.hpp>
 #include <stdx/cx_multimap.hpp>
@@ -35,9 +33,7 @@
 #include <stdx/ranges.hpp>
 #include <stdx/rollover.hpp>
 #include <stdx/span.hpp>
-#ifndef SIMULATE_FREESTANDING
 #include <stdx/static_assert.hpp>
-#endif
 #include <stdx/tuple.hpp>
 #include <stdx/tuple_algorithms.hpp>
 #include <stdx/tuple_destructure.hpp>
