@@ -3,7 +3,7 @@ build/
 /venv
 /.vscode
 /.idea
-.cache/
+/.cache
 /.DS_Store
 .clang-format
 .clang-tidy
