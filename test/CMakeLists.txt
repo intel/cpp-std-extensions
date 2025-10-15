@@ -95,7 +95,7 @@ if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
         warnings
         stdx)
     target_compile_definitions(ct_format_freestanding_test
-                               PRIVATE -DSTDX_FMT_FREESTANDING=1)
+                               PRIVATE STDX_FREESTANDING)
 endif()
 
 add_subdirectory(fail)

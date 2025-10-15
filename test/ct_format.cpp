@@ -106,7 +106,7 @@ TEST_CASE("format a compile-time argument with different base", "[ct_format]") {
                    "Hello 0x2a"_fmt_res);
 }
 
-#if not STDX_FMT_FREESTANDING
+#ifndef STDX_FREESTANDING
 TEST_CASE("format a compile-time argument with fmt spec", "[ct_format]") {
     STATIC_REQUIRE(stdx::ct_format<"Hello {:*>#6x}">(CX_VALUE(42)) ==
                    "Hello **0x2a"_fmt_res);
