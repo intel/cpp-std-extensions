@@ -61,6 +61,7 @@ target_sources(
               include/stdx/cx_vector.hpp
               include/stdx/detail/bitset_common.hpp
               include/stdx/detail/fmt.hpp
+              include/stdx/detail/freestanding.hpp
               include/stdx/detail/list_common.hpp
               include/stdx/env.hpp
               include/stdx/for_each_n_args.hpp

@@ -1,6 +1,10 @@
 #pragma once
 
-#if not STDX_FMT_FREESTANDING
+#include <stdx/detail/freestanding.hpp>
+
+// NOLINTBEGIN(cppcoreguidelines-macro-usage)
+
+#ifndef STDX_FREESTANDING
 
 #include <fmt/compile.h>
 #include <fmt/format.h>
@@ -172,3 +176,5 @@ CONSTEVAL auto format_to(It dest, auto fmtstr, auto v) -> void {
 } // namespace stdx
 
 #endif
+
+// NOLINTEND(cppcoreguidelines-macro-usage)
