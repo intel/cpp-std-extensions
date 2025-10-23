@@ -281,6 +281,10 @@ span(R &&) -> span<std::remove_reference_t<detail::range_reference_t<R>>>;
 
 template <typename T, std::size_t N>
 constexpr auto ct_capacity_v<span<T, N>> = N;
+
+template <typename T>
+constexpr auto ct_capacity_v<span<T, dynamic_extent>> =
+    detail::ct_capacity_fail<span<T, dynamic_extent>>{};
 } // namespace v1
 } // namespace stdx
 

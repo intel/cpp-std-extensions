@@ -32,8 +32,9 @@ if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
         atomic_bool_dec
         call_by_need
         ct_format_mismatch
-        dynamic_span_no_ct_capacity
         dynamic_container_no_ct_capacity
+        dynamic_std_span_no_ct_capacity
+        dynamic_stdx_span_no_ct_capacity
         tuple_index_out_of_bounds
         tuple_equality_mismatch
         tuple_equality_with_element
