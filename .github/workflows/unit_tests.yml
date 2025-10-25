@@ -15,8 +15,9 @@ env:
   DEFAULT_CXX_STANDARD: 20
   DEFAULT_LLVM_VERSION: 21
   DEFAULT_GCC_VERSION: 14
-  MULL_LLVM_VERSION: 18
-  MULL_VERSION: 0.26.1
+  MULL_LLVM_MAJOR_VERSION: 19
+  MULL_LLVM_VERSION: 19.1.1
+  MULL_VERSION: 0.27.1
   HYPOTHESIS_PROFILE: default
 
 concurrency:
@@ -480,12 +481,15 @@ jobs:
 
       - name: Install build tools
         run: |
-          sudo apt update && sudo apt install -y clang-${{env.MULL_LLVM_VERSION}} ninja-build python3-venv python3-pip
+          wget https://apt.llvm.org/llvm.sh && chmod +x llvm.sh && sudo ./llvm.sh ${{env.MULL_LLVM_MAJOR_VERSION}}
+          sudo apt install -y ninja-build python3-venv python3-pip
 
       - name: Install mull
+        env:
+          mull-pkg: Mull-${{env.MULL_LLVM_MAJOR_VERSION}}-${{env.MULL_VERSION}}-LLVM-${{env.MULL_LLVM_VERSION}}-ubuntu-amd64-24.04.deb
         run: |
-          wget https://github.com/mull-project/mull/releases/download/${{env.MULL_VERSION}}/Mull-${{env.MULL_LLVM_VERSION}}-${{env.MULL_VERSION}}-LLVM-${{env.MULL_LLVM_VERSION}}.1-ubuntu-x86_64-24.04.deb
-          sudo dpkg -i Mull-${{env.MULL_LLVM_VERSION}}-${{env.MULL_VERSION}}-LLVM-${{env.MULL_LLVM_VERSION}}.1-ubuntu-x86_64-24.04.deb
+          wget https://github.com/mull-project/mull/releases/download/${{env.MULL_VERSION}}/${{env.mull-pkg}}
+          sudo dpkg -i ${{env.mull-pkg}}
 
       - name: Restore CPM cache
         env:
@@ -500,8 +504,8 @@ jobs:
 
       - name: Configure CMake
         env:
-          CC: "/usr/lib/llvm-${{env.MULL_LLVM_VERSION}}/bin/clang"
-          CXX: "/usr/lib/llvm-${{env.MULL_LLVM_VERSION}}/bin/clang++"
+          CC: "/usr/lib/llvm-${{env.MULL_LLVM_MAJOR_VERSION}}/bin/clang"
+          CXX: "/usr/lib/llvm-${{env.MULL_LLVM_MAJOR_VERSION}}/bin/clang++"
         run: cmake -B ${{github.workspace}}/build -DCMAKE_CXX_STANDARD=${{env.DEFAULT_CXX_STANDARD}} -DCPM_SOURCE_CACHE=~/cpm-cache
 
       - name: Save CPM cache
