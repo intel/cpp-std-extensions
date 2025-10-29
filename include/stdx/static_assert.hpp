@@ -31,7 +31,7 @@ template <bool B> constexpr auto ct_check = ct_check_t<B>{};
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define STATIC_ASSERT(cond, ...)                                               \
-    [&]<bool B>() -> bool {                                                    \
+    []<bool B>() -> bool {                                                     \
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wunknown-warning-option")             \
         STDX_PRAGMA(diagnostic ignored "-Wc++26-extensions")                   \
@@ -45,7 +45,7 @@ template <bool B> constexpr auto ct_check = ct_check_t<B>{};
 
 // NOLINTNEXTLINE(cppcoreguidelines-macro-usage)
 #define STATIC_ASSERT(cond, ...)                                               \
-    [&]<bool B>() -> bool {                                                    \
+    []<bool B>() -> bool {                                                     \
         constexpr auto S = STDX_CT_FORMAT(__VA_ARGS__);                        \
         stdx::detail::ct_check<B>.template emit<S>();                          \
         return B;                                                              \
