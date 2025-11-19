@@ -77,7 +77,6 @@ constexpr static auto value_lookup_v =
                   std::declval<M>())),
               detail::value_t<Default>>::value;
 
-#if __cpp_lib_forward_like < 202207L
 template <typename T, typename U>
 [[nodiscard]] constexpr auto forward_like(U &&u) noexcept -> decltype(auto) {
     constexpr auto t_is_const = std::is_const_v<std::remove_reference_t<T>>;
@@ -96,9 +95,6 @@ template <typename T, typename U>
         }
     }
 }
-#else
-using std::forward_like;
-#endif
 template <typename T, typename U>
 using forward_like_t = decltype(forward_like<T>(std::declval<U>()));
 
