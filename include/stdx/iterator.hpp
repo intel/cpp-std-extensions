@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/compiler.hpp>
 #include <stdx/type_traits.hpp>
 
 #include <array>
@@ -25,7 +26,8 @@ constexpr auto ct_capacity_v<std::array<T, N>> = N;
 
 template <typename T> constexpr auto ct_capacity_v<T const> = ct_capacity_v<T>;
 
-template <typename T> constexpr auto ct_capacity(T &&) -> std::size_t {
+template <typename T>
+CONSTEVAL auto ct_capacity([[maybe_unused]] T &&) -> std::size_t {
     return ct_capacity_v<remove_cvref_t<T>>;
 }
 
