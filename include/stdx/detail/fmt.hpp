@@ -77,7 +77,7 @@ CONSTEVAL auto formatted_size(fmt_spec s, I i) -> std::size_t {
 
         while (i != 0) {
             ++sz;
-            i /= s.base;
+            i /= static_cast<I>(s.base);
         }
         return sz;
     }
@@ -131,8 +131,8 @@ CONSTEVAL auto format_to(fmt_spec s, It dest, I i) -> It {
 
         auto b = dest;
         while (i != 0) {
-            auto digit = to_digit(abs(i % s.base));
-            i /= s.base;
+            auto digit = to_digit(abs(i % static_cast<I>(s.base)));
+            i /= static_cast<I>(s.base);
             *dest++ = digit;
         }
 
