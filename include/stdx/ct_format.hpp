@@ -270,8 +270,8 @@ constexpr auto ct_format = [](auto &&...args) {
         return (format1.template operator()<Is>(ct_format_as(FWD(args))) + ... +
                 format_result{cts_t<data::last_cts>{}});
     }(std::make_index_sequence<data::N>{});
-    return format_result{detail::convert_output<result.str.value, Output>(),
-                         result.args};
+    constexpr auto str = detail::convert_output<result.str.value, Output>();
+    return format_result{str, result.args};
 };
 
 template <ct_string Fmt>
