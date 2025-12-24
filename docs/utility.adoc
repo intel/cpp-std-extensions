@@ -242,6 +242,27 @@ type arguments which are defaults returned when lookup fails. In the case of
 mapping to values, the `*_lookup_v` aliases have optional third NTTP arguments
 in the same role.
 
+Any of these type maps can also use reverse lookup, if values are unique:
+
+[source,cpp]
+----
+// a type-type map that uses reverse_type_lookup_t
+using M1 = stdx::type_map<stdx::tt_pair<A, X>, stdx::tt_pair<B, Y>>;
+using T1 = stdx::reverse_type_lookup_t<M1, X>; // A
+
+// a type-value map that uses reverse_value_lookup_t
+using M2 = stdx::type_map<stdx::tv_pair<A, 0>, stdx::tv_pair<B, 1>>;
+using T2 = stdx::reverse_value_lookup_t<M2, 0>; // A
+
+// a value-type map that uses reverse_type_lookup_v
+using M3 = stdx::type_map<stdx::vt_pair<0, X>, stdx::vt_pair<1, Y>>;
+constexpr auto v3 = stdx::reverse_type_lookup_v<M3, X>; // 0
+
+// a value-value map that uses reverse_value_lookup_v
+using M4 = stdx::type_map<stdx::vv_pair<0, 42>, stdx::vv_pair<1, 17>>;
+constexpr auto v4 = stdx::reverse_value_lookup_v<M4, 42>; // 0
+----
+
 === `unreachable`
 
 `unreachable` is an implementation of
