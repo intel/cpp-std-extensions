@@ -50,14 +50,28 @@ template <typename K, typename Default>
 constexpr static auto lookup(...) -> Default;
 template <typename K, typename Default, typename V>
 constexpr static auto lookup(type_pair<K, V>) -> V;
+
+template <typename V, typename Default>
+constexpr static auto reverse_lookup(...) -> Default;
+template <typename V, typename Default, typename K>
+constexpr static auto reverse_lookup(type_pair<K, V>) -> K;
 } // namespace detail
 
 template <typename M, typename K, typename Default = void>
 using type_lookup_t = decltype(detail::lookup<K, Default>(std::declval<M>()));
 
+template <typename M, typename V, typename Default = void>
+using reverse_type_lookup_t =
+    decltype(detail::reverse_lookup<V, Default>(std::declval<M>()));
+
 template <typename M, auto K, typename Default = void>
 using value_lookup_t =
     decltype(detail::lookup<detail::value_t<K>, Default>(std::declval<M>()));
+
+template <typename M, auto V, typename Default = void>
+using reverse_value_lookup_t =
+    decltype(detail::reverse_lookup<detail::value_t<V>, Default>(
+        std::declval<M>()));
 
 namespace detail {
 template <typename T>
@@ -70,10 +84,23 @@ constexpr static auto type_lookup_v =
               decltype(detail::lookup<K, void>(std::declval<M>())),
               detail::value_t<Default>>::value;
 
+template <typename M, typename V, auto Default = 0>
+constexpr static auto reverse_type_lookup_v =
+    type_or_t<detail::is_not_void,
+              decltype(detail::reverse_lookup<V, void>(std::declval<M>())),
+              detail::value_t<Default>>::value;
+
 template <typename M, auto K, auto Default = 0>
 constexpr static auto value_lookup_v =
     type_or_t<detail::is_not_void,
               decltype(detail::lookup<detail::value_t<K>, void>(
+                  std::declval<M>())),
+              detail::value_t<Default>>::value;
+
+template <typename M, auto V, auto Default = 0>
+constexpr static auto reverse_value_lookup_v =
+    type_or_t<detail::is_not_void,
+              decltype(detail::reverse_lookup<detail::value_t<V>, void>(
                   std::declval<M>())),
               detail::value_t<Default>>::value;
 
