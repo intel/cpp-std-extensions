@@ -499,3 +499,21 @@ TEST_CASE("construct with a ct_string", "[bitset]") {
                    stdx::bitset<9ul, std::uint16_t>{0b101010101ul});
 }
 #endif
+
+TEST_CASE("zero size bitset", "[bitset]") {
+    constexpr auto bs1 = stdx::bitset<0>{};
+    STATIC_REQUIRE(bs1.count() == 0u);
+    STATIC_REQUIRE(bs1.all());
+    STATIC_REQUIRE(not bs1.any());
+    STATIC_REQUIRE(bs1.none());
+
+    constexpr auto bs2 = stdx::bitset<0>{};
+    STATIC_REQUIRE(bs1 == bs2);
+    STATIC_REQUIRE(bs2.to<std::uint8_t>() == 0);
+
+    auto bs3 = stdx::bitset<0>{};
+    bs3 <<= 1;
+    CHECK(bs3.to<std::uint8_t>() == 0);
+    bs3 >>= 1;
+    CHECK(bs3.to<std::uint8_t>() == 0);
+}
