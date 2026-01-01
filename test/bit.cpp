@@ -160,6 +160,9 @@ TEMPLATE_TEST_CASE("bit_ceil", "[bit]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     STATIC_REQUIRE(stdx::bit_ceil(TestType{}) == 1);
     STATIC_REQUIRE(stdx::bit_ceil(TestType{1u}) == 1);
+    STATIC_REQUIRE(stdx::bit_ceil(TestType{3u}) == 4);
+    STATIC_REQUIRE(stdx::bit_ceil(TestType{4u}) == 4);
+    STATIC_REQUIRE(stdx::bit_ceil(TestType{5u}) == 8);
     STATIC_REQUIRE(stdx::bit_ceil(TestType{45u}) == 64);
 }
 
@@ -167,6 +170,9 @@ TEMPLATE_TEST_CASE("bit_floor", "[bit]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
     STATIC_REQUIRE(stdx::bit_floor(TestType{}) == 0);
     STATIC_REQUIRE(stdx::bit_floor(TestType{1u}) == 1);
+    STATIC_REQUIRE(stdx::bit_floor(TestType{3u}) == 2);
+    STATIC_REQUIRE(stdx::bit_floor(TestType{4u}) == 4);
+    STATIC_REQUIRE(stdx::bit_floor(TestType{5u}) == 4);
     STATIC_REQUIRE(stdx::bit_floor(TestType{45u}) == 32);
 }
 
