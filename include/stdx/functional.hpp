@@ -170,5 +170,22 @@ template <auto F, typename... Args> constexpr auto bind_back(Args &&...args) {
 }
 
 #endif
+
+template <typename T = void> struct unary_plus {
+    constexpr auto operator()(T const &arg) const -> decltype(+arg) {
+        return +arg;
+    }
+};
+
+template <> struct unary_plus<void> {
+    using is_transparent = int;
+
+    template <typename T>
+    constexpr auto operator()(T &&arg) const
+        -> decltype(+std::forward<T>(arg)) {
+        return +std::forward<T>(arg);
+    }
+};
+
 } // namespace v1
 } // namespace stdx
