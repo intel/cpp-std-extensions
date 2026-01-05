@@ -57,6 +57,9 @@ class bitset {
 
     [[nodiscard]] friend constexpr auto operator==(bitset const &lhs,
                                                    bitset const &rhs) -> bool {
+        if constexpr (N == 0) {
+            return true;
+        }
         for (auto i = std::size_t{}; i < storage_size - 1; ++i) {
             if (lhs.storage[i] != rhs.storage[i]) {
                 return false;
@@ -191,6 +194,9 @@ class bitset {
 #endif
 
     template <typename T> [[nodiscard]] constexpr auto to() const -> T {
+        if constexpr (N == 0) {
+            return {};
+        }
         using U = underlying_type_t<T>;
         static_assert(
             unsigned_integral<U>,
@@ -329,33 +335,26 @@ class bitset {
         return *this;
     }
 
-    [[nodiscard]] constexpr auto all() const -> bool {
-        for (auto i = std::size_t{}; i < storage_size - 1; ++i) {
-            if (storage[i] != allbits) {
-                return false;
-            }
-        }
-        return highbits() == lastmask;
-    }
-
-    [[nodiscard]] constexpr auto any() const -> bool {
-        for (auto i = std::size_t{}; i < storage_size - 1; ++i) {
-            if (storage[i] != 0) {
-                return true;
-            }
-        }
-        return highbits() != 0;
-    }
-
-    [[nodiscard]] constexpr auto none() const -> bool { return not any(); }
-
     [[nodiscard]] constexpr auto count() const -> std::size_t {
-        std::size_t n{};
+        if constexpr (N == 0) {
+            return {};
+        }
+        auto n = static_cast<std::size_t>(popcount(highbits()));
         for (auto i = std::size_t{}; i < storage_size - 1; ++i) {
             n += static_cast<std::size_t>(popcount(storage[i]));
         }
-        return n + static_cast<std::size_t>(popcount(highbits()));
+        return n;
     }
+
+    [[nodiscard]] constexpr auto all() const -> bool {
+        return count() == size();
+    }
+
+    [[nodiscard]] constexpr auto any() const -> bool {
+        return count() != std::size_t{};
+    }
+
+    [[nodiscard]] constexpr auto none() const -> bool { return not any(); }
 
     [[nodiscard]] constexpr auto lowest_unset() const {
         std::size_t i = 0;
@@ -397,53 +396,57 @@ class bitset {
     }
 
     constexpr auto operator<<=(std::size_t pos) LIFETIMEBOUND->bitset & {
-        auto dst = storage_size - 1;
-        auto const start = dst - (pos / storage_elem_size);
-        pos %= storage_elem_size;
+        if constexpr (N != 0) {
+            auto dst = storage_size - 1;
+            auto const start = dst - (pos / storage_elem_size);
+            pos %= storage_elem_size;
 
-        if (pos == 0) {
-            for (auto i = start; i > std::size_t{}; --i) {
-                storage[dst] = storage[i];
-                --dst;
+            if (pos == 0) {
+                for (auto i = start; i > std::size_t{}; --i) {
+                    storage[dst] = storage[i];
+                    --dst;
+                }
+            } else {
+                auto const borrow_shift = storage_elem_size - pos;
+                for (auto i = start; i > std::size_t{}; --i) {
+                    storage[dst] = static_cast<elem_t>(storage[i] << pos);
+                    storage[dst] |=
+                        static_cast<elem_t>(storage[i - 1] >> borrow_shift);
+                    --dst;
+                }
             }
-        } else {
-            auto const borrow_shift = storage_elem_size - pos;
-            for (auto i = start; i > std::size_t{}; --i) {
-                storage[dst] = static_cast<elem_t>(storage[i] << pos);
-                storage[dst] |=
-                    static_cast<elem_t>(storage[i - 1] >> borrow_shift);
-                --dst;
+            storage[dst] = static_cast<elem_t>(storage.front() << pos);
+            while (dst > std::size_t{}) {
+                storage[--dst] = 0;
             }
-        }
-        storage[dst] = static_cast<elem_t>(storage.front() << pos);
-        while (dst > std::size_t{}) {
-            storage[--dst] = 0;
         }
         return *this;
     }
 
     constexpr auto operator>>=(std::size_t pos) LIFETIMEBOUND->bitset & {
-        auto dst = std::size_t{};
-        auto const start = pos / storage_elem_size;
-        pos %= storage_elem_size;
+        if constexpr (N != 0) {
+            auto dst = std::size_t{};
+            auto const start = pos / storage_elem_size;
+            pos %= storage_elem_size;
 
-        if (pos == 0) {
-            for (auto i = start; i < storage_size - 1; ++i) {
-                storage[dst] = storage[i];
-                ++dst;
+            if (pos == 0) {
+                for (auto i = start; i < storage_size - 1; ++i) {
+                    storage[dst] = storage[i];
+                    ++dst;
+                }
+            } else {
+                auto const borrow_shift = storage_elem_size - pos;
+                for (auto i = start; i < storage_size - 1; ++i) {
+                    storage[dst] = static_cast<elem_t>(storage[i] >> pos);
+                    storage[dst] |=
+                        static_cast<elem_t>(storage[i + 1] << borrow_shift);
+                    ++dst;
+                }
             }
-        } else {
-            auto const borrow_shift = storage_elem_size - pos;
-            for (auto i = start; i < storage_size - 1; ++i) {
-                storage[dst] = static_cast<elem_t>(storage[i] >> pos);
-                storage[dst] |=
-                    static_cast<elem_t>(storage[i + 1] << borrow_shift);
-                ++dst;
+            storage[dst++] = static_cast<elem_t>(storage.back() >> pos);
+            while (dst < storage_size) {
+                storage[dst++] = 0;
             }
-        }
-        storage[dst++] = static_cast<elem_t>(storage.back() >> pos);
-        while (dst < storage_size) {
-            storage[dst++] = 0;
         }
         return *this;
     }
