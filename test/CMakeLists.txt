@@ -43,6 +43,7 @@ add_tests(
     default_panic
     for_each_n_args
     function_traits
+    functional
     intrusive_forward_list
     intrusive_list
     intrusive_list_properties
