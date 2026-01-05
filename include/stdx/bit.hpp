@@ -223,7 +223,7 @@ template <typename T>
     if (x <= 1U) {
         return 1U;
     }
-    return T(1U << bit_width(x));
+    return T(1U << bit_width(x - 1U));
 }
 
 template <typename T>
