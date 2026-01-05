@@ -97,10 +97,21 @@ stdx::is_function_object_v<decltype(lam)>;       // true
 stdx::is_function_object_v<decltype(gen_lam)>;   // true
 ----
 
+=== `is_same_template_v`
+
+`is_same_template_v` is a variable template that detects whether two types
+are specializations of the same base template.
+
+[source,cpp]
+----
+stdx::is_same_template_v<std::vector<int>, std::vector<float>>; // true
+stdx::is_same_template_v<std::vector<int>, std::list<int>>;     // false
+----
+
 === `is_same_unqualified_v`
 
-`is_same_unqualified_v` is a variable template that detects whether a two types
-are the same are removing top-level cv-qualifications and references, if any.
+`is_same_unqualified_v` is a variable template that detects whether two types
+are the same after removing top-level cv-qualifications and references, if any.
 
 [source,cpp]
 ----

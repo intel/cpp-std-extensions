@@ -110,6 +110,9 @@ template <typename T> constexpr auto structural = is_structural_v<T>;
 
 template <typename T> constexpr auto complete = is_complete_v<T>;
 
+template <typename T, typename U>
+constexpr auto same_template_as = is_same_template_v<T, U>;
+
 #else
 
 // After C++20, we can define concepts that are lacking in the library
@@ -199,6 +202,9 @@ concept structural = is_structural_v<T>;
 template <typename T>
 concept complete = is_complete_v<T>;
 
+template <typename T, typename U>
+concept same_template_as = is_same_template_v<T, U>;
+
 #endif
 
 } // namespace v1
@@ -241,6 +247,9 @@ concept structural = is_structural_v<T>;
 
 template <typename T>
 concept complete = is_complete_v<T>;
+
+template <typename T, typename U>
+concept same_template_as = is_same_template_v<T, U>;
 
 template <typename T, typename... Us>
 constexpr auto same_any = (... or same_as<T, Us>);

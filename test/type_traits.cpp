@@ -275,3 +275,9 @@ TEST_CASE("is_complete_v", "[type_traits]") {
     STATIC_REQUIRE(stdx::is_complete_v<int>);
     STATIC_REQUIRE(not stdx::is_complete_v<incomplete>);
 }
+
+TEST_CASE("is_same_template_v", "[type_traits]") {
+    STATIC_REQUIRE(stdx::is_same_template_v<unary_t<int>, unary_t<void>>);
+    STATIC_REQUIRE(
+        not stdx::is_same_template_v<unary_t<int>, variadic_t<void>>);
+}

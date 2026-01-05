@@ -1,13 +1,13 @@
 #pragma once
 
 #include <stdx/compiler.hpp>
-#include <stdx/type_traits.hpp>
 
-#include <cstddef>
 #include <string_view>
 
 namespace stdx {
 inline namespace v1 {
+template <typename...> constexpr bool always_false_v = false;
+
 template <typename Tag>
 CONSTEVAL static auto type_as_string() -> std::string_view {
 #ifdef __clang__
@@ -23,6 +23,13 @@ CONSTEVAL static auto type_as_string() -> std::string_view {
 
     constexpr auto lhs = function_name.rfind('=', rhs) + 2;
     return function_name.substr(lhs, rhs - lhs + 1);
+}
+
+template <typename T>
+CONSTEVAL static auto template_base() -> std::string_view {
+    constexpr auto t = stdx::type_as_string<T>();
+    constexpr auto rhs = t.find('<');
+    return t.substr(0, rhs);
 }
 
 template <auto Value>

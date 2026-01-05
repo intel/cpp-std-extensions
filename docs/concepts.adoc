@@ -107,3 +107,14 @@ private:
   }
 };
 ----
+
+=== `same_template_as`
+
+`same_template_as` is true when two types are specializations of the same base
+template.
+
+[source,cpp]
+----
+stdx::same_template_as<std::vector<int>, std::vector<float>>; // true
+stdx::same_template_as<std::vector<int>, std::list<int>>;     // false
+----

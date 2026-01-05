@@ -172,13 +172,23 @@ struct non_structural {
 };
 } // namespace
 
-TEST_CASE("structural", "[type_traits]") {
+TEST_CASE("structural", "[concepts]") {
     STATIC_REQUIRE(stdx::structural<int>);
     STATIC_REQUIRE(not stdx::structural<non_structural>);
 }
 
-TEST_CASE("complete", "[type_traits]") {
+TEST_CASE("complete", "[concepts]") {
     struct incomplete;
     STATIC_REQUIRE(stdx::complete<int>);
     STATIC_REQUIRE(not stdx::complete<incomplete>);
+}
+
+namespace {
+template <typename> struct unary_t {};
+template <typename...> struct variadic_t {};
+} // namespace
+
+TEST_CASE("same_template_as", "[concepts]") {
+    STATIC_REQUIRE(stdx::same_template_as<unary_t<int>, unary_t<void>>);
+    STATIC_REQUIRE(not stdx::same_template_as<unary_t<int>, variadic_t<void>>);
 }
