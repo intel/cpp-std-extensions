@@ -36,23 +36,39 @@ template <auto Value>
 CONSTEVAL static auto enum_as_string() -> std::basic_string_view<char> {
 #ifdef __clang__
     constexpr std::string_view value_string = __PRETTY_FUNCTION__;
-    constexpr auto rhs = value_string.size() - 2;
 #elif defined(__GNUC__) || defined(__GNUG__)
     constexpr std::string_view value_string = __PRETTY_FUNCTION__;
-    constexpr auto rhs = value_string.size() - 2;
 #else
     static_assert(always_false_v<Tag>,
                   "Unknown compiler, can't build type name.");
 #endif
-
-    constexpr auto lhs = [&]() -> std::string_view::size_type {
-        if (auto const colon_pos = value_string.find_last_of(':');
-            colon_pos != std::string_view::npos) {
-            return colon_pos + 1;
+    constexpr auto qual_str = [&]() -> std::string_view {
+        constexpr auto rhs = value_string.size() - 2;
+        if (auto const eq_pos = value_string.find_last_of('=');
+            eq_pos != std::string_view::npos) {
+            auto const lhs = eq_pos + 2;
+            return value_string.substr(lhs, rhs - lhs + 1);
         }
-        return 0;
+        return value_string;
     }();
-    return value_string.substr(lhs, rhs - lhs + 1);
+
+    constexpr auto cast_str = [&]() -> std::string_view {
+        if (auto const close_paren_pos = qual_str.find_last_of(')');
+            close_paren_pos != std::string_view::npos) {
+            if (qual_str[close_paren_pos + 1] != ':') {
+                return qual_str;
+            }
+        }
+
+        if (auto const colon_pos = qual_str.find_last_of(':');
+            colon_pos != std::string_view::npos) {
+            return qual_str.substr(colon_pos + 1);
+        }
+
+        return qual_str;
+    }();
+
+    return cast_str;
 }
 } // namespace v1
 } // namespace stdx
