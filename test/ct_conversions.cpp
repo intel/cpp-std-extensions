@@ -34,6 +34,13 @@ enum struct B { Y };
 
 TEST_CASE("enum as string", "[ct_conversion]") {
     using namespace std::string_view_literals;
-    STATIC_REQUIRE(stdx::enum_as_string<X>() == "X"sv);
-    STATIC_REQUIRE(stdx::enum_as_string<B::Y>() == "Y"sv);
+    STATIC_CHECK(stdx::enum_as_string<X>() == "X"sv);
+    STATIC_CHECK(stdx::enum_as_string<B::Y>() == "Y"sv);
+}
+
+enum struct C {};
+
+TEST_CASE("enum as string (no identifier)", "[ct_conversion]") {
+    using namespace std::string_view_literals;
+    STATIC_CHECK(stdx::enum_as_string<C{17}>() == "(C)17"sv);
 }
