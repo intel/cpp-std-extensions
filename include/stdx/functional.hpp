@@ -187,5 +187,13 @@ template <> struct unary_plus<void> {
     }
 };
 
+constexpr inline struct safe_identity_t {
+    using is_transparent = void;
+
+    template <typename T>
+    constexpr auto operator()(T &&t) const -> decltype(auto) {
+        return T(std::forward<T>(t));
+    }
+} safe_identity;
 } // namespace v1
 } // namespace stdx
