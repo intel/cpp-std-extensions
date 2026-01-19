@@ -16,6 +16,7 @@ constexpr auto
 
 struct S {};
 constexpr auto operator+(S) { return 17; }
+constexpr auto operator*(S) { return 28; }
 } // namespace
 
 TEST_CASE("unary_plus", "[functional]") {
@@ -88,4 +89,19 @@ TEST_CASE("safe_identity cvref categories", "[functional]") {
     static_assert(std::is_same_v<decltype(stdx::safe_identity(
                                      declval<int const volatile &&>())),
                                  int>);
+}
+
+TEST_CASE("dereference", "[functional]") {
+    int x{28};
+    CHECK(stdx::dereference<int *>{}(&x) == 28);
+    CHECK(stdx::dereference<>{}(&x) == 28);
+}
+
+TEST_CASE("dereference transparency", "[functional]") {
+    STATIC_REQUIRE(not detect_is_transparent<stdx::dereference<int *>>);
+    STATIC_REQUIRE(detect_is_transparent<stdx::dereference<>>);
+}
+
+TEST_CASE("dereference calls operator*", "[functional]") {
+    STATIC_REQUIRE(stdx::dereference<>{}(S{}) == 28);
 }
