@@ -109,7 +109,7 @@ struct format_result<Str, Args, Spans> {
 
 template <typename Spans = type_list<>, typename Str, typename Args = tuple<>>
 constexpr auto make_format_result(Str s, Args args = {}) {
-    return format_result<Str, Args, Spans>{s, args};
+    return format_result<Str, Args, Spans>{s, std::move(args)};
 }
 
 inline namespace literals {
@@ -228,13 +228,13 @@ CONSTEVAL auto arg_type(fmt_cx_value auto a) {
 
 template <typename Str, typename Args, typename Spans, typename S>
 constexpr auto operator+(format_result<Str, Args, Spans> r, S s) {
-    return make_format_result<Spans>(r.str + s, r.args);
+    return make_format_result<Spans>(r.str + s, std::move(r.args));
 }
 
 template <typename S, typename Str, typename Args, typename Spans>
 constexpr auto operator+(S s, format_result<Str, Args, Spans> r) {
-    return make_format_result<detail::apply_offset<s.size(), Spans>>(s + r.str,
-                                                                     r.args);
+    return make_format_result<detail::apply_offset<s.size(), Spans>>(
+        s + r.str, std::move(r.args));
 }
 
 template <typename Str1, typename Args1, typename Spans1, typename Str2,
@@ -243,7 +243,7 @@ constexpr auto operator+(format_result<Str1, Args1, Spans1> r1,
                          format_result<Str2, Args2, Spans2> r2) {
     return make_format_result<boost::mp11::mp_append<
         Spans1, detail::apply_offset<r1.str.size(), Spans2>>>(
-        r1.str + r2.str, tuple_cat(r1.args, r2.args));
+        r1.str + r2.str, tuple_cat(std::move(r1.args), std::move(r2.args)));
 }
 
 template <typename T, T...> struct null_output;
@@ -271,7 +271,7 @@ CONSTEVAL auto convert_output() {
 }
 
 template <std::size_t N>
-CONSTEVAL auto perform_format(auto s, auto v) -> ct_string<N + 1> {
+CONSTEVAL auto perform_format(auto s, auto const &v) -> ct_string<N + 1> {
     ct_string<N + 1> cts{};
     fmt::format_to(cts.begin(), s, v);
     return cts;
@@ -302,10 +302,10 @@ constexpr auto format1(Arg arg) {
         auto const sub_result = format1<Fmt, Start>(arg.str);
         using Spans = typename Arg::spans_t;
         return make_format_result<detail::apply_offset<Start, Spans>>(
-            sub_result.str, arg.args);
+            sub_result.str, std::move(arg).args);
     } else {
         using Spans = type_list<format_span<Start, Fmt.size()>>;
-        return make_format_result<Spans>(cts_t<Fmt>{}, tuple{arg});
+        return make_format_result<Spans>(cts_t<Fmt>{}, tuple{std::move(arg)});
     }
 }
 
@@ -324,10 +324,20 @@ template <ct_string Fmt> struct fmt_data {
         to_ct_string<splits[N].view.size()>(splits[N].view);
 };
 
-template <typename T>
-constexpr auto ct_format_as(T const &t) -> decltype(auto) {
-    return (t);
-}
+[[maybe_unused]] constexpr inline struct format_as_t {
+    template <typename T>
+        requires true
+    constexpr auto operator()(T &&t) const
+        noexcept(noexcept(ct_format_as(std::forward<T>(t))))
+            -> decltype(ct_format_as(std::forward<T>(t))) {
+        return ct_format_as(std::forward<T>(t));
+    }
+
+    template <typename T>
+    constexpr auto operator()(T &&t) const -> decltype(auto) {
+        return T(std::forward<T>(t));
+    }
+} format_as;
 } // namespace detail
 
 template <ct_string Fmt,
@@ -343,20 +353,20 @@ constexpr auto ct_format = [](auto &&...args) {
                   "Format string has a mismatch between the number of format "
                   "specifiers and arguments.");
 
-    [[maybe_unused]] auto const format1 = [&]<std::size_t I>(auto &&arg) {
+    [[maybe_unused]] auto const format1 = []<std::size_t I>(auto &&arg) {
         constexpr auto cts = detail::to_ct_string<data::splits[I].view.size()>(
             data::splits[I].view);
         return detail::format1<cts, data::splits[I].start>(FWD(arg));
     };
 
-    auto const result = [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        using detail::ct_format_as;
-        return (format1.template operator()<Is>(ct_format_as(FWD(args))) + ... +
-                make_format_result(cts_t<data::last_cts>{}));
-    }(std::make_index_sequence<data::N>{});
+    auto result = [&]<std::size_t... Is>(std::index_sequence<Is...>,
+                                         auto &&...as) {
+        return (format1.template operator()<Is>(detail::format_as(FWD(as))) +
+                ... + make_format_result(cts_t<data::last_cts>{}));
+    }(std::make_index_sequence<data::N>{}, FWD(args)...);
     constexpr auto str = detail::convert_output<result.str.value, Output>();
     using Spans = typename std::remove_cvref_t<decltype(result)>::spans_t;
-    return make_format_result<Spans>(str, result.args);
+    return make_format_result<Spans>(str, std::move(result).args);
 };
 
 template <ct_string Fmt>

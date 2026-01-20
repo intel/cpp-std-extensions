@@ -1,3 +1,5 @@
+#include "detail/tuple_types.hpp"
+
 #include <stdx/ct_format.hpp>
 #include <stdx/utility.hpp>
 
@@ -112,6 +114,35 @@ TEST_CASE("format a char (CX_VALUE)", "[ct_format]") {
             "Hello world"_ctst, stdx::tuple{stdx::ct_format_arg<char>{}}));
 }
 
+#ifndef STDX_FREESTANDING
+namespace move_test {
+struct move_only {
+    constexpr move_only() = default;
+    constexpr move_only(int x) : value{x} {}
+    constexpr move_only(move_only &&) = default;
+    constexpr auto operator=(move_only &&) noexcept -> move_only & = default;
+
+    friend constexpr auto operator==(move_only const &, move_only const &)
+        -> bool = default;
+
+    int value;
+};
+
+[[nodiscard]] constexpr auto format_as(move_only const &) -> std::string_view {
+    return "17";
+}
+} // namespace move_test
+
+TEST_CASE("format a move-only argument (CX_VALUE)", "[ct_format]") {
+    using expected_spans_t = stdx::type_list<stdx::format_span<6, 8>>;
+    STATIC_CHECK(
+        stdx::ct_format<"Hello {}">(CX_VALUE(move_test::move_only{17})) ==
+        stdx::make_format_result<expected_spans_t>(
+            "Hello 17"_ctst,
+            stdx::tuple{stdx::ct_format_arg<move_test::move_only>{}}));
+}
+#endif
+
 TEST_CASE("format a compile-time integral argument (ct)", "[ct_format]") {
     using expected_spans_t = stdx::type_list<stdx::format_span<6, 8>>;
     STATIC_CHECK(stdx::ct_format<"Hello {}">(stdx::ct<42>()) ==
@@ -191,6 +222,14 @@ TEST_CASE("format a runtime argument", "[ct_format]") {
         "Hello {}"_ctst, stdx::tuple{x});
     CHECK(stdx::ct_format<"Hello {}">(x) == expected);
     STATIC_CHECK(stdx::ct_format<"Hello {}">(x) == expected);
+}
+
+TEST_CASE("format a move-only runtime argument", "[ct_format]") {
+    using expected_spans_t = stdx::type_list<stdx::format_span<6, 8>>;
+    constexpr auto expected = stdx::make_format_result<expected_spans_t>(
+        "Hello {}"_ctst, stdx::tuple{move_only{17}});
+    CHECK(stdx::ct_format<"Hello {}">(move_only{17}) == expected);
+    STATIC_CHECK(stdx::ct_format<"Hello {}">(move_only{17}) == expected);
 }
 
 TEST_CASE("format a compile-time and a runtime argument (1)", "[ct_format]") {
