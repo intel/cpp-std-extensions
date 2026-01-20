@@ -10,6 +10,15 @@ NOTE: https://wg21.link/P2714[P2714] added the ability (in C\\++26) to use a
 non-type template parameter for the bound function; this works for function
 pointers in C++17, and also for lambda expressions in C++20 and beyond.
 
+=== `dereference`
+
+`dereference` is a function object like
+https://en.cppreference.com/w/cpp/utility/functional/negate.html[`std::negate`],
+except it calls (unary) `operator*` instead of `operator-`.
+
+It also has a specialization for `void` which is _transparent_ like that of
+https://en.cppreference.com/w/cpp/utility/functional/negate_void.html[`std::negate`].
+
 === `safe_identity`
 
 `safe_identity` is a function object (of type `safe_identity_t`)  similar
@@ -33,6 +42,16 @@ decltype(auto) r4 = stdx::safe_identity(f()); // r4 has type int - no longer dan
 NOTE: In standard usage, the type is `std::identity` and we must instantiate it
 to use it; in `stdx`, the type is `safe_identity_t` and `safe_identity` is a
 `constexpr inline` variable of that type.
+
+=== `unary_plus`
+
+`unary_plus` is a function object like
+https://en.cppreference.com/w/cpp/utility/functional/negate.html[`std::negate`],
+except it calls (unary) `operator+` instead of `operator-`.
+
+It also has a specialization for `void` which is _transparent_ like that of
+https://en.cppreference.com/w/cpp/utility/functional/negate_void.html[`std::negate`].
+>>>>>>> 7a78082 (:sparkles: Add `dereference`)
 
 === `with_result_of`
 
@@ -59,11 +78,3 @@ v.emplace(0, stdx::with_result_of{make_S}); // this constructs S in-place thanks
 `with_result_of` can help to achieve in-place construction, effectively by deferring
 evaluation of function arguments.
 
-=== `unary_plus`
-
-`unary_plus` is a function object like
-https://en.cppreference.com/w/cpp/utility/functional/negate.html[`std::negate`],
-except it calls (unary) `operator+` instead of `operator-`.
-
-It also has a specialization for `void` which is _transparent_ like that of
-https://en.cppreference.com/w/cpp/utility/functional/negate_void.html[`std::negate`].

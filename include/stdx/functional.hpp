@@ -171,11 +171,15 @@ template <auto F, typename... Args> constexpr auto bind_back(Args &&...args) {
 
 #endif
 
+// NOLINTBEGIN(modernize-use-constraints)
 template <typename T = void> struct unary_plus {
-    constexpr auto operator()(T const &arg) const -> decltype(+arg) {
-        return +arg;
+    template <typename U,
+              typename = std::enable_if_t<is_same_unqualified_v<U, T>>>
+    constexpr auto operator()(U &&u) const -> decltype(+std::forward<U>(u)) {
+        return +std::forward<U>(u);
     }
 };
+// NOLINTEND(modernize-use-constraints)
 
 template <> struct unary_plus<void> {
     using is_transparent = int;
@@ -195,5 +199,25 @@ constexpr inline struct safe_identity_t {
         return T(std::forward<T>(t));
     }
 } safe_identity;
+
+// NOLINTBEGIN(modernize-use-constraints)
+template <typename T = void> struct dereference {
+    template <typename U,
+              typename = std::enable_if_t<is_same_unqualified_v<U, T>>>
+    constexpr auto operator()(U &&u) const -> decltype(*std::forward<U>(u)) {
+        return *std::forward<U>(u);
+    }
+};
+// NOLINTEND(modernize-use-constraints)
+
+template <> struct dereference<void> {
+    using is_transparent = int;
+
+    template <typename T>
+    constexpr auto operator()(T &&arg) const
+        -> decltype(*std::forward<T>(arg)) {
+        return *std::forward<T>(arg);
+    }
+};
 } // namespace v1
 } // namespace stdx

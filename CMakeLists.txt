@@ -89,6 +89,7 @@ target_sources(
               include/stdx/utility.hpp)
 
 if(PROJECT_IS_TOP_LEVEL)
+    include(CTest)
     add_docs(docs)
     add_subdirectory(test)
     clang_tidy_interface(stdx)
