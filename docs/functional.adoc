@@ -10,6 +10,30 @@ NOTE: https://wg21.link/P2714[P2714] added the ability (in C\\++26) to use a
 non-type template parameter for the bound function; this works for function
 pointers in C++17, and also for lambda expressions in C++20 and beyond.
 
+=== `safe_identity`
+
+`safe_identity` is a function object (of type `safe_identity_t`)  similar
+in intent to
+https://en.cppreference.com/w/cpp/utility/functional/identity.html[`std::identity`].
+A call to `safe_identity` returns its argument unchanged. _However_, the vital
+difference with `safe_identity` is in the value category of what is returned.
+
+[source,cpp]
+----
+int x;
+auto f() -> int;
+
+decltype(auto) r1 = std::identity{}(x);       // r1 has type int &
+decltype(auto) r2 = std::identity{}(f());     // r2 has type int && - dangling!
+
+decltype(auto) r3 = stdx::safe_identity(x);   // r3 has type int &
+decltype(auto) r4 = stdx::safe_identity(f()); // r4 has type int - no longer dangling
+----
+
+NOTE: In standard usage, the type is `std::identity` and we must instantiate it
+to use it; in `stdx`, the type is `safe_identity_t` and `safe_identity` is a
+`constexpr inline` variable of that type.
+
 === `with_result_of`
 
 `with_result_of` is a class that can be used for lazy evaluation.
