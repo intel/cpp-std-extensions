@@ -47,11 +47,11 @@ template with no runtime arguments is called with the pack of arguments.
 ----
 using L1 = stdx::type_list<std::integral_constant<int, 1>,
                            std::integral_constant<int, 2>>;
-int x = stdx::apply_sequence<L1>([&] <typename... Ts> () { return (0 + ... + Ts::value); });
+int x = stdx::apply_sequence<L1>([] <typename... Ts> () { return (0 + ... + Ts::value); });
 // x is 3
 
 using L2 = stdx::value_list<1, 2>;
-int y = stdx::apply_sequence<L2>([&] <auto... Vs> () { return (0 + ... + Vs); });
+int y = stdx::apply_sequence<L2>([] <auto... Vs> () { return (0 + ... + Vs); });
 // y is 3
 ----
 
@@ -61,8 +61,8 @@ https://en.cppreference.com/w/cpp/utility/integer_sequence[`std::integer_sequenc
 [source,cpp]
 ----
 using L3 = stdx::make_index_sequence<3>;
-auto y = stdx::apply_sequence<L3>([&] <auto... Vs> () { y += V; });
-// y is 3
+auto y = stdx::apply_sequence<L3>([] <auto... Vs> () { return (0 + ... + Vs); });
+// y is 3 (a std::size_t)
 ----
 
 NOTE: If the function iterates the pack by folding over `operator,` then
