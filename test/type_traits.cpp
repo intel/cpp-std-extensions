@@ -166,6 +166,8 @@ TEST_CASE("apply_sequence with value list", "[type_traits]") {
 TEST_CASE("apply_sequence with index sequence", "[type_traits]") {
     using L = std::make_index_sequence<3>;
     CHECK(stdx::apply_sequence<L>(add_values{}) == 3);
+    STATIC_CHECK(std::is_same_v<decltype(stdx::apply_sequence<L>(add_values{})),
+                                std::size_t>);
 }
 
 TEST_CASE("is_same_unqualified", "[type_traits]") {
