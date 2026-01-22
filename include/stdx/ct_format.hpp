@@ -243,7 +243,8 @@ constexpr auto operator+(format_result<Str1, Args1, Spans1> r1,
                          format_result<Str2, Args2, Spans2> r2) {
     return make_format_result<boost::mp11::mp_append<
         Spans1, detail::apply_offset<r1.str.size(), Spans2>>>(
-        r1.str + r2.str, tuple_cat(std::move(r1.args), std::move(r2.args)));
+        r1.str + r2.str,
+        stdx::tuple_cat(std::move(r1.args), std::move(r2.args)));
 }
 
 template <typename T, T...> struct null_output;
