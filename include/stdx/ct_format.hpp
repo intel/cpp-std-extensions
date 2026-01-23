@@ -28,45 +28,51 @@ template <std::size_t N> constexpr auto format_as(stdx::ct_string<N> const &s) {
     return std::string_view{s};
 }
 
-template <std::size_t Begin, std::size_t End> struct format_span {
+template <stdx::ct_string Name, typename T, int Begin, int End = Begin - 1>
+struct named_arg {
+    using type = T;
+    constexpr static auto name = Name;
     constexpr static auto begin = Begin;
     constexpr static auto end = End;
 
+    constexpr static std::integral_constant<bool, (End < Begin)> is_runtime{};
+
+    template <int StringOffset, int ArgOffset>
+    CONSTEVAL static auto apply_offset() {
+        if constexpr (is_runtime) {
+            return named_arg<Name, T, Begin + ArgOffset, End + ArgOffset>{};
+        } else {
+            return named_arg<Name, T, Begin + StringOffset,
+                             End + StringOffset>{};
+        }
+    }
+
   private:
-    friend constexpr auto operator==(format_span const &, format_span const &)
+    friend constexpr auto operator==(named_arg const &, named_arg const &)
         -> bool = default;
 };
 
 namespace detail {
-template <std::size_t Offset> struct apply_span_offset_q {
-    template <typename Span>
-    using fn = format_span<Offset + Span::begin, Offset + Span::end>;
+template <std::size_t StringOffset, std::size_t ArgOffset>
+struct apply_span_offset_q {
+    template <typename Arg>
+    using fn = decltype(Arg::template apply_offset<StringOffset, ArgOffset>());
 };
 
-template <std::size_t Offset, typename L>
+template <std::size_t StringOffset, std::size_t ArgOffset, typename L>
 using apply_offset =
-    boost::mp11::mp_transform_q<apply_span_offset_q<Offset>, L>;
+    boost::mp11::mp_transform_q<apply_span_offset_q<StringOffset, ArgOffset>,
+                                L>;
 } // namespace detail
 
-template <typename T = void> struct ct_format_arg {
-    using type_t = T;
-    friend constexpr auto operator==(ct_format_arg const &,
-                                     ct_format_arg const &) -> bool = default;
-};
-
-template <typename Arg>
-using is_compile_time_arg =
-    std::bool_constant<is_specialization_of<Arg, ct_format_arg>()>;
-
-template <typename Str, typename Args, typename Spans> struct format_result {
-    static_assert(Args::size() == boost::mp11::mp_size<Spans>::value);
-
+template <typename Str, typename Args, typename NamedArgs>
+struct format_result {
     CONSTEVAL static auto ct_string_convertible()
         -> std::bool_constant<Args::size() == 0>;
 
     [[no_unique_address]] Str str;
     [[no_unique_address]] Args args{};
-    using spans_t = Spans;
+    using named_args_t = NamedArgs;
 
     friend constexpr auto operator+(format_result const &fr)
         requires(decltype(ct_string_convertible())::value)
@@ -85,17 +91,14 @@ template <typename Str, typename Args, typename Spans> struct format_result {
                                      format_result const &) -> bool = default;
 };
 
-template <typename Str, typename Args, typename Spans>
-    requires(boost::mp11::mp_all_of<Args, is_compile_time_arg>::value and
-             is_cx_value_v<Str>)
-struct format_result<Str, Args, Spans> {
-    static_assert(Args::size() == boost::mp11::mp_size<Spans>::value);
-
+template <typename Str, typename Args, typename NamedArgs>
+    requires(Args::size() == 0 and is_cx_value_v<Str>)
+struct format_result<Str, Args, NamedArgs> {
     CONSTEVAL static auto ct_string_convertible() -> std::true_type;
 
     [[no_unique_address]] Str str;
     [[no_unique_address]] Args args{};
-    using spans_t = Spans;
+    using named_args_t = NamedArgs;
 
     friend constexpr auto operator+(format_result const &fr) { return +fr.str; }
 
@@ -107,9 +110,10 @@ struct format_result<Str, Args, Spans> {
                                      format_result const &) -> bool = default;
 };
 
-template <typename Spans = type_list<>, typename Str, typename Args = tuple<>>
+template <typename NamedArgs = type_list<>, typename Str,
+          typename Args = tuple<>>
 constexpr auto make_format_result(Str s, Args args = {}) {
-    return format_result<Str, Args, Spans>{s, std::move(args)};
+    return format_result<Str, Args, NamedArgs>{s, std::move(args)};
 }
 
 inline namespace literals {
@@ -180,6 +184,50 @@ CONSTEVAL auto split_specifiers(std::string_view fmt)
     return splits;
 }
 
+template <ct_string S, std::size_t Start> CONSTEVAL auto extract_format1_str() {
+    constexpr auto name_start = Start + 1;
+    constexpr auto it = [] {
+        for (auto i = S.value.cbegin() + name_start; i != S.value.cend(); ++i) {
+            if (*i == ':') {
+                return i;
+            }
+        }
+        return S.value.cend();
+    }();
+    if constexpr (it == S.value.cend()) {
+        if constexpr (Start == S.size() - 2) {
+            // no name, empty fmt spec e.g. "abc{}"
+            return std::pair{S, ct_string{""}};
+        } else {
+            // named arg, empty fmt spec, e.g. "abc{ghi}"
+            constexpr auto suffix_start = S.size() - 1;
+            constexpr auto prefix_size = name_start;
+            constexpr auto name_size = suffix_start - name_start;
+            constexpr auto suffix_size = 1;
+
+            return std::pair{
+                ct_string<prefix_size + 1U>{S.value.cbegin(), prefix_size} +
+                    ct_string<suffix_size + 1U>{S.value.cbegin() + suffix_start,
+                                                suffix_size},
+                ct_string<name_size + 1U>{S.value.cbegin() + name_start,
+                                          name_size}};
+        }
+    } else {
+        // named arg, fmt spec, e.g. "abc{ghi:x}"
+        constexpr auto suffix_start = it - S.value.cbegin();
+        constexpr auto prefix_size = name_start;
+        constexpr auto name_size = suffix_start - name_start;
+        constexpr auto suffix_size = S.size() - suffix_start;
+
+        return std::pair{
+            ct_string<prefix_size + 1U>{S.value.cbegin(), prefix_size} +
+                ct_string<suffix_size + 1U>{S.value.cbegin() + suffix_start,
+                                            suffix_size},
+            ct_string<name_size + 1U>{S.value.cbegin() + name_start,
+                                      name_size}};
+    }
+}
+
 template <typename T>
 concept fmt_cx_value =
     is_cx_value_v<T> or requires(T t) { ct_string_from_type(t); };
@@ -226,23 +274,27 @@ CONSTEVAL auto arg_type(fmt_cx_value auto a) {
     }
 }
 
-template <typename Str, typename Args, typename Spans, typename S>
-constexpr auto operator+(format_result<Str, Args, Spans> r, S s) {
-    return make_format_result<Spans>(r.str + s, std::move(r.args));
+template <typename Str, typename Args, typename NamedArgs, typename S>
+constexpr auto operator+(format_result<Str, Args, NamedArgs> r, S s) {
+    return make_format_result<NamedArgs>(r.str + s, std::move(r.args));
 }
 
-template <typename S, typename Str, typename Args, typename Spans>
-constexpr auto operator+(S s, format_result<Str, Args, Spans> r) {
-    return make_format_result<detail::apply_offset<s.size(), Spans>>(
+template <typename S, typename Str, typename Args, typename NamedArgs>
+constexpr auto operator+(S s, format_result<Str, Args, NamedArgs> r) {
+    return make_format_result<detail::apply_offset<s.size(), 0, NamedArgs>>(
         s + r.str, std::move(r.args));
 }
 
-template <typename Str1, typename Args1, typename Spans1, typename Str2,
-          typename Args2, typename Spans2>
-constexpr auto operator+(format_result<Str1, Args1, Spans1> r1,
-                         format_result<Str2, Args2, Spans2> r2) {
-    return make_format_result<boost::mp11::mp_append<
-        Spans1, detail::apply_offset<r1.str.size(), Spans2>>>(
+template <typename Str1, typename Args1, typename NamedArgs1, typename Str2,
+          typename Args2, typename NamedArgs2>
+constexpr auto operator+(format_result<Str1, Args1, NamedArgs1> r1,
+                         format_result<Str2, Args2, NamedArgs2> r2) {
+    using ShiftedNamedArgs2 =
+        detail::apply_offset<r1.str.size(), boost::mp11::mp_size<Args1>::value,
+                             NamedArgs2>;
+
+    return make_format_result<
+        boost::mp11::mp_append<NamedArgs1, ShiftedNamedArgs2>>(
         r1.str + r2.str,
         stdx::tuple_cat(std::move(r1.args), std::move(r2.args)));
 }
@@ -278,35 +330,44 @@ CONSTEVAL auto perform_format(auto s, auto const &v) -> ct_string<N + 1> {
     return cts;
 }
 
-template <ct_string Fmt, std::size_t Start, typename Arg>
+template <ct_string Fmt, ct_string Name, std::size_t Start, typename Arg>
 constexpr auto format1(Arg arg) {
     if constexpr (requires { arg_value(arg); }) {
         constexpr auto fmtstr = STDX_FMT_COMPILE(Fmt);
         constexpr auto a = arg_value(arg);
-        if constexpr (is_specialization_of_v<std::remove_cv_t<decltype(a)>,
-                                             format_result>) {
+        using a_t = std::remove_cv_t<decltype(a)>;
+        if constexpr (is_specialization_of_v<a_t, format_result>) {
             constexpr auto s = convert_input(a.str);
             constexpr auto sz = fmt::formatted_size(fmtstr, s);
             constexpr auto cts = perform_format<sz>(fmtstr, s);
-            using Spans = typename std::remove_cvref_t<decltype(a)>::spans_t;
-            return make_format_result<detail::apply_offset<Start, Spans>>(
-                cts_t<cts>{}, a.args);
+            using shifted_named_args_t =
+                detail::apply_offset<Start, 0, typename a_t::named_args_t>;
+            return make_format_result<shifted_named_args_t>(cts_t<cts>{},
+                                                            a.args);
         } else {
-            using arg_t = stdx::remove_cvref_t<decltype(arg_type(arg))>;
             constexpr auto sz = fmt::formatted_size(fmtstr, a);
             constexpr auto cts = perform_format<sz>(fmtstr, a);
-            using Spans = type_list<format_span<Start, sz>>;
-            return make_format_result<Spans>(cts_t<cts>{},
-                                             tuple{ct_format_arg<arg_t>{}});
+            if constexpr (not Name.empty()) {
+                using name_info_t = named_arg<Name, a_t, Start, sz>;
+                return make_format_result<type_list<name_info_t>>(cts_t<cts>{});
+            } else {
+                return make_format_result(cts_t<cts>{});
+            }
         }
     } else if constexpr (is_specialization_of_v<Arg, format_result>) {
-        auto const sub_result = format1<Fmt, Start>(arg.str);
-        using Spans = typename Arg::spans_t;
-        return make_format_result<detail::apply_offset<Start, Spans>>(
-            sub_result.str, std::move(arg).args);
+        auto const sub_result = format1<Fmt, "", Start>(arg.str);
+        using shifted_named_args_t =
+            detail::apply_offset<Start, 0, typename Arg::named_args_t>;
+        return make_format_result<shifted_named_args_t>(sub_result.str,
+                                                        std::move(arg).args);
     } else {
-        using Spans = type_list<format_span<Start, Fmt.size()>>;
-        return make_format_result<Spans>(cts_t<Fmt>{}, tuple{std::move(arg)});
+        if constexpr (not Name.empty()) {
+            using name_info_t = named_arg<Name, Arg, 0>;
+            return make_format_result<type_list<name_info_t>>(
+                cts_t<Fmt>{}, tuple{std::move(arg)});
+        } else {
+            return make_format_result(cts_t<Fmt>{}, tuple{std::move(arg)});
+        }
     }
 }
 
@@ -355,9 +416,12 @@ constexpr auto ct_format = [](auto &&...args) {
                   "specifiers and arguments.");
 
     [[maybe_unused]] auto const format1 = []<std::size_t I>(auto &&arg) {
-        constexpr auto cts = detail::to_ct_string<data::splits[I].view.size()>(
-            data::splits[I].view);
-        return detail::format1<cts, data::splits[I].start>(FWD(arg));
+        constexpr auto fmt = detail::extract_format1_str<
+            detail::to_ct_string<data::splits[I].view.size()>(
+                data::splits[I].view),
+            data::splits[I].start>();
+        return detail::format1<fmt.first, fmt.second, data::splits[I].start>(
+            FWD(arg));
     };
 
     auto result = [&]<std::size_t... Is>(std::index_sequence<Is...>,
@@ -366,8 +430,9 @@ constexpr auto ct_format = [](auto &&...args) {
                 ... + make_format_result(cts_t<data::last_cts>{}));
     }(std::make_index_sequence<data::N>{}, FWD(args)...);
     constexpr auto str = detail::convert_output<result.str.value, Output>();
-    using Spans = typename std::remove_cvref_t<decltype(result)>::spans_t;
-    return make_format_result<Spans>(str, std::move(result).args);
+    using NamedArgs =
+        typename std::remove_cvref_t<decltype(result)>::named_args_t;
+    return make_format_result<NamedArgs>(str, std::move(result).args);
 };
 
 template <ct_string Fmt>
