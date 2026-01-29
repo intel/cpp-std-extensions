@@ -8,6 +8,8 @@
 #include <stdx/type_traits.hpp>
 #include <stdx/udls.hpp>
 
+#include <boost/mp11/algorithm.hpp>
+
 #include <algorithm>
 #include <array>
 #include <cstddef>
@@ -478,5 +480,163 @@ template <typename T, typename F, typename R, auto M, typename... S>
 #if __cplusplus >= 202002L
 template <std::size_t N> bitset(ct_string<N>) -> bitset<N - 1>;
 #endif
+
+namespace detail {
+template <typename...> constexpr std::size_t index_of = 0;
+
+template <typename T, typename... Us>
+constexpr std::size_t index_of<T, type_list<Us...>> =
+    boost::mp11::mp_find<type_list<Us...>, T>::value;
+} // namespace detail
+
+template <typename... Ts> class type_bitset {
+    using list_t = boost::mp11::mp_unique<type_list<Ts...>>;
+    constexpr static std::size_t N = boost::mp11::mp_size<list_t>::value;
+
+    bitset<N> bs;
+
+    [[nodiscard]] friend constexpr auto operator==(type_bitset const &lhs,
+                                                   type_bitset const &rhs)
+        -> bool {
+        return lhs.bs == rhs.bs;
+    }
+
+    friend constexpr auto operator|(type_bitset lhs, type_bitset const &rhs)
+        -> type_bitset {
+        lhs |= rhs;
+        return lhs;
+    }
+
+    friend constexpr auto operator&(type_bitset lhs, type_bitset const &rhs)
+        -> type_bitset {
+        lhs &= rhs;
+        return lhs;
+    }
+
+    friend constexpr auto operator^(type_bitset lhs, type_bitset const &rhs)
+        -> type_bitset {
+        lhs ^= rhs;
+        return lhs;
+    }
+
+    friend constexpr auto operator-(type_bitset const &lhs, type_bitset rhs)
+        -> type_bitset {
+        rhs.flip();
+        return lhs & rhs;
+    }
+
+    template <typename F, std::size_t... Is>
+    constexpr static auto make_callers(std::index_sequence<Is...>) {
+        using call_t = auto (*)(F &)->void;
+        return std::array<call_t, N>{[](F &f) {
+            f.template operator()<boost::mp11::mp_at_c<list_t, Is>, Is>();
+        }...};
+    }
+
+  public:
+    constexpr type_bitset() = default;
+    constexpr explicit type_bitset(all_bits_t) : bs{all_bits} {}
+    constexpr explicit type_bitset(std::uint64_t value) : bs{value} {}
+
+    template <typename... Us>
+    constexpr explicit type_bitset(type_list<Us...>)
+        : bs{place_bits, detail::index_of<Us, list_t>...} {
+        static_assert((... and (detail::index_of<Us, list_t> < N)),
+                      "Type not found in bitset");
+    }
+
+    template <typename T> [[nodiscard]] constexpr auto to() const -> T {
+        return bs.template to<T>();
+    }
+    [[nodiscard]] constexpr auto to_natural() const { return bs.to_natural(); }
+
+    constexpr static std::integral_constant<std::size_t, N> size{};
+
+    template <typename T>
+    [[nodiscard]] constexpr auto operator[](type_identity<T>) const
+        -> decltype(auto) {
+        constexpr auto idx = detail::index_of<T, list_t>;
+        static_assert(idx < sizeof...(Ts), "Type not found in bitset");
+        return bs[idx];
+    }
+
+    template <typename... Us>
+    constexpr auto set(bool value = true) LIFETIMEBOUND -> type_bitset & {
+        static_assert((... and (detail::index_of<Us, type_list<Ts...>> < N)),
+                      "Type not found in bitset");
+        if constexpr (sizeof...(Us) == 0) {
+            bs.set();
+        } else {
+            (bs.set(detail::index_of<Us, type_list<Ts...>>, value), ...);
+        }
+        return *this;
+    }
+
+    template <typename... Us>
+    constexpr auto reset() LIFETIMEBOUND -> type_bitset & {
+        static_assert((... and (detail::index_of<Us, type_list<Ts...>> < N)),
+                      "Type not found in bitset");
+        if constexpr (sizeof...(Us) == 0) {
+            bs.reset();
+        } else {
+            (bs.reset(detail::index_of<Us, type_list<Ts...>>), ...);
+        }
+        return *this;
+    }
+
+    template <typename... Us>
+    constexpr auto flip() LIFETIMEBOUND -> type_bitset & {
+        static_assert((... and (detail::index_of<Us, type_list<Ts...>> < N)),
+                      "Type not found in bitset");
+        if constexpr (sizeof...(Us) == 0) {
+            bs.flip();
+        } else {
+            (bs.flip(detail::index_of<Us, type_list<Ts...>>), ...);
+        }
+        return *this;
+    }
+
+    [[nodiscard]] constexpr auto count() const -> std::size_t {
+        return bs.count();
+    }
+
+    [[nodiscard]] constexpr auto all() const -> bool {
+        return count() == size();
+    }
+
+    [[nodiscard]] constexpr auto any() const -> bool {
+        return count() != std::size_t{};
+    }
+
+    [[nodiscard]] constexpr auto none() const -> bool { return not any(); }
+
+    [[nodiscard]] constexpr auto operator~() const -> type_bitset {
+        return type_bitset{~bs.template to<std::uint64_t>()};
+    }
+
+    constexpr auto
+    operator|=(type_bitset const &rhs) LIFETIMEBOUND->type_bitset & {
+        bs |= rhs.bs;
+        return *this;
+    }
+
+    constexpr auto
+    operator&=(type_bitset const &rhs) LIFETIMEBOUND->type_bitset & {
+        bs &= rhs.bs;
+        return *this;
+    }
+
+    constexpr auto
+    operator^=(type_bitset const &rhs) LIFETIMEBOUND->type_bitset & {
+        bs ^= rhs.bs;
+        return *this;
+    }
+
+    template <typename F> constexpr auto for_each(F &&f) const -> F {
+        constexpr auto callers = make_callers<F>(std::make_index_sequence<N>{});
+        stdx::for_each([&](auto i) { callers[i](f); }, bs);
+        return f;
+    }
+};
 } // namespace v1
 } // namespace stdx
