@@ -42,6 +42,7 @@ target_sources(
               include
               FILES
               include/stdx/algorithm.hpp
+              include/stdx/array.hpp
               include/stdx/atomic.hpp
               include/stdx/atomic_bitset.hpp
               include/stdx/bit.hpp

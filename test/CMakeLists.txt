@@ -21,6 +21,7 @@ add_tests(
     FILES
     algorithm
     always_false
+    array
     atomic
     atomic_override
     atomic_bitset
