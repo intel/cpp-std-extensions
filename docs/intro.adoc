@@ -67,6 +67,7 @@ into headers whose names match the standard.
 The following headers are available:
 
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/algorithm.hpp[`algorithm.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/array.hpp[`array.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/atomic.hpp[`atomic.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/atomic_bitset.hpp[`atomic_bitset.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bit.hpp[`bit.hpp`]
