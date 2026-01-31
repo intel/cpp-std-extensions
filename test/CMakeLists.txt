@@ -63,6 +63,7 @@ add_tests(
     rollover
     span
     to_underlying
+    type_bitset
     type_map
     type_traits
     with_result_of
