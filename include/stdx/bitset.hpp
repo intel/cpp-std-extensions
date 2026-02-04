@@ -538,8 +538,8 @@ template <typename... Ts> class type_bitset {
     constexpr explicit type_bitset(all_bits_t) : bs{all_bits} {}
     constexpr explicit type_bitset(std::uint64_t value) : bs{value} {}
 
-    template <typename... Us>
-    constexpr explicit type_bitset(type_list<Us...>)
+    template <template <typename...> typename L, typename... Us>
+    constexpr explicit type_bitset(L<Us...>)
         : bs{place_bits, detail::index_of<Us, list_t>...} {
         static_assert((... and (detail::index_of<Us, list_t> < N)),
                       "Type not found in bitset");
