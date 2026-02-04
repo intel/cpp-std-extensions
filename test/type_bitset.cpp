@@ -10,6 +10,7 @@
 #include <type_traits>
 
 TEST_CASE("bitset size", "[type_bitset]") {
+    STATIC_CHECK(stdx::type_bitset<>{}.size() == 0u);
     STATIC_CHECK(stdx::type_bitset<int>{}.size() == 1u);
     STATIC_CHECK(stdx::type_bitset<int, float>{}.size() == 2u);
 }
