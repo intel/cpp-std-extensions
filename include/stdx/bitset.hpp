@@ -175,7 +175,9 @@ class bitset {
         for (auto &elem : storage) {
             elem = allbits;
         }
-        storage.back() &= lastmask;
+        if constexpr (N > 0) {
+            storage.back() &= lastmask;
+        }
     }
 
     constexpr explicit bitset(std::string_view str, std::size_t pos = 0,

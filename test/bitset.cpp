@@ -516,4 +516,6 @@ TEST_CASE("zero size bitset", "[bitset]") {
     CHECK(bs3.to<std::uint8_t>() == 0);
     bs3 >>= 1;
     CHECK(bs3.to<std::uint8_t>() == 0);
+    bs3 = stdx::bitset<0>{stdx::all_bits};
+    CHECK(bs3.to<std::uint8_t>() == 0);
 }
