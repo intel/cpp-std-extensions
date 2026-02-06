@@ -281,7 +281,8 @@ constexpr auto operator+(format_result<Str, Args, NamedArgs> r, S s) {
 
 template <typename S, typename Str, typename Args, typename NamedArgs>
 constexpr auto operator+(S s, format_result<Str, Args, NamedArgs> r) {
-    return make_format_result<detail::apply_offset<s.size(), 0, NamedArgs>>(
+    constexpr auto sz = s.size();
+    return make_format_result<detail::apply_offset<sz, 0, NamedArgs>>(
         s + r.str, std::move(r.args));
 }
 
@@ -289,8 +290,9 @@ template <typename Str1, typename Args1, typename NamedArgs1, typename Str2,
           typename Args2, typename NamedArgs2>
 constexpr auto operator+(format_result<Str1, Args1, NamedArgs1> r1,
                          format_result<Str2, Args2, NamedArgs2> r2) {
+    constexpr auto sz = r1.str.size();
     using ShiftedNamedArgs2 =
-        detail::apply_offset<r1.str.size(), boost::mp11::mp_size<Args1>::value,
+        detail::apply_offset<sz, boost::mp11::mp_size<Args1>::value,
                              NamedArgs2>;
 
     return make_format_result<
