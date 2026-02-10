@@ -29,6 +29,8 @@ namespace detail {
 template <auto V> struct value_t {
     constexpr static inline auto value = V;
 };
+
+template <typename... Ts> struct type_map : Ts... {};
 } // namespace detail
 
 template <typename K, typename V> struct type_pair {
@@ -43,7 +45,7 @@ template <typename K, auto V> using tv_pair = tt_pair<K, detail::value_t<V>>;
 template <auto K, auto V>
 using vv_pair = tt_pair<detail::value_t<K>, detail::value_t<V>>;
 
-template <typename... Ts> struct type_map : Ts... {};
+template <typename... Ts> using type_map = shrink_t<detail::type_map<Ts...>>;
 
 namespace detail {
 template <typename K, typename Default>
@@ -58,20 +60,19 @@ constexpr static auto reverse_lookup(type_pair<K, V>) -> K;
 } // namespace detail
 
 template <typename M, typename K, typename Default = void>
-using type_lookup_t = decltype(detail::lookup<K, Default>(std::declval<M>()));
+using type_lookup_t = decltype(detail::lookup<K, Default>(expand<M>()));
 
 template <typename M, typename V, typename Default = void>
 using reverse_type_lookup_t =
-    decltype(detail::reverse_lookup<V, Default>(std::declval<M>()));
+    decltype(detail::reverse_lookup<V, Default>(expand<M>()));
 
 template <typename M, auto K, typename Default = void>
 using value_lookup_t =
-    decltype(detail::lookup<detail::value_t<K>, Default>(std::declval<M>()));
+    decltype(detail::lookup<detail::value_t<K>, Default>(expand<M>()));
 
 template <typename M, auto V, typename Default = void>
 using reverse_value_lookup_t =
-    decltype(detail::reverse_lookup<detail::value_t<V>, Default>(
-        std::declval<M>()));
+    decltype(detail::reverse_lookup<detail::value_t<V>, Default>(expand<M>()));
 
 namespace detail {
 template <typename T>
@@ -81,27 +82,26 @@ using is_not_void = std::bool_constant<not std::is_void_v<T>>;
 template <typename M, typename K, auto Default = 0>
 constexpr static auto type_lookup_v =
     type_or_t<detail::is_not_void,
-              decltype(detail::lookup<K, void>(std::declval<M>())),
+              decltype(detail::lookup<K, void>(expand<M>())),
               detail::value_t<Default>>::value;
 
 template <typename M, typename V, auto Default = 0>
 constexpr static auto reverse_type_lookup_v =
     type_or_t<detail::is_not_void,
-              decltype(detail::reverse_lookup<V, void>(std::declval<M>())),
+              decltype(detail::reverse_lookup<V, void>(expand<M>())),
               detail::value_t<Default>>::value;
 
 template <typename M, auto K, auto Default = 0>
 constexpr static auto value_lookup_v =
     type_or_t<detail::is_not_void,
-              decltype(detail::lookup<detail::value_t<K>, void>(
-                  std::declval<M>())),
+              decltype(detail::lookup<detail::value_t<K>, void>(expand<M>())),
               detail::value_t<Default>>::value;
 
 template <typename M, auto V, auto Default = 0>
 constexpr static auto reverse_value_lookup_v =
     type_or_t<detail::is_not_void,
               decltype(detail::reverse_lookup<detail::value_t<V>, void>(
-                  std::declval<M>())),
+                  expand<M>())),
               detail::value_t<Default>>::value;
 
 #if __cpp_lib_forward_like < 202207L
