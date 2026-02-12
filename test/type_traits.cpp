@@ -255,9 +255,9 @@ TEST_CASE("type shrinkage", "[type_traits]") {
     using B = long_type_name<A, A, A, A, A, A, A, A>;
     using C = long_type_name<B, B, B, B, B, B, B, B>;
     using X = stdx::shrink_t<C>;
-    STATIC_REQUIRE(stdx::type_as_string<X>().size() <
-                   stdx::type_as_string<C>().size());
-    STATIC_REQUIRE(std::same_as<stdx::expand_t<X>, C>);
+    STATIC_CHECK(stdx::type_as_string<X>().size() <
+                 stdx::type_as_string<C>().size());
+    STATIC_CHECK(std::same_as<stdx::expand_t<X>, C>);
 }
 #endif
 

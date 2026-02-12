@@ -228,11 +228,42 @@ template <typename T>
 constexpr auto is_cx_value_v<T, std::void_t<typename T::cx_value_t>> = true;
 
 #if __cplusplus >= 202002L
-template <typename T>
-using shrink_t = decltype([]() -> T (*)() { return nullptr; });
+namespace detail {
+template <typename T> struct shrinkwrap {
+    using is_shrinkwrapped = void;
+    using type = T;
+};
 
-template <typename T> using expand_t = decltype(T{}()());
+template <typename T>
+concept is_shrinkwrapped = requires { typename T::is_shrinkwrapped; };
+
+template <typename T,
+          auto F = []()->auto (*)() -> shrinkwrap<T> { return nullptr; }>
+CONSTEVAL auto shrink() {
+    return F;
+}
+
+template <typename T>
+concept is_shrunk = requires(T t) {
+    { t()() } -> is_shrinkwrapped;
+};
+
+template <typename T> CONSTEVAL auto maybe_expand() -> T;
+template <is_shrunk T>
+CONSTEVAL auto maybe_expand() -> typename decltype(T{}()())::type;
+} // namespace detail
+
+template <typename T> CONSTEVAL auto shrink() -> decltype(detail::shrink<T>());
+
+template <typename T>
+CONSTEVAL auto expand() -> decltype(detail::maybe_expand<T>());
+#else
+template <typename T> CONSTEVAL auto shrink() -> T;
+template <typename T> CONSTEVAL auto expand() -> T;
 #endif
+
+template <typename T> using shrink_t = decltype(shrink<T>());
+template <typename T> using expand_t = decltype(expand<T>());
 
 STDX_PRAGMA(diagnostic push)
 #ifdef __clang__
