@@ -53,3 +53,6 @@ template <bool B> constexpr auto ct_check = ct_check_t<B>{};
 #endif
 
 #endif
+
+#define STATIC_PROOF(cond) \
+    if (not (cond)) asm("compiler cannot prove (" #cond ") is always true");
