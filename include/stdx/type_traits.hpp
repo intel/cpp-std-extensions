@@ -244,22 +244,71 @@ CONSTEVAL auto shrink() {
 }
 
 template <typename T>
-concept is_shrunk = requires(T t) {
+concept is_shrunk = requires(T const &t) {
     { t()() } -> is_shrinkwrapped;
 };
 
 template <typename T> CONSTEVAL auto maybe_expand() -> T;
 template <is_shrunk T>
 CONSTEVAL auto maybe_expand() -> typename decltype(T{}()())::type;
+
+template <typename T> constexpr auto maybe_expand(T &&t) -> decltype(auto) {
+    return T(std::forward<T>(t));
+}
+template <is_shrunk T>
+constexpr auto maybe_expand(T &&) ->
+    typename decltype(std::remove_cvref_t<T>{}()())::type {
+    using R = typename decltype(std::remove_cvref_t<T>{}()())::type;
+    static_assert(std::is_default_constructible_v<R>,
+                  "expand(T) cannot default-construct the return value: maybe "
+                  "use expand_t<T> instead?");
+    static_assert(
+        std::is_empty_v<R>,
+        "Danger! expand(T) would return a default-constructed but non-empty "
+        "object: use expand_t<T>{} instead if this is what you want");
+    return R{};
+}
 } // namespace detail
 
-template <typename T> CONSTEVAL auto shrink() -> decltype(detail::shrink<T>());
+template <typename T> CONSTEVAL auto shrink() -> decltype(detail::shrink<T>()) {
+    static_assert(
+        always_false_v<T>,
+        "shrink<T>() should not be called outside an unevaluated context");
+}
+template <typename T>
+CONSTEVAL auto shrink(T const &) -> decltype(detail::shrink<T>()) {
+    return {};
+}
 
 template <typename T>
-CONSTEVAL auto expand() -> decltype(detail::maybe_expand<T>());
+CONSTEVAL auto expand() -> decltype(detail::maybe_expand<T>()) {
+    using R = decltype(detail::maybe_expand<T>());
+    static_assert(
+        always_false_v<R>,
+        "expand<T>() should not be called outside an unevaluated context");
+}
+template <typename T> constexpr auto expand(T &&t) -> decltype(auto) {
+    return detail::maybe_expand(std::forward<T>(t));
+}
+
 #else
-template <typename T> CONSTEVAL auto shrink() -> T;
-template <typename T> CONSTEVAL auto expand() -> T;
+template <typename T> CONSTEVAL auto shrink() -> T {
+    static_assert(
+        always_false_v<T>,
+        "shrink<T>() should not be called outside an unevaluated context");
+}
+template <typename T> constexpr auto shrink(T &&t) -> decltype(auto) {
+    return T(std::forward<T>(t));
+}
+
+template <typename T> CONSTEVAL auto expand() -> T {
+    static_assert(
+        always_false_v<T>,
+        "expand<T>() should not be called outside an unevaluated context");
+}
+template <typename T> constexpr auto expand(T &&t) -> decltype(auto) {
+    return T(std::forward<T>(t));
+}
 #endif
 
 template <typename T> using shrink_t = decltype(shrink<T>());
