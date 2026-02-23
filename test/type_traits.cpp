@@ -245,21 +245,32 @@ TEST_CASE("non-structural types", "[type_traits]") {
     STATIC_REQUIRE(not stdx::is_structural_v<non_structural::S>);
 }
 
-#if __cplusplus >= 202002L
 namespace {
 template <typename...> struct long_type_name {};
+using A = long_type_name<int, int, int, int, int, int, int, int>;
+using B = long_type_name<A, A, A, A, A, A, A, A>;
+using C = long_type_name<B, B, B, B, B, B, B, B>;
 } // namespace
 
-TEST_CASE("type shrinkage", "[type_traits]") {
-    using A = long_type_name<int, int, int, int, int, int, int, int>;
-    using B = long_type_name<A, A, A, A, A, A, A, A>;
-    using C = long_type_name<B, B, B, B, B, B, B, B>;
+TEST_CASE("type shrinkage (by type)", "[type_traits]") {
     using X = stdx::shrink_t<C>;
+#if __cplusplus >= 202002L
     STATIC_CHECK(stdx::type_as_string<X>().size() <
                  stdx::type_as_string<C>().size());
-    STATIC_CHECK(std::same_as<stdx::expand_t<X>, C>);
-}
 #endif
+    STATIC_CHECK(std::is_same_v<stdx::expand_t<X>, C>);
+}
+
+TEST_CASE("type shrinkage (by value)", "[type_traits]") {
+    auto c = C{};
+    auto x = stdx::shrink(c);
+    auto y = stdx::expand(x);
+#if __cplusplus >= 202002L
+    STATIC_CHECK(stdx::type_as_string<decltype(x)>().size() <
+                 stdx::type_as_string<C>().size());
+#endif
+    STATIC_CHECK(std::is_same_v<decltype(y), C>);
+}
 
 TEST_CASE("nth type in pack", "[type_traits]") {
     STATIC_REQUIRE(
