@@ -260,14 +260,16 @@ constexpr auto is_aligned_with = [](auto v) -> bool {
 };
 
 #if __cplusplus >= 202002L
-
 namespace detail {
 template <typename T> struct ct_helper {
     // NOLINTNEXTLINE(google-explicit-constructor)
-    CONSTEVAL ct_helper(T t) : value(t) {}
+    CONSTEVAL ct_helper(auto t) : value(t) {}
     T value;
 };
+
 template <typename T> ct_helper(T) -> ct_helper<T>;
+template <typename T, T I>
+ct_helper(std::integral_constant<T, I>) -> ct_helper<T>;
 
 template <auto> CONSTEVAL auto cx_detect0() {}
 CONSTEVAL auto cx_detect1(auto) { return 0; }

@@ -260,6 +260,12 @@ TEST_CASE("ct (integral)", "[utility]") {
                        std::integral_constant<unsigned int, 42> const>);
 }
 
+TEST_CASE("ct (integral constant)", "[utility]") {
+    constexpr auto vs = stdx::ct<std::integral_constant<int, 42>{}>();
+    STATIC_REQUIRE(
+        std::is_same_v<decltype(vs), std::integral_constant<int, 42> const>);
+}
+
 TEST_CASE("ct (bool)", "[utility]") {
     constexpr auto v = stdx::ct<true>();
     STATIC_REQUIRE(std::is_same_v<decltype(v), std::bool_constant<true> const>);
