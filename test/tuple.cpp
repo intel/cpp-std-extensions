@@ -44,6 +44,18 @@ TEST_CASE("multi element tuple", "[tuple]") {
     STATIC_CHECK(T::size() == 2);
 }
 
+namespace {
+template <auto N> struct empty {};
+} // namespace
+
+TEST_CASE("multi element tuple has minimal size", "[tuple]") {
+    constexpr auto t = stdx::tuple{empty<0>{}, empty<1>{}};
+    STATIC_CHECK(sizeof(decltype(t)) == 1);
+
+    constexpr auto u = stdx::tuple{42, empty<0>{}, empty<1>{}};
+    STATIC_CHECK(sizeof(decltype(u)) == sizeof(int));
+}
+
 TEST_CASE("constexpr tuple of references", "[tuple]") {
     constexpr static int x = 1;
     constexpr auto t = stdx::tuple<int const &>{x};

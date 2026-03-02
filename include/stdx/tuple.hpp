@@ -102,10 +102,10 @@ template <std::size_t Index, typename T, typename... Ts> struct element {
         return std::forward<T>(value);
     }
 
-    T value;
+    [[no_unique_address]] T value;
 
   private:
-    [[nodiscard]] friend auto operator==(element const &x, element const &y)
+    [[nodiscard]] friend auto operator==(element const &, element const &)
         -> bool = default;
     [[nodiscard]] friend auto operator<=>(element const &,
                                           element const &) = default;
@@ -355,7 +355,24 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     operator==(tuple_impl const &lhs,
                tuple_impl<std::index_sequence<Is...>, Funcs, Us...> const &rhs)
         -> bool {
-        return (... and (lhs[index<Is>] == rhs[index<Is>]));
+#ifndef __clang__
+        STDX_PRAGMA(diagnostic push)
+        STDX_PRAGMA(diagnostic ignored "-Wduplicated-branches")
+        if constexpr ((... and (std::is_copy_constructible_v<Ts> and
+                                std::is_copy_constructible_v<Us>))) {
+            if (std::is_constant_evaluated()) {
+                return (... and (static_cast<Ts>(lhs[index<Is>]) ==
+                                 static_cast<Us>(rhs[index<Is>])));
+            } else {
+#endif
+                return (... and (lhs[index<Is>] == rhs[index<Is>]));
+#ifndef __clang__
+            }
+            STDX_PRAGMA(diagnostic pop)
+        } else {
+            return (... and (lhs[index<Is>] == rhs[index<Is>]));
+        }
+#endif
     }
 
     template <typename Funcs, typename... Us>
