@@ -20,6 +20,11 @@ TEST_CASE("compile-time capacity (std::array)", "[iterator]") {
     STATIC_REQUIRE(stdx::ct_capacity(a) == 4u);
 }
 
+TEST_CASE("compile-time capacity (C-style array)", "[iterator]") {
+    int a[4]{};
+    STATIC_REQUIRE(stdx::ct_capacity(a) == 4u);
+}
+
 #if __cpp_lib_span >= 202002L
 TEST_CASE("compile-time capacity (std::span)", "[iterator]") {
     std::array a{1, 2, 3, 4};
