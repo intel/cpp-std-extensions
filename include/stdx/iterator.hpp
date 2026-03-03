@@ -24,6 +24,9 @@ constexpr auto ct_capacity_v = detail::ct_capacity_fail<T>{};
 template <typename T, std::size_t N>
 constexpr auto ct_capacity_v<std::array<T, N>> = N;
 
+// NOLINTNEXTLINE(modernize-avoid-c-arrays)
+template <typename T, std::size_t N> constexpr auto ct_capacity_v<T[N]> = N;
+
 template <typename T> constexpr auto ct_capacity_v<T const> = ct_capacity_v<T>;
 
 template <typename T>
