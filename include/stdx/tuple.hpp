@@ -3,6 +3,7 @@
 #if __cplusplus >= 202002L
 
 #include <stdx/udls.hpp>
+#include <stdx/utility.hpp>
 
 #include <array>
 #include <concepts>
@@ -408,6 +409,8 @@ tuple_impl(Ts...)
 template <typename T> constexpr auto tuple_size_v = T::size();
 template <typename T, std::size_t N>
 constexpr auto tuple_size_v<std::array<T, N>> = N;
+template <typename T, T N>
+constexpr auto tuple_size_v<make_integer_sequence<T, N>> = std::size_t{N};
 
 template <std::size_t I, typename T>
 using tuple_element_t = typename T::template element_t<I>;
