@@ -287,8 +287,28 @@ template <typename T> constexpr auto is_ct_v<type_identity<T>> = true;
 template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
 
 #endif
+
+template <typename T, T N>
+struct make_integer_sequence : std::make_integer_sequence<T, N> {};
+template <std::size_t N>
+using make_index_sequence = make_integer_sequence<std::size_t, N>;
+template <typename... Ts>
+using index_sequence_for = make_index_sequence<sizeof...(Ts)>;
+
+template <std::size_t I, typename T, T N>
+constexpr auto get(make_integer_sequence<T, N>) {
+    return std::integral_constant<T, I>{};
+}
+
 } // namespace v1
 } // namespace stdx
+
+template <typename T, T N>
+struct std::tuple_size<stdx::make_integer_sequence<T, N>>
+    : std::integral_constant<std::size_t, N> {};
+template <std::size_t I, typename T, T N>
+struct std::tuple_element<I, stdx::make_integer_sequence<T, N>>
+    : stdx::type_identity<std::integral_constant<T, I>> {};
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
