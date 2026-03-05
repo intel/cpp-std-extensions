@@ -236,6 +236,12 @@ class span : public detail::span_base<T, Extent> {
     }
 };
 
+template <std::size_t I, typename T, std::size_t E>
+[[nodiscard]] constexpr auto get(span<T, E> s) -> decltype(s[I]) {
+    static_assert(E == dynamic_extent or I < E, "get() out of range on span");
+    return s[I];
+}
+
 // NOLINTBEGIN(cppcoreguidelines-pro-type-reinterpret-cast)
 template <class T, std::size_t N> auto as_bytes(span<T, N> s) noexcept {
     if constexpr (N == dynamic_extent) {

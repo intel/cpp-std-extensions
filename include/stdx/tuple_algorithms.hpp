@@ -140,7 +140,7 @@ template <template <typename T> typename Pred, tuplelike T>
 namespace detail {
 template <std::size_t I, typename... Ts>
 constexpr auto invoke_at(auto &&op, Ts &&...ts) -> decltype(auto) {
-    return op(std::forward<Ts>(ts)[index<I>]...);
+    return op(get<I>(std::forward<Ts>(ts))...);
 }
 
 template <typename... Ts>
@@ -181,7 +181,7 @@ constexpr auto for_each(Op &&op, Ts &&...ts) -> Op {
 namespace detail {
 template <std::size_t I, typename... Ts>
 constexpr auto invoke_with_idx_at(auto &&op, Ts &&...ts) -> decltype(auto) {
-    return op.template operator()<I>(std::forward<Ts>(ts)[index<I>]...);
+    return op.template operator()<I>(get<I>(std::forward<Ts>(ts))...);
 }
 } // namespace detail
 

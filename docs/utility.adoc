@@ -116,6 +116,49 @@ std::uint32_t i;
 assert(stdx::is_aligned_with<std::uint32_t>(&i));
 ----
 
+=== `make_integer_sequence`
+
+`make_integer_sequence` is a class template that derives from
+https://en.cppreference.com/w/cpp/utility/integer_sequence.html[`std::make_integer_sequence`].
+Likewise, `make_index_sequence` and `index_sequence_for` are analogous with
+their standard counterparts. In fact each `stdx` version derives from the `std`
+version, so can be used in exactly the same way, for instance:
+
+[source,cpp]
+----
+auto sum = []<std::size_t... Is>(std::index_sequence<Is...>) {
+  return (std::size_t{} + ... + Is);
+}(stdx::make_index_sequence<3>{});
+
+// sum is 6
+----
+The difference is that `stdx::make_integer_sequence` implements the tuple
+protocol. This means that it is usable with
+xref:tuple_algorithms.adoc#_tuple_algorithms_hpp[tuple algorithms]. And when
+using the tuple protocol, `stdx::make_index_sequence` produces
+`std::integral_constant<std::size_t, I>` rather than `std::size_t{I}`.
+
+[source,cpp]
+----
+template <std::size_t N>
+auto f() {
+  // use make_index_sequence with tuple algorithms
+  stdx::unrolled_for_each(
+    [](auto x) {
+      // x is std::integral_constant<std::size_t, I> for each I
+    },
+    stdx::make_index_sequence<N>{});
+
+  // or with C++26, destructure into a pack (optionally constexpr here)
+  auto [...Is] = stdx::make_index_sequence<N>{};
+
+  // std::integral_constant implicitly converts to its contained type...
+  auto rt_sum = (std::size_t{} + ... + Is);
+  // ...or can be used at compile time
+  constexpr auto ct_sum = (std::size_t{} + ... + decltype(Is)::value);
+}
+----
+
 === `overload`
 
 `overload` is a struct designed to encapsulate an overload set. It inherits from

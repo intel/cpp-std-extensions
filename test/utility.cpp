@@ -432,3 +432,23 @@ TEST_CASE("CX_WRAP non-constexpr expression", "[utility]") {
 #endif
 
 #endif
+
+STDX_PRAGMA(diagnostic push)
+#ifdef __clang__
+STDX_PRAGMA(diagnostic ignored "-Wunknown-warning-option")
+STDX_PRAGMA(diagnostic ignored "-Wc++26-extensions")
+#endif
+#if __cpp_structured_bindings >= 202411L
+namespace {
+template <std::size_t N> constexpr auto sum() {
+    auto [... Is] = stdx::make_index_sequence<N>{};
+    constexpr auto sum = (0 + ... + decltype(Is)::value);
+    return sum;
+}
+} // namespace
+
+TEST_CASE("destructurable integer_sequence", "[utility]") {
+    STATIC_CHECK(sum<4>() == 6);
+}
+#endif
+STDX_PRAGMA(diagnostic pop)

@@ -2,6 +2,7 @@
 
 #include <stdx/span.hpp>
 #include <stdx/tuple_algorithms.hpp>
+#include <stdx/utility.hpp>
 
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
@@ -244,6 +245,19 @@ TEST_CASE("unrolled_for_each on spans", "[tuple_algorithms]") {
         stdx::span{a}, stdx::span{a});
     CHECK(sum == 12);
     CHECK(a == std::array{0, 1, 2});
+}
+
+TEST_CASE("unrolled_for_each on index_sequence", "[tuple_algorithms]") {
+    auto a = std::array{1u, 2u, 3u};
+    auto sum = std::size_t{};
+    stdx::unrolled_for_each(
+        [&](auto &x, auto y) {
+            sum += x + y;
+            x--;
+        },
+        a, stdx::make_index_sequence<stdx::ct_capacity(a)>{});
+    CHECK(sum == 9u);
+    CHECK(a == std::array{0u, 1u, 2u});
 }
 
 TEST_CASE("tuple_cat", "[tuple_algorithms]") {
