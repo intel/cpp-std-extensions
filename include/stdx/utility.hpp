@@ -379,7 +379,7 @@ auto cx_detect(auto f) {
 
 #ifndef CX_WRAP
 #define CX_WRAP(...)                                                           \
-    [&]([[maybe_unused]] auto f) {                                             \
+    []([[maybe_unused]] auto f) {                                              \
         STDX_PRAGMA(diagnostic push)                                           \
         STDX_PRAGMA(diagnostic ignored "-Wold-style-cast")                     \
         if constexpr (STDX_IS_TYPE(__VA_ARGS__)) {                             \
