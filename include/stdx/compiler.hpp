@@ -89,4 +89,12 @@
 #endif
 #endif
 
+#ifndef NRVO
+#ifdef __clang__
+#define STDX_NRVO(x) std::move(x)
+#else
+#define STDX_NRVO(x) x
+#endif
+#endif
+
 // NOLINTEND(cppcoreguidelines-macro-usage)
