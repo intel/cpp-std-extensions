@@ -143,6 +143,8 @@ template <typename T> rollover_t(T) -> rollover_t<T>;
 } // namespace v1
 } // namespace stdx
 
+// NOLINTBEGIN(bugprone-std-namespace-modification)
+
 template <typename T, typename U>
 struct std::common_type<stdx::rollover_t<T>, stdx::rollover_t<U>> {
     using type = stdx::rollover_t<std::common_type_t<T, U>>;
@@ -153,3 +155,5 @@ struct std::common_type<stdx::rollover_t<T>, I> {
     using type =
         stdx::rollover_t<std::common_type_t<T, std::make_unsigned_t<I>>>;
 };
+
+// NOLINTEND(bugprone-std-namespace-modification)
