@@ -148,7 +148,7 @@ template <typename T, typename U>
     } else if constexpr (sizeof(T) > sizeof(U)) {
         return (sz * sizeof(T) / sizeof(U)) + (sizeof(T) % sizeof(U) > 0);
     } else {
-        return (sz * sizeof(T) + sizeof(U) - 1) / sizeof(U);
+        return ((sz * sizeof(T)) + sizeof(U) - 1) / sizeof(U);
     }
 }
 } // namespace detail
@@ -300,12 +300,16 @@ constexpr auto get(make_integer_sequence<T, N>) {
 } // namespace v1
 } // namespace stdx
 
+// NOLINTBEGIN(bugprone-std-namespace-modification)
+
 template <typename T, T N>
 struct std::tuple_size<stdx::make_integer_sequence<T, N>>
     : std::integral_constant<std::size_t, N> {};
 template <std::size_t I, typename T, T N>
 struct std::tuple_element<I, stdx::make_integer_sequence<T, N>>
     : stdx::type_identity<std::integral_constant<T, I>> {};
+
+// NOLINTEND(bugprone-std-namespace-modification)
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 

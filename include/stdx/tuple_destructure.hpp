@@ -9,6 +9,8 @@
 #include <type_traits>
 #include <utility>
 
+// NOLINTBEGIN(bugprone-std-namespace-modification)
+
 template <typename... Ts>
 struct std::tuple_size<stdx::tuple<Ts...>>
     : std::integral_constant<std::size_t, sizeof...(Ts)> {};
@@ -25,5 +27,7 @@ struct std::tuple_element<I, stdx::indexed_tuple<IL, Ts...>>
     : std::type_identity<
           std::remove_cvref_t<decltype(std::declval<stdx::indexed_tuple<
                                            IL, Ts...>>()[stdx::index<I>])>> {};
+
+// NOLINTEND(bugprone-std-namespace-modification)
 
 #endif

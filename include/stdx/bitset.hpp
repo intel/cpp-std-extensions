@@ -40,7 +40,7 @@ class bitset {
 
     constexpr static auto lastmask = []() -> elem_t {
         if constexpr (N % storage_elem_size != 0) {
-            return allbits >> (storage_elem_size - N % storage_elem_size);
+            return allbits >> (storage_elem_size - (N % storage_elem_size));
         } else {
             return allbits;
         }
