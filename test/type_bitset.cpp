@@ -161,7 +161,6 @@ TEST_CASE("difference", "[type_bitset]") {
     STATIC_CHECK((bs1 - bs2) == stdx::type_bitset<int, float, bool>{0b100ul});
 }
 
-#if __cplusplus >= 202002L
 TEST_CASE("for_each", "[type_bitset]") {
     constexpr auto bs = stdx::type_bitset<int, float, bool>{stdx::all_bits};
     auto result = std::string{};
@@ -170,4 +169,3 @@ TEST_CASE("for_each", "[type_bitset]") {
     });
     CHECK(result == "int0float1bool2");
 }
-#endif

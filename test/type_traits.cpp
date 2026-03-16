@@ -254,10 +254,8 @@ using C = long_type_name<B, B, B, B, B, B, B, B>;
 
 TEST_CASE("type shrinkage (by type)", "[type_traits]") {
     using X = stdx::shrink_t<C>;
-#if __cplusplus >= 202002L
     STATIC_CHECK(stdx::type_as_string<X>().size() <
                  stdx::type_as_string<C>().size());
-#endif
     STATIC_CHECK(std::is_same_v<stdx::expand_t<X>, C>);
 }
 
@@ -265,10 +263,8 @@ TEST_CASE("type shrinkage (by value)", "[type_traits]") {
     auto c = C{};
     auto x = stdx::shrink(c);
     auto y = stdx::expand(x);
-#if __cplusplus >= 202002L
     STATIC_CHECK(stdx::type_as_string<decltype(x)>().size() <
                  stdx::type_as_string<C>().size());
-#endif
     STATIC_CHECK(std::is_same_v<decltype(y), C>);
 }
 
@@ -277,11 +273,9 @@ TEST_CASE("nth type in pack", "[type_traits]") {
         std::is_same_v<stdx::nth_t<2, bool, char, float, int>, float>);
 }
 
-#if __cplusplus >= 202002L
 TEST_CASE("nth value in pack", "[type_traits]") {
     STATIC_REQUIRE(stdx::nth_v<2, 0, true, 'b', 3> == 'b');
 }
-#endif
 
 TEST_CASE("is_complete_v", "[type_traits]") {
     struct incomplete;

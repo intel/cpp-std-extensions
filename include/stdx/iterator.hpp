@@ -42,11 +42,7 @@ struct counting_iterator {
     using const_reference = T const &;
     using pointer = T *;
     using const_pointer = T const *;
-#if __cplusplus >= 202002L
     using iterator_category = std::contiguous_iterator_tag;
-#else
-    using iterator_category = std::random_access_iterator_tag;
-#endif
 
     auto operator*() -> reference { return i; }
     auto operator*() const -> const_reference { return i; }
@@ -113,39 +109,10 @@ struct counting_iterator {
         return x.i == y.i;
     }
 
-#if __cpp_impl_three_way_comparison >= 201907L
     [[nodiscard]] friend constexpr auto
     operator<=>(counting_iterator const &x, counting_iterator const &y) {
         return x.i <=> y.i;
     }
-#else
-    [[nodiscard]] friend constexpr auto operator!=(counting_iterator const &x,
-                                                   counting_iterator const &y)
-        -> bool {
-        return not(x == y);
-    }
-
-    [[nodiscard]] friend constexpr auto operator<(counting_iterator const &x,
-                                                  counting_iterator const &y)
-        -> bool {
-        return x.i < y.i;
-    }
-    [[nodiscard]] friend constexpr auto operator<=(counting_iterator const &x,
-                                                   counting_iterator const &y)
-        -> bool {
-        return not(y < x);
-    }
-    [[nodiscard]] friend constexpr auto operator>(counting_iterator const &x,
-                                                  counting_iterator const &y)
-        -> bool {
-        return y < x;
-    }
-    [[nodiscard]] friend constexpr auto operator>=(counting_iterator const &x,
-                                                   counting_iterator const &y)
-        -> bool {
-        return not(x < y);
-    }
-#endif
 
     T i{};
 };

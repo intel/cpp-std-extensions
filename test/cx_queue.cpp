@@ -12,12 +12,10 @@ struct injected_handler {
         throw panic_exception{};
     }
 
-#if __cplusplus >= 202002L
     template <stdx::ct_string Why, typename... Args>
     static auto panic(Args &&...) -> void {
         throw panic_exception{};
     }
-#endif
 };
 } // namespace
 template <> inline auto stdx::panic_handler<> = injected_handler{};

@@ -50,7 +50,6 @@ template <typename T> class byterator {
                static_cast<void const *>(stdx::to_address(y));
     }
 
-#if __cpp_impl_three_way_comparison >= 201907L
     [[nodiscard]] friend constexpr auto operator<=>(byterator const &x,
                                                     byterator const &y) {
         return x.ptr <=> y.ptr;
@@ -62,94 +61,6 @@ template <typename T> class byterator {
         return static_cast<void const *>(x.ptr) <=>
                static_cast<void const *>(stdx::to_address(y));
     }
-#else
-    template <typename It>
-    [[nodiscard]] friend constexpr auto operator==(It x, byterator const &y)
-        -> bool {
-        return y == x;
-    }
-
-    [[nodiscard]] friend constexpr auto operator!=(byterator const &x,
-                                                   byterator const &y) -> bool {
-        return not(x == y);
-    }
-    template <typename It>
-    [[nodiscard]] friend constexpr auto operator!=(byterator const &x, It y)
-        -> bool {
-        return not(x == y);
-    }
-    template <typename It>
-    [[nodiscard]] friend constexpr auto operator!=(It x, byterator const &y)
-        -> bool {
-        return y != x;
-    }
-
-    [[nodiscard]] friend constexpr auto operator<(byterator const &x,
-                                                  byterator const &y) -> bool {
-        return std::less{}(x.ptr, y.ptr);
-    }
-    template <typename It,
-              std::enable_if_t<std::is_same_v<detail::iterator_value_t<It>, T>,
-                               int> = 0>
-    [[nodiscard]] friend constexpr auto operator<(byterator const &x, It y)
-        -> bool {
-        return std::less{}(static_cast<void const *>(x.ptr),
-                           static_cast<void const *>(stdx::to_address(y)));
-    }
-    template <typename It,
-              std::enable_if_t<std::is_same_v<detail::iterator_value_t<It>, T>,
-                               int> = 0>
-    [[nodiscard]] friend constexpr auto operator<(It x, byterator const &y)
-        -> bool {
-        return std::less{}(static_cast<void const *>(stdx::to_address(x)),
-                           static_cast<void const *>(y.ptr));
-    }
-
-    [[nodiscard]] friend constexpr auto operator<=(byterator const &x,
-                                                   byterator const &y) -> bool {
-        return not(y < x);
-    }
-    template <typename It>
-    [[nodiscard]] friend constexpr auto operator<=(byterator const &x, It y)
-        -> bool {
-        return not(y < x);
-    }
-    template <typename It>
-    [[nodiscard]] friend constexpr auto operator<=(It x, byterator const &y)
-        -> bool {
-        return not(y < x);
-    }
-
-    [[nodiscard]] friend constexpr auto operator>(byterator const &x,
-                                                  byterator const &y) -> bool {
-        return y < x;
-    }
-    template <typename It>
-    [[nodiscard]] friend constexpr auto operator>(byterator const &x, It y)
-        -> bool {
-        return y < x;
-    }
-    template <typename It>
-    [[nodiscard]] friend constexpr auto operator>(It x, byterator const &y)
-        -> bool {
-        return y < x;
-    }
-
-    [[nodiscard]] friend constexpr auto operator>=(byterator const &x,
-                                                   byterator const &y) -> bool {
-        return not(x < y);
-    }
-    template <typename It>
-    [[nodiscard]] friend constexpr auto operator>=(byterator const &x, It y)
-        -> bool {
-        return not(x < y);
-    }
-    template <typename It>
-    [[nodiscard]] friend constexpr auto operator>=(It x, byterator const &y)
-        -> bool {
-        return not(x < y);
-    }
-#endif
 
   public:
     using difference_type = std::ptrdiff_t;

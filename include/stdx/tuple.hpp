@@ -1,7 +1,5 @@
 #pragma once
 
-#if __cplusplus >= 202002L
-
 #include <stdx/udls.hpp>
 #include <stdx/utility.hpp>
 
@@ -529,5 +527,3 @@ template <typename... Ts> one_of(Ts...) -> one_of<Ts...>;
 
 } // namespace v1
 } // namespace stdx
-
-#endif

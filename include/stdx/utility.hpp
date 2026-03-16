@@ -256,7 +256,6 @@ constexpr auto is_aligned_with = [](auto v) -> bool {
     }
 };
 
-#if __cplusplus >= 202002L
 namespace detail {
 template <typename T> struct ct_helper {
     // NOLINTNEXTLINE(google-explicit-constructor)
@@ -282,8 +281,6 @@ template <typename T, T V>
 constexpr auto is_ct_v<std::integral_constant<T, V>> = true;
 template <typename T> constexpr auto is_ct_v<type_identity<T>> = true;
 template <typename T> constexpr auto is_ct_v<T const> = is_ct_v<T>;
-
-#endif
 
 template <typename T, T N>
 struct make_integer_sequence : std::make_integer_sequence<T, N> {};
@@ -344,8 +341,6 @@ struct std::tuple_element<I, stdx::make_integer_sequence<T, N>>
     }()
 #endif
 
-#if __cplusplus >= 202002L
-
 #ifndef CT_WRAP
 #define CT_WRAP(...)                                                           \
     [&](auto f) constexpr {                                                    \
@@ -404,7 +399,6 @@ auto cx_detect(auto f) {
         STDX_PRAGMA(diagnostic pop)                                            \
     })
 
-#endif
 #endif
 
 // NOLINTEND(cppcoreguidelines-macro-usage)

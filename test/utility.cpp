@@ -248,8 +248,6 @@ TEST_CASE("is_aligned_with (pointer)", "[utility]") {
     CHECK(stdx::is_aligned_with<std::uint32_t>(p));
 }
 
-#if __cplusplus >= 202002L
-
 TEST_CASE("ct (integral)", "[utility]") {
     constexpr auto vs = stdx::ct<42>();
     STATIC_REQUIRE(
@@ -429,8 +427,6 @@ TEST_CASE("CX_WRAP non-constexpr expression", "[utility]") {
         std::is_same_v<decltype(CX_WRAP(expression_test{}.f(x))), int>);
     CHECK(CX_WRAP(expression_test{}.f(x)) == 17);
 }
-#endif
-
 #endif
 
 STDX_PRAGMA(diagnostic push)

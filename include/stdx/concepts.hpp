@@ -14,109 +14,6 @@
 
 namespace stdx {
 inline namespace v1 {
-
-#if __cplusplus < 202002L
-
-// Before C++20 we can't use concepts directly, but we can still allow the
-// names to be used in constexpr contexts
-
-template <typename T> constexpr auto integral = std::is_integral_v<T>;
-template <typename T>
-constexpr auto floating_point = std::is_floating_point_v<T>;
-
-template <typename T>
-constexpr auto signed_integral = integral<T> and std::is_signed_v<T>;
-
-template <typename T>
-constexpr auto unsigned_integral = integral<T> and std::is_unsigned_v<T>;
-
-template <typename From, typename To>
-constexpr auto convertible_to = std::is_convertible_v<From, To>;
-
-template <typename T, typename U>
-constexpr auto derived_from =
-    std::is_base_of_v<U, T> and
-    std::is_convertible_v<T const volatile *, U const volatile *>;
-
-template <typename T, typename U>
-constexpr auto same_as = std::is_same_v<T, U> and std::is_same_v<U, T>;
-
-template <typename T, typename... Us>
-constexpr auto same_any = (... or same_as<T, Us>);
-
-template <typename T, typename... Us>
-constexpr auto same_none = not same_any<T, Us...>;
-
-template <typename T, typename U>
-constexpr auto same_as_unqualified =
-    is_same_unqualified_v<T, U> and is_same_unqualified_v<U, T>;
-
-// NOLINTBEGIN(bugprone-macro-parentheses, cppcoreguidelines-macro-usage)
-#define DETECTOR(name, expr)                                                   \
-    namespace detail::detect {                                                 \
-    template <typename T, typename = void> constexpr auto name = false;        \
-    template <typename T>                                                      \
-    constexpr auto name<T, std::void_t<decltype(expr)>> = true;                \
-    }
-// NOLINTEND(bugprone-macro-parentheses, cppcoreguidelines-macro-usage)
-
-DETECTOR(eq_compare, (std::declval<T>() == std::declval<T>()))
-DETECTOR(neq_compare, (std::declval<T>() != std::declval<T>()))
-
-template <typename T>
-constexpr auto equality_comparable =
-    detail::detect::eq_compare<T> and detail::detect::neq_compare<T>;
-
-DETECTOR(lt_compare, (std::declval<T>() < std::declval<T>()))
-DETECTOR(lte_compare, (std::declval<T>() <= std::declval<T>()))
-DETECTOR(gt_compare, (std::declval<T>() > std::declval<T>()))
-DETECTOR(gte_compare, (std::declval<T>() >= std::declval<T>()))
-
-template <typename T>
-constexpr auto totally_ordered =
-    equality_comparable<T> and detail::detect::lt_compare<T> and
-    detail::detect::lte_compare<T> and detail::detect::gt_compare<T> and
-    detail::detect::gte_compare<T>;
-
-namespace detail::detect {
-template <typename... Args> struct arg_list {
-    template <typename F>
-    using invoke_result_t = std::invoke_result_t<F, Args...>;
-};
-template <typename F, typename Args, typename = void>
-constexpr auto invocable = false;
-template <typename F, typename Args>
-constexpr auto invocable<
-    F, Args, std::void_t<typename Args::template invoke_result_t<F>>> = true;
-} // namespace detail::detect
-
-template <typename F, typename... Args>
-constexpr auto invocable =
-    detail::detect::invocable<F, detail::detect::arg_list<Args...>>;
-
-template <typename F, typename... Args>
-constexpr auto predicate =
-    invocable<F, Args...> and
-    std::is_convertible_v<std::invoke_result_t<F, Args...>, bool>;
-
-template <typename T> constexpr auto callable = is_callable_v<T>;
-
-template <typename T, template <typename> typename TypeTrait>
-constexpr auto has_trait = TypeTrait<T>::value;
-
-#undef DETECTOR
-
-template <typename T> constexpr auto structural = is_structural_v<T>;
-
-template <typename T> constexpr auto complete = is_complete_v<T>;
-
-template <typename T, typename U>
-constexpr auto same_template_as = is_same_template_v<T, U>;
-
-#else
-
-// After C++20, we can define concepts that are lacking in the library
-
 template <typename T>
 concept integral = std::is_integral_v<T>;
 
@@ -204,9 +101,6 @@ concept complete = is_complete_v<T>;
 
 template <typename T, typename U>
 concept same_template_as = is_same_template_v<T, U>;
-
-#endif
-
 } // namespace v1
 } // namespace stdx
 

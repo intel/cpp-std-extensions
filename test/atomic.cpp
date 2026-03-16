@@ -27,11 +27,9 @@ struct non_dc {
 };
 } // namespace
 
-#if __cplusplus >= 202002L
 TEST_CASE("atomic is not default constructible when data is not", "[atomic]") {
     STATIC_REQUIRE(not std::is_default_constructible_v<stdx::atomic<non_dc>>);
 }
-#endif
 
 TEST_CASE("atomic is not copyable or movable", "[atomic]") {
     STATIC_REQUIRE(not std::is_copy_constructible_v<stdx::atomic<int>>);

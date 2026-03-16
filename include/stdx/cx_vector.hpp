@@ -162,14 +162,6 @@ template <typename T, std::size_t N> class cx_vector {
         }
         return true;
     }
-
-#if __cpp_impl_three_way_comparison < 201907L
-    [[nodiscard]] friend constexpr auto operator!=(cx_vector const &lhs,
-                                                   cx_vector const &rhs)
-        -> bool {
-        return not(lhs == rhs);
-    }
-#endif
 };
 
 template <typename T, typename... Ts>

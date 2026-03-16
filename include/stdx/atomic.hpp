@@ -5,13 +5,6 @@
 #include <atomic>
 #include <type_traits>
 
-// NOLINTBEGIN(cppcoreguidelines-macro-usage)
-#if __cplusplus >= 202002L
-#define CPP20(...) __VA_ARGS__
-#else
-#define CPP20(...)
-#endif
-
 namespace stdx {
 inline namespace v1 {
 // NOLINTNEXTLINE(cppcoreguidelines-special-member-functions)
@@ -49,7 +42,8 @@ template <typename T> class atomic {
   public:
     using value_type = T;
 
-    constexpr atomic() CPP20(requires std::is_default_constructible_v<elem_t>)
+    constexpr atomic()
+        requires std::is_default_constructible_v<elem_t>
         : value{} {}
     constexpr explicit atomic(T t) : value{static_cast<elem_t>(t)} {}
     atomic(atomic const &) = delete;
@@ -78,13 +72,11 @@ template <typename T> class atomic {
     }
 
     auto fetch_add(T t, std::memory_order mo = std::memory_order_seq_cst) -> T {
-        CPP20(static_assert(
-            requires { t + t; }, "T must support operator+(x, y)"));
+        static_assert(requires { t + t; }, "T must support operator+(x, y)");
         return ::atomic::fetch_add(value, static_cast<elem_t>(t), mo);
     }
     auto fetch_sub(T t, std::memory_order mo = std::memory_order_seq_cst) -> T {
-        CPP20(static_assert(
-            requires { t - t; }, "T must support operator-(x, y)"));
+        static_assert(requires { t - t; }, "T must support operator-(x, y)");
         return ::atomic::fetch_sub(value, static_cast<elem_t>(t), mo);
     }
 
@@ -92,39 +84,32 @@ template <typename T> class atomic {
     auto operator-=(T t) -> T { return fetch_sub(t) - t; }
 
     auto operator++() -> T {
-        CPP20(static_assert(
-            requires(T t) { ++t; }, "T must support operator++()"));
+        static_assert(requires(T t) { ++t; }, "T must support operator++()");
         return ::atomic::fetch_add(value, 1) + 1;
     }
     [[nodiscard]] auto operator++(int) -> T {
-        CPP20(static_assert(
-            requires(T t) { t++; }, "T must support operator++(int)"));
+        static_assert(requires(T t) { t++; }, "T must support operator++(int)");
         return ::atomic::fetch_add(value, 1);
     }
     auto operator--() -> T {
-        CPP20(static_assert(
-            requires(T t) { --t; }, "T must support operator--()"));
+        static_assert(requires(T t) { --t; }, "T must support operator--()");
         return ::atomic::fetch_sub(value, 1) - 1;
     }
     [[nodiscard]] auto operator--(int) -> T {
-        CPP20(static_assert(
-            requires(T t) { t--; }, "T must support operator--(int)"));
+        static_assert(requires(T t) { t--; }, "T must support operator--(int)");
         return ::atomic::fetch_sub(value, 1);
     }
 
     auto fetch_and(T t, std::memory_order mo = std::memory_order_seq_cst) -> T {
-        CPP20(static_assert(
-            requires { t & t; }, "T must support operator&(x, y)"));
+        static_assert(requires { t & t; }, "T must support operator&(x, y)");
         return ::atomic::fetch_and(value, static_cast<elem_t>(t), mo);
     }
     auto fetch_or(T t, std::memory_order mo = std::memory_order_seq_cst) -> T {
-        CPP20(static_assert(
-            requires { t | t; }, "T must support operator|(x, y)"));
+        static_assert(requires { t | t; }, "T must support operator|(x, y)");
         return ::atomic::fetch_or(value, static_cast<elem_t>(t), mo);
     }
     auto fetch_xor(T t, std::memory_order mo = std::memory_order_seq_cst) -> T {
-        CPP20(static_assert(
-            requires { t ^ t; }, "T must support operator^(x, y)"));
+        static_assert(requires { t ^ t; }, "T must support operator^(x, y)");
         return ::atomic::fetch_xor(value, static_cast<elem_t>(t), mo);
     }
 
@@ -134,5 +119,3 @@ template <typename T> class atomic {
 };
 } // namespace v1
 } // namespace stdx
-
-// NOLINTEND(cppcoreguidelines-macro-usage)

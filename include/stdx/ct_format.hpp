@@ -1,7 +1,5 @@
 #pragma once
 
-#if __cplusplus >= 202002L
-
 #include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
 #include <stdx/ct_conversions.hpp>
@@ -449,5 +447,3 @@ constexpr auto num_fmt_specifiers =
     stdx::ct_format<S>(STDX_MAP(CX_WRAP __VA_OPT__(, ) __VA_ARGS__))
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
-
-#endif

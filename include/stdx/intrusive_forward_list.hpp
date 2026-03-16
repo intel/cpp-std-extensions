@@ -3,13 +3,10 @@
 #include <stdx/detail/list_common.hpp>
 
 #include <cstddef>
-#if __cplusplus < 202002L
-#include <iterator>
-#endif
 
 namespace stdx {
 inline namespace v1 {
-template <STDX_SINGLE_LINKABLE NodeType,
+template <single_linkable NodeType,
           template <typename> typename P = node_policy::checked>
 class intrusive_forward_list {
     friend P<NodeType>;
@@ -19,9 +16,6 @@ class intrusive_forward_list {
         using value_type = N;
         using pointer = value_type *;
         using reference = value_type &;
-#if __cplusplus < 202002L
-        using iterator_category = std::forward_iterator_tag;
-#endif
 
         constexpr iterator_t() = default;
         constexpr explicit iterator_t(pointer n) : node{n} {}
@@ -44,19 +38,8 @@ class intrusive_forward_list {
       private:
         pointer node{};
 
-#if __cpp_impl_three_way_comparison < 201907L
-        friend constexpr auto operator==(iterator_t lhs, iterator_t rhs)
-            -> bool {
-            return lhs.node == rhs.node;
-        }
-        friend constexpr auto operator!=(iterator_t lhs, iterator_t rhs)
-            -> bool {
-            return not(lhs == rhs);
-        }
-#else
         friend constexpr auto operator==(iterator_t, iterator_t)
             -> bool = default;
-#endif
     };
 
   public:

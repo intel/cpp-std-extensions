@@ -1,7 +1,5 @@
 #pragma once
 
-#if __cplusplus >= 202002L
-
 #include <stdx/tuple.hpp>
 
 #include <cstddef>
@@ -29,5 +27,3 @@ struct std::tuple_element<I, stdx::indexed_tuple<IL, Ts...>>
                                            IL, Ts...>>()[stdx::index<I>])>> {};
 
 // NOLINTEND(bugprone-std-namespace-modification)
-
-#endif

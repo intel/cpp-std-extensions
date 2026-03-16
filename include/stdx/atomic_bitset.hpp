@@ -80,10 +80,8 @@ class atomic_bitset {
                                      char one = '1')
         : storage{value_from_string(str, pos, n, one)} {}
 
-#if __cplusplus >= 202002L
     constexpr explicit atomic_bitset(ct_string<N + 1> s)
         : atomic_bitset{static_cast<std::string_view>(s)} {}
-#endif
 
     template <typename T>
     [[nodiscard]] auto
@@ -238,8 +236,6 @@ class atomic_bitset {
     }
 };
 
-#if __cplusplus >= 202002L
 template <std::size_t N> atomic_bitset(ct_string<N>) -> atomic_bitset<N - 1>;
-#endif
 } // namespace v1
 } // namespace stdx

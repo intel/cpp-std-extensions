@@ -227,7 +227,6 @@ template <typename T, typename = void> constexpr auto is_cx_value_v = false;
 template <typename T>
 constexpr auto is_cx_value_v<T, std::void_t<typename T::cx_value_t>> = true;
 
-#if __cplusplus >= 202002L
 namespace detail {
 template <typename T> struct shrinkwrap {
     using is_shrinkwrapped = void;
@@ -291,26 +290,6 @@ template <typename T> constexpr auto expand(T &&t) -> decltype(auto) {
     return detail::maybe_expand(std::forward<T>(t));
 }
 
-#else
-template <typename T> CONSTEVAL auto shrink() -> T {
-    static_assert(
-        always_false_v<T>,
-        "shrink<T>() should not be called outside an unevaluated context");
-}
-template <typename T> constexpr auto shrink(T &&t) -> decltype(auto) {
-    return T(std::forward<T>(t));
-}
-
-template <typename T> CONSTEVAL auto expand() -> T {
-    static_assert(
-        always_false_v<T>,
-        "expand<T>() should not be called outside an unevaluated context");
-}
-template <typename T> constexpr auto expand(T &&t) -> decltype(auto) {
-    return T(std::forward<T>(t));
-}
-#endif
-
 template <typename T> using shrink_t = decltype(shrink<T>());
 template <typename T> using expand_t = decltype(expand<T>());
 
@@ -330,7 +309,6 @@ using nth_t =
 #endif
 STDX_PRAGMA(diagnostic pop)
 
-#if __cplusplus >= 202002L
 namespace detail {
 template <auto V> struct value_wrapper {
     constexpr static auto value = V;
@@ -350,7 +328,6 @@ constexpr auto nth_v =
     boost::mp11::mp_at_c<type_list<detail::value_wrapper<Vs>...>, N>::value;
 #endif
 STDX_PRAGMA(diagnostic pop)
-#endif
 
 template <typename T, typename = void> constexpr auto is_complete_v = false;
 template <typename T>

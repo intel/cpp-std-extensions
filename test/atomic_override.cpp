@@ -31,7 +31,6 @@ TEST_CASE("atomic config works with partial specialization",
     STATIC_REQUIRE(std::is_same_v<elem_t, uintptr_t>);
 }
 
-#if __cplusplus >= 202002L
 namespace {
 enum E : std::uint8_t {};
 }
@@ -41,4 +40,3 @@ TEST_CASE("atomic config works with enum", "[atomic_override]") {
     STATIC_REQUIRE(sizeof(decltype(bs)) == sizeof(std::uint32_t));
     STATIC_REQUIRE(alignof(decltype(bs)) == alignof(std::uint32_t));
 }
-#endif

@@ -8,9 +8,7 @@
 
 namespace {
 int runtime_calls{};
-#if __cplusplus >= 202002L
 int compile_time_calls{};
-#endif
 
 struct injected_handler {
     template <typename Why, typename... Ts>
@@ -19,13 +17,11 @@ struct injected_handler {
         ++runtime_calls;
     }
 
-#if __cplusplus >= 202002L
     template <stdx::ct_string Why, typename... Ts>
     static auto panic(Ts &&...) noexcept -> void {
         STATIC_REQUIRE(std::string_view{Why} == "uh-oh");
         ++compile_time_calls;
     }
-#endif
 };
 } // namespace
 
@@ -37,7 +33,6 @@ TEST_CASE("panic called with runtime arguments", "[panic]") {
     CHECK(runtime_calls == 1);
 }
 
-#if __cplusplus >= 202002L
 TEST_CASE("panic called with compile-time strings", "[panic]") {
     compile_time_calls = 0;
     using namespace stdx::ct_string_literals;
@@ -50,10 +45,3 @@ TEST_CASE("compile-time panic called through macro", "[panic]") {
     STDX_PANIC("uh-oh");
     CHECK(compile_time_calls == 1);
 }
-#else
-TEST_CASE("runtime panic called through macro", "[panic]") {
-    runtime_calls = 0;
-    STDX_PANIC("uh-oh");
-    CHECK(runtime_calls == 1);
-}
-#endif
