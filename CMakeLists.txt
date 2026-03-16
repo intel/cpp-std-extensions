@@ -15,11 +15,11 @@ else()
 endif()
 
 add_versioned_package("gh:boostorg/mp11#boost-1.83.0")
-fmt_recipe(11.1.3)
+fmt_recipe(12.1.0)
 add_versioned_package("gh:intel/cpp-baremetal-concurrency#06e5901")
 
 if(NOT DEFINED CMAKE_CXX_STANDARD)
-    set(CMAKE_CXX_STANDARD 20)
+    set(CMAKE_CXX_STANDARD 23)
 endif()
 
 add_library(stdx INTERFACE)

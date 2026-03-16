@@ -1,17 +1,10 @@
 #pragma once
 
+#include <stdx/tuple.hpp>
 #include <stdx/type_traits.hpp>
 
 #include <functional>
 #include <type_traits>
-
-#if __cpp_lib_bind_front < 202306L or __cpp_lib_bind_back < 202306L
-#if __cplusplus >= 202002L
-#include <stdx/tuple.hpp>
-#else
-#include <tuple>
-#endif
-#endif
 
 namespace stdx {
 inline namespace v1 {
@@ -34,20 +27,10 @@ template <typename F> with_result_of(F) -> with_result_of<F>;
 #endif
 
 namespace detail {
-#if __cpp_lib_bind_front < 202306L or __cpp_lib_bind_back < 202306L
-#if __cplusplus >= 202002L
 template <typename... Ts> using bind_tuple_t = stdx::tuple<Ts...>;
 using stdx::get;
-#else
-template <typename... Ts> using bind_tuple_t = std::tuple<Ts...>;
-using std::get;
-#endif
-#endif
 } // namespace detail
 
-#if __cpp_lib_bind_front >= 201907L
-using std::bind_front;
-#else
 namespace detail {
 template <typename...> struct bind_front_t;
 
@@ -77,9 +60,7 @@ constexpr auto bind_front(F &&f, Args &&...args) {
                                 std::decay_t<Args>...>{
         std::forward<F>(f), {std::forward<Args>(args)...}};
 }
-#endif
 
-#if __cpp_lib_bind_front < 202306L
 namespace detail {
 template <auto, typename...> struct bind_front_value_t;
 
@@ -106,11 +87,6 @@ template <auto F, typename... Args> constexpr auto bind_front(Args &&...args) {
         {std::forward<Args>(args)...}};
 }
 
-#endif
-
-#if __cpp_lib_bind_back >= 202202L
-using std::bind_back;
-#else
 namespace detail {
 template <typename...> struct bind_back_t;
 
@@ -140,9 +116,7 @@ constexpr auto bind_back(F &&f, Args &&...args) {
                                std::decay_t<Args>...>{
         std::forward<F>(f), {std::forward<Args>(args)...}};
 }
-#endif
 
-#if __cpp_lib_bind_back < 202306L
 namespace detail {
 template <auto, typename...> struct bind_back_value_t;
 
@@ -168,8 +142,6 @@ template <auto F, typename... Args> constexpr auto bind_back(Args &&...args) {
         F, std::make_index_sequence<sizeof...(Args)>, std::decay_t<Args>...>{
         {std::forward<Args>(args)...}};
 }
-
-#endif
 
 // NOLINTBEGIN(modernize-use-constraints)
 template <typename T = void> struct unary_plus {
