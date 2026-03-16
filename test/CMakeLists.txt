@@ -31,20 +31,25 @@ add_tests(
     bitset
     byterator
     cached
+    call_by_need
     callable
     compiler
     concepts
     conditional
     ct_conversions
+    ct_format
+    ct_string
     cx_map
     cx_multimap
     cx_queue
     cx_set
     cx_vector
     default_panic
+    env
     for_each_n_args
     function_traits
     functional
+    indexed_tuple
     intrusive_forward_list
     intrusive_list
     intrusive_list_properties
@@ -63,6 +68,8 @@ add_tests(
     rollover
     span
     to_underlying
+    tuple
+    tuple_algorithms
     type_bitset
     type_map
     type_traits
@@ -78,28 +85,16 @@ target_compile_definitions(
     atomic_override_test
     PRIVATE -DATOMIC_CFG="${CMAKE_CURRENT_LIST_DIR}/detail/atomic_cfg.hpp")
 
-if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
-    add_tests(
-        FILES
-        call_by_need
-        ct_format
-        ct_string
-        env
-        indexed_tuple
-        tuple
-        tuple_algorithms)
-
-    add_unit_test(
-        "ct_format_freestanding_test"
-        CATCH2
-        FILES
-        "ct_format.cpp"
-        LIBRARIES
-        warnings
-        stdx)
-    target_compile_definitions(ct_format_freestanding_test
-                               PRIVATE STDX_FREESTANDING)
-endif()
+add_unit_test(
+    "ct_format_freestanding_test"
+    CATCH2
+    FILES
+    "ct_format.cpp"
+    LIBRARIES
+    warnings
+    stdx)
+target_compile_definitions(ct_format_freestanding_test
+                           PRIVATE STDX_FREESTANDING)
 
 add_subdirectory(fail)
 add_subdirectory(pbt)

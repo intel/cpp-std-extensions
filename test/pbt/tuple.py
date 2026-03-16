@@ -89,12 +89,18 @@ def test_get_by_index(compile, l, i):
 
         constexpr auto t = {t};
         constexpr auto expected = {expected_v};
-        
-        static_assert(stdx::get<{i}>(t) == expected);
-        static_assert(get<{i}>(t) == expected);
 
-        static_assert(t[{i}_idx] == expected);
-        static_assert(t[stdx::index<{i}>] == expected);
+        constexpr auto x1 = stdx::get<{i}>(t);
+        static_assert(x1 == expected);
+
+        constexpr auto x2 = get<{i}>(t);        
+        static_assert(x2 == expected);
+
+        constexpr auto x3 = t[{i}_idx];
+        static_assert(x3 == expected);
+
+        constexpr auto x4 = t[stdx::index<{i}>];
+        static_assert(x4 == expected);
 
         int main() {{
             return 0;

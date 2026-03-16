@@ -7,10 +7,16 @@ endfunction()
 add_fail_tests(
     as_signed_bool
     as_unsigned_bool
+    atomic_bool_dec
     bitset_mixed_enumeration
     bitset_nonintegral_bit_places
     bitset_signed_storage
     bitset_to_uint64_over_64_bits
+    call_by_need
+    ct_format_mismatch
+    dynamic_container_no_ct_capacity
+    dynamic_std_span_no_ct_capacity
+    dynamic_stdx_span_no_ct_capacity
     for_each_n_args_bad_size
     optional_without_tombstone
     optional_integral_with_tombstone_traits
@@ -25,23 +31,13 @@ add_fail_tests(
     subspan_too_big
     subspan_wrapping
     template_for_each_not_list
-    to_address_undefined_on_function)
-
-if(${CMAKE_CXX_STANDARD} GREATER_EQUAL 20)
-    add_fail_tests(
-        atomic_bool_dec
-        call_by_need
-        ct_format_mismatch
-        dynamic_container_no_ct_capacity
-        dynamic_std_span_no_ct_capacity
-        dynamic_stdx_span_no_ct_capacity
-        tuple_index_out_of_bounds
-        tuple_equality_mismatch
-        tuple_equality_with_element
-        tuple_spaceship_mismatch
-        tuple_spaceship_with_element
-        tuple_type_not_found)
-endif()
+    to_address_undefined_on_function
+    tuple_index_out_of_bounds
+    tuple_equality_mismatch
+    tuple_equality_with_element
+    tuple_spaceship_mismatch
+    tuple_spaceship_with_element
+    tuple_type_not_found)
 
 function(add_test_by_compiler CPP_NAME CXX_VERSION COMPILER_ID COMPILER_VERSION)
     if("cxx_std_${CXX_VERSION}" IN_LIST CMAKE_CXX_COMPILE_FEATURES)

@@ -104,7 +104,6 @@ constexpr static auto reverse_value_lookup_v =
                   expand<M>())),
               detail::value_t<Default>>::value;
 
-#if __cpp_lib_forward_like < 202207L
 template <typename T, typename U>
 [[nodiscard]] constexpr auto forward_like(U &&u) noexcept -> decltype(auto) {
     constexpr auto t_is_const = std::is_const_v<std::remove_reference_t<T>>;
@@ -113,7 +112,7 @@ template <typename T, typename U>
         if constexpr (t_is_const) {
             return std::as_const(u);
         } else {
-            return (u);
+            return static_cast<U &>(u); // NOLINT(readability-redundant-casting)
         }
     } else {
         if constexpr (t_is_const) {
@@ -123,11 +122,9 @@ template <typename T, typename U>
         }
     }
 }
-#else
-using std::forward_like;
-#endif
+
 template <typename T, typename U>
-using forward_like_t = decltype(forward_like<T>(std::declval<U>()));
+using forward_like_t = decltype(stdx::forward_like<T>(std::declval<U>()));
 
 template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
 [[nodiscard]] constexpr auto as_unsigned(T t) {
