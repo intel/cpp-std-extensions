@@ -1,7 +1,5 @@
 #pragma once
 
-#if __cplusplus >= 202002L
-
 #include <stdx/ct_conversions.hpp>
 #include <stdx/tuple.hpp>
 #include <stdx/type_traits.hpp>
@@ -446,5 +444,3 @@ template <tuplelike Tuple> [[nodiscard]] constexpr auto gather(Tuple &&t) {
 }
 } // namespace v1
 } // namespace stdx
-
-#endif

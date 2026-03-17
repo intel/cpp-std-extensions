@@ -1,7 +1,5 @@
 #pragma once
 
-#if __cplusplus >= 202002L
-
 #include <stdx/compiler.hpp>
 #include <stdx/ct_format.hpp>
 #include <stdx/ct_string.hpp>
@@ -50,6 +48,4 @@ template <bool B> constexpr auto ct_check = ct_check_t<B>{};
         stdx::detail::ct_check<B>.template emit<S>();                          \
         return B;                                                              \
     }.template operator()<cond>()
-#endif
-
 #endif

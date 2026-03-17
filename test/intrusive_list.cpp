@@ -12,9 +12,7 @@ struct int_node {
     int_node *prev{};
     int_node *next{};
 };
-#if __cpp_concepts >= 201907L
 static_assert(stdx::double_linkable<int_node>);
-#endif
 
 struct double_link_node {
     double_link_node *prev{};
@@ -27,13 +25,11 @@ struct bad_double_link_node {
 };
 } // namespace
 
-#if __cpp_concepts >= 201907L
 TEST_CASE("double_linkable", "[intrusive_list]") {
     STATIC_REQUIRE(not stdx::double_linkable<int>);
     STATIC_REQUIRE(not stdx::double_linkable<bad_double_link_node>);
     STATIC_REQUIRE(stdx::double_linkable<double_link_node>);
 }
-#endif
 
 TEST_CASE("push_back, pop_front", "[intrusive_list]") {
     stdx::intrusive_list<int_node> list{};
@@ -352,32 +348,19 @@ TEST_CASE("checked operation clears pointers on clear", "[intrusive_list]") {
 }
 
 namespace {
-#if __cplusplus >= 202002L
 int compile_time_calls{};
-#else
-int runtime_calls{};
-#endif
 
 struct injected_handler {
-#if __cplusplus >= 202002L
     template <stdx::ct_string Why, typename... Ts>
     static auto panic(Ts &&...) noexcept -> void {
         STATIC_REQUIRE(std::string_view{Why} == "bad list node!");
         ++compile_time_calls;
     }
-#else
-    template <typename Why, typename... Ts>
-    static auto panic(Why why, Ts &&...) noexcept -> void {
-        CHECK(std::string_view{why} == "bad list node!");
-        ++runtime_calls;
-    }
-#endif
 };
 } // namespace
 
 template <> inline auto stdx::panic_handler<> = injected_handler{};
 
-#if __cplusplus >= 202002L
 TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
     stdx::intrusive_list<int_node> list{};
     int_node n{5};
@@ -393,23 +376,6 @@ TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
     list.push_front(&n);
     CHECK(compile_time_calls == 1);
 }
-#else
-TEST_CASE("checked panic when pushing populated node", "[intrusive_list]") {
-    stdx::intrusive_list<int_node> list{};
-    int_node n{5};
-
-    n.prev = &n;
-    runtime_calls = 0;
-    list.push_back(&n);
-    CHECK(runtime_calls == 1);
-    list.pop_back();
-
-    n.prev = &n;
-    runtime_calls = 0;
-    list.push_front(&n);
-    CHECK(runtime_calls == 1);
-}
-#endif
 
 TEST_CASE("unchecked operation doesn't clear pointers", "[intrusive_list]") {
     stdx::intrusive_list<int_node, stdx::node_policy::unchecked> list{};

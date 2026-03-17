@@ -1,7 +1,5 @@
 #pragma once
 
-#if __cplusplus >= 202002L
-
 #include <stdx/compiler.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/utility.hpp>
@@ -189,5 +187,3 @@ template <ct_string S> CONSTEVAL_UDL auto operator""_ctst() {
 } // namespace literals
 } // namespace v1
 } // namespace stdx
-
-#endif

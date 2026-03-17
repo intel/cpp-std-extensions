@@ -1,7 +1,5 @@
 #pragma once
 
-#if __cplusplus >= 202002L
-
 #include <stdx/compiler.hpp>
 #include <stdx/ct_string.hpp>
 #include <stdx/type_traits.hpp>
@@ -109,5 +107,3 @@ constexpr auto query(Q q, [[maybe_unused]] Default &&d) -> decltype(auto) {
 
 } // namespace v1
 } // namespace stdx
-
-#endif

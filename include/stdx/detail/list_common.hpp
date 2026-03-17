@@ -10,7 +10,6 @@
 namespace stdx {
 inline namespace v1 {
 
-#if __cpp_concepts >= 201907L
 namespace detail {
 template <typename T>
 concept base_single_linkable = requires(T node) {
@@ -36,13 +35,6 @@ concept double_linkable = not complete<T> or requires(T *node) {
     requires detail::base_double_linkable<
         std::remove_cvref_t<decltype(node->prev)>>;
 };
-
-#define STDX_SINGLE_LINKABLE single_linkable
-#define STDX_DOUBLE_LINKABLE double_linkable
-#else
-#define STDX_SINGLE_LINKABLE typename
-#define STDX_DOUBLE_LINKABLE typename
-#endif
 
 namespace detail::detect {
 template <typename T, typename = void> constexpr auto has_prev_pointer = false;

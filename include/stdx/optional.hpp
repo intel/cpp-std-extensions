@@ -269,14 +269,6 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
         return lhs.val == rhs.val;
     }
 
-#if __cpp_impl_three_way_comparison < 201907L
-    [[nodiscard]] friend constexpr auto operator!=(optional const &lhs,
-                                                   optional const &rhs)
-        -> bool {
-        return not(lhs == rhs);
-    }
-#endif
-
     [[nodiscard]] friend constexpr auto operator<(optional const &lhs,
                                                   optional const &rhs) -> bool {
         return lhs.has_value() and rhs.has_value()

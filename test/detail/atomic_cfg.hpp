@@ -15,9 +15,7 @@ template <typename T> struct atomic::atomic_type<T *> {
     using type = std::uintptr_t;
 };
 
-#if __cplusplus >= 202002L
 template <typename T>
     requires(std::is_enum_v<T>)
 struct atomic::atomic_type<T> : atomic::atomic_type<std::underlying_type_t<T>> {
 };
-#endif

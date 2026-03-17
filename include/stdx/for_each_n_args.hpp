@@ -1,16 +1,7 @@
 #pragma once
 
 #include <stdx/function_traits.hpp>
-
-#if __cplusplus >= 202002L
 #include <stdx/tuple.hpp>
-#define TUPLE_T stdx::tuple
-#define TUPLE_GET stdx::get
-#else
-#include <tuple>
-#define TUPLE_T std::tuple
-#define TUPLE_GET std::get
-#endif
 
 #include <cstddef>
 #include <functional>
@@ -32,7 +23,7 @@ struct for_each_n_args<std::index_sequence<Rows...>,
   private:
     template <std::size_t RowIndex, typename F, typename T>
     static auto exec(F &&f, T &&t) -> void {
-        std::invoke(f, TUPLE_GET<RowIndex + Columns>(std::forward<T>(t))...);
+        std::invoke(f, get<RowIndex + Columns>(std::forward<T>(t))...);
     }
 };
 } // namespace detail
@@ -50,7 +41,7 @@ void for_each_n_args(F &&f, Args &&...args) {
                   "for_each_n_args: number of args must be a multiple of the "
                   "given N (or function arity)");
 
-    using tuple_t = TUPLE_T<Args &&...>;
+    using tuple_t = tuple<Args &&...>;
     detail::for_each_n_args<
         std::make_index_sequence<sizeof...(Args) / batch_size>,
         std::make_index_sequence<batch_size>>::apply(std::forward<F>(f),
@@ -59,6 +50,3 @@ void for_each_n_args(F &&f, Args &&...args) {
 }
 } // namespace v1
 } // namespace stdx
-
-#undef TUPLE_T
-#undef TUPLE_GET
