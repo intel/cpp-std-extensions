@@ -7,6 +7,7 @@
 #include <catch2/catch_template_test_macros.hpp>
 #include <catch2/catch_test_macros.hpp>
 
+#include <array>
 #include <compare>
 #include <type_traits>
 #include <utility>
@@ -42,6 +43,29 @@ TEST_CASE("multi element tuple", "[tuple]") {
     STATIC_CHECK(std::is_same_v<T, stdx::tuple<int, float>>);
     STATIC_CHECK(stdx::tuple_size_v<T> == 2);
     STATIC_CHECK(T::size() == 2);
+}
+
+TEST_CASE("tuple is tuplelike", "[tuple]") {
+    auto t = stdx::tuple{1, 2, 3};
+    STATIC_CHECK(stdx::tuplelike<decltype(t)>);
+    STATIC_CHECK(stdx::tuplelike<stdx::tuple<>>);
+}
+
+TEST_CASE("tuple has tuple protocol", "[tuple]") {
+    auto t = stdx::tuple{1, 2, 3};
+    STATIC_CHECK(stdx::has_tuple_protocol<decltype(t)>);
+    STATIC_CHECK(stdx::has_tuple_protocol<stdx::tuple<>>);
+}
+
+TEST_CASE("std::array has tuple protocol", "[tuple_algorithms]") {
+    auto t = std::array{1, 2, 3};
+    STATIC_CHECK(stdx::has_tuple_protocol<decltype(t)>);
+    STATIC_CHECK(stdx::has_tuple_protocol<std::array<int, 0>>);
+}
+
+TEST_CASE("std::pair has tuple protocol", "[tuple_algorithms]") {
+    auto t = std::pair{1, 2};
+    STATIC_CHECK(stdx::has_tuple_protocol<decltype(t)>);
 }
 
 namespace {

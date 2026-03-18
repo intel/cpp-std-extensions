@@ -17,6 +17,16 @@ template <typename Key, typename Value> struct map_entry {
 template <typename T> using key_for = typename T::key_t;
 } // namespace
 
+TEST_CASE("indexed_tuple is tuplelike", "[tuple]") {
+    auto t = stdx::indexed_tuple{1, 2, 3};
+    STATIC_CHECK(stdx::tuplelike<decltype(t)>);
+}
+
+TEST_CASE("indexed_tuple has tuple protocol", "[tuple]") {
+    auto t = stdx::indexed_tuple{1, 2, 3};
+    STATIC_CHECK(stdx::has_tuple_protocol<decltype(t)>);
+}
+
 TEST_CASE("make_indexed_tuple", "[indexed_tuple]") {
     STATIC_REQUIRE(stdx::make_indexed_tuple<>() == stdx::indexed_tuple{});
     STATIC_REQUIRE(stdx::make_indexed_tuple<>(1, 2, 3) ==
