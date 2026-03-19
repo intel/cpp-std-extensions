@@ -14,7 +14,29 @@
 
 namespace stdx {
 inline namespace v1 {
-template <typename F, tuplelike... Ts> constexpr auto apply(F &&f, Ts &&...ts) {
+namespace detail {
+template <has_tuple_protocol T>
+[[nodiscard]] constexpr auto fill_inner_indices([[maybe_unused]] index_pair *p)
+    -> index_pair * {
+    return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+        ((p++->inner = Is), ...);
+        return p;
+    }(std::make_index_sequence<tuple_size_v<T>>{});
+}
+
+template <has_tuple_protocol T>
+[[nodiscard]] constexpr auto fill_outer_indices([[maybe_unused]] index_pair *p,
+                                                [[maybe_unused]] std::size_t n)
+    -> index_pair * {
+    return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
+        ((p++->outer = (static_cast<void>(Is), n)), ...);
+        return p;
+    }(std::make_index_sequence<tuple_size_v<T>>{});
+}
+} // namespace detail
+
+template <typename F, has_tuple_protocol... Ts>
+constexpr auto apply(F &&f, Ts &&...ts) {
     constexpr auto total_num_elements =
         (std::size_t{} + ... + stdx::tuple_size_v<std::remove_cvref_t<Ts>>);
 
@@ -22,19 +44,19 @@ template <typename F, tuplelike... Ts> constexpr auto apply(F &&f, Ts &&...ts) {
         [&]() -> std::array<detail::index_pair, total_num_elements> {
         std::array<detail::index_pair, total_num_elements> indices{};
         [[maybe_unused]] auto p = indices.data();
-        ((p = std::remove_cvref_t<Ts>::fill_inner_indices(p)), ...);
+        ((p = detail::fill_inner_indices<std::remove_cvref_t<Ts>>(p)), ...);
         [[maybe_unused]] auto q = indices.data();
         [[maybe_unused]] std::size_t n{};
-        ((q = std::remove_cvref_t<Ts>::fill_outer_indices(q, n++)), ...);
+        ((q = detail::fill_outer_indices<std::remove_cvref_t<Ts>>(q, n++)),
+         ...);
         return indices;
     }();
 
     [[maybe_unused]] auto outer_tuple =
         stdx::tuple<Ts &&...>{std::forward<Ts>(ts)...};
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return std::forward<F>(f)(
-            std::move(outer_tuple)[index<element_indices[Is].outer>]
-                                  [index<element_indices[Is].inner>]...);
+        return std::forward<F>(f)(get<element_indices[Is].inner>(
+            get<element_indices[Is].outer>(std::move(outer_tuple)))...);
     }(std::make_index_sequence<total_num_elements>{});
 }
 
@@ -51,10 +73,11 @@ template <tuplelike... Ts> [[nodiscard]] constexpr auto tuple_cat(Ts &&...ts) {
             [&]() -> std::array<detail::index_pair, total_num_elements> {
             std::array<detail::index_pair, total_num_elements> indices{};
             auto p = indices.data();
-            ((p = std::remove_cvref_t<Ts>::fill_inner_indices(p)), ...);
+            ((p = detail::fill_inner_indices<std::remove_cvref_t<Ts>>(p)), ...);
             auto q = indices.data();
             std::size_t n{};
-            ((q = std::remove_cvref_t<Ts>::fill_outer_indices(q, n++)), ...);
+            ((q = detail::fill_outer_indices<std::remove_cvref_t<Ts>>(q, n++)),
+             ...);
             return indices;
         }();
 

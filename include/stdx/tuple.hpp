@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/type_traits.hpp>
 #include <stdx/udls.hpp>
 #include <stdx/utility.hpp>
 
@@ -335,18 +336,6 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
     constexpr static auto size =
         std::integral_constant<std::size_t, sizeof...(Ts)>{};
 
-    [[nodiscard]] constexpr static auto fill_inner_indices(index_pair *p)
-        -> index_pair * {
-        ((p++->inner = Is), ...);
-        return p;
-    }
-    [[nodiscard]] constexpr static auto
-    fill_outer_indices(index_pair *p, [[maybe_unused]] std::size_t n)
-        -> index_pair * {
-        ((p++->outer = (static_cast<void>(Is), n)), ...);
-        return p;
-    }
-
   private:
     template <typename Funcs, typename... Us>
         requires(... and std::equality_comparable_with<Ts, Us>)
@@ -407,17 +396,55 @@ tuple_impl(Ts...)
 template <typename T> constexpr auto tuple_size_v = T::size();
 template <typename T, std::size_t N>
 constexpr auto tuple_size_v<std::array<T, N>> = N;
+template <typename T, typename U>
+constexpr auto tuple_size_v<std::pair<T, U>> = std::size_t{2};
 template <typename T, T N>
 constexpr auto tuple_size_v<make_integer_sequence<T, N>> = std::size_t{N};
-
-template <std::size_t I, typename T>
-using tuple_element_t = typename T::template element_t<I>;
 
 template <typename T>
 concept tuple_comparable = requires { typename T::common_tuple_comparable; };
 
 template <typename T>
 concept tuplelike = requires { typename remove_cvref_t<T>::is_tuple; };
+
+template <std::size_t I, typename T> struct tuple_element;
+
+template <std::size_t I, tuplelike T> struct tuple_element<I, T> {
+    using type = typename T::template element_t<I>;
+};
+
+template <std::size_t I, typename T, std::size_t N>
+struct tuple_element<I, std::array<T, N>> {
+    using type = T;
+};
+
+template <std::size_t I, typename T, typename U>
+struct tuple_element<I, std::pair<T, U>> {
+    using type = nth_t<I, T, U>;
+};
+
+template <std::size_t I, typename T>
+using tuple_element_t = typename tuple_element<I, T>::type;
+
+namespace detail {
+template <typename T>
+concept has_vacuous_tuple_protocol = requires {
+    {
+        tuple_size_v<std::remove_cvref_t<T>>
+    } -> std::same_as<std::size_t const &>;
+};
+template <typename T>
+concept is_vacuous_tuple = tuple_size_v<std::remove_cvref_t<T>> == 0;
+} // namespace detail
+
+template <typename T>
+concept has_tuple_protocol =
+    detail::has_vacuous_tuple_protocol<T> and
+    (detail::is_vacuous_tuple<T> or requires(T &t) {
+        {
+            get<0>(t)
+        } -> std::same_as<tuple_element_t<0, std::remove_cvref_t<T>> &>;
+    });
 
 template <typename... Ts>
 class tuple : public detail::tuple_impl<std::index_sequence_for<Ts...>,
@@ -524,6 +551,5 @@ class one_of : public detail::tuple_impl<std::index_sequence_for<Ts...>,
     }
 };
 template <typename... Ts> one_of(Ts...) -> one_of<Ts...>;
-
 } // namespace v1
 } // namespace stdx

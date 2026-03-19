@@ -116,6 +116,16 @@ TEST_CASE("apply preserves argument order", "[tuple_algorithms]") {
     CHECK(called == 1);
 }
 
+TEST_CASE("apply works on std::array", "[tuple_algorithms]") {
+    STATIC_REQUIRE(stdx::apply([](auto... xs) { return (0 + ... + xs); },
+                               std::array{1, 2, 3, 4}) == 10);
+}
+
+TEST_CASE("apply works on std::pair", "[tuple_algorithms]") {
+    STATIC_REQUIRE(stdx::apply([](auto... xs) { return (0 + ... + xs); },
+                               std::pair{1, 2}) == 3);
+}
+
 TEST_CASE("variadic apply", "[tuple_algorithms]") {
     STATIC_REQUIRE(stdx::apply([](auto... xs) { return (0 + ... + xs); }) == 0);
     STATIC_REQUIRE(stdx::apply([](auto... xs) { return (0 + ... + xs); },
@@ -159,6 +169,24 @@ TEST_CASE("variadic apply preserves argument order", "[tuple_algorithms]") {
         },
         stdx::tuple{1, 2, 3}, stdx::tuple{4, 5, 6});
     CHECK(called == 1);
+}
+
+TEST_CASE("variadic apply works on std::array", "[tuple_algorithms]") {
+    STATIC_REQUIRE(stdx::apply([](auto... xs) { return (0 + ... + xs); },
+                               std::array{1, 2, 3, 4},
+                               std::array{1, 2, 3, 4, 5}) == 25);
+}
+
+TEST_CASE("variadic apply works on std::pair", "[tuple_algorithms]") {
+    STATIC_REQUIRE(stdx::apply([](auto... xs) { return (0 + ... + xs); },
+                               std::pair{1, 2}, std::pair{3, 4}) == 10);
+}
+
+TEST_CASE("variadic apply works on heterogeneous arguments",
+          "[tuple_algorithms]") {
+    STATIC_REQUIRE(stdx::apply([](auto... xs) { return (0 + ... + xs); },
+                               std::array{1, 2}, std::pair{3, 4},
+                               stdx::tuple{5, 6}) == 21);
 }
 
 TEST_CASE("join", "[tuple_algorithms]") {
