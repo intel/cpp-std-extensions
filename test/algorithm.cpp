@@ -1,4 +1,5 @@
 #include <stdx/algorithm.hpp>
+#include <stdx/iterator.hpp>
 #include <stdx/tuple_algorithms.hpp>
 #include <stdx/tuple_destructure.hpp>
 
@@ -59,6 +60,19 @@ TEST_CASE("n-ary for_each", "[algorithm]") {
     CHECK(i1 == std::cend(input));
     CHECK(i2 == std::cend(input));
     CHECK(output == std::array{3, 6, 9, 12});
+}
+
+TEST_CASE("for_each with counting_iterator", "[algorithm]") {
+    auto const input = std::array{1, 2, 3, 4};
+    auto output = decltype(input){};
+    auto [op, i] = stdx::for_each(
+        std::cbegin(input), std::cend(input),
+        [it = std::begin(output)](auto... ns) mutable {
+            *it++ = (0 + ... + ns);
+        },
+        stdx::counting_iterator{1});
+    CHECK(i == stdx::counting_iterator{5});
+    CHECK(output == std::array{2, 4, 6, 8});
 }
 
 TEST_CASE("unary for_each_n", "[algorithm]") {

@@ -23,3 +23,27 @@ constexpr auto c = stdx::ct_capacity(a); // std::size_t{4}
 * `stdx::cx_vector`
 
 `ct_capacity_v` is a corresponding variable template of type `std::size_t`.
+
+=== `counting_iterator`
+
+A `counting_iterator` is a random access iterator that counts up indefinitely
+from some integral starting value. It is useful for enumerating sequences:
+
+[source,cpp]
+----
+stdx::for_each(
+    std::cbegin(input), std::cend(input),
+    [](auto const &elem, auto idx) {
+      // do something with element and index
+    },
+    stdx::counting_iterator{});
+----
+
+By default, it produces `int` values starting from `0`.
+It also can be given a starting value, and it will respect the type:
+
+[source,cpp]
+----
+auto i1 = stdx::counting_iterator{17};  // 17, 18, 19...
+auto i2 = stdx::counting_iterator{'A'}; // A, B, C...
+----

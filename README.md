@@ -19,6 +19,6 @@ Compiler support:
 
 | Branch | GCC versions | Clang versions |
 | --- | --- | --- |
-| [main](https://github.com/intel/cpp-std-extensions/tree/main) | 12 thru 14 | 18 thru 21 |
+| [main](https://github.com/intel/cpp-std-extensions/tree/main) | 12 thru 14 | 18 thru 22 |
 | [cpp20](https://github.com/intel/cpp-std-extensions/tree/cpp20) | 12 thru 14 | 14 thru 21 |
 
