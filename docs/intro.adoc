@@ -16,20 +16,15 @@
 
 The following compilers are supported:
 
-* clang 14
-* clang 15
-* clang 16
-* clang 17
 * clang 18
 * clang 19
 * clang 20
-* clang 21
+* clang 22
 * gcc 12
 * gcc 13
 * gcc 14
 
-In general, `stdx` supports the C\\++17 standard; however some functionality is
-available only in C++20 and later.
+In general, `stdx` targets the C++23 standard.
 
 === Dependencies
 
