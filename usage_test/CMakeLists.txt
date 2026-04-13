@@ -11,7 +11,10 @@ if(NOT DEFINED CMAKE_CXX_STANDARD)
 endif()
 
 include(${CMAKE_CURRENT_LIST_DIR}/../cmake/get_cpm.cmake)
-cpmaddpackage(NAME stdx SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/.." GIT_TAG HEAD)
+cpmaddpackage("gh:intel/cicd-repo-infrastructure#dev")
+
+add_versioned_package(NAME stdx SOURCE_DIR "${CMAKE_CURRENT_LIST_DIR}/.."
+                      GIT_TAG HEAD)
 
 add_executable(app main.cpp)
 target_link_libraries(app PRIVATE stdx)
