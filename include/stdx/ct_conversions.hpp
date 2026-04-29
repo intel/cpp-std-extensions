@@ -9,7 +9,7 @@ inline namespace v1 {
 template <typename...> constexpr bool always_false_v = false;
 
 template <typename Tag>
-CONSTEVAL static auto type_as_string() -> std::string_view {
+consteval static auto type_as_string() -> std::string_view {
 #ifdef __clang__
     constexpr std::string_view function_name = __PRETTY_FUNCTION__;
     constexpr auto rhs = function_name.size() - 2;
@@ -26,14 +26,14 @@ CONSTEVAL static auto type_as_string() -> std::string_view {
 }
 
 template <typename T>
-CONSTEVAL static auto template_base() -> std::string_view {
+consteval static auto template_base() -> std::string_view {
     constexpr auto t = stdx::type_as_string<T>();
     constexpr auto rhs = t.find('<');
     return t.substr(0, rhs);
 }
 
 template <auto Value>
-CONSTEVAL static auto enum_as_string() -> std::basic_string_view<char> {
+consteval static auto enum_as_string() -> std::basic_string_view<char> {
 #ifdef __clang__
     constexpr std::string_view value_string = __PRETTY_FUNCTION__;
 #elif defined(__GNUC__) || defined(__GNUG__)

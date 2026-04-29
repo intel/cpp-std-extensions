@@ -403,7 +403,7 @@ template <typename T, std::size_t N> struct bitmask_subtract<std::array<T, N>> {
 
 template <typename T, std::size_t Msb = detail::num_digits_v<T> - 1,
           std::size_t Lsb = 0>
-[[nodiscard]] CONSTEVAL auto bit_mask() noexcept -> T {
+[[nodiscard]] consteval auto bit_mask() noexcept -> T {
     static_assert(Msb < detail::num_digits_v<T>,
                   "bit_mask requested exceeds the range of the type");
     static_assert(Msb >= Lsb, "bit_mask range is invalid");
@@ -422,7 +422,7 @@ template <typename T> constexpr auto bit_size() -> std::size_t {
     return sizeof(T) * CHAR_BIT;
 }
 
-template <std::size_t N> CONSTEVAL auto smallest_uint() {
+template <std::size_t N> consteval auto smallest_uint() {
     if constexpr (N <= std::numeric_limits<std::uint8_t>::digits) {
         return std::uint8_t{};
     } else if constexpr (N <= std::numeric_limits<std::uint16_t>::digits) {

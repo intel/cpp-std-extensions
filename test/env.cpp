@@ -8,13 +8,13 @@ namespace {
 [[maybe_unused]] constexpr inline struct custom_t {
     template <typename T>
         requires true // more constrained
-    [[nodiscard]] CONSTEVAL auto operator()(T &&t) const
+    [[nodiscard]] consteval auto operator()(T &&t) const
         noexcept(noexcept(std::forward<T>(t).query(std::declval<custom_t>())))
             -> decltype(std::forward<T>(t).query(*this)) {
         return std::forward<T>(t).query(*this);
     }
 
-    [[nodiscard]] CONSTEVAL auto operator()(auto &&) const { return 42; }
+    [[nodiscard]] consteval auto operator()(auto &&) const { return 42; }
 } custom;
 } // namespace
 
@@ -29,7 +29,7 @@ TEST_CASE("lookup query with default (free function)", "[env]") {
 namespace {
 [[maybe_unused]] constexpr inline struct custom_no_default_t {
     template <typename T>
-    [[nodiscard]] CONSTEVAL auto operator()(T &&t) const
+    [[nodiscard]] consteval auto operator()(T &&t) const
         noexcept(noexcept(std::forward<T>(t).query(std::declval<custom_t>())))
             -> decltype(std::forward<T>(t).query(*this)) {
         return std::forward<T>(t).query(*this);

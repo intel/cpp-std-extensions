@@ -31,7 +31,7 @@ constexpr static auto integral_value_v =
     is_decimal_digit_v<C> ? C - '0' : force_lower_case<C> - 'a' + 10;
 
 template <auto Base, char C, typename Sum>
-CONSTEVAL auto maybe_add_digit(Sum s) {
+consteval auto maybe_add_digit(Sum s) {
     if constexpr (not is_digit_sep_v<C>) {
         s *= Base;
         s += integral_value_v<C>;
@@ -40,7 +40,7 @@ CONSTEVAL auto maybe_add_digit(Sum s) {
 }
 
 template <auto Base, char... Cs> struct raw_parser {
-    template <typename T> CONSTEVAL static auto parse() {
+    template <typename T> consteval static auto parse() {
         using U = decltype(stdx::to_underlying(std::declval<T>()));
         auto x = U{};
         ((x = maybe_add_digit<Base, Cs>(x)), ...);
@@ -69,7 +69,7 @@ template <char... Cs>
 struct parser<'0', 'B', Cs...> : parser<'0', 'b', Cs...> {};
 } // namespace detail
 
-template <typename T, char... Chars> CONSTEVAL auto parse_literal() -> T {
+template <typename T, char... Chars> consteval auto parse_literal() -> T {
     using parser_t = detail::parser<Chars...>;
     return parser_t::template parse<T>();
 }

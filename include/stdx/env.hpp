@@ -12,7 +12,7 @@ namespace _env {
 template <auto Query, auto Value> struct ct_prop {
     using query_t = std::remove_cvref_t<decltype(Query)>;
 
-    [[nodiscard]] CONSTEVAL static auto query(query_t) noexcept {
+    [[nodiscard]] consteval static auto query(query_t) noexcept {
         return Value;
     }
 };
@@ -31,7 +31,7 @@ template <typename Q> struct has_query {
 
 template <typename... Envs> struct env {
     template <_env::valid_query_over<Envs...> Q>
-    [[nodiscard]] CONSTEVAL static auto query(Q) noexcept {
+    [[nodiscard]] consteval static auto query(Q) noexcept {
         using I = boost::mp11::mp_find_if_q<boost::mp11::mp_list<Envs...>,
                                             _env::has_query<Q>>;
         using E = nth_t<I::value, Envs...>;
@@ -45,7 +45,7 @@ concept envlike = is_specialization_of_v<T, env>;
 namespace _env {
 template <typename T> struct autowrap {
     // NOLINTNEXTLINE(google-explicit-constructor)
-    CONSTEVAL autowrap(T t) : value(t) {}
+    consteval autowrap(T t) : value(t) {}
     T value;
 };
 
@@ -54,7 +54,7 @@ template <std::size_t N> using str_lit_t = char const (&)[N];
 
 template <std::size_t N> struct autowrap<str_lit_t<N>> {
     // NOLINTNEXTLINE(google-explicit-constructor)
-    CONSTEVAL autowrap(str_lit_t<N> str) : value(str) {}
+    consteval autowrap(str_lit_t<N> str) : value(str) {}
     stdx::ct_string<N> value;
 };
 

@@ -2,19 +2,11 @@
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
-#ifndef CONSTEVAL
-#ifndef __cpp_consteval
-#define CONSTEVAL constexpr
-#else
-#define CONSTEVAL consteval
-#endif
-#endif
-
 #ifndef CONSTEVAL_UDL
 #ifdef __clang__
 #define CONSTEVAL_UDL constexpr
 #else
-#define CONSTEVAL_UDL CONSTEVAL
+#define CONSTEVAL_UDL consteval
 #endif
 #endif
 

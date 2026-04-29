@@ -36,7 +36,7 @@ struct named_arg {
     constexpr static std::integral_constant<bool, (End < Begin)> is_runtime{};
 
     template <int StringOffset, int ArgOffset>
-    CONSTEVAL static auto apply_offset() {
+    consteval static auto apply_offset() {
         if constexpr (is_runtime) {
             return named_arg<Name, T, Begin + ArgOffset, End + ArgOffset>{};
         } else {
@@ -65,7 +65,7 @@ using apply_offset =
 
 template <typename Str, typename Args, typename NamedArgs>
 struct format_result {
-    CONSTEVAL static auto ct_string_convertible()
+    consteval static auto ct_string_convertible()
         -> std::bool_constant<Args::size() == 0>;
 
     [[no_unique_address]] Str str;
@@ -92,7 +92,7 @@ struct format_result {
 template <typename Str, typename Args, typename NamedArgs>
     requires(Args::size() == 0 and is_cx_value_v<Str>)
 struct format_result<Str, Args, NamedArgs> {
-    CONSTEVAL static auto ct_string_convertible() -> std::true_type;
+    consteval static auto ct_string_convertible() -> std::true_type;
 
     [[no_unique_address]] Str str;
     [[no_unique_address]] Args args{};
@@ -123,7 +123,7 @@ template <ct_string S> CONSTEVAL_UDL auto operator""_fmt_res() {
 } // namespace literals
 
 namespace detail {
-template <typename It> CONSTEVAL auto find_spec(It first, It last) -> It {
+template <typename It> consteval auto find_spec(It first, It last) -> It {
     for (auto spec_start = std::find(first, last, '{'); spec_start != last;
          spec_start = std::find(spec_start, last, '{')) {
         if (spec_start + 1 != last) {
@@ -137,7 +137,7 @@ template <typename It> CONSTEVAL auto find_spec(It first, It last) -> It {
     return last;
 }
 
-CONSTEVAL auto count_specifiers(std::string_view fmt) -> std::size_t {
+consteval auto count_specifiers(std::string_view fmt) -> std::size_t {
     auto count = std::size_t{};
     for (auto spec_start = find_spec(fmt.begin(), fmt.end());
          spec_start != fmt.end();
@@ -157,7 +157,7 @@ struct split_spec {
 };
 
 template <std::size_t N>
-CONSTEVAL auto split_specifiers(std::string_view fmt)
+consteval auto split_specifiers(std::string_view fmt)
     -> std::array<split_spec, N> {
     auto splits = std::array<split_spec, N>{};
     auto count = std::size_t{};
@@ -182,7 +182,7 @@ CONSTEVAL auto split_specifiers(std::string_view fmt)
     return splits;
 }
 
-template <ct_string S, std::size_t Start> CONSTEVAL auto extract_format1_str() {
+template <ct_string S, std::size_t Start> consteval auto extract_format1_str() {
     constexpr auto name_start = Start + 1;
     constexpr auto it = [] {
         for (auto i = S.value.cbegin() + name_start; i != S.value.cend(); ++i) {
@@ -231,7 +231,7 @@ concept fmt_cx_value =
     is_cx_value_v<T> or requires(T t) { ct_string_from_type(t); };
 
 template <typename T, T V>
-CONSTEVAL auto arg_value(std::integral_constant<T, V>) {
+consteval auto arg_value(std::integral_constant<T, V>) {
     if constexpr (std::is_enum_v<T>) {
         return enum_as_string<V>();
     } else {
@@ -239,13 +239,13 @@ CONSTEVAL auto arg_value(std::integral_constant<T, V>) {
     }
 }
 
-template <typename T> CONSTEVAL auto arg_value(type_identity<T>) {
+template <typename T> consteval auto arg_value(type_identity<T>) {
     return type_as_string<T>();
 }
 
-template <ct_string S> CONSTEVAL auto arg_value(cts_t<S>) { return S; }
+template <ct_string S> consteval auto arg_value(cts_t<S>) { return S; }
 
-CONSTEVAL auto arg_value(fmt_cx_value auto a) {
+consteval auto arg_value(fmt_cx_value auto a) {
     if constexpr (is_specialization_of_v<decltype(a), format_result>) {
         return a;
     } else if constexpr (requires { arg_value(a()); }) {
@@ -259,12 +259,12 @@ CONSTEVAL auto arg_value(fmt_cx_value auto a) {
     }
 }
 
-template <typename T> CONSTEVAL auto arg_type(T) -> T;
+template <typename T> consteval auto arg_type(T) -> T;
 
 template <typename T, T V>
-CONSTEVAL auto arg_type(std::integral_constant<T, V>) -> T;
+consteval auto arg_type(std::integral_constant<T, V>) -> T;
 
-CONSTEVAL auto arg_type(fmt_cx_value auto a) {
+consteval auto arg_type(fmt_cx_value auto a) {
     if constexpr (requires { ct_string_from_type(a); }) {
         return ct_string_from_type(a);
     } else {
@@ -301,11 +301,11 @@ constexpr auto operator+(format_result<Str1, Args1, NamedArgs1> r1,
 
 template <typename T, T...> struct null_output;
 
-template <std::size_t Sz> CONSTEVAL auto to_ct_string(std::string_view s) {
+template <std::size_t Sz> consteval auto to_ct_string(std::string_view s) {
     return ct_string<Sz + 1>{s.data(), s.size()};
 }
 
-CONSTEVAL auto convert_input(auto s) {
+consteval auto convert_input(auto s) {
     if constexpr (requires { ct_string_from_type(s); }) {
         return ct_string_from_type(s);
     } else {
@@ -315,7 +315,7 @@ CONSTEVAL auto convert_input(auto s) {
 
 template <ct_string S,
           template <typename T, T...> typename Output = detail::null_output>
-CONSTEVAL auto convert_output() {
+consteval auto convert_output() {
     if constexpr (same_as<Output<char>, null_output<char>>) {
         return cts_t<S>{};
     } else {
@@ -324,7 +324,7 @@ CONSTEVAL auto convert_output() {
 }
 
 template <std::size_t N>
-CONSTEVAL auto perform_format(auto s, auto const &v) -> ct_string<N + 1> {
+consteval auto perform_format(auto s, auto const &v) -> ct_string<N + 1> {
     ct_string<N + 1> cts{};
     fmt::format_to(cts.begin(), s, v);
     return cts;

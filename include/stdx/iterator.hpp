@@ -30,7 +30,7 @@ template <typename T, std::size_t N> constexpr auto ct_capacity_v<T[N]> = N;
 template <typename T> constexpr auto ct_capacity_v<T const> = ct_capacity_v<T>;
 
 template <typename T>
-CONSTEVAL auto ct_capacity([[maybe_unused]] T &&) -> std::size_t {
+consteval auto ct_capacity([[maybe_unused]] T &&) -> std::size_t {
     return ct_capacity_v<remove_cvref_t<T>>;
 }
 
