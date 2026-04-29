@@ -77,7 +77,7 @@
 #endif
 #endif
 
-#ifndef NRVO
+#ifndef STDX_NRVO
 #ifdef __clang__
 #define STDX_NRVO(x) std::move(x)
 #else
