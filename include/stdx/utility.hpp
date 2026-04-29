@@ -180,16 +180,16 @@ template <typename T, std::size_t N> struct udl_sized {
 };
 
 inline namespace literals {
-template <char... Chars> CONSTEVAL_UDL auto operator""_z8() {
+template <char... Chars> consteval auto operator""_z8() {
     return udl_sized<std::uint8_t, parse_literal<std::size_t, Chars...>()>{};
 }
-template <char... Chars> CONSTEVAL_UDL auto operator""_z16() {
+template <char... Chars> consteval auto operator""_z16() {
     return udl_sized<std::uint16_t, parse_literal<std::size_t, Chars...>()>{};
 }
-template <char... Chars> CONSTEVAL_UDL auto operator""_z32() {
+template <char... Chars> consteval auto operator""_z32() {
     return udl_sized<std::uint32_t, parse_literal<std::size_t, Chars...>()>{};
 }
-template <char... Chars> CONSTEVAL_UDL auto operator""_z64() {
+template <char... Chars> consteval auto operator""_z64() {
     return udl_sized<std::uint64_t, parse_literal<std::size_t, Chars...>()>{};
 }
 } // namespace literals

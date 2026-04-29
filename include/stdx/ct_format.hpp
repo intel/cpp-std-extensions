@@ -116,7 +116,7 @@ constexpr auto make_format_result(Str s, Args args = {}) {
 
 inline namespace literals {
 inline namespace ct_string_literals {
-template <ct_string S> CONSTEVAL_UDL auto operator""_fmt_res() {
+template <ct_string S> consteval auto operator""_fmt_res() {
     return make_format_result(cts_t<S>{});
 }
 } // namespace ct_string_literals

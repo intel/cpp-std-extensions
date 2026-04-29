@@ -2,14 +2,6 @@
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
-#ifndef CONSTEVAL_UDL
-#ifdef __clang__
-#define CONSTEVAL_UDL constexpr
-#else
-#define CONSTEVAL_UDL consteval
-#endif
-#endif
-
 #ifndef USING_ATTR_NS
 #ifdef __clang__
 #define USING_ATTR_NS using clang:

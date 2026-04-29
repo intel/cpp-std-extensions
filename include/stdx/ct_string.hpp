@@ -178,11 +178,9 @@ template <ct_string Value> constexpr auto is_ct_v<cts_t<Value>> = true;
 
 inline namespace literals {
 inline namespace ct_string_literals {
-template <ct_string S> CONSTEVAL_UDL auto operator""_cts() { return S; }
+template <ct_string S> consteval auto operator""_cts() { return S; }
 
-template <ct_string S> CONSTEVAL_UDL auto operator""_ctst() {
-    return cts_t<S>{};
-}
+template <ct_string S> consteval auto operator""_ctst() { return cts_t<S>{}; }
 } // namespace ct_string_literals
 } // namespace literals
 } // namespace v1
