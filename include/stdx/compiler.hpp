@@ -2,18 +2,6 @@
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
-#ifndef CONSTINIT
-#ifndef __cpp_constinit
-#ifdef __clang__
-#define CONSTINIT [[clang::require_constant_initialization]]
-#else
-#define CONSTINIT
-#endif
-#else
-#define CONSTINIT constinit
-#endif
-#endif
-
 #ifndef CONSTEVAL
 #ifndef __cpp_consteval
 #define CONSTEVAL constexpr

@@ -7,7 +7,6 @@ to compiler-specific attributes:
 
 * https://clang.llvm.org/docs/AttributeReference.html#always-inline-force-inline[`ALWAYS_INLINE`]
 * https://en.cppreference.com/w/cpp/language/consteval[`CONSTEVAL`]
-* https://en.cppreference.com/w/cpp/language/constinit[`CONSTINIT`]
 * https://clang.llvm.org/docs/AttributeReference.html#lifetimebound[`LIFETIMEBOUND`]
 * https://clang.llvm.org/docs/AttributeReference.html#musttail[`MUSTTAIL`]
 * https://clang.llvm.org/docs/AttributeReference.html#noinline[`NEVER_INLINE`]
