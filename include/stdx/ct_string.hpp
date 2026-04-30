@@ -25,10 +25,10 @@ concept format_convertible = requires(T t) {
 } // namespace detail
 
 template <std::size_t N> struct ct_string {
-    CONSTEVAL ct_string() = default;
+    consteval ct_string() = default;
 
     // NOLINTNEXTLINE(*-avoid-c-arrays, google-explicit-constructor)
-    CONSTEVAL explicit(false) ct_string(char const (&str)[N]) {
+    consteval explicit(false) ct_string(char const (&str)[N]) {
         for (auto i = std::size_t{}; i < N; ++i) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-*)
             value[i] = str[i];
@@ -37,16 +37,16 @@ template <std::size_t N> struct ct_string {
 
     template <detail::format_convertible T>
     // NOLINTNEXTLINE(google-explicit-constructor)
-    CONSTEVAL explicit(false) ct_string(T t) : ct_string(+t) {}
+    consteval explicit(false) ct_string(T t) : ct_string(+t) {}
 
-    CONSTEVAL explicit(true) ct_string(char const *str, std::size_t sz) {
+    consteval explicit(true) ct_string(char const *str, std::size_t sz) {
         for (auto i = std::size_t{}; i < sz; ++i) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-*)
             value[i] = str[i];
         }
     }
 
-    CONSTEVAL explicit(true) ct_string(std::string_view str)
+    consteval explicit(true) ct_string(std::string_view str)
         : ct_string{str.data(), str.size()} {}
 
     [[nodiscard]] constexpr auto begin() LIFETIMEBOUND { return value.begin(); }
@@ -86,12 +86,12 @@ template <std::size_t N, std::size_t M>
 }
 
 template <template <typename C, C...> typename T, char... Cs>
-[[nodiscard]] CONSTEVAL auto ct_string_from_type(T<char, Cs...>) {
+[[nodiscard]] consteval auto ct_string_from_type(T<char, Cs...>) {
     return ct_string<sizeof...(Cs) + 1U>{{Cs..., 0}};
 }
 
 template <ct_string S, template <typename C, C...> typename T>
-[[nodiscard]] CONSTEVAL auto ct_string_to_type() {
+[[nodiscard]] consteval auto ct_string_to_type() {
     return [&]<auto... Is>(std::index_sequence<Is...>) {
         return T<char, std::get<Is>(S.value)...>{};
     }(std::make_index_sequence<S.size()>{});
@@ -141,7 +141,7 @@ template <ct_string S> struct cts_t {
     using value_type = decltype(S);
     constexpr static auto value = S;
 
-    CONSTEVAL static auto ct_string_convertible() -> std::true_type;
+    consteval static auto ct_string_convertible() -> std::true_type;
     friend constexpr auto operator+(cts_t const &) { return value; }
     constexpr auto operator()() const noexcept { return value; }
     using cx_value_t [[maybe_unused]] = void;
@@ -172,17 +172,15 @@ namespace detail {
 template <std::size_t N> struct ct_helper<ct_string<N>>;
 } // namespace detail
 
-template <ct_string Value> CONSTEVAL auto ct() { return cts_t<Value>{}; }
+template <ct_string Value> consteval auto ct() { return cts_t<Value>{}; }
 
 template <ct_string Value> constexpr auto is_ct_v<cts_t<Value>> = true;
 
 inline namespace literals {
 inline namespace ct_string_literals {
-template <ct_string S> CONSTEVAL_UDL auto operator""_cts() { return S; }
+template <ct_string S> consteval auto operator""_cts() { return S; }
 
-template <ct_string S> CONSTEVAL_UDL auto operator""_ctst() {
-    return cts_t<S>{};
-}
+template <ct_string S> consteval auto operator""_ctst() { return cts_t<S>{}; }
 } // namespace ct_string_literals
 } // namespace literals
 } // namespace v1

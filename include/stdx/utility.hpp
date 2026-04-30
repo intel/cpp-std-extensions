@@ -180,16 +180,16 @@ template <typename T, std::size_t N> struct udl_sized {
 };
 
 inline namespace literals {
-template <char... Chars> CONSTEVAL_UDL auto operator""_z8() {
+template <char... Chars> consteval auto operator""_z8() {
     return udl_sized<std::uint8_t, parse_literal<std::size_t, Chars...>()>{};
 }
-template <char... Chars> CONSTEVAL_UDL auto operator""_z16() {
+template <char... Chars> consteval auto operator""_z16() {
     return udl_sized<std::uint16_t, parse_literal<std::size_t, Chars...>()>{};
 }
-template <char... Chars> CONSTEVAL_UDL auto operator""_z32() {
+template <char... Chars> consteval auto operator""_z32() {
     return udl_sized<std::uint32_t, parse_literal<std::size_t, Chars...>()>{};
 }
-template <char... Chars> CONSTEVAL_UDL auto operator""_z64() {
+template <char... Chars> consteval auto operator""_z64() {
     return udl_sized<std::uint64_t, parse_literal<std::size_t, Chars...>()>{};
 }
 } // namespace literals
@@ -259,7 +259,7 @@ constexpr auto is_aligned_with = [](auto v) -> bool {
 namespace detail {
 template <typename T> struct ct_helper {
     // NOLINTNEXTLINE(google-explicit-constructor)
-    CONSTEVAL ct_helper(auto t) : value(t) {}
+    consteval ct_helper(auto t) : value(t) {}
     T value;
 };
 
@@ -267,14 +267,14 @@ template <typename T> ct_helper(T) -> ct_helper<T>;
 template <typename T, T I>
 ct_helper(std::integral_constant<T, I>) -> ct_helper<T>;
 
-template <auto> CONSTEVAL auto cx_detect0() {}
-CONSTEVAL auto cx_detect1(auto) { return 0; }
+template <auto> consteval auto cx_detect0() {}
+consteval auto cx_detect1(auto) { return 0; }
 } // namespace detail
 
-template <detail::ct_helper Value> CONSTEVAL auto ct() {
+template <detail::ct_helper Value> consteval auto ct() {
     return std::integral_constant<decltype(Value.value), Value.value>{};
 }
-template <typename T> CONSTEVAL auto ct() { return type_identity<T>{}; }
+template <typename T> consteval auto ct() { return type_identity<T>{}; }
 
 template <typename> constexpr auto is_ct_v = false;
 template <typename T, T V>

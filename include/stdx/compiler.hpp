@@ -2,34 +2,6 @@
 
 // NOLINTBEGIN(cppcoreguidelines-macro-usage)
 
-#ifndef CONSTINIT
-#ifndef __cpp_constinit
-#ifdef __clang__
-#define CONSTINIT [[clang::require_constant_initialization]]
-#else
-#define CONSTINIT
-#endif
-#else
-#define CONSTINIT constinit
-#endif
-#endif
-
-#ifndef CONSTEVAL
-#ifndef __cpp_consteval
-#define CONSTEVAL constexpr
-#else
-#define CONSTEVAL consteval
-#endif
-#endif
-
-#ifndef CONSTEVAL_UDL
-#ifdef __clang__
-#define CONSTEVAL_UDL constexpr
-#else
-#define CONSTEVAL_UDL CONSTEVAL
-#endif
-#endif
-
 #ifndef USING_ATTR_NS
 #ifdef __clang__
 #define USING_ATTR_NS using clang:
@@ -89,7 +61,7 @@
 #endif
 #endif
 
-#ifndef NRVO
+#ifndef STDX_NRVO
 #ifdef __clang__
 #define STDX_NRVO(x) std::move(x)
 #else

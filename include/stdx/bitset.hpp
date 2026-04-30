@@ -102,7 +102,7 @@ class bitset {
     using iter_arg_t = conditional_t<std::is_enum_v<decltype(Size)>,
                                      decltype(Size), std::size_t>;
 
-    template <typename T> CONSTEVAL static auto admissible_enum() {
+    template <typename T> consteval static auto admissible_enum() {
         return not std::is_enum_v<T> or std::is_same_v<T, decltype(Size)>;
     }
 

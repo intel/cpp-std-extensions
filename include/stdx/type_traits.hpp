@@ -238,7 +238,7 @@ concept is_shrinkwrapped = requires { typename T::is_shrinkwrapped; };
 
 template <typename T,
           auto F = []()->auto (*)() -> shrinkwrap<T> { return nullptr; }>
-CONSTEVAL auto shrink() {
+consteval auto shrink() {
     return F;
 }
 
@@ -247,9 +247,9 @@ concept is_shrunk = requires(T const &t) {
     { t()() } -> is_shrinkwrapped;
 };
 
-template <typename T> CONSTEVAL auto maybe_expand() -> T;
+template <typename T> consteval auto maybe_expand() -> T;
 template <is_shrunk T>
-CONSTEVAL auto maybe_expand() -> typename decltype(T{}()())::type;
+consteval auto maybe_expand() -> typename decltype(T{}()())::type;
 
 template <typename T> constexpr auto maybe_expand(T &&t) -> decltype(auto) {
     return T(std::forward<T>(t));
@@ -269,18 +269,18 @@ constexpr auto maybe_expand(T &&) ->
 }
 } // namespace detail
 
-template <typename T> CONSTEVAL auto shrink() -> decltype(detail::shrink<T>()) {
+template <typename T> consteval auto shrink() -> decltype(detail::shrink<T>()) {
     static_assert(
         always_false_v<T>,
         "shrink<T>() should not be called outside an unevaluated context");
 }
 template <typename T>
-CONSTEVAL auto shrink(T const &) -> decltype(detail::shrink<T>()) {
+consteval auto shrink(T const &) -> decltype(detail::shrink<T>()) {
     return {};
 }
 
 template <typename T>
-CONSTEVAL auto expand() -> decltype(detail::maybe_expand<T>()) {
+consteval auto expand() -> decltype(detail::maybe_expand<T>()) {
     using R = decltype(detail::maybe_expand<T>());
     static_assert(
         always_false_v<R>,

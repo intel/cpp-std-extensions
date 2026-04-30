@@ -27,14 +27,14 @@ struct call_info {
 };
 
 template <std::size_t R, typename T, std::size_t N>
-CONSTEVAL auto truncate_array(std::array<T, N> const &arr) {
+consteval auto truncate_array(std::array<T, N> const &arr) {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         return std::array<T, sizeof...(Is)>{arr[Is]...};
     }(std::make_index_sequence<R>{});
 }
 
 template <typename T, std::size_t N, std::size_t M>
-CONSTEVAL auto concat(std::array<T, N> const &a1, std::array<T, M> const &a2)
+consteval auto concat(std::array<T, N> const &a1, std::array<T, M> const &a2)
     -> std::array<T, N + M> {
     std::array<T, N + M> result{};
     auto it = std::copy(std::cbegin(a1), std::cend(a1), std::begin(result));
@@ -64,7 +64,7 @@ constexpr auto invoke(F &&f, Args &&args) -> decltype(auto) {
 
 template <typename... Fs> struct by_need {
     template <typename... Args>
-    [[nodiscard]] CONSTEVAL static auto compute_call_info_impl() {
+    [[nodiscard]] consteval static auto compute_call_info_impl() {
         auto results = std::array<call_info, sizeof...(Fs) + sizeof...(Args)>{};
         auto result_count = std::size_t{};
 
@@ -108,7 +108,7 @@ template <typename... Fs> struct by_need {
     }
 
     template <typename... Args>
-    [[nodiscard]] CONSTEVAL static auto compute_call_info() {
+    [[nodiscard]] consteval static auto compute_call_info() {
         constexpr auto given_calls = [] {
             constexpr auto cs = compute_call_info_impl<Args...>();
             return truncate_array<cs.second>(cs.first);
