@@ -23,13 +23,13 @@ concept base_double_linkable = base_single_linkable<T> and requires(T node) {
 } // namespace detail
 
 template <typename T>
-concept single_linkable = not complete<T> or requires(T *node) {
+concept single_linkable = requires(T *node) {
     requires detail::base_single_linkable<
         std::remove_cvref_t<decltype(node->next)>>;
 };
 
 template <typename T>
-concept double_linkable = not complete<T> or requires(T *node) {
+concept double_linkable = requires(T *node) {
     requires detail::base_double_linkable<
         std::remove_cvref_t<decltype(node->next)>>;
     requires detail::base_double_linkable<
@@ -46,6 +46,7 @@ constexpr auto
 namespace node_policy {
 template <typename Node> class checked {
     constexpr static auto valid_for_push(Node *node) -> bool {
+        static_assert(single_linkable<Node>);
         if constexpr (detail::detect::has_prev_pointer<Node>) {
             return node->prev == nullptr and node->next == nullptr;
         } else {
@@ -79,6 +80,7 @@ template <typename Node> class checked {
     }
 
     constexpr static auto on_pop(Node *node) {
+        static_assert(single_linkable<Node>);
         if constexpr (detail::detect::has_prev_pointer<Node>) {
             node->prev = nullptr;
         }
@@ -86,6 +88,7 @@ template <typename Node> class checked {
     }
 
     constexpr static auto on_clear(Node *head) {
+        static_assert(single_linkable<Node>);
         while (head != nullptr) {
             if constexpr (detail::detect::has_prev_pointer<Node>) {
                 head->prev = nullptr;

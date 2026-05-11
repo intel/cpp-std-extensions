@@ -6,7 +6,7 @@
 
 namespace stdx {
 inline namespace v1 {
-template <single_linkable NodeType,
+template <typename NodeType,
           template <typename> typename P = node_policy::checked>
 class intrusive_forward_list {
     friend P<NodeType>;
@@ -58,6 +58,7 @@ class intrusive_forward_list {
     pointer tail{};
 
     constexpr auto unchecked_push_front(pointer n) -> void {
+        static_assert(single_linkable<value_type>);
         n->next = head;
         head = n;
         if (tail == nullptr) {
@@ -66,6 +67,7 @@ class intrusive_forward_list {
     }
 
     constexpr auto unchecked_push_back(pointer n) -> void {
+        static_assert(single_linkable<value_type>);
         if (tail != nullptr) {
             tail->next = n;
         }
@@ -99,6 +101,7 @@ class intrusive_forward_list {
     }
 
     constexpr auto pop_front() -> pointer {
+        static_assert(single_linkable<value_type>);
         pointer poppedNode = head;
         head = head->next;
 

@@ -6,7 +6,7 @@
 
 namespace stdx {
 inline namespace v1 {
-template <double_linkable NodeType,
+template <typename NodeType,
           template <typename> typename P = node_policy::checked>
 class intrusive_list {
     friend P<NodeType>;
@@ -58,6 +58,7 @@ class intrusive_list {
     pointer tail{};
 
     constexpr auto unchecked_push_front(pointer n) -> void {
+        static_assert(double_linkable<value_type>);
         if (head != nullptr) {
             head->prev = n;
         }
@@ -70,6 +71,7 @@ class intrusive_list {
     }
 
     constexpr auto unchecked_push_back(pointer n) -> void {
+        static_assert(double_linkable<value_type>);
         if (tail != nullptr) {
             tail->next = n;
         }
@@ -82,6 +84,7 @@ class intrusive_list {
     }
 
     constexpr auto unchecked_insert(iterator it, pointer n) -> void {
+        static_assert(double_linkable<value_type>);
         if (it != end()) {
             auto p = it.operator->();
             n->next = p;
@@ -128,6 +131,7 @@ class intrusive_list {
     }
 
     constexpr auto pop_front() -> pointer {
+        static_assert(double_linkable<value_type>);
         pointer poppedNode = head;
         head = head->next;
 
@@ -142,6 +146,7 @@ class intrusive_list {
     }
 
     constexpr auto pop_back() -> pointer {
+        static_assert(double_linkable<value_type>);
         pointer poppedNode = tail;
         tail = tail->prev;
 
@@ -166,6 +171,7 @@ class intrusive_list {
     }
 
     constexpr auto remove(pointer n) -> void {
+        static_assert(double_linkable<value_type>);
         pointer nextNode = n->next;
         pointer prevNode = n->prev;
 
