@@ -492,3 +492,18 @@ TEST_CASE("indexing unambiguously", "[tuple]") {
     STATIC_CHECK(t[0_idx] == 42);
     STATIC_CHECK(t[1_idx][0_idx] == 17);
 }
+
+TEST_CASE("tuple tail (const lvalue)", "[tuple]") {
+    constexpr auto t = stdx::tuple{1, 2, 3};
+    STATIC_CHECK(t.tail() == stdx::tuple{2, 3});
+}
+
+TEST_CASE("tuple tail (rvalue)", "[tuple]") {
+    auto t = stdx::tuple{move_only{42}, move_only{17}};
+    CHECK(std::move(t).tail() == stdx::tuple{move_only{17}});
+}
+
+TEST_CASE("tuple tail (empty tuple)", "[tuple]") {
+    constexpr auto t = stdx::tuple{};
+    STATIC_CHECK(t.tail() == stdx::tuple{});
+}

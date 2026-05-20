@@ -335,6 +335,33 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
 
     constexpr static auto size =
         std::integral_constant<std::size_t, sizeof...(Ts)>{};
+    constexpr static auto empty = std::bool_constant<sizeof...(Ts) == 0>{};
+
+    [[nodiscard]] constexpr auto tail() const & {
+        if constexpr (empty()) {
+            return *this;
+        } else {
+            return [&]<std::size_t... Js>(std::index_sequence<Js...>) {
+                return tuple_impl<std::index_sequence<Js...>,
+                                  index_function_list<Fs...>,
+                                  nth_t<Js + 1, Ts...>...>{
+                    (*this)[index<Js + 1>]...};
+            }(std::make_index_sequence<sizeof...(Ts) - 1>{});
+        }
+    }
+
+    [[nodiscard]] constexpr auto tail() && {
+        if constexpr (empty()) {
+            return *this;
+        } else {
+            return [&]<std::size_t... Js>(std::index_sequence<Js...>) {
+                return tuple_impl<std::index_sequence<Js...>,
+                                  index_function_list<Fs...>,
+                                  nth_t<Js + 1, Ts...>...>{
+                    std::move(*this)[index<Js + 1>]...};
+            }(std::make_index_sequence<sizeof...(Ts) - 1>{});
+        }
+    }
 
   private:
     template <typename Funcs, typename... Us>
