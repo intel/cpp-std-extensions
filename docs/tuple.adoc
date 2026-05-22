@@ -145,6 +145,15 @@ auto sum1 = stdx::tuple{"hello"s, "world"s}.join(
     [] (auto const &acc, auto const &s) { return acc + ", " + s; });  // "hello, world"
 ----
 
+`tail` is a member function that returns the tail of a tuple, i.e. every element
+from index 1 onwards.
+[source,cpp]
+----
+auto t = stdx::tuple{1, 2, 3}.tail();  // stdx::tuple{2, 3}
+----
+
+NOTE: `tail` called on an empty tuple returns an empty tuple.
+
 === Indexed tuples
 
 Sometimes, it is useful to index a tuple by something other than a plain

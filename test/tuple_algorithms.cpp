@@ -63,6 +63,11 @@ TEST_CASE("transform stops at smallest tuple length", "[tuple_algorithms]") {
                                    stdx::tuple{1, 2}) == stdx::tuple{2, 4});
 }
 
+TEST_CASE("zip with tail", "[tuple_algorithms]") {
+    auto t = stdx::tuple{1, 2, 3};
+    CHECK(stdx::transform(std::plus{}, t, t.tail()) == stdx::tuple{3, 5});
+}
+
 namespace {
 template <typename Key, typename Value> struct map_entry {
     using key_t = Key;
