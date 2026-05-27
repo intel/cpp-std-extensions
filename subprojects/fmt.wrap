@@ -1,0 +1,13 @@
+[wrap-file]
+directory = fmt-12.1.0
+source_url = https://github.com/fmtlib/fmt/archive/12.1.0.tar.gz
+source_filename = fmt-12.1.0.tar.gz
+source_hash = ea7de4299689e12b6dddd392f9896f08fb0777ac7168897a244a6d6085043fea
+source_fallback_url = https://github.com/wrapdb/fmt/releases/download/12.1.0-5/fmt-12.1.0.tar.gz
+patch_filename = fmt_12.1.0-5_patch.zip
+patch_url = https://github.com/wrapdb/fmt/releases/download/12.1.0-5/fmt_12.1.0-5_patch.zip
+patch_hash = 211a6c3f208ec152d3bac0bebbb09abc9b59f1d3a41165e77171e80d871dcd68
+3rdparty_wrapdb_version = 12.1.0-5
+
+[provide]
+dependency_names = fmt

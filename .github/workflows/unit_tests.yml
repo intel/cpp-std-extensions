@@ -25,7 +25,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build_and_test_24:
+  build_and_test_24_cmake:
     runs-on: &runner ${{ github.repository_owner == 'intel' && 'intel-' || '' }}ubuntu-24.04
     strategy: &strategy
       fail-fast: false
@@ -167,6 +167,30 @@ jobs:
       - name: Test
         working-directory: ${{github.workspace}}/build
         run: ctest --output-on-failure -j -C ${{matrix.build_type}}
+
+  build_and_test_24_meson:
+    runs-on: *runner
+    strategy: *strategy
+    steps:
+      - uses: *checkout
+
+      - *install_build_tools
+
+      - name: Install meson
+        run: pipx install meson
+
+      - name: Configure meson
+        env:
+          CC: ${{matrix.toolchain_root}}/bin/${{matrix.cc}}
+          CXX: ${{matrix.toolchain_root}}/bin/${{matrix.cxx}}
+          CXXFLAGS: ${{matrix.cxx_flags}}
+        run: |
+          buildtype="${{matrix.build_type}}"
+          meson setup ${{github.workspace}}/build -Dcpp_std=c++${{matrix.cxx_standard}} --buildtype="${buildtype,,}"
+
+      - name: Test
+        working-directory: ${{github.workspace}}/build
+        run: meson test
 
   quality_checks_pass:
     runs-on: *runner

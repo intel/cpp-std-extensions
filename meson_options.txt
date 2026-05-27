@@ -1,0 +1,4 @@
+option('docs', type: 'feature', description: 'Build documentation')
+option('tests', type: 'feature', description: 'Build tests')
+option('fmt', type: 'feature', value: 'enabled', description: 'Use fmtlib')
+option('conc', type: 'feature', value: 'enabled', description: 'Use baremetal-concurrency')

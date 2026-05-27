@@ -1,0 +1,13 @@
+[wrap-file]
+directory = mp11-boost-1.88.0
+source_url = https://github.com/boostorg/mp11/archive/refs/tags/boost-1.88.0.zip
+source_filename = boost-mp11-1.88.0.zip
+source_hash = f8062dc44fe9a0cd8fd29ce1db112a2bc4deab93a78fbadec1fa92bf568a4659
+patch_filename = boost-mp11_1.88.0-1_patch.zip
+patch_url = https://wrapdb.mesonbuild.com/v2/boost-mp11_1.88.0-1/get_patch
+patch_hash = ed193c72b217e27d9ae1af5172fa9181f9c52e6ece427f87bf6518fdd142f9b2
+source_fallback_url = https://github.com/mesonbuild/wrapdb/releases/download/boost-mp11_1.88.0-1/boost-mp11-1.88.0.zip
+wrapdb_version = 1.88.0-1
+
+[provide]
+dependency_names = boost-mp11

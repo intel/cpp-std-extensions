@@ -1,6 +1,7 @@
-# ignore all directories that start with . (except .github/)
+# ignore all directories that start with . (except .github/ and .gitignore)
 **/.*/
 !.github/
+!**/.gitignore
 
 # ignore conventionally-named build directories
 **/build*/

@@ -1,0 +1,8 @@
+[wrap-git]
+url = https://github.com/intel/cpp-baremetal-concurrency.git
+# FIXME: this points to mcha-forks. use upstream commit or a stable tag
+revision = 53f3493dace298888b60fd761e21f1ae5492ed21
+depth = 1
+
+[provide]
+dependency_names = baremetal-concurrency
