@@ -1,6 +1,8 @@
 
 == `bitset.hpp`
 
+=== `bitset`
+
 https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/bitset.hpp[`bitset.hpp`]
 provides an implementation that mirrors
 https://en.cppreference.com/w/cpp/utility/bitset[`std::bitset`], but is
@@ -17,6 +19,9 @@ platform.
 * `to_string`, `to_ulong` and `to_ullong` are not implemented -- but `to` and
   `to_natural` provide ways to convert to integral types.
 * `operator[]` is read-only: it does not return a proxy reference type
+* `size` does the same as `count()`: `capacity()` is the static size
+* `empty` (size == 0) is provided
+* `clear` does the same as `reset`
 
 A bitset has two template parameters: the size of the bitset and the storage
 element type to use. The storage element type must be unsigned.
@@ -111,4 +116,25 @@ auto bs = stdx::bitset<8>{0b1010'1010ul};
 auto result = transform_reduce([](auto i) { return i * 2 },
                                std::plus{}, std::size_t{}, bs);
 // result is 1*2 + 3*2 + 5*2 + 7*2
+----
+
+=== `type_bitset`
+
+A `type_bitset` is much the same as a `bitset`, except that it is indexed by types.
+It may also be constructed using a `type_list`.
+
+[source,cpp]
+----
+auto tbs = stdx::type_bitset<int, float, bool>{stdx::type_list<int, bool>{}};
+assert(tbs[stdx::type_identity_v<int>]);
+assert(not tbs[stdx::type_identity_v<float>]);
+assert(tbs[stdx::type_identity_v<bool>]);
+----
+
+The `set`, `reset` and `flip` functions are templates:
+
+[source,cpp]
+----
+tbs.flip<float>();
+assert(tbs[stdx::type_identity_v<float>]);
 ----

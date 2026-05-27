@@ -9,10 +9,10 @@
 #include <string>
 #include <type_traits>
 
-TEST_CASE("bitset size", "[type_bitset]") {
-    STATIC_CHECK(stdx::type_bitset<>{}.size() == 0u);
-    STATIC_CHECK(stdx::type_bitset<int>{}.size() == 1u);
-    STATIC_CHECK(stdx::type_bitset<int, float>{}.size() == 2u);
+TEST_CASE("bitset capacity", "[type_bitset]") {
+    STATIC_CHECK(stdx::type_bitset<>{}.capacity() == 0u);
+    STATIC_CHECK(stdx::type_bitset<int>{}.capacity() == 1u);
+    STATIC_CHECK(stdx::type_bitset<int, float>{}.capacity() == 2u);
 }
 
 TEST_CASE("index operation", "[type_bitset]") {
@@ -32,6 +32,13 @@ TEST_CASE("reset single bit", "[type_bitset]") {
     auto bs = stdx::type_bitset<int, float, bool>{stdx::all_bits};
     CHECK(bs[stdx::type_identity_v<int>]);
     bs.reset<int>();
+    CHECK(not bs[stdx::type_identity_v<int>]);
+}
+
+TEST_CASE("clear single bit", "[type_bitset]") {
+    auto bs = stdx::type_bitset<int, float, bool>{stdx::all_bits};
+    CHECK(bs[stdx::type_identity_v<int>]);
+    bs.clear<int>();
     CHECK(not bs[stdx::type_identity_v<int>]);
 }
 
@@ -106,6 +113,22 @@ TEST_CASE("count", "[type_bitset]") {
     STATIC_CHECK(bs2.count() == 3u);
 }
 
+TEST_CASE("size", "[type_bitset]") {
+    constexpr auto bs1 = stdx::type_bitset<int, float, bool>{};
+    STATIC_CHECK(bs1.size() == 0u);
+
+    constexpr auto bs2 = stdx::type_bitset<int, float, bool>{stdx::all_bits};
+    STATIC_CHECK(bs2.size() == 3u);
+}
+
+TEST_CASE("empty", "[type_bitset]") {
+    constexpr auto bs1 = stdx::type_bitset<int, float, bool>{};
+    STATIC_CHECK(bs1.empty());
+
+    constexpr auto bs2 = stdx::type_bitset<int, float, bool>{stdx::all_bits};
+    STATIC_CHECK(not bs2.empty());
+}
+
 TEST_CASE("set all bits", "[type_bitset]") {
     auto bs = stdx::type_bitset<int, float, bool>{};
     bs.set();
@@ -119,6 +142,14 @@ TEST_CASE("reset all bits", "[type_bitset]") {
     bs.reset();
     CHECK(bs == stdx::type_bitset<int, float, bool>{});
     bs.reset();
+    CHECK(bs == stdx::type_bitset<int, float, bool>{});
+}
+
+TEST_CASE("clear all bits", "[type_bitset]") {
+    auto bs = stdx::type_bitset<int, float, bool>{stdx::all_bits};
+    bs.clear();
+    CHECK(bs == stdx::type_bitset<int, float, bool>{});
+    bs.clear();
     CHECK(bs == stdx::type_bitset<int, float, bool>{});
 }
 

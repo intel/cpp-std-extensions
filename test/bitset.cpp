@@ -28,10 +28,10 @@ TEST_CASE("bitset with implicit storage element type", "[bitset]") {
     STATIC_REQUIRE(sizeof(stdx::bitset<64>) == 8);
 }
 
-TEMPLATE_TEST_CASE("bitset size", "[bitset]", std::uint8_t, std::uint16_t,
+TEMPLATE_TEST_CASE("bitset capacity", "[bitset]", std::uint8_t, std::uint16_t,
                    std::uint32_t, std::uint64_t) {
-    STATIC_REQUIRE(stdx::bitset<1, TestType>{}.size() == 1);
-    STATIC_REQUIRE(stdx::bitset<8, TestType>{}.size() == 8);
+    STATIC_REQUIRE(stdx::bitset<1, TestType>{}.capacity() == 1);
+    STATIC_REQUIRE(stdx::bitset<8, TestType>{}.capacity() == 8);
 }
 
 TEMPLATE_TEST_CASE("index operation", "[bitset]", std::uint8_t, std::uint16_t,
@@ -70,6 +70,22 @@ TEMPLATE_TEST_CASE("reset all bits", "[bitset]", std::uint8_t, std::uint16_t,
     auto bs = stdx::bitset<1, TestType>{1ul};
     CHECK(bs[0]);
     bs.reset();
+    CHECK(not bs[0]);
+}
+
+TEMPLATE_TEST_CASE("clear single bit", "[bitset]", std::uint8_t, std::uint16_t,
+                   std::uint32_t, std::uint64_t) {
+    auto bs = stdx::bitset<1, TestType>{1ul};
+    CHECK(bs[0]);
+    bs.clear(0);
+    CHECK(not bs[0]);
+}
+
+TEMPLATE_TEST_CASE("clear all bits", "[bitset]", std::uint8_t, std::uint16_t,
+                   std::uint32_t, std::uint64_t) {
+    auto bs = stdx::bitset<1, TestType>{1ul};
+    CHECK(bs[0]);
+    bs.clear();
     CHECK(not bs[0]);
 }
 
@@ -198,6 +214,24 @@ TEMPLATE_TEST_CASE("count", "[bitset]", std::uint8_t, std::uint16_t,
 
     constexpr auto bs2 = stdx::bitset<8, TestType>{0b10101ul};
     STATIC_REQUIRE(bs2.count() == 3u);
+}
+
+TEMPLATE_TEST_CASE("size", "[bitset]", std::uint8_t, std::uint16_t,
+                   std::uint32_t, std::uint64_t) {
+    constexpr auto bs1 = stdx::bitset<8, TestType>{};
+    STATIC_REQUIRE(bs1.size() == 0u);
+
+    constexpr auto bs2 = stdx::bitset<8, TestType>{0b10101ul};
+    STATIC_REQUIRE(bs2.size() == 3u);
+}
+
+TEMPLATE_TEST_CASE("empty", "[bitset]", std::uint8_t, std::uint16_t,
+                   std::uint32_t, std::uint64_t) {
+    constexpr auto bs1 = stdx::bitset<8, TestType>{};
+    STATIC_REQUIRE(bs1.empty());
+
+    constexpr auto bs2 = stdx::bitset<8, TestType>{0b10101ul};
+    STATIC_REQUIRE(not bs2.empty());
 }
 
 TEMPLATE_TEST_CASE("or", "[bitset]", std::uint8_t, std::uint16_t, std::uint32_t,
@@ -443,7 +477,7 @@ enum struct Bits : std::uint8_t { ZERO, ONE, TWO, THREE, MAX };
 
 TEST_CASE("use bitset with enum struct (default construct)", "[bitset]") {
     constexpr auto bs = stdx::bitset<Bits::MAX>{};
-    STATIC_REQUIRE(bs.size() == stdx::to_underlying(Bits::MAX));
+    STATIC_REQUIRE(bs.capacity() == stdx::to_underlying(Bits::MAX));
 }
 
 TEST_CASE("use bitset with enum struct (to)", "[bitset]") {
