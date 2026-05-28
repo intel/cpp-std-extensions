@@ -217,7 +217,7 @@ class bitset {
         return to<T>();
     }
 
-    constexpr static std::integral_constant<std::size_t, N> size{};
+    constexpr static std::integral_constant<std::size_t, N> capacity{};
 
     template <typename T>
     [[nodiscard]] constexpr auto operator[](T idx) const -> bool {
@@ -313,6 +313,11 @@ class bitset {
         return set(lsb, len, false);
     }
 
+    template <typename... Ts>
+    constexpr auto clear(Ts... ts) LIFETIMEBOUND -> bitset & {
+        return reset(ts...);
+    }
+
     template <typename T> constexpr auto flip(T idx) LIFETIMEBOUND -> bitset & {
         static_assert(admissible_enum<T>() or
                           stdx::always_false_v<T, decltype(Size)>,
@@ -341,15 +346,20 @@ class bitset {
         return n;
     }
 
+    [[nodiscard]] constexpr auto size() const -> std::size_t { return count(); }
+    [[nodiscard]] constexpr auto empty() const -> bool {
+        return size() == std::size_t{};
+    }
+
     [[nodiscard]] constexpr auto all() const -> bool {
-        return count() == size();
+        return count() == capacity();
     }
 
     [[nodiscard]] constexpr auto any() const -> bool {
         return count() != std::size_t{};
     }
 
-    [[nodiscard]] constexpr auto none() const -> bool { return not any(); }
+    [[nodiscard]] constexpr auto none() const -> bool { return empty(); }
 
     [[nodiscard]] constexpr auto lowest_unset() const {
         std::size_t i = 0;
@@ -478,6 +488,9 @@ template <typename...> constexpr std::size_t index_of = 0;
 template <typename T, typename... Us>
 constexpr std::size_t index_of<T, type_list<Us...>> =
     boost::mp11::mp_find<type_list<Us...>, T>::value;
+
+template <typename T>
+concept type_index_like = requires { typename T::type; };
 } // namespace detail
 
 template <typename... Ts> class type_bitset {
@@ -524,6 +537,8 @@ template <typename... Ts> class type_bitset {
         }...};
     }
 
+    constexpr explicit(true) type_bitset(bitset<N> const &b) : bs{b} {}
+
   public:
     constexpr type_bitset() = default;
     constexpr explicit type_bitset(all_bits_t) : bs{all_bits} {}
@@ -541,11 +556,11 @@ template <typename... Ts> class type_bitset {
     }
     [[nodiscard]] constexpr auto to_natural() const { return bs.to_natural(); }
 
-    constexpr static std::integral_constant<std::size_t, N> size{};
+    constexpr static std::integral_constant<std::size_t, N> capacity{};
 
-    template <typename T>
-    [[nodiscard]] constexpr auto operator[](type_identity<T>) const
-        -> decltype(auto) {
+    template <detail::type_index_like TI>
+    [[nodiscard]] constexpr auto operator[](TI) const -> decltype(auto) {
+        using T = typename TI::type;
         constexpr auto idx = detail::index_of<T, list_t>;
         static_assert(idx < sizeof...(Ts), "Type not found in bitset");
         return bs[idx];
@@ -576,6 +591,11 @@ template <typename... Ts> class type_bitset {
     }
 
     template <typename... Us>
+    constexpr auto clear() LIFETIMEBOUND -> type_bitset & {
+        return reset<Us...>();
+    }
+
+    template <typename... Us>
     constexpr auto flip() LIFETIMEBOUND -> type_bitset & {
         static_assert((... and (detail::index_of<Us, type_list<Ts...>> < N)),
                       "Type not found in bitset");
@@ -591,18 +611,23 @@ template <typename... Ts> class type_bitset {
         return bs.count();
     }
 
+    [[nodiscard]] constexpr auto size() const -> std::size_t { return count(); }
+    [[nodiscard]] constexpr auto empty() const -> bool {
+        return size() == std::size_t{};
+    }
+
     [[nodiscard]] constexpr auto all() const -> bool {
-        return count() == size();
+        return count() == capacity();
     }
 
     [[nodiscard]] constexpr auto any() const -> bool {
         return count() != std::size_t{};
     }
 
-    [[nodiscard]] constexpr auto none() const -> bool { return not any(); }
+    [[nodiscard]] constexpr auto none() const -> bool { return empty(); }
 
     [[nodiscard]] constexpr auto operator~() const -> type_bitset {
-        return type_bitset{~bs.template to<std::uint64_t>()};
+        return type_bitset{~bs};
     }
 
     constexpr auto
