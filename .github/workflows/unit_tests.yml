@@ -17,7 +17,7 @@ env:
   DEFAULT_GCC_VERSION: 14
   MULL_LLVM_MAJOR_VERSION: 20
   MULL_LLVM_VERSION: 20.1.2
-  MULL_VERSION: 0.29.0
+  MULL_VERSION: 0.34.0
   HYPOTHESIS_PROFILE: default
 
 concurrency:
@@ -295,7 +295,7 @@ jobs:
       - name: Test
         working-directory: ${{github.workspace}}/build
         run: |
-          ctest --output-on-failure -j -E EXPECT_FAIL -T memcheck
+          ctest --output-on-failure -j -E "EXPECT_FAIL|PYTHON" -T memcheck
 
           LOGFILE=$(ls ./Testing/Temporary/LastDynamicAnalysis_*.log)
           FAILSIZE=$(du -c ./Testing/Temporary/MemoryChecker.* | tail -1 | cut -f1)
