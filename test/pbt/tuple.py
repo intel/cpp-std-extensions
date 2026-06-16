@@ -40,8 +40,7 @@ def tuple_trees(draw, leaves=st.integers()):
 @settings(deadline=50000)
 @given(tuple_trees(small_ints))
 def test_tuple_trees(compile, t):
-    assert compile(
-        f"""
+    assert compile(f"""
         #include <stdx/tuple.hpp>
 
         [[maybe_unused]] constexpr auto t = {t};
@@ -49,16 +48,14 @@ def test_tuple_trees(compile, t):
         int main() {{
             return 0;
         }}
-    """
-    )
+    """)
 
 
 @settings(deadline=50000)
 @given(list_trees(small_ints))
 def test_tuple_size(compile, l):
     t = as_tuple_tree(l)
-    assert compile(
-        f"""
+    assert compile(f"""
         #include <stdx/tuple.hpp>
 
         constexpr auto t = {t};
@@ -68,8 +65,7 @@ def test_tuple_size(compile, l):
         int main() {{
             return 0;
         }}
-    """
-    )
+    """)
 
 
 @settings(deadline=50000)
@@ -81,8 +77,7 @@ def test_get_by_index(compile, l, i):
 
     expected_v = as_tuple_tree(l[i])
 
-    assert compile(
-        f"""
+    assert compile(f"""
         #include <stdx/tuple.hpp>
 
         using namespace stdx::literals;
@@ -105,8 +100,7 @@ def test_get_by_index(compile, l, i):
         int main() {{
             return 0;
         }}
-    """
-    )
+    """)
 
 
 @settings(deadline=50000)
@@ -117,8 +111,7 @@ def test_tuple_cat(compile, ls):
     flattened_ls = [i for subl in ls for i in subl]
     expected = as_tuple_tree(flattened_ls)
 
-    assert compile(
-        f"""
+    assert compile(f"""
         #include <stdx/tuple.hpp>
         #include <stdx/tuple_algorithms.hpp>
 
@@ -127,8 +120,7 @@ def test_tuple_cat(compile, ls):
         int main() {{
             return 0;
         }}
-    """
-    )
+    """)
 
 
 @settings(deadline=50000)
@@ -144,8 +136,7 @@ def test_push(compile, l, elem):
 
     t = as_tuple_tree(l)
 
-    assert compile(
-        f"""
+    assert compile(f"""
         #include <stdx/tuple.hpp>
         #include <stdx/tuple_algorithms.hpp>
 
@@ -163,8 +154,7 @@ def test_push(compile, l, elem):
         int main() {{
             return 0;
         }}
-    """
-    )
+    """)
 
 
 from itertools import product
@@ -184,8 +174,7 @@ def test_cartesian_product(compile, ls):
     ts = [as_tuple_tree(l) for l in ls]
     expected = as_tuple_tree([list(p) for p in product(*ls)])
 
-    assert compile(
-        f"""
+    assert compile(f"""
         #include <stdx/tuple.hpp>
         #include <stdx/tuple_algorithms.hpp>
 
@@ -194,8 +183,7 @@ def test_cartesian_product(compile, ls):
         int main() {{
             return 0;
         }}
-    """
-    )
+    """)
 
 
 from functools import reduce
@@ -210,8 +198,7 @@ def test_star_of(compile, l):
 
     t = as_tuple_tree(l)
 
-    assert compile(
-        f"""
+    assert compile(f"""
         #include <stdx/tuple.hpp>
         #include <stdx/tuple_algorithms.hpp>
 
@@ -224,5 +211,4 @@ def test_star_of(compile, l):
         int main() {{
             return 0;
         }}
-    """
-    )
+    """)

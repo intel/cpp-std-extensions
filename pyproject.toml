@@ -1,0 +1,18 @@
+[project]
+name = "intel-cpp-std-extensions"
+version = "0.0.1"
+requires-python = ">=3.12"
+dependencies = [
+  "intel-cicd-repo-infrastructure"
+]
+license = "BSL-1.0"
+
+[project.urls]
+Repository = "https://github.com/intel/cpp-std-extensions/"
+Documentation = "https://intel.github.io/cpp-std-extensions/"
+
+[tool.setuptools]
+packages = []
+
+[tool.uv.sources]
+intel-cicd-repo-infrastructure = { git = "https://github.com/intel/cicd-repo-infrastructure", branch = "dev" }
