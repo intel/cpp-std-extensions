@@ -61,7 +61,8 @@ auto s = stdx::ct_format<"Hello {} {}">(CX_VALUE(int), CX_VALUE(E::value));
 ----
 
 NOTE: Compile-time formatting is done with https://github.com/fmtlib/fmt[fmtlib]
-and supports the same formatting DSL. Positional arguments are not supported.
+and supports the same formatting DSL. Named arguments are supported, but only as
+a way to "tag", not for position-independence.
 
 When formatting a compile-time `stdx::format_result`, the strings and argument
 tuples are collapsed to a single `stdx::format_result`:

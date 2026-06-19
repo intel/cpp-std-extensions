@@ -21,7 +21,7 @@ using l_return = stdx::return_t<decltype(l)>;         // int
 using l_args = stdx::args_t<decltype(l), std::tuple>; // std::tuple<int>
 ----
 
-`stdx::args_t` returns a list of the function arguments. `std::decayed_args_t`
+`stdx::args_t` returns a list of the function arguments. `stdx::decayed_args_t`
 returns the same list, but with `std::decay_t` applied to each element. This is
 useful for example when you need to copy and store a tuple of the arguments.
 [source,cpp]
