@@ -150,6 +150,15 @@ template <typename T> class byterator {
         return advance(sizeof(V));
     }
 
+    template <typename V = std::uint8_t>
+    auto advance_to_alignment(difference_type n = 0) -> decltype(auto) {
+        auto p = bit_cast<std::uintptr_t>(ptr);
+        constexpr auto offset = sizeof(V) - 1u;
+        constexpr auto mask = ~offset;
+        ptr = bit_cast<byte_t *>((p + offset) & mask);
+        return advance(n * static_cast<difference_type>(sizeof(V)));
+    }
+
     template <typename V = std::uint8_t, typename R = V,
               std::enable_if_t<std::is_trivially_copyable_v<V>, int> = 0>
     [[nodiscard]] auto read() -> R {
