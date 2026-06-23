@@ -58,6 +58,9 @@ static_assert(not stdx::complete<incomplete>);
 static_assert(stdx::complete<int>);
 ----
 
+CAUTION: Using class completeness to make decisions about definitions is a good
+way to get an ODR violation.
+
 === `has_trait`
 
 `has_trait` is used to turn a type trait (standard or otherwise) into a concept.
@@ -78,7 +81,7 @@ parameter that has a `constexpr static bool value` member.
 
 === `same_as_unqualified`
 
-`same_as_unqualified` is true when two types are the same are removing top-level
+`same_as_unqualified` is true when two types are the same after removing top-level
 cv-qualifications and references, if any. It's useful for constraining hidden
 friends -- particularly when member functions would need to be replicated with
 different reference qualifiers before C++23.

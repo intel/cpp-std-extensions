@@ -81,6 +81,9 @@ static_assert(not stdx::is_complete_v<incomplete>);
 static_assert(stdx::is_complete_v<int>);
 ----
 
+CAUTION: Using class completeness to make decisions about definitions is a good
+way to get an ODR violation.
+
 === `is_function_object_v`
 
 `is_function_object_v` is a variable template that detects whether a type is a

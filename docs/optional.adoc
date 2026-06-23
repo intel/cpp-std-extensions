@@ -52,7 +52,7 @@ static_assert(sizeof(stdx::optional<S> == 1);
 
 To use `stdx::optional`, specialize `stdx::tombstone_traits` for the required
 type, giving it a call operator that returns the sentinel value. After that,
-`stdx::optional`'s interface mirrors that of
+`stdx::optional`​'s interface mirrors that of
 https://en.cppreference.com/w/cpp/utility/optional[`std::optional`]. The C\+​+23
 monadic operations on `std::optional` are available on `stdx::optional` with
 C++17.
@@ -63,7 +63,7 @@ even non-movable) types.
 NOTE: Like `std::optional`, `stdx::optional` can be constructed with
 https://en.cppreference.com/w/cpp/utility/optional/nullopt_t[`std::nullopt`] or
 with https://en.cppreference.com/w/cpp/utility/in_place[`std::in_place`].
-(`stdx` does not redefine these types.)
+(`stdx` does not define its own versions of these.)
 
 NOTE: `stdx::optional` does not use exceptions. There is no
 `stdx::bad_optional_access`. If you access a disengaged `stdx::optional`, you

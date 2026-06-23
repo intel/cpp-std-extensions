@@ -51,7 +51,6 @@ except it calls (unary) `operator+` instead of `operator-`.
 
 It also has a specialization for `void` which is _transparent_ like that of
 https://en.cppreference.com/w/cpp/utility/functional/negate_void.html[`std::negate`].
->>>>>>> 7a78082 (:sparkles: Add `dereference`)
 
 === `with_result_of`
 
