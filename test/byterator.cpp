@@ -389,3 +389,50 @@ TEST_CASE("read enum (constrained size alias)", "[byterator]") {
     CHECK(i.readu8<E2>() == E2::A);
     CHECK((i == j));
 }
+
+TEST_CASE("advance to next alignment", "[byterator]") {
+    auto const a =
+        std::array{stdx::to_be<std::uint64_t>(0x0102'0304'0506'0708),
+                   stdx::to_be<std::uint64_t>(0x0a0b'0c0d'0e0f'1011)};
+    auto base = stdx::byterator{std::begin(a)};
+    auto i = stdx::byterator{std::begin(a)};
+    i.advance_to_alignment();
+    CHECK(i == base);
+
+    ++i;
+    i.advance_to_alignment();
+    CHECK(i == std::next(base));
+
+    i.advance_to_alignment<std::uint16_t>();
+    CHECK(i == std::next(base, 2));
+
+    i.advance_to_alignment<std::uint32_t>();
+    CHECK(i == std::next(base, 4));
+
+    i.advance_to_alignment<std::uint64_t>();
+    CHECK(i == std::next(base, 8));
+
+    i.advance_to_alignment<std::uint64_t>(); // already there
+    CHECK(i == std::next(base, 8));
+}
+
+TEST_CASE("advance to previous alignment", "[byterator]") {
+    auto const a =
+        std::array{stdx::to_be<std::uint64_t>(0x0102'0304'0506'0708),
+                   stdx::to_be<std::uint64_t>(0x0a0b'0c0d'0e0f'1011)};
+    auto base = stdx::byterator{std::begin(a)};
+    auto i = stdx::byterator{std::begin(a)};
+
+    i.advance(8);
+    i.advance_to_alignment(-1);
+    CHECK(i == std::next(base, 7));
+
+    i.advance_to_alignment<std::uint16_t>(-1);
+    CHECK(i == std::next(base, 6));
+
+    i.advance_to_alignment<std::uint32_t>(-1);
+    CHECK(i == std::next(base, 4));
+
+    i.advance_to_alignment<std::uint64_t>(-1);
+    CHECK(i == base);
+}

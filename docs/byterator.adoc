@@ -102,3 +102,27 @@ The last case above is particularly useful for dealing with enumerations:
 enum struct E : std::uint32_t { A, B, C };
 auto v3 = i.read<std::uint8_t, E>();
 ----
+
+`byterator` can also advance to alignment boundaries:
+
+[source,cpp]
+----
+i.advance_to_alignment<std::uint32_t>();   // advance to next uint32_t alignment
+i.advance_to_alignment<std::uint32_t>(0);  // the same thing - now a no-op
+i.advance_to_alignment<std::uint32_t>(-1); // advance to previous uint32_t alignment
+
+i.advance_to_alignment<std::uint32_t>(n);  // advance to nth next uint32_t alignment
+i.advance_to_alignment<std::uint32_t>(-n); // advance to nth previous uint32_t alignment
+----
+
+If the `byterator` is already located at the requested alignment boundary (and
+the argument is zero or omitted), it doesn't change.
+
+NOTE: `advance_to_alignment` advances to the absolute alignment, _not_ the
+alignment relative to the underlying storage. For example, if the start of the
+underlying storage is _not_ 4-byte aligned, calling
+`advance_to_alignment<std::uint32_t>()` will result in an offset from the start
+that is _not_ a multiple of 4.
+
+TIP: `advance_to_alignment<T>(n)` is equivalent to `advance_to_alignment<T>()`
+followed by `advance<T>()` `n` times.
