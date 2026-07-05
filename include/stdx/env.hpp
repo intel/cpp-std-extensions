@@ -49,7 +49,7 @@ template <typename T> struct autowrap {
     T value;
 };
 
-// NOLINTNEXTLINE(modernize-avoid-c-arrays)
+// NOLINTNEXTLINE(*-avoid-c-arrays)
 template <std::size_t N> using str_lit_t = char const (&)[N];
 
 template <std::size_t N> struct autowrap<str_lit_t<N>> {
