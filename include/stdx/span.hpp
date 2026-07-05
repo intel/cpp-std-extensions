@@ -2,6 +2,7 @@
 
 #include <stdx/bit.hpp>
 #include <stdx/compiler.hpp>
+#include <stdx/concepts.hpp>
 #include <stdx/iterator.hpp>
 #include <stdx/memory.hpp>
 #include <stdx/type_traits.hpp>
@@ -12,8 +13,6 @@
 #include <iterator>
 #include <limits>
 #include <type_traits>
-
-// NOLINTBEGIN(modernize-use-constraints)
 
 namespace stdx {
 inline namespace v1 {
@@ -38,15 +37,13 @@ template <typename T> class span_base<T, dynamic_extent> {
   public:
     constexpr span_base() = default;
 
-    template <typename It, typename SizeOrEnd,
-              std::enable_if_t<std::is_integral_v<SizeOrEnd>, int> = 0>
-    constexpr span_base(It, SizeOrEnd count)
-        : sz{static_cast<std::size_t>(count)} {}
-
-    template <typename It, typename SizeOrEnd,
-              std::enable_if_t<not std::is_integral_v<SizeOrEnd>, int> = 0>
+    template <typename It, typename SizeOrEnd>
     constexpr span_base(It first, SizeOrEnd last)
         : sz{static_cast<std::size_t>(std::distance(first, last))} {}
+
+    template <typename It, integral SizeOrEnd>
+    constexpr span_base(It, SizeOrEnd count)
+        : sz{static_cast<std::size_t>(count)} {}
 
     [[nodiscard]] constexpr auto size() const noexcept -> std::size_t {
         return sz;
@@ -85,13 +82,13 @@ class span : public detail::span_base<T, Extent> {
 
     constexpr span() = default;
 
-    template <typename It, typename SizeOrEnd,
-              std::enable_if_t<dependent_extent<It> != dynamic_extent, int> = 0>
+    template <typename It, typename SizeOrEnd>
+        requires(dependent_extent<It> != dynamic_extent)
     explicit constexpr span(It first, SizeOrEnd)
         : ptr{stdx::to_address(first)} {}
 
-    template <typename It, typename SizeOrEnd,
-              std::enable_if_t<dependent_extent<It> == dynamic_extent, int> = 0>
+    template <typename It, typename SizeOrEnd>
+        requires(dependent_extent<It> == dynamic_extent)
     constexpr span(It first, SizeOrEnd sore)
         : base_t{first, sore}, ptr{stdx::to_address(first)} {}
 
@@ -122,27 +119,23 @@ class span : public detail::span_base<T, Extent> {
                       "Span extends beyond available storage");
     }
 
-    template <typename R,
-              std::enable_if_t<dependent_extent<R> != dynamic_extent, int> = 0>
+    template <typename R>
+        requires(dependent_extent<R> != dynamic_extent)
     explicit constexpr span(R &&r)
         : ptr{stdx::to_address(std::begin(std::forward<R>(r)))} {}
 
-    template <typename R,
-              std::enable_if_t<dependent_extent<R> == dynamic_extent, int> = 0>
+    template <typename R>
+        requires(dependent_extent<R> == dynamic_extent)
     explicit constexpr span(R &&r)
         : base_t{std::begin(std::forward<R>(r)), std::end(std::forward<R>(r))},
           ptr{stdx::to_address(std::begin(std::forward<R>(r)))} {}
 
-    template <class U, std::size_t N,
-              std::enable_if_t<dependent_extent<U> != dynamic_extent and
-                                   N == dynamic_extent,
-                               int> = 0>
+    template <class U, std::size_t N>
+        requires(dependent_extent<U> != dynamic_extent and N == dynamic_extent)
     explicit constexpr span(span<U, N> const &s) noexcept : ptr{s.data()} {}
 
-    template <class U, std::size_t N,
-              std::enable_if_t<dependent_extent<U> == dynamic_extent or
-                                   N != dynamic_extent,
-                               int> = 0>
+    template <class U, std::size_t N>
+        requires(dependent_extent<U> == dynamic_extent or N != dynamic_extent)
     // NOLINTNEXTLINE(google-explicit-constructor)
     constexpr span(span<U, N> const &s) noexcept
         : base_t{s.data(), s.size()}, ptr{s.data()} {}
@@ -254,8 +247,8 @@ template <class T, std::size_t N> auto as_bytes(span<T, N> s) noexcept {
     }
 }
 
-template <class T, std::size_t N,
-          std::enable_if_t<not std::is_const_v<T>, int> = 0>
+template <class T, std::size_t N>
+    requires(not std::is_const_v<T>)
 auto as_writable_bytes(span<T, N> s) noexcept {
     if constexpr (N == dynamic_extent) {
         return span{reinterpret_cast<std::byte *>(s.data()), s.size_bytes()};
@@ -293,5 +286,3 @@ constexpr auto ct_capacity_v<span<T, dynamic_extent>> =
     detail::ct_capacity_fail<span<T, dynamic_extent>>{};
 } // namespace v1
 } // namespace stdx
-
-// NOLINTEND(modernize-use-constraints)

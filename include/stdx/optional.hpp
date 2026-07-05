@@ -10,8 +10,6 @@
 #include <type_traits>
 #include <utility>
 
-// NOLINTBEGIN(modernize-use-constraints)
-
 namespace stdx {
 inline namespace v1 {
 template <typename T, typename = void> struct tombstone_traits {
@@ -110,12 +108,11 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
     constexpr explicit optional(std::in_place_t, Args &&...args)
         : val{std::forward<Args>(args)...} {}
 
-    template <
-        typename U = T,
-        typename = std::enable_if_t<
+    template <typename U = T>
+        requires(
             std::is_constructible_v<T, U &&> and
             not std::is_same_v<stdx::remove_cvref_t<U>, std::in_place_t> and
-            not std::is_same_v<stdx::remove_cvref_t<U>, optional>>>
+            not std::is_same_v<stdx::remove_cvref_t<U>, optional>)
     constexpr explicit optional(U &&u) : val{std::forward<U>(u)} {}
 
     constexpr auto operator=(std::nullopt_t) -> optional & {
@@ -123,12 +120,12 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
         return *this;
     }
 
-    template <
-        typename U = T,
-        typename = std::enable_if_t<
-            std::is_constructible_v<T, U> and std::is_assignable_v<T &, U> and
-            not std::is_same_v<stdx::remove_cvref_t<U>, optional> and
-            (std::is_scalar_v<T> or not std::is_same_v<std::decay_t<U>, T>)>>
+    template <typename U = T>
+        requires(std::is_constructible_v<T, U> and
+                 std::is_assignable_v<T &, U> and
+                 not std::is_same_v<stdx::remove_cvref_t<U>, optional> and
+                 (std::is_scalar_v<T> or
+                  not std::is_same_v<std::decay_t<U>, T>))
     constexpr auto operator=(U &&u) -> optional & {
         val = std::forward<U>(u);
         return *this;
@@ -312,7 +309,7 @@ template <typename T> optional(T) -> optional<T>;
 
 namespace detail {
 template <typename T>
-constexpr bool optional_like =
+concept optional_like =
     stdx::is_specialization_of_v<stdx::remove_cvref_t<T>, optional> or
     stdx::is_specialization_of_v<stdx::remove_cvref_t<T>, std::optional>;
 
@@ -328,8 +325,7 @@ template <typename R, typename... Ts,
 auto convert_optional(Ts const &...) -> std::optional<R>;
 } // namespace detail
 
-template <typename F, typename... Ts,
-          typename = std::enable_if_t<(... and detail::optional_like<Ts>)>>
+template <typename F, detail::optional_like... Ts>
 constexpr auto transform(F &&f, Ts &&...ts) {
     using func_t = stdx::remove_cvref_t<F>;
     using R = std::invoke_result_t<
@@ -345,5 +341,3 @@ constexpr auto transform(F &&f, Ts &&...ts) {
 }
 } // namespace v1
 } // namespace stdx
-
-// NOLINTEND(modernize-use-constraints)

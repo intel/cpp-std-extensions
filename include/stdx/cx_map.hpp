@@ -37,10 +37,8 @@ template <typename Key, typename Value, std::size_t N> class cx_map {
 
   public:
     constexpr cx_map() = default;
-    // NOLINTNEXTLINE(modernize-use-constraints)
-    template <typename... Vs, std::enable_if_t<((sizeof...(Vs) <= N) and ... and
-                                                stdx::same_as<value_type, Vs>),
-                                               int> = 0>
+    template <same_as<value_type>... Vs>
+        requires(sizeof...(Vs) <= N)
     constexpr explicit cx_map(Vs const &...vs)
         : storage{vs...}, current_size{sizeof...(Vs)} {}
 

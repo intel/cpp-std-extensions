@@ -205,8 +205,8 @@ template <typename T, typename... Ts> constexpr auto try_construct() -> T {
 }
 
 template <typename T> struct any_t {
-    // NOLINTNEXTLINE(modernize-use-constraints)
-    template <typename U, std::enable_if_t<not std::is_same_v<T, U>, int> = 0>
+    template <typename U>
+        requires(not std::is_same_v<T, U>)
     // NOLINTNEXTLINE(google-explicit-constructor)
     constexpr operator U() {
         return try_construct<U>();

@@ -23,14 +23,10 @@ template <typename Key, std::size_t N> class cx_set {
     using const_iterator = value_type const *;
 
     constexpr cx_set() = default;
-    template <typename... Ts,
-              // NOLINTNEXTLINE(modernize-use-constraints)
-              std::enable_if_t<((sizeof...(Ts) <= N) and ... and
-                                stdx::convertible_to<key_type, Ts>),
-                               int> = 0>
+    template <convertible_to<key_type>... Ts>
+        requires(sizeof...(Ts) <= N)
     constexpr explicit cx_set(Ts const &...ts)
-        : storage{static_cast<value_type>(ts)...}, current_size{sizeof...(Ts)} {
-    }
+        : storage{static_cast<key_type>(ts)...}, current_size{sizeof...(Ts)} {}
 
     [[nodiscard]] constexpr auto begin() LIFETIMEBOUND -> iterator {
         return std::data(storage);
