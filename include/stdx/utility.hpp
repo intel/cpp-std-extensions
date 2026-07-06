@@ -192,10 +192,8 @@ template <char... Chars> consteval auto operator""_z64() {
 
 namespace cxv_detail {
 struct from_any {
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    template <typename... Ts> constexpr from_any(Ts const &...) {}
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr operator int() const { return 0; }
+    template <typename... Ts>
+    constexpr explicit(false) from_any(Ts const &...) {}
 };
 
 struct value_marker {};
@@ -252,8 +250,7 @@ constexpr auto is_aligned_with = [](auto v) -> bool {
 
 namespace detail {
 template <typename T> struct ct_helper {
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    consteval ct_helper(auto t) : value(t) {}
+    consteval explicit(false) ct_helper(auto t) : value(t) {}
     T value;
 };
 
