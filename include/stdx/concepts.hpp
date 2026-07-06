@@ -35,8 +35,13 @@ concept derived_from =
     std::is_base_of_v<U, T> and
     std::is_convertible_v<T const volatile *, U const volatile *>;
 
+namespace detail {
 template <typename T, typename U>
-concept same_as = std::is_same_v<T, U> and std::is_same_v<U, T>;
+concept same_as_helper = std::is_same_v<T, U>;
+}
+
+template <typename T, typename U>
+concept same_as = detail::same_as_helper<T, U> and detail::same_as_helper<U, T>;
 
 template <typename T, typename... Us>
 constexpr auto same_any = (... or same_as<T, Us>);
@@ -45,8 +50,7 @@ template <typename T, typename... Us>
 constexpr auto same_none = not same_any<T, Us...>;
 
 template <typename T, typename U>
-concept same_as_unqualified =
-    is_same_unqualified_v<T, U> and is_same_unqualified_v<U, T>;
+concept same_as_unqualified = same_as<remove_cvref_t<T>, remove_cvref_t<U>>;
 
 template <typename T>
 concept equality_comparable = requires(T const &t) {
@@ -133,8 +137,7 @@ template <typename T, template <typename> typename TypeTrait>
 concept has_trait = TypeTrait<T>::value;
 
 template <typename T, typename U>
-concept same_as_unqualified =
-    is_same_unqualified_v<T, U> and is_same_unqualified_v<U, T>;
+concept same_as_unqualified = same_as<remove_cvref_t<T>, remove_cvref_t<U>>;
 
 template <typename T>
 concept structural = is_structural_v<T>;
