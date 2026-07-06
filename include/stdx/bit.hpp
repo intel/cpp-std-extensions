@@ -16,8 +16,6 @@
 #include <bit>
 #endif
 
-// NOLINTBEGIN(modernize-use-constraints)
-
 namespace stdx {
 inline namespace v1 {
 
@@ -241,9 +239,8 @@ using std::bit_width;
 using std::has_single_bit;
 #endif
 
-template <typename T>
-[[nodiscard]] constexpr auto to_le(T x) noexcept
-    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+template <unsigned_integral T>
+[[nodiscard]] constexpr auto to_le(T x) noexcept -> T {
     if constexpr (stdx::endian::native == stdx::endian::big) {
         return byteswap(x);
     } else {
@@ -251,9 +248,8 @@ template <typename T>
     }
 }
 
-template <typename T>
-[[nodiscard]] constexpr auto to_be(T x) noexcept
-    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+template <unsigned_integral T>
+[[nodiscard]] constexpr auto to_be(T x) noexcept -> T {
     if constexpr (stdx::endian::native == stdx::endian::little) {
         return byteswap(x);
     } else {
@@ -261,9 +257,8 @@ template <typename T>
     }
 }
 
-template <typename T>
-[[nodiscard]] constexpr auto from_le(T x) noexcept
-    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+template <unsigned_integral T>
+[[nodiscard]] constexpr auto from_le(T x) noexcept -> T {
     if constexpr (stdx::endian::native == stdx::endian::big) {
         return byteswap(x);
     } else {
@@ -271,9 +266,8 @@ template <typename T>
     }
 }
 
-template <typename T>
-[[nodiscard]] constexpr auto from_be(T x) noexcept
-    -> std::enable_if_t<std::is_unsigned_v<T>, T> {
+template <unsigned_integral T>
+[[nodiscard]] constexpr auto from_be(T x) noexcept -> T {
     if constexpr (stdx::endian::native == stdx::endian::little) {
         return byteswap(x);
     } else {
@@ -463,14 +457,10 @@ constexpr auto bit_destructure_impl(T t, std::index_sequence<Is...>) {
 }
 } // namespace bit_detail
 
-template <std::size_t... Offsets, typename T>
-constexpr auto bit_destructure(T t)
-    -> std::enable_if_t<unsigned_integral<T>,
-                        std::array<T, sizeof...(Offsets) + 1>> {
+template <std::size_t... Offsets, unsigned_integral T>
+constexpr auto bit_destructure(T t) -> std::array<T, sizeof...(Offsets) + 1> {
     return bit_detail::bit_destructure_impl<Offsets..., bit_size<T>()>(
         t, std::make_index_sequence<sizeof...(Offsets) + 1>{});
 }
 } // namespace v1
 } // namespace stdx
-
-// NOLINTEND(modernize-use-constraints)

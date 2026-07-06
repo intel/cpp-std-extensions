@@ -1,5 +1,6 @@
 #pragma once
 
+#include <stdx/concepts.hpp>
 #include <stdx/tuple.hpp>
 #include <stdx/type_traits.hpp>
 
@@ -143,15 +144,12 @@ template <auto F, typename... Args> constexpr auto bind_back(Args &&...args) {
         {std::forward<Args>(args)...}};
 }
 
-// NOLINTBEGIN(modernize-use-constraints)
 template <typename T = void> struct unary_plus {
-    template <typename U,
-              typename = std::enable_if_t<is_same_unqualified_v<U, T>>>
+    template <same_as_unqualified<T> U>
     constexpr auto operator()(U &&u) const -> decltype(+std::forward<U>(u)) {
         return +std::forward<U>(u);
     }
 };
-// NOLINTEND(modernize-use-constraints)
 
 template <> struct unary_plus<void> {
     using is_transparent = int;
@@ -172,15 +170,12 @@ constexpr inline struct safe_identity_t {
     }
 } safe_identity;
 
-// NOLINTBEGIN(modernize-use-constraints)
 template <typename T = void> struct dereference {
-    template <typename U,
-              typename = std::enable_if_t<is_same_unqualified_v<U, T>>>
+    template <same_as_unqualified<T> U>
     constexpr auto operator()(U &&u) const -> decltype(*std::forward<U>(u)) {
         return *std::forward<U>(u);
     }
 };
-// NOLINTEND(modernize-use-constraints)
 
 template <> struct dereference<void> {
     using is_transparent = int;

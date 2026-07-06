@@ -30,11 +30,8 @@ template <typename T, std::size_t N> class cx_vector {
     using const_reverse_iterator = std::reverse_iterator<const_iterator>;
 
     constexpr cx_vector() = default;
-    template <typename... Ts,
-              // NOLINTNEXTLINE(modernize-use-constraints)
-              std::enable_if_t<((sizeof...(Ts) <= N) and ... and
-                                stdx::convertible_to<value_type, Ts>),
-                               int> = 0>
+    template <convertible_to<value_type>... Ts>
+        requires(sizeof...(Ts) <= N)
     constexpr explicit cx_vector(Ts const &...ts)
         : storage{static_cast<value_type>(ts)...}, current_size{sizeof...(Ts)} {
     }

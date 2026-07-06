@@ -10,8 +10,6 @@
 #include <type_traits>
 #include <utility>
 
-// NOLINTBEGIN(modernize-use-constraints)
-
 namespace stdx {
 inline namespace v1 {
 
@@ -126,15 +124,13 @@ template <typename T, typename U>
 template <typename T, typename U>
 using forward_like_t = decltype(stdx::forward_like<T>(std::declval<U>()));
 
-template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
-[[nodiscard]] constexpr auto as_unsigned(T t) {
+template <integral T> [[nodiscard]] constexpr auto as_unsigned(T t) {
     static_assert(not std::is_same_v<T, bool>,
                   "as_unsigned is not applicable to bool");
     return static_cast<std::make_unsigned_t<T>>(t);
 }
 
-template <typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
-[[nodiscard]] constexpr auto as_signed(T t) {
+template <integral T> [[nodiscard]] constexpr auto as_signed(T t) {
     static_assert(not std::is_same_v<T, bool>,
                   "as_signed is not applicable to bool");
     return static_cast<std::make_signed_t<T>>(t);
@@ -205,15 +201,13 @@ struct from_any {
 struct value_marker {};
 
 struct type_val {
-    template <typename T, typename U,
-              typename = std::enable_if_t<same_as_unqualified<type_val, U>>>
+    template <typename T, same_as<type_val> U>
     friend constexpr auto operator+(T t, U const &) -> T {
         return t;
     }
     friend constexpr auto operator+(type_val const &f) -> type_val { return f; }
 
-    template <typename T, typename U,
-              typename = std::enable_if_t<same_as_unqualified<type_val, U>>>
+    template <typename T, same_as<type_val> U>
     friend constexpr auto operator-(T, U const &) -> value_marker {
         return {};
     }
@@ -402,4 +396,3 @@ auto cx_detect(auto f) {
 #endif
 
 // NOLINTEND(cppcoreguidelines-macro-usage)
-// NOLINTEND(modernize-use-constraints)
