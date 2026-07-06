@@ -93,16 +93,15 @@ class span : public detail::span_base<T, Extent> {
         : base_t{first, sore}, ptr{stdx::to_address(first)} {}
 
     template <typename U, std::size_t N>
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr span(std::array<U, N> &arr LIFETIMEBOUND) noexcept
+    constexpr explicit(false) span(std::array<U, N> &arr LIFETIMEBOUND) noexcept
         : base_t{std::data(arr), N}, ptr{std::data(arr)} {
         static_assert(Extent == dynamic_extent or Extent <= N,
                       "Span extends beyond available storage");
     }
 
     template <typename U, std::size_t N>
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr span(std::array<U, N> const &arr LIFETIMEBOUND) noexcept
+    constexpr explicit(false)
+        span(std::array<U, N> const &arr LIFETIMEBOUND) noexcept
         : base_t{std::data(arr), N}, ptr{std::data(arr)} {
         static_assert(Extent == dynamic_extent or Extent <= N,
                       "Span extends beyond available storage");
@@ -112,8 +111,7 @@ class span : public detail::span_base<T, Extent> {
     template <std::size_t N> using arr_t = type_identity_t<element_type> (&)[N];
 
     template <std::size_t N>
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr span(arr_t<N> arr LIFETIMEBOUND) noexcept
+    constexpr explicit(false) span(arr_t<N> arr LIFETIMEBOUND) noexcept
         : base_t{std::data(arr), N}, ptr{std::data(arr)} {
         static_assert(Extent == dynamic_extent or Extent <= N,
                       "Span extends beyond available storage");
@@ -136,8 +134,7 @@ class span : public detail::span_base<T, Extent> {
 
     template <class U, std::size_t N>
         requires(dependent_extent<U> == dynamic_extent or N != dynamic_extent)
-    // NOLINTNEXTLINE(google-explicit-constructor)
-    constexpr span(span<U, N> const &s) noexcept
+    constexpr explicit(false) span(span<U, N> const &s) noexcept
         : base_t{s.data(), s.size()}, ptr{s.data()} {}
 
     [[nodiscard]] constexpr auto data() const noexcept -> pointer {

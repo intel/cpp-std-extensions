@@ -27,7 +27,7 @@ concept format_convertible = requires(T t) {
 template <std::size_t N> struct ct_string {
     consteval ct_string() = default;
 
-    // NOLINTNEXTLINE(*-avoid-c-arrays, google-explicit-constructor)
+    // NOLINTNEXTLINE(*-avoid-c-arrays)
     consteval explicit(false) ct_string(char const (&str)[N]) {
         for (auto i = std::size_t{}; i < N; ++i) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-*)
@@ -36,7 +36,6 @@ template <std::size_t N> struct ct_string {
     }
 
     template <detail::format_convertible T>
-    // NOLINTNEXTLINE(google-explicit-constructor)
     consteval explicit(false) ct_string(T t) : ct_string(+t) {}
 
     consteval explicit(true) ct_string(char const *str, std::size_t sz) {
