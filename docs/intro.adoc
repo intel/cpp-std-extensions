@@ -88,7 +88,6 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/intrusive_list.hpp[`intrusive_list.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/iterator.hpp[`iterator.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/latched.hpp[`latched.hpp`]
-* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/memory.hpp[`memory.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/numeric.hpp[`numeric.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/optional.hpp[`optional.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/panic.hpp[`panic.hpp`]

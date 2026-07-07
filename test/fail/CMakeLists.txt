@@ -31,7 +31,6 @@ add_fail_tests(
     subspan_too_big
     subspan_wrapping
     template_for_each_not_list
-    to_address_undefined_on_function
     tuple_index_out_of_bounds
     tuple_equality_mismatch
     tuple_equality_with_element

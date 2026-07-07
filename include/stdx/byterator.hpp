@@ -2,14 +2,13 @@
 
 #include <stdx/bit.hpp>
 #include <stdx/concepts.hpp>
-#include <stdx/memory.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/utility.hpp>
 
 #include <cstddef>
 #include <cstring>
-#include <functional>
 #include <iterator>
+#include <memory>
 #include <type_traits>
 
 namespace stdx {
@@ -45,7 +44,7 @@ template <typename T> class byterator {
     [[nodiscard]] friend constexpr auto operator==(byterator const &x, It y)
         -> bool {
         return static_cast<void const *>(x.ptr) ==
-               static_cast<void const *>(stdx::to_address(y));
+               static_cast<void const *>(std::to_address(y));
     }
 
     [[nodiscard]] friend constexpr auto operator<=>(byterator const &x,
@@ -56,7 +55,7 @@ template <typename T> class byterator {
         requires std::is_same_v<detail::iterator_value_t<It>, T>
     [[nodiscard]] friend constexpr auto operator<=>(byterator const &x, It y) {
         return static_cast<void const *>(x.ptr) <=>
-               static_cast<void const *>(stdx::to_address(y));
+               static_cast<void const *>(std::to_address(y));
     }
 
   public:
@@ -67,7 +66,7 @@ template <typename T> class byterator {
     using iterator_category = std::random_access_iterator_tag;
 
     template <detail::byteratorish It>
-    explicit byterator(It it) : ptr(bit_cast<byte_t *>(stdx::to_address(it))) {}
+    explicit byterator(It it) : ptr(bit_cast<byte_t *>(std::to_address(it))) {}
 
     [[nodiscard]] constexpr auto operator->() const -> byte_t * { return ptr; }
     [[nodiscard]] constexpr auto operator*() const -> byte_t & { return *ptr; }

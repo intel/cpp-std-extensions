@@ -8,6 +8,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <iterator>
+#include <memory>
 #include <type_traits>
 
 TEMPLATE_TEST_CASE("span exposes types", "[span]", std::uint8_t,
@@ -418,7 +419,7 @@ TEST_CASE("subspan of span", "[span]") {
     constexpr auto s6 = s1.subspan<4, 0>();
     STATIC_REQUIRE(
         std::is_same_v<decltype(s6), stdx::span<int const, 0> const>);
-    STATIC_REQUIRE(std::data(s6) == stdx::to_address(std::end(a)));
+    STATIC_REQUIRE(std::data(s6) == std::to_address(std::end(a)));
 }
 
 TEST_CASE("subspan of dynamic span", "[span]") {
@@ -445,7 +446,7 @@ TEST_CASE("subspan of dynamic span", "[span]") {
 
     auto s6 = s1.subspan<4, 0>();
     STATIC_REQUIRE(std::is_same_v<decltype(s6), stdx::span<int, 0>>);
-    CHECK(std::data(s6) == stdx::to_address(std::end(a)));
+    CHECK(std::data(s6) == std::to_address(std::end(a)));
 }
 
 TEST_CASE("span is explicitly convertible from dynamic to fixed", "[span]") {

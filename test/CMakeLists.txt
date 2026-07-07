@@ -56,7 +56,6 @@ add_tests(
     is_constant_evaluated
     iterator
     latched
-    memory
     numeric
     optional
     overload
