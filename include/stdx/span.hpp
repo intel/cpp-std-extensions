@@ -4,7 +4,6 @@
 #include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
 #include <stdx/iterator.hpp>
-#include <stdx/memory.hpp>
 #include <stdx/type_traits.hpp>
 
 #include <algorithm>
@@ -12,6 +11,7 @@
 #include <cstddef>
 #include <iterator>
 #include <limits>
+#include <memory>
 #include <type_traits>
 
 namespace stdx {
@@ -85,12 +85,12 @@ class span : public detail::span_base<T, Extent> {
     template <typename It, typename SizeOrEnd>
         requires(dependent_extent<It> != dynamic_extent)
     explicit constexpr span(It first, SizeOrEnd)
-        : ptr{stdx::to_address(first)} {}
+        : ptr{std::to_address(first)} {}
 
     template <typename It, typename SizeOrEnd>
         requires(dependent_extent<It> == dynamic_extent)
     constexpr span(It first, SizeOrEnd sore)
-        : base_t{first, sore}, ptr{stdx::to_address(first)} {}
+        : base_t{first, sore}, ptr{std::to_address(first)} {}
 
     template <typename U, std::size_t N>
     constexpr explicit(false) span(std::array<U, N> &arr LIFETIMEBOUND) noexcept
@@ -120,13 +120,13 @@ class span : public detail::span_base<T, Extent> {
     template <typename R>
         requires(dependent_extent<R> != dynamic_extent)
     explicit constexpr span(R &&r)
-        : ptr{stdx::to_address(std::begin(std::forward<R>(r)))} {}
+        : ptr{std::to_address(std::begin(std::forward<R>(r)))} {}
 
     template <typename R>
         requires(dependent_extent<R> == dynamic_extent)
     explicit constexpr span(R &&r)
         : base_t{std::begin(std::forward<R>(r)), std::end(std::forward<R>(r))},
-          ptr{stdx::to_address(std::begin(std::forward<R>(r)))} {}
+          ptr{std::to_address(std::begin(std::forward<R>(r)))} {}
 
     template <class U, std::size_t N>
         requires(dependent_extent<U> != dynamic_extent and N == dynamic_extent)

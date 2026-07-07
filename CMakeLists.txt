@@ -72,7 +72,6 @@ target_sources(
               include/stdx/intrusive_list.hpp
               include/stdx/iterator.hpp
               include/stdx/latched.hpp
-              include/stdx/memory.hpp
               include/stdx/numeric.hpp
               include/stdx/optional.hpp
               include/stdx/panic.hpp

@@ -19,8 +19,6 @@ flowchart BT
   type_traits --> ct_conversions
 
   %% level 3
-  memory(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/memory.hpp">memory.hpp</a>)
-  memory --> type_traits
   iterator(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/iterator.hpp">iterator.hpp</a>)
   iterator --> type_traits
   concepts(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/concepts.hpp">concepts.hpp</a>)
@@ -53,11 +51,9 @@ flowchart BT
 
   %% level 6
   span(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/span.hpp">span.hpp</a>)
-  span ----> memory
   span ----> iterator
   span --> bit
   byterator(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/byterator.hpp">byterator.hpp</a>)
-  byterator ----> memory
   byterator --> bit
   cx_set(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/cx_set.hpp">cx_set.hpp</a>)
   cx_set ---> cx_map

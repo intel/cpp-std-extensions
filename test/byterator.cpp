@@ -4,12 +4,13 @@
 
 #include <array>
 #include <iterator>
+#include <memory>
 
 TEST_CASE("constructible from an iterator", "[byterator]") {
     auto const a = std::array{1, 2, 3, 4};
     auto const b = stdx::byterator{std::begin(a)};
-    CHECK(static_cast<void const *>(stdx::to_address(std::begin(a))) ==
-          static_cast<void const *>(stdx::to_address(b)));
+    CHECK(static_cast<void const *>(std::to_address(std::begin(a))) ==
+          static_cast<void const *>(std::to_address(b)));
 }
 
 TEST_CASE("equality comparable to iterator", "[byterator]") {
