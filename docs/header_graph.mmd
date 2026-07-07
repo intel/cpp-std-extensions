@@ -1,0 +1,107 @@
+flowchart BT
+  %% level 0
+  compiler(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/compiler.hpp">compiler.hpp</a>)
+
+  %% level 1
+  array(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/array.hpp">array.hpp</a>)
+  atomic(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/atomic.hpp">atomic.hpp</a>)
+  ct_conversions(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/ct_conversions.hpp">ct_conversions.hpp</a>)
+  array ~~~ compiler
+  atomic ~~~ compiler
+  ct_conversions --> compiler
+  priority(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/priority.hpp">priority.hpp</a>)
+  numeric(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/numeric.hpp">numeric.hpp</a>)
+  priority ~~~ compiler
+  numeric ~~~ compiler
+
+  %% level 2
+  type_traits(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/type_traits.hpp">type_traits.hpp</a>)
+  type_traits --> ct_conversions
+
+  %% level 3
+  memory(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/memory.hpp">memory.hpp</a>)
+  memory --> type_traits
+  iterator(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/iterator.hpp">iterator.hpp</a>)
+  iterator --> type_traits
+  concepts(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/concepts.hpp">concepts.hpp</a>)
+  concepts --> type_traits
+  udls(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/udls.hpp">udls.hpp</a>)
+  udls --> type_traits
+  function_traits(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/function_traits.hpp">function_traits.hpp</a>)
+  function_traits --> type_traits
+
+  %% level 4
+  cx_vector(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/cx_vector.hpp">cx_vector.hpp</a>)
+  cx_vector --> iterator
+  cx_vector --> concepts
+  rollover(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/rollover.hpp">rollover.hpp</a>)
+  rollover --> concepts
+  utility(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/utility.hpp">utility.hpp</a>)
+  utility --> concepts
+  utility --> udls
+
+  %% level 5
+  cx_map(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/cx_map.hpp">cx_map.hpp</a>)
+  cx_map ---> iterator
+  cx_map --> utility
+  bit(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/bit.hpp">bit.hpp</a>)
+  bit --> utility
+  ct_string(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/ct_string.hpp">ct_string.hpp</a>)
+  ct_string --> utility
+  tuple(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/tuple.hpp">tuple.hpp</a>)
+  tuple --> utility
+
+  %% level 6
+  span(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/span.hpp">span.hpp</a>)
+  span ----> memory
+  span ----> iterator
+  span --> bit
+  byterator(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/byterator.hpp">byterator.hpp</a>)
+  byterator ----> memory
+  byterator --> bit
+  cx_set(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/cx_set.hpp">cx_set.hpp</a>)
+  cx_set ---> cx_map
+  bitset(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/bitset.hpp">bitset.hpp</a>)
+  bitset --> bit
+  bitset --> ct_string
+  panic(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/panic.hpp">panic.hpp</a>)
+  panic --> ct_string
+  A(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/env.hpp">env.hpp</a><br><a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/static_assert.hpp">static_assert.hpp</a>)
+  A --> ct_string
+  tuple_algorithms(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/tuple_algorithms.hpp">tuple_algorithms.hpp</a>)
+  tuple_algorithms --> tuple
+  functional(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/functional.hpp">functional.hpp</a>)
+  functional --> tuple
+  C(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/algorithm.hpp">algorithm.hpp</a><br><a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/tuple_destructure.hpp">tuple_destructure.hpp</a>)
+  C --> tuple
+  for_each_n_args(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/for_each_n_args.hpp">for_each_n_args.hpp</a>)
+  for_each_n_args ----> function_traits
+  for_each_n_args --> tuple
+
+  %% level 7
+  cx_multimap(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/cx_multimap.hpp">cx_multimap.hpp</a>)
+  cx_multimap --> cx_set
+  cx_queue(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/cx_queue.hpp">cx_queue.hpp</a>)
+  cx_queue ----> iterator
+  cx_queue --> panic
+  atomic_bitset(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/atomic_bitset.hpp">atomic_bitset.hpp</a>)
+  atomic_bitset ---> bitset
+  B(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/intrusive_forward_list.hpp">intrusive_forward_list.hpp<br><a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/intrusive_list.hpp">intrusive_list.hpp</a>)
+  B --> panic
+  ct_format(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/ct_format.hpp">ct_format.hpp</a>)
+  pp_map(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/pp_map.hpp">pp_map.hpp</a>)
+  ranges(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/ranges.hpp">ranges.hpp</a>)
+  ct_format ----> ct_string
+  ct_format ---> tuple_algorithms
+  ct_format --> pp_map
+  ct_format --> ranges
+  call_by_need(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/call_by_need.hpp">call_by_need.hpp</a>)
+  call_by_need --> tuple_algorithms
+  latched(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/latched.hpp">latched.hpp</a>)
+  latched --> functional
+  optional(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/optional.hpp">optional.hpp</a>)
+  optional --> functional
+
+  %% level 8
+  cached(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/cached.hpp">cached.hpp</a>)
+  cached --> latched
