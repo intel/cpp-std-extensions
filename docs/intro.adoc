@@ -104,3 +104,10 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/type_traits.hpp[`type_traits.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/udls.hpp[`udls.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/utility.hpp[`utility.hpp`]
+
+
+=== Header Graph
+
+mermaid::header_graph.mmd[format="svg" config="mermaid.conf"]
+
+(The rendering makes this small. Either right-click and open in new tab, or https://github.com/intel/cpp-std-extensions/blob/main/docs/header_graph.mmd[view the file on GitHub].)
