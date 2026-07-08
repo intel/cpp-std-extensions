@@ -1,8 +1,5 @@
 #pragma once
 
-#include <stdx/compiler.hpp>
-#include <stdx/type_traits.hpp>
-
 #include <cstddef>
 #include <cstdint>
 #include <type_traits>
@@ -41,8 +38,7 @@ consteval auto maybe_add_digit(Sum s) {
 
 template <auto Base, char... Cs> struct raw_parser {
     template <typename T> consteval static auto parse() {
-        using U = decltype(stdx::to_underlying(std::declval<T>()));
-        auto x = U{};
+        auto x = T{};
         ((x = maybe_add_digit<Base, Cs>(x)), ...);
         return T{x};
     }
