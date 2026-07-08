@@ -271,7 +271,7 @@ constexpr auto contains_type =
 template <template <typename> typename Proj = std::type_identity_t,
           tuplelike Tuple>
 [[nodiscard]] constexpr auto sort(Tuple &&t) {
-    using T = stdx::remove_cvref_t<Tuple>;
+    using T = std::remove_cvref_t<Tuple>;
     constexpr auto indices = detail::sorted_indices<T, Proj>();
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         return stdx::tuple<tuple_element_t<indices[Is], T>...>{
@@ -344,7 +344,7 @@ template <template <typename> typename Proj = std::type_identity_t,
                 [&]<std::size_t... Js>(std::index_sequence<Js...>) {
                     constexpr auto offset = chunks[Is].offset;
                     return stdx::tuple<tuple_element_t<
-                        offset + Js, stdx::remove_cvref_t<Tuple>>...>{
+                        offset + Js, std::remove_cvref_t<Tuple>>...>{
                         std::forward<Tuple>(t)[index<offset + Js>]...};
                 }(std::make_index_sequence<chunks[Is].size>{})...);
         }(std::make_index_sequence<chunks.size()>{});
@@ -409,7 +409,7 @@ template <tuplelike T> constexpr auto to_sorted_set(T &&t) {
 }
 
 template <tuplelike Tuple> constexpr auto to_unsorted_set(Tuple &&t) {
-    using T = stdx::remove_cvref_t<Tuple>;
+    using T = std::remove_cvref_t<Tuple>;
     using U = boost::mp11::mp_unique<T>;
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         return U{get<boost::mp11::mp_find<T, tuple_element_t<Is, U>>::value>(

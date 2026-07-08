@@ -66,7 +66,7 @@ class span : public detail::span_base<T, Extent> {
 
   public:
     using element_type = T;
-    using value_type = stdx::remove_cvref_t<T>;
+    using value_type = std::remove_cvref_t<T>;
     using size_type = std::size_t;
     using difference_type = std::ptrdiff_t;
     using pointer = T *;

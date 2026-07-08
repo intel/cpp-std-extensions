@@ -156,8 +156,8 @@ constexpr auto call_by_need(Fs &&fs, Args &&args) {
                 std::forward<Fs>(fs)))...>::
                 template compute_call_info<decltype(get<Js>(
                     std::forward<Args>(args)))...>();
-        }(std::make_index_sequence<tuple_size_v<remove_cvref_t<Fs>>>{},
-          std::make_index_sequence<tuple_size_v<remove_cvref_t<Args>>>{});
+        }(std::make_index_sequence<tuple_size_v<std::remove_cvref_t<Fs>>>{},
+          std::make_index_sequence<tuple_size_v<std::remove_cvref_t<Args>>>{});
 
     auto new_fs = [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         return tuple{get<Is>(std::forward<Fs>(fs))...,

@@ -128,8 +128,8 @@ template <typename F, typename = void> struct detect_call_operator {
 };
 template <typename F>
 struct detect_call_operator<
-    F, std::void_t<decltype(&remove_cvref_t<F>::operator())>>
-    : function_traits<decltype(&remove_cvref_t<F>::operator())> {};
+    F, std::void_t<decltype(&std::remove_cvref_t<F>::operator())>>
+    : function_traits<decltype(&std::remove_cvref_t<F>::operator())> {};
 
 template <typename F> struct function_traits : detect_call_operator<F> {};
 } // namespace detail

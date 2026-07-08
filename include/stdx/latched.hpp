@@ -11,7 +11,7 @@
 namespace stdx {
 inline namespace v1 {
 template <typename F> struct latched {
-    using value_type = stdx::remove_cvref_t<std::invoke_result_t<F>>;
+    using value_type = std::remove_cvref_t<std::invoke_result_t<F>>;
 
     constexpr explicit latched(F const &f) : lazy{f} {}
     constexpr explicit latched(F &&f) : lazy{std::move(f)} {}
@@ -56,6 +56,6 @@ template <typename F> struct latched {
 };
 
 template <typename C>
-using latched_value_t = typename stdx::remove_cvref_t<C>::value_type;
+using latched_value_t = typename std::remove_cvref_t<C>::value_type;
 } // namespace v1
 } // namespace stdx

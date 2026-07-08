@@ -13,7 +13,7 @@ namespace stdx {
 inline namespace v1 {
 namespace detail {
 template <typename T> struct ct_capacity_fail {
-    static_assert(always_false_v<stdx::remove_cvref_t<T>>,
+    static_assert(always_false_v<std::remove_cvref_t<T>>,
                   "Type does not support compile-time capacity");
 };
 } // namespace detail
@@ -31,7 +31,7 @@ template <typename T> constexpr auto ct_capacity_v<T const> = ct_capacity_v<T>;
 
 template <typename T>
 consteval auto ct_capacity([[maybe_unused]] T &&) -> std::size_t {
-    return ct_capacity_v<remove_cvref_t<T>>;
+    return ct_capacity_v<std::remove_cvref_t<T>>;
 }
 
 template <typename T = int, typename = std::enable_if_t<std::is_integral_v<T>>>

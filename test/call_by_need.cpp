@@ -11,8 +11,8 @@ template <auto V> constexpr auto arg = arg_t<V>{};
 
 template <auto V1, auto V2>
 constexpr auto operator==(arg_t<V1>, arg_t<V2>) -> bool {
-    if constexpr (std::is_same_v<stdx::remove_cvref_t<decltype(V1)>,
-                                 stdx::remove_cvref_t<decltype(V2)>>) {
+    if constexpr (std::is_same_v<std::remove_cvref_t<decltype(V1)>,
+                                 std::remove_cvref_t<decltype(V2)>>) {
         return V1 == V2;
     }
     return false;
