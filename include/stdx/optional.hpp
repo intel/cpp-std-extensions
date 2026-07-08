@@ -79,10 +79,10 @@ struct unwrap_invoker<Func, L<Ts...>,
 
 template <typename F, typename Arg>
 constexpr auto unwrap_invoke(F &&f, Arg &&arg) {
-    return unwrap_invoker<stdx::remove_cvref_t<F>,
-                          stdx::remove_cvref_t<Arg>>::invoke(std::forward<F>(f),
-                                                             std::forward<Arg>(
-                                                                 arg));
+    return unwrap_invoker<std::remove_cvref_t<F>,
+                          std::remove_cvref_t<Arg>>::invoke(std::forward<F>(f),
+                                                            std::forward<Arg>(
+                                                                arg));
 }
 
 template <typename F, typename Arg>
@@ -109,10 +109,9 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
         : val{std::forward<Args>(args)...} {}
 
     template <typename U = T>
-        requires(
-            std::is_constructible_v<T, U &&> and
-            not std::is_same_v<stdx::remove_cvref_t<U>, std::in_place_t> and
-            not std::is_same_v<stdx::remove_cvref_t<U>, optional>)
+        requires(std::is_constructible_v<T, U &&> and
+                 not std::is_same_v<std::remove_cvref_t<U>, std::in_place_t> and
+                 not std::is_same_v<std::remove_cvref_t<U>, optional>)
     constexpr explicit optional(U &&u) : val{std::forward<U>(u)} {}
 
     constexpr auto operator=(std::nullopt_t) -> optional & {
@@ -123,7 +122,7 @@ template <typename T, typename TS = tombstone_traits<T>> class optional {
     template <typename U = T>
         requires(std::is_constructible_v<T, U> and
                  std::is_assignable_v<T &, U> and
-                 not std::is_same_v<stdx::remove_cvref_t<U>, optional> and
+                 not std::is_same_v<std::remove_cvref_t<U>, optional> and
                  (std::is_scalar_v<T> or
                   not std::is_same_v<std::decay_t<U>, T>))
     constexpr auto operator=(U &&u) -> optional & {
@@ -310,27 +309,27 @@ template <typename T> optional(T) -> optional<T>;
 namespace detail {
 template <typename T>
 concept optional_like =
-    stdx::is_specialization_of_v<stdx::remove_cvref_t<T>, optional> or
-    stdx::is_specialization_of_v<stdx::remove_cvref_t<T>, std::optional>;
+    stdx::is_specialization_of_v<std::remove_cvref_t<T>, optional> or
+    stdx::is_specialization_of_v<std::remove_cvref_t<T>, std::optional>;
 
 template <typename R, typename... Ts,
-          typename = std::enable_if_t<
-              (... and stdx::is_specialization_of_v<stdx::remove_cvref_t<Ts>,
-                                                    optional>)>>
+          typename = std::enable_if_t<(
+              ... and
+              stdx::is_specialization_of_v<std::remove_cvref_t<Ts>, optional>)>>
 auto convert_optional(Ts const &...) -> optional<R>;
 template <typename R, typename... Ts,
           typename = std::enable_if_t<
-              (... and stdx::is_specialization_of_v<stdx::remove_cvref_t<Ts>,
+              (... and stdx::is_specialization_of_v<std::remove_cvref_t<Ts>,
                                                     std::optional>)>>
 auto convert_optional(Ts const &...) -> std::optional<R>;
 } // namespace detail
 
 template <typename F, detail::optional_like... Ts>
 constexpr auto transform(F &&f, Ts &&...ts) {
-    using func_t = stdx::remove_cvref_t<F>;
+    using func_t = std::remove_cvref_t<F>;
     using R = std::invoke_result_t<
         func_t,
-        forward_like_t<Ts, typename stdx::remove_cvref_t<Ts>::value_type>...>;
+        forward_like_t<Ts, typename std::remove_cvref_t<Ts>::value_type>...>;
     using O = decltype(detail::convert_optional<R>(ts...));
     if ((... and ts.has_value())) {
         return O{with_result_of{[&] {

@@ -2,7 +2,6 @@
 
 #include <stdx/compiler.hpp>
 #include <stdx/latched.hpp>
-#include <stdx/type_traits.hpp>
 
 namespace stdx {
 inline namespace v1 {
@@ -17,7 +16,7 @@ template <typename F> struct cached : latched<F> {
     }
 };
 
-template <typename F> cached(F) -> cached<remove_cvref_t<F>>;
+template <typename F> cached(F) -> cached<std::remove_cvref_t<F>>;
 
 template <typename C> using cached_value_t = latched_value_t<C>;
 } // namespace v1

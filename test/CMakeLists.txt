@@ -63,7 +63,6 @@ add_tests(
     pp_map
     priority
     ranges
-    remove_cvref
     rollover
     span
     to_underlying

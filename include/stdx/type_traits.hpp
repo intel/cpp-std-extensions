@@ -21,11 +21,6 @@ template <typename E> constexpr auto to_underlying(E e) noexcept {
 template <typename E>
 using underlying_type_t = decltype(to_underlying(std::declval<E>()));
 
-template <typename T> struct remove_cvref {
-    using type = std::remove_cv_t<std::remove_reference_t<T>>;
-};
-template <typename T> using remove_cvref_t = typename remove_cvref<T>::type;
-
 namespace detail {
 template <bool> struct conditional;
 
@@ -54,7 +49,7 @@ struct call_base {
 
 template <typename, bool> struct callable_test : call_base {};
 template <typename F>
-struct callable_test<F, true> : remove_cvref_t<F>, call_base {};
+struct callable_test<F, true> : std::remove_cvref_t<F>, call_base {};
 
 template <typename F, typename = void> constexpr auto is_func_obj = true;
 template <typename F>
@@ -189,7 +184,7 @@ constexpr static auto apply_sequence = detail::apply_sequence_t<L>{};
 
 template <typename T, typename U>
 constexpr bool is_same_unqualified_v =
-    std::is_same_v<remove_cvref_t<T>, remove_cvref_t<U>>;
+    std::is_same_v<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
 
 namespace detail {
 template <typename T> struct any_t;

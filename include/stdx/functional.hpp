@@ -56,7 +56,7 @@ struct bind_front_t<F, std::index_sequence<Is...>, BoundArgs...> {
 
 template <typename F, typename... Args>
 constexpr auto bind_front(F &&f, Args &&...args) {
-    return detail::bind_front_t<stdx::remove_cvref_t<F>,
+    return detail::bind_front_t<std::remove_cvref_t<F>,
                                 std::make_index_sequence<sizeof...(Args)>,
                                 std::decay_t<Args>...>{
         std::forward<F>(f), {std::forward<Args>(args)...}};
@@ -112,7 +112,7 @@ struct bind_back_t<F, std::index_sequence<Is...>, BoundArgs...> {
 
 template <typename F, typename... Args>
 constexpr auto bind_back(F &&f, Args &&...args) {
-    return detail::bind_back_t<stdx::remove_cvref_t<F>,
+    return detail::bind_back_t<std::remove_cvref_t<F>,
                                std::make_index_sequence<sizeof...(Args)>,
                                std::decay_t<Args>...>{
         std::forward<F>(f), {std::forward<Args>(args)...}};

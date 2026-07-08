@@ -50,7 +50,8 @@ template <typename T, typename... Us>
 constexpr auto same_none = not same_any<T, Us...>;
 
 template <typename T, typename U>
-concept same_as_unqualified = same_as<remove_cvref_t<T>, remove_cvref_t<U>>;
+concept same_as_unqualified =
+    same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
 
 template <typename T>
 concept equality_comparable = requires(T const &t) {
@@ -137,7 +138,8 @@ template <typename T, template <typename> typename TypeTrait>
 concept has_trait = TypeTrait<T>::value;
 
 template <typename T, typename U>
-concept same_as_unqualified = same_as<remove_cvref_t<T>, remove_cvref_t<U>>;
+concept same_as_unqualified =
+    same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
 
 template <typename T>
 concept structural = is_structural_v<T>;

@@ -16,7 +16,7 @@ TEMPLATE_TEST_CASE("span exposes types", "[span]", std::uint8_t,
     using S = stdx::span<TestType>;
     STATIC_REQUIRE(std::is_same_v<typename S::element_type, TestType>);
     STATIC_REQUIRE(
-        std::is_same_v<typename S::value_type, stdx::remove_cvref_t<TestType>>);
+        std::is_same_v<typename S::value_type, std::remove_cvref_t<TestType>>);
     STATIC_REQUIRE(std::is_same_v<typename S::size_type, std::size_t>);
     STATIC_REQUIRE(std::is_same_v<typename S::difference_type, std::ptrdiff_t>);
     STATIC_REQUIRE(std::is_same_v<typename S::pointer, TestType *>);

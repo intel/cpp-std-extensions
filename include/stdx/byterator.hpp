@@ -163,9 +163,9 @@ template <typename T> class byterator {
     }
 
     template <typename V>
-        requires std::is_trivially_copyable_v<remove_cvref_t<V>>
+        requires std::is_trivially_copyable_v<std::remove_cvref_t<V>>
     auto write(V &&v) -> void {
-        using R = remove_cvref_t<V>;
+        using R = std::remove_cvref_t<V>;
         std::memcpy(ptr, std::addressof(v), sizeof(R));
         advance<R>();
     }
