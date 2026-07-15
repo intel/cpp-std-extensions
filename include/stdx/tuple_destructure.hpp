@@ -27,3 +27,12 @@ struct std::tuple_element<I, stdx::indexed_tuple<IL, Ts...>>
                                            IL, Ts...>>()[stdx::index<I>])>> {};
 
 // NOLINTEND(bugprone-std-namespace-modification)
+
+namespace stdx {
+template <typename... Ts>
+constexpr auto tuple_size_v<std::tuple<Ts...>> = sizeof...(Ts);
+template <std::size_t I, typename... Ts>
+struct tuple_element<I, std::tuple<Ts...>> {
+    using type = nth_t<I, Ts...>;
+};
+} // namespace stdx

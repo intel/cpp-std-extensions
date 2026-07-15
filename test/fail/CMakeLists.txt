@@ -18,6 +18,7 @@ add_fail_tests(
     dynamic_std_span_no_ct_capacity
     dynamic_stdx_span_no_ct_capacity
     for_each_n_args_bad_size
+    non_unrolled_for_each
     optional_without_tombstone
     optional_integral_with_tombstone_traits
     rollover_less_than

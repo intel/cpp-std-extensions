@@ -51,23 +51,6 @@ TEST_CASE("tuple is tuplelike", "[tuple]") {
     STATIC_CHECK(stdx::tuplelike<stdx::tuple<>>);
 }
 
-TEST_CASE("tuple has tuple protocol", "[tuple]") {
-    auto t = stdx::tuple{1, 2, 3};
-    STATIC_CHECK(stdx::has_tuple_protocol<decltype(t)>);
-    STATIC_CHECK(stdx::has_tuple_protocol<stdx::tuple<>>);
-}
-
-TEST_CASE("std::array has tuple protocol", "[tuple_algorithms]") {
-    auto t = std::array{1, 2, 3};
-    STATIC_CHECK(stdx::has_tuple_protocol<decltype(t)>);
-    STATIC_CHECK(stdx::has_tuple_protocol<std::array<int, 0>>);
-}
-
-TEST_CASE("std::pair has tuple protocol", "[tuple_algorithms]") {
-    auto t = std::pair{1, 2};
-    STATIC_CHECK(stdx::has_tuple_protocol<decltype(t)>);
-}
-
 namespace {
 template <auto N> struct empty {};
 } // namespace

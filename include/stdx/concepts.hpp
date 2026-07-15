@@ -2,6 +2,8 @@
 
 #include <stdx/type_traits.hpp>
 
+#include <type_traits>
+
 #if __has_include(<concepts>)
 #include <concepts>
 #endif
@@ -9,16 +11,15 @@
 #if __cpp_lib_concepts < 202002L
 
 #include <functional>
-#include <type_traits>
 #include <utility>
 
 namespace stdx {
 inline namespace v1 {
 template <typename T>
-concept integral = std::is_integral_v<T>;
+concept floating_point = std::is_floating_point_v<T>;
 
 template <typename T>
-concept floating_point = std::is_floating_point_v<T>;
+concept integral = std::is_integral_v<T>;
 
 template <typename T>
 concept signed_integral = integral<T> and std::is_signed_v<T>;
@@ -42,16 +43,6 @@ concept same_as_helper = std::is_same_v<T, U>;
 
 template <typename T, typename U>
 concept same_as = detail::same_as_helper<T, U> and detail::same_as_helper<U, T>;
-
-template <typename T, typename... Us>
-constexpr auto same_any = (... or same_as<T, Us>);
-
-template <typename T, typename... Us>
-constexpr auto same_none = not same_any<T, Us...>;
-
-template <typename T, typename U>
-concept same_as_unqualified =
-    same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
 
 template <typename T>
 concept equality_comparable = requires(T const &t) {
@@ -91,21 +82,6 @@ concept boolean_testable = boolean_testable_impl<B> and requires(B &&b) {
 template <typename F, typename... Args>
 concept predicate = invocable<F, Args...> and
                     detail::boolean_testable<std::invoke_result_t<F, Args...>>;
-
-template <typename T>
-concept callable = is_callable_v<T>;
-
-template <typename T, template <typename> typename TypeTrait>
-concept has_trait = TypeTrait<T>::value;
-
-template <typename T>
-concept structural = is_structural_v<T>;
-
-template <typename T>
-concept complete = is_complete_v<T>;
-
-template <typename T, typename U>
-concept same_template_as = is_same_template_v<T, U>;
 } // namespace v1
 } // namespace stdx
 
@@ -130,16 +106,29 @@ using std::totally_ordered;
 
 using std::invocable;
 using std::predicate;
+} // namespace v1
+} // namespace stdx
+
+#endif
+
+namespace stdx {
+inline namespace v1 {
+
+template <typename T, typename U>
+concept same_as_unqualified =
+    same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
+
+template <typename T, typename... Us>
+constexpr auto same_any = (... or same_as<T, Us>);
+
+template <typename T, typename... Us>
+constexpr auto same_none = not same_any<T, Us...>;
 
 template <typename T>
 concept callable = is_callable_v<T>;
 
 template <typename T, template <typename> typename TypeTrait>
 concept has_trait = TypeTrait<T>::value;
-
-template <typename T, typename U>
-concept same_as_unqualified =
-    same_as<std::remove_cvref_t<T>, std::remove_cvref_t<U>>;
 
 template <typename T>
 concept structural = is_structural_v<T>;
@@ -150,12 +139,44 @@ concept complete = is_complete_v<T>;
 template <typename T, typename U>
 concept same_template_as = is_same_template_v<T, U>;
 
-template <typename T, typename... Us>
-constexpr auto same_any = (... or same_as<T, Us>);
+template <typename T>
+concept tuple_comparable = requires { typename T::common_tuple_comparable; };
 
-template <typename T, typename... Us>
-constexpr auto same_none = not same_any<T, Us...>;
+template <typename T>
+concept tuplelike = requires { typename std::remove_cvref_t<T>::is_tuple; };
+
+namespace detail {
+template <typename T>
+concept has_vacuous_tuple_protocol = requires {
+    {
+        tuple_size_v<std::remove_cvref_t<T>>
+    } -> std::same_as<std::size_t const &>;
+};
+template <typename T>
+concept is_vacuous_tuple = tuple_size_v<std::remove_cvref_t<T>> == 0;
+
+constexpr inline auto concept_try_get = [](auto &x) -> decltype(auto) {
+    using std::get;
+    return get<0>(x);
+};
+
+template <typename T>
+concept has_get_protocol = requires(T &t) {
+    {
+        concept_try_get(t)
+    } -> same_as_unqualified<tuple_element_t<0, std::remove_cvref_t<T>>>;
+};
+} // namespace detail
+
+template <typename T>
+concept has_tuple_protocol = detail::has_vacuous_tuple_protocol<T> and
+                             (detail::is_vacuous_tuple<T> or
+                              detail::has_get_protocol<std::remove_cvref_t<T>>);
+
+template <typename T>
+concept has_array_protocol = has_tuple_protocol<T> and requires {
+    typename std::remove_cvref_t<T>::value_type;
+};
+
 } // namespace v1
 } // namespace stdx
-
-#endif
