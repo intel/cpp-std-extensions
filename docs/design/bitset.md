@@ -8,8 +8,8 @@ Documentation: https://intel.github.io/cpp-std-extensions/#_bitset_hpp
 A platform might have different performance characteristics depending on the
 type used inside `bitset`. `std::bitset` doesn't allow this to be controlled;
 `stdx::bitset` does. For convenience, we don't always want to specify the
-underlying type; by default we want it to pick the smallest unsigned integral
-type that will work.
+underlying type; by default we want to automatically pick the smallest unsigned
+integral type that will work.
 
 ```cpp
 using A = stdx::bitset<8>;
@@ -22,11 +22,14 @@ than manipulating `A`.
 
 ### Other ideas
 
-There is a tradeoff of size/performance here that we partially expose with the
-underlying type, but for larger bitsets this is not so easy to expose. Should
-the underlying type for a `stdx::bitset<97>` be `std::array<std::uint64_t, 13>` or
-`std::array<std::uint8_t, 97>`? In the end it is probably not worth worrying
-about a very small amount of extra space for such cases.
+There is a tradeoff of size/performance here that we expose with the underlying
+type, but for larger bitsets the size consideration becomes less important; it
+becomes a smaller percentage. Should the underlying type for a
+`stdx::bitset<97>` be `std::array<std::uint64_t, 13>` or
+`std::array<std::uint8_t, 97>`? If we get better performance from
+`std::uint64_t` manipulation it probably outweighs the size overhead.
+
+Would it be possible to make this determination automatically?
 
 ## Construction
 
