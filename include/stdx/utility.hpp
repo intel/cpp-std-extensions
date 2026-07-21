@@ -285,6 +285,14 @@ constexpr auto get(make_integer_sequence<T, N>) {
     return std::integral_constant<T, I>{};
 }
 
+template <typename T, T N>
+constexpr auto tuple_size_v<make_integer_sequence<T, N>> = std::size_t{N};
+
+template <std::size_t I, typename T, T N>
+struct tuple_element<I, make_integer_sequence<T, N>> {
+    static_assert(I < N);
+    using type = std::integral_constant<T, I>;
+};
 } // namespace v1
 } // namespace stdx
 

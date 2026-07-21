@@ -10,8 +10,37 @@
 #include <algorithm>
 #include <array>
 #include <functional>
+#include <tuple>
 #include <type_traits>
 #include <utility>
+
+TEST_CASE("tuple has tuple protocol", "[tuple_algorithms]") {
+    auto t = stdx::tuple{1, 2, 3};
+    STATIC_CHECK(stdx::has_tuple_protocol<decltype(t)>);
+    STATIC_CHECK(stdx::has_tuple_protocol<stdx::tuple<>>);
+}
+
+TEST_CASE("span has tuple protocol", "[tuple_algorithms]") {
+    auto a = std::array{1, 2, 3};
+    auto s = stdx::span<int, 3>{a};
+    STATIC_CHECK(stdx::has_tuple_protocol<decltype(s)>);
+}
+
+TEST_CASE("std::pair has tuple protocol", "[tuple_algorithms]") {
+    auto t = std::pair{1, 2};
+    STATIC_CHECK(stdx::has_tuple_protocol<decltype(t)>);
+}
+
+TEST_CASE("std::tuple has tuple protocol", "[tuple_algorithms]") {
+    auto t = std::tuple{1, 2};
+    STATIC_CHECK(stdx::has_tuple_protocol<decltype(t)>);
+}
+
+TEST_CASE("std::array has tuple protocol", "[tuple_algorithms]") {
+    auto t = std::array{1, 2, 3};
+    STATIC_CHECK(stdx::has_tuple_protocol<decltype(t)>);
+    STATIC_CHECK(stdx::has_tuple_protocol<std::array<int, 0>>);
+}
 
 TEST_CASE("unary transform", "[tuple_algorithms]") {
     STATIC_REQUIRE(stdx::transform([](auto) { return 1; }, stdx::tuple{}) ==
@@ -247,6 +276,38 @@ TEST_CASE("for_each", "[tuple_algorithms]") {
     }
 }
 
+TEST_CASE("for_each on std::tuple", "[tuple_algorithms]") {
+    {
+        auto const t = std::tuple{};
+        auto sum = 0;
+        stdx::for_each([&](auto x, auto y) { sum += x + y; }, t, t);
+        CHECK(sum == 0);
+    }
+    {
+        auto const t = std::tuple{1, 2, 3};
+        auto sum = 0;
+        stdx::for_each([&](auto x, auto y) { sum += x + y; }, t, t);
+        CHECK(sum == 12);
+    }
+    {
+        auto const t = std::tuple{1};
+        auto sum = 0;
+        stdx::for_each([&](auto x, auto &&y) { sum += x + y.value; }, t,
+                       stdx::tuple{move_only{2}});
+        CHECK(sum == 3);
+    }
+    {
+        auto const t = std::tuple{1, 2, 3};
+        auto f = stdx::for_each(
+            [calls = 0](auto) mutable {
+                ++calls;
+                return calls;
+            },
+            t);
+        CHECK(f(0) == 4);
+    }
+}
+
 TEST_CASE("for_each stops at smallest tuple length", "[tuple_algorithms]") {
     auto sum = 0;
     stdx::for_each([&](auto x, auto y) { sum += x + y; }, stdx::tuple{1, 2, 3},
@@ -291,6 +352,20 @@ TEST_CASE("unrolled_for_each on index_sequence", "[tuple_algorithms]") {
         a, stdx::make_index_sequence<stdx::ct_capacity(a)>{});
     CHECK(sum == 9u);
     CHECK(a == std::array{0u, 1u, 2u});
+}
+
+TEST_CASE("heterogeneous for_each", "[tuple_algorithms]") {
+    auto a = std::array{1, 2, 3};
+    auto t = std::tuple{1, 2, 3};
+    auto sum = 0;
+    stdx::for_each(
+        [&](auto &x, auto y) {
+            sum += x + y;
+            x--;
+        },
+        a, t);
+    CHECK(sum == 12);
+    CHECK(a == std::array{0, 1, 2});
 }
 
 TEST_CASE("tuple_cat", "[tuple_algorithms]") {
@@ -497,6 +572,13 @@ TEST_CASE("all_of", "[tuple_algorithms]") {
                                 stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
 }
 
+TEST_CASE("unrolled all_of on arrays", "[tuple_algorithms]") {
+    auto const a = std::array{1, 2, 3};
+    CHECK(stdx::unrolled_all_of([](auto n) { return n > 0; }, a));
+    CHECK(stdx::unrolled_all_of([](auto x, auto y) { return (x + y) % 2 == 0; },
+                                a, a));
+}
+
 TEST_CASE("any_of", "[tuple_algorithms]") {
     constexpr auto t = stdx::tuple{1, 2, 3};
     STATIC_REQUIRE(stdx::any_of([](auto n) { return n % 2 == 0; }, t));
@@ -505,6 +587,13 @@ TEST_CASE("any_of", "[tuple_algorithms]") {
 
     STATIC_REQUIRE(stdx::any_of([](auto x, auto y) { return (x + y) % 2 == 0; },
                                 stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
+}
+
+TEST_CASE("unrolled any_of on arrays", "[tuple_algorithms]") {
+    auto const a = std::array{1, 2, 3};
+    CHECK(stdx::unrolled_any_of([](auto n) { return n % 2 == 0; }, a));
+    CHECK(stdx::unrolled_any_of([](auto x, auto y) { return (x + y) % 2 == 0; },
+                                a, a));
 }
 
 TEST_CASE("none_of", "[tuple_algorithms]") {
@@ -516,6 +605,13 @@ TEST_CASE("none_of", "[tuple_algorithms]") {
     STATIC_REQUIRE(
         stdx::none_of([](auto x, auto y) { return (x + y) % 2 != 0; },
                       stdx::tuple{1, 3, 5}, stdx::tuple{1, 3}));
+}
+
+TEST_CASE("unrolled none_of on arrays", "[tuple_algorithms]") {
+    auto const a = std::array{1, 3, 5};
+    CHECK(stdx::unrolled_none_of([](auto n) { return n % 2 == 0; }, a));
+    CHECK(stdx::unrolled_none_of(
+        [](auto x, auto y) { return (x + y) % 2 != 0; }, a, a));
 }
 
 TEST_CASE("contains_type", "[tuple_algorithms]") {
@@ -898,6 +994,12 @@ TEST_CASE("tuple_cons", "[tuple_algorithms]") {
     STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<int>>);
 }
 
+TEST_CASE("tuple_cons on std::tuple", "[tuple_algorithms]") {
+    STATIC_REQUIRE(stdx::tuple_cons(1, std::tuple{}) == std::tuple{1});
+    auto t = stdx::tuple_cons(1, std::tuple{});
+    STATIC_REQUIRE(std::is_same_v<decltype(t), std::tuple<int>>);
+}
+
 TEST_CASE("tuple_cons (move only)", "[tuple_algorithms]") {
     auto t = stdx::tuple_cons(move_only{5}, stdx::tuple{move_only{10}});
     STATIC_REQUIRE(
@@ -917,6 +1019,12 @@ TEST_CASE("tuple_snoc", "[tuple_algorithms]") {
     STATIC_REQUIRE(stdx::tuple_snoc(stdx::tuple{}, 1) == stdx::tuple{1});
     auto t = stdx::tuple_snoc(stdx::tuple{}, 1);
     STATIC_REQUIRE(std::is_same_v<decltype(t), stdx::tuple<int>>);
+}
+
+TEST_CASE("tuple_snoc on std::tuple", "[tuple_algorithms]") {
+    STATIC_REQUIRE(stdx::tuple_snoc(std::tuple{}, 1) == std::tuple{1});
+    auto t = stdx::tuple_snoc(std::tuple{}, 1);
+    STATIC_REQUIRE(std::is_same_v<decltype(t), std::tuple<int>>);
 }
 
 TEST_CASE("tuple_snoc (move only)", "[tuple_algorithms]") {

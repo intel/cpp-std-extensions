@@ -1,7 +1,9 @@
 #pragma once
 
+#include <stdx/concepts.hpp>
 #include <stdx/ct_conversions.hpp>
 #include <stdx/tuple.hpp>
+#include <stdx/tuple_destructure.hpp>
 #include <stdx/type_traits.hpp>
 
 #include <boost/mp11/algorithm.hpp>
@@ -95,23 +97,27 @@ template <tuplelike... Ts> [[nodiscard]] constexpr auto tuple_cat(Ts &&...ts) {
     }
 }
 
-template <typename T, tuplelike Tup>
+template <typename T, has_tuple_protocol Tup>
 [[nodiscard]] constexpr auto tuple_cons(T &&t, Tup &&tup) {
     using tuple_t = std::remove_cvref_t<Tup>;
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return stdx::tuple<std::remove_cvref_t<T>,
-                           stdx::tuple_element_t<Is, tuple_t>...>{
-            std::forward<T>(t), std::forward<Tup>(tup)[index<Is>]...};
+        using std::get;
+        using new_tuple_t =
+            boost::mp11::mp_push_front<tuple_t, std::remove_cvref_t<T>>;
+        return new_tuple_t{std::forward<T>(t),
+                           get<Is>(std::forward<Tup>(tup))...};
     }(std::make_index_sequence<stdx::tuple_size_v<tuple_t>>{});
 }
 
-template <tuplelike Tup, typename T>
+template <has_tuple_protocol Tup, typename T>
 [[nodiscard]] constexpr auto tuple_snoc(Tup &&tup, T &&t) {
     using tuple_t = std::remove_cvref_t<Tup>;
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return stdx::tuple<stdx::tuple_element_t<Is, tuple_t>...,
-                           std::remove_cvref_t<T>>{
-            std::forward<Tup>(tup)[index<Is>]..., std::forward<T>(t)};
+        using std::get;
+        using new_tuple_t =
+            boost::mp11::mp_push_back<tuple_t, std::remove_cvref_t<T>>;
+        return new_tuple_t{get<Is>(std::forward<Tup>(tup))...,
+                           std::forward<T>(t)};
     }(std::make_index_sequence<stdx::tuple_size_v<tuple_t>>{});
 }
 
@@ -186,6 +192,7 @@ constexpr auto transform(Op &&op, Ts &&...ts) {
     }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
 }
 
+namespace detail {
 template <typename Op, typename... Ts>
 constexpr auto unrolled_for_each(Op &&op, Ts &&...ts) -> Op {
     [&]<std::size_t... Is>(std::index_sequence<Is...>) {
@@ -193,10 +200,21 @@ constexpr auto unrolled_for_each(Op &&op, Ts &&...ts) -> Op {
     }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
     return op;
 }
+} // namespace detail
 
-template <typename Op, tuplelike... Ts>
+template <typename Op, has_tuple_protocol... Ts>
 constexpr auto for_each(Op &&op, Ts &&...ts) -> Op {
-    return unrolled_for_each(std::forward<Op>(op), std::forward<Ts>(ts)...);
+    static_assert((... or not has_array_protocol<Ts>),
+                  "Calling for_each on array-like type: use unrolled_for_each "
+                  "if you really want this.");
+    return detail::unrolled_for_each(std::forward<Op>(op),
+                                     std::forward<Ts>(ts)...);
+}
+
+template <typename Op, has_tuple_protocol... Ts>
+constexpr auto unrolled_for_each(Op &&op, Ts &&...ts) -> Op {
+    return detail::unrolled_for_each(std::forward<Op>(op),
+                                     std::forward<Ts>(ts)...);
 }
 
 namespace detail {
@@ -204,7 +222,6 @@ template <std::size_t I, typename... Ts>
 constexpr auto invoke_with_idx_at(auto &&op, Ts &&...ts) -> decltype(auto) {
     return op.template operator()<I>(get<I>(std::forward<Ts>(ts))...);
 }
-} // namespace detail
 
 template <typename Op, typename... Ts>
 constexpr auto unrolled_enumerate(Op &&op, Ts &&...ts) -> Op {
@@ -213,28 +230,81 @@ constexpr auto unrolled_enumerate(Op &&op, Ts &&...ts) -> Op {
     }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
     return op;
 }
+} // namespace detail
 
-template <typename Op, tuplelike... Ts>
+template <typename Op, has_tuple_protocol... Ts>
 constexpr auto enumerate(Op &&op, Ts &&...ts) -> Op {
-    return unrolled_enumerate(std::forward<Op>(op), std::forward<Ts>(ts)...);
+    static_assert(
+        (... or not has_array_protocol<Ts>),
+        "Calling enumerate on array-like type: use unrolled_enumerate "
+        "if you really want this.");
+    return detail::unrolled_enumerate(std::forward<Op>(op),
+                                      std::forward<Ts>(ts)...);
 }
 
-template <typename F, tuplelike... Ts>
-constexpr auto all_of(F &&f, Ts &&...ts) -> bool {
+template <typename Op, has_tuple_protocol... Ts>
+constexpr auto unrolled_enumerate(Op &&op, Ts &&...ts) -> Op {
+    return detail::unrolled_enumerate(std::forward<Op>(op),
+                                      std::forward<Ts>(ts)...);
+}
+
+namespace detail {
+template <typename F, typename... Ts>
+constexpr auto unrolled_all_of(F &&f, Ts &&...ts) -> bool {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         return (... and detail::invoke_at<Is>(f, std::forward<Ts>(ts)...));
     }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
 }
+} // namespace detail
 
-template <typename F, tuplelike... Ts>
-constexpr auto any_of(F &&f, Ts &&...ts) -> bool {
+template <typename F, has_tuple_protocol... Ts>
+constexpr auto all_of(F &&f, Ts &&...ts) -> bool {
+    static_assert((... or not has_array_protocol<Ts>),
+                  "Calling all_of on array-like type: use unrolled_all_of "
+                  "if you really want this.");
+    return detail::unrolled_all_of(std::forward<F>(f), std::forward<Ts>(ts)...);
+}
+
+template <typename F, has_tuple_protocol... Ts>
+constexpr auto unrolled_all_of(F &&f, Ts &&...ts) -> bool {
+    return detail::unrolled_all_of(std::forward<F>(f), std::forward<Ts>(ts)...);
+}
+
+namespace detail {
+template <typename F, typename... Ts>
+constexpr auto unrolled_any_of(F &&f, Ts &&...ts) -> bool {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         return (... or detail::invoke_at<Is>(f, std::forward<Ts>(ts)...));
     }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
 }
+} // namespace detail
 
-template <typename... Ts> constexpr auto none_of(Ts &&...ts) -> bool {
-    return not any_of(std::forward<Ts>(ts)...);
+template <typename F, has_tuple_protocol... Ts>
+constexpr auto any_of(F &&f, Ts &&...ts) -> bool {
+    static_assert((... or not has_array_protocol<Ts>),
+                  "Calling any_of on array-like type: use unrolled_any_of "
+                  "if you really want this.");
+    return detail::unrolled_any_of(std::forward<F>(f), std::forward<Ts>(ts)...);
+}
+
+template <typename F, has_tuple_protocol... Ts>
+constexpr auto unrolled_any_of(F &&f, Ts &&...ts) -> bool {
+    return detail::unrolled_any_of(std::forward<F>(f), std::forward<Ts>(ts)...);
+}
+
+template <typename F, has_tuple_protocol... Ts>
+constexpr auto none_of(F &&f, Ts &&...ts) -> bool {
+    static_assert((... or not has_array_protocol<Ts>),
+                  "Calling none_of on array-like type: use unrolled_none_of "
+                  "if you really want this.");
+    return not detail::unrolled_any_of(std::forward<F>(f),
+                                       std::forward<Ts>(ts)...);
+}
+
+template <typename F, has_tuple_protocol... Ts>
+constexpr auto unrolled_none_of(F &&f, Ts &&...ts) -> bool {
+    return not detail::unrolled_any_of(std::forward<F>(f),
+                                       std::forward<Ts>(ts)...);
 }
 
 namespace detail {
@@ -280,7 +350,6 @@ template <template <typename> typename Proj = std::type_identity_t,
 }
 
 namespace detail {
-
 template <tuplelike T, template <typename> typename Proj> struct test_pair_t {
     template <std::size_t I, std::size_t J>
     constexpr static auto value =

@@ -5,6 +5,8 @@
 
 #include <boost/mp11/algorithm.hpp>
 
+#include <array>
+#include <cstddef>
 #include <type_traits>
 #include <utility>
 
@@ -330,5 +332,31 @@ constexpr auto is_complete_v<T, detail::void_v<sizeof(T)>> = true;
 
 template <typename T, typename U>
 constexpr auto is_same_template_v = template_base<T>() == template_base<U>();
+
+template <typename T> constexpr auto tuple_size_v = 0u;
+template <typename T>
+    requires requires { T::size(); }
+constexpr auto tuple_size_v<T> = T::size();
+
+template <typename T, std::size_t N>
+constexpr auto tuple_size_v<std::array<T, N>> = N;
+template <typename T, typename U>
+constexpr auto tuple_size_v<std::pair<T, U>> = std::size_t{2};
+
+template <std::size_t I, typename T> struct tuple_element;
+
+template <std::size_t I, typename T>
+using tuple_element_t = typename tuple_element<I, T>::type;
+
+template <std::size_t I, typename T, std::size_t N>
+struct tuple_element<I, std::array<T, N>> {
+    using type = T;
+};
+
+template <std::size_t I, typename T, typename U>
+struct tuple_element<I, std::pair<T, U>> {
+    static_assert(I < 2);
+    using type = stdx::conditional_t<I == 0, T, U>;
+};
 } // namespace v1
 } // namespace stdx

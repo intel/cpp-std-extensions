@@ -281,5 +281,11 @@ constexpr auto ct_capacity_v<span<T, N>> = N;
 template <typename T>
 constexpr auto ct_capacity_v<span<T, dynamic_extent>> =
     detail::ct_capacity_fail<span<T, dynamic_extent>>{};
+
+template <std::size_t I, typename T, std::size_t N>
+struct tuple_element<I, span<T, N>> {
+    static_assert(N != dynamic_extent and I < N);
+    using type = T;
+};
 } // namespace v1
 } // namespace stdx
