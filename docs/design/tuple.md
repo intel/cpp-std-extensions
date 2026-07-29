@@ -25,7 +25,7 @@ For example, it can't use formatted `static_assert`s (because they make use of
 `tuplelike` is modelled by `stdx::tuple` and `stdx::indexed_tuple` only.
 
 `has_tuple_protocol` means that a type models the `get` protocol. This applies
-to much more: `stdx::tuple` but also `std::tuple`, `std::pair`, std::array`,
+to much more: `stdx::tuple` but also `std::tuple`, `std::pair`, `std::array`,
 etc.
 
 ## `one_of`
