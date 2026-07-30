@@ -71,21 +71,6 @@ TEST_CASE("derived types are not specializations (value templates)",
         not stdx::is_specialization_of<value_derived_t<0>, value_unary_t>());
 }
 
-namespace {
-enum E1 {};
-enum struct E2 {};
-} // namespace
-
-TEST_CASE("is_scoped_enum", "[type_traits]") {
-    STATIC_REQUIRE(not stdx::is_scoped_enum_v<int>);
-    STATIC_REQUIRE(not stdx::is_scoped_enum_v<E1>);
-    STATIC_REQUIRE(stdx::is_scoped_enum_v<E2>);
-
-    STATIC_REQUIRE(not stdx::is_scoped_enum<int>::value);
-    STATIC_REQUIRE(not stdx::is_scoped_enum<E1>::value);
-    STATIC_REQUIRE(stdx::is_scoped_enum<E2>::value);
-}
-
 TEST_CASE("type_identity", "[type_traits]") {
     STATIC_REQUIRE(std::is_same_v<stdx::type_identity_t<void>, void>);
 }

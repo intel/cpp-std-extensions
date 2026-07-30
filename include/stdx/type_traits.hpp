@@ -66,10 +66,6 @@ constexpr bool is_function_object_v = detail::is_func_obj<T>;
 template <typename T>
 constexpr bool is_callable_v = is_function_v<T> or is_function_object_v<T>;
 
-constexpr auto is_constant_evaluated() noexcept -> bool {
-    return __builtin_is_constant_evaluated();
-}
-
 template <typename T> struct type_identity {
     using type = T;
 };
@@ -114,12 +110,6 @@ constexpr auto is_specialization_of()
     -> std::bool_constant<is_value_specialization_of_v<U, T>> {
     return {};
 }
-
-template <typename E>
-constexpr bool is_scoped_enum_v =
-    std::is_enum_v<E> and not std::is_convertible_v<E, underlying_type_t<E>>;
-template <typename E>
-using is_scoped_enum = std::bool_constant<is_scoped_enum_v<E>>;
 
 template <typename...> struct type_list {};
 template <auto...> struct value_list {};
