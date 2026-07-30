@@ -19,3 +19,45 @@ operations are done through alias templates, which are much cheaper.
 STL implementations typically do the same thing for internal use, but the
 standard constrains them to provide the more expensive interface.
 
+## `to_underlying`
+
+In the standard, `underlying_type_t` is in `<type_traits>` while `to_underlying`
+is in `<utility>`. `stdx` puts both in `<type_traits>`.
+
+In the standard, this fails to compile:
+
+```cpp
+auto x = to_underlying(42);
+```
+
+because `to_underlying` is defined only on enumeration types. But in practice,
+it is very useful in generic code to have an "idempotent" form of
+`to_underlying` that reduces an enumeration to the underlying integral type and
+is a no-op otherwise. That's what `stdx::to_underlying` does.
+
+### Other ideas
+
+`stdx::to_underlying` could be constrained to work on either integral or
+enumeration types, but it is currently unconstrained.
+
+## Tuple helpers
+
+The standard seems ambiguous on where the primary template declarations for
+`tuple_element` and `tuple_size` are to be kept, or if it matters. We choose to
+put them in `<type_traits.hpp>`. Each class that specializes them then includes
+`<type_traits.hpp>` rather than `<tuple.hpp>`.
+
+## `type_identity`
+
+`std::type_identity` and `std::type_identity_t` exist from C++20, so in theory
+we could get rid of their counterparts in `stdx`. However, the standard does not
+define `type_identity_v` -- which is actually very useful. Given that utility,
+it is consistent to provide all three in `stdx`; especially given that they are
+trivial.
+
+## Miscellaneous
+
+We expect to remove several type traits from `stdx` as standard adoption allows.
+
+`is_specialization_of` and `is_same_template_v` get a lot easier particularly
+with reflection.
