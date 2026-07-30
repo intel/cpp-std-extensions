@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdx/concepts.hpp>
+#include <stdx/ct_conversions.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/udls.hpp>
 #include <stdx/utility.hpp>
@@ -27,7 +28,6 @@ template <typename> struct tag_constant;
 template <typename T> constexpr static tag_constant<T> *tag{};
 
 namespace error {
-template <typename...> constexpr auto always_false_v = false;
 template <typename T> struct type_from_tag_constant {
     using type = T;
 };
