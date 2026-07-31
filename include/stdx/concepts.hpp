@@ -156,7 +156,6 @@ template <typename T>
 concept is_vacuous_tuple = tuple_size_v<std::remove_cvref_t<T>> == 0;
 
 constexpr inline auto concept_try_get = [](auto &x) -> decltype(auto) {
-    using std::get;
     return get<0>(x);
 };
 
