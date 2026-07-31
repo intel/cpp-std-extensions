@@ -418,6 +418,18 @@ struct tuple_impl<std::index_sequence<Is...>, index_function_list<Fs...>, Ts...>
 template <typename... Ts>
 tuple_impl(Ts...)
     -> tuple_impl<std::index_sequence_for<Ts...>, index_function_list<>, Ts...>;
+
+template <std::size_t I, tuplelike Tuple>
+[[nodiscard]] constexpr auto get(Tuple &&t LIFETIMEBOUND)
+    -> decltype(std::forward<Tuple>(t)[index<I>]) {
+    return std::forward<Tuple>(t)[index<I>];
+}
+
+template <typename T, tuplelike Tuple>
+[[nodiscard]] constexpr auto get(Tuple &&t LIFETIMEBOUND)
+    -> decltype(std::forward<Tuple>(t).get(tag<T>)) {
+    return std::forward<Tuple>(t).get(tag<T>);
+}
 } // namespace detail
 
 template <std::size_t I, tuplelike T> struct tuple_element<I, T> {
@@ -456,17 +468,7 @@ class indexed_tuple : public detail::tuple_impl<std::index_sequence_for<Ts...>,
 template <typename... Ts>
 indexed_tuple(Ts...) -> indexed_tuple<detail::index_function_list<>, Ts...>;
 
-template <std::size_t I, tuplelike Tuple>
-[[nodiscard]] constexpr auto get(Tuple &&t LIFETIMEBOUND)
-    -> decltype(std::forward<Tuple>(t)[index<I>]) {
-    return std::forward<Tuple>(t)[index<I>];
-}
-
-template <typename T, tuplelike Tuple>
-[[nodiscard]] constexpr auto get(Tuple &&t LIFETIMEBOUND)
-    -> decltype(std::forward<Tuple>(t).get(tag<T>)) {
-    return std::forward<Tuple>(t).get(tag<T>);
-}
+using detail::get;
 
 template <typename... Ts> [[nodiscard]] constexpr auto make_tuple(Ts &&...ts) {
     return tuple<std::decay_t<Ts>...>{std::forward<Ts>(ts)...};

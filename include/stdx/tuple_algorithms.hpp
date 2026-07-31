@@ -178,19 +178,25 @@ constexpr std::size_t zip_length_for =
         : std::min({stdx::tuple_size_v<std::remove_cvref_t<Ts>>...});
 } // namespace detail
 
-template <template <typename> typename... Fs, typename Op, tuplelike... Ts>
-constexpr auto transform(Op &&op, Ts &&...ts) {
+template <template <typename> typename... Fs, typename Op, has_tuple_protocol T,
+          has_tuple_protocol... Ts>
+constexpr auto transform(Op &&op, T &&t, Ts &&...ts) {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         if constexpr (sizeof...(Fs) == 0) {
-            return stdx::tuple<decltype(detail::invoke_at<Is>(
-                std::forward<Op>(op), std::forward<Ts>(ts)...))...>{
-                detail::invoke_at<Is>(std::forward<Op>(op),
-                                      std::forward<Ts>(ts)...)...};
+            using R = boost::mp11::mp_assign<
+                std::remove_cvref_t<T>,
+                type_list<decltype(detail::invoke_at<Is>(
+                    std::forward<Op>(op), std::forward<T>(t),
+                    std::forward<Ts>(ts)...))...>>;
+            return R{detail::invoke_at<Is>(std::forward<Op>(op),
+                                           std::forward<T>(t),
+                                           std::forward<Ts>(ts)...)...};
         } else {
-            return stdx::make_indexed_tuple<Fs...>(detail::invoke_at<Is>(
-                std::forward<Op>(op), std::forward<Ts>(ts)...)...);
+            return stdx::make_indexed_tuple<Fs...>(
+                detail::invoke_at<Is>(std::forward<Op>(op), std::forward<T>(t),
+                                      std::forward<Ts>(ts)...)...);
         }
-    }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
+    }(std::make_index_sequence<detail::zip_length_for<T, Ts...>>{});
 }
 
 namespace detail {
