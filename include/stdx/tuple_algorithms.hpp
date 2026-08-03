@@ -121,19 +121,19 @@ template <has_tuple_protocol Tup, typename T>
     }(std::make_index_sequence<stdx::tuple_size_v<tuple_t>>{});
 }
 
-template <typename T, tuplelike Tup>
+template <typename T, has_tuple_protocol Tup>
 [[nodiscard]] constexpr auto tuple_push_front(T &&t, Tup &&tup)
     -> decltype(auto) {
     return tuple_cons(std::forward<T>(t), std::forward<Tup>(tup));
 }
 
-template <tuplelike Tup, typename T>
+template <has_tuple_protocol Tup, typename T>
 [[nodiscard]] constexpr auto tuple_push_back(Tup &&tup, T &&t)
     -> decltype(auto) {
     return tuple_snoc(std::forward<Tup>(tup), std::forward<T>(t));
 }
 
-template <template <typename T> typename Pred, tuplelike T>
+template <template <typename T> typename Pred, has_tuple_protocol T>
 [[nodiscard]] constexpr auto filter(T &&t) {
     using tuple_t = std::remove_cvref_t<T>;
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
@@ -157,9 +157,10 @@ template <template <typename T> typename Pred, tuplelike T>
         }();
 
         return [&]<std::size_t... Js>(std::index_sequence<Js...>) {
-            using R =
-                stdx::tuple<stdx::tuple_element_t<indices[Js], tuple_t>...>;
-            return R{std::forward<T>(t)[index<indices[Js]>]...};
+            using R = boost::mp11::mp_assign<
+                tuple_t,
+                type_list<stdx::tuple_element_t<indices[Js], tuple_t>...>>;
+            return R{get<indices[Js]>(std::forward<T>(t))...};
         }(std::make_index_sequence<num_matches>{});
     }(std::make_index_sequence<stdx::tuple_size_v<tuple_t>>{});
 }
@@ -177,19 +178,25 @@ constexpr std::size_t zip_length_for =
         : std::min({stdx::tuple_size_v<std::remove_cvref_t<Ts>>...});
 } // namespace detail
 
-template <template <typename> typename... Fs, typename Op, tuplelike... Ts>
-constexpr auto transform(Op &&op, Ts &&...ts) {
+template <template <typename> typename... Fs, typename Op, has_tuple_protocol T,
+          has_tuple_protocol... Ts>
+constexpr auto transform(Op &&op, T &&t, Ts &&...ts) {
     return [&]<std::size_t... Is>(std::index_sequence<Is...>) {
         if constexpr (sizeof...(Fs) == 0) {
-            return stdx::tuple<decltype(detail::invoke_at<Is>(
-                std::forward<Op>(op), std::forward<Ts>(ts)...))...>{
-                detail::invoke_at<Is>(std::forward<Op>(op),
-                                      std::forward<Ts>(ts)...)...};
+            using R = boost::mp11::mp_assign<
+                std::remove_cvref_t<T>,
+                type_list<decltype(detail::invoke_at<Is>(
+                    std::forward<Op>(op), std::forward<T>(t),
+                    std::forward<Ts>(ts)...))...>>;
+            return R{detail::invoke_at<Is>(std::forward<Op>(op),
+                                           std::forward<T>(t),
+                                           std::forward<Ts>(ts)...)...};
         } else {
-            return stdx::make_indexed_tuple<Fs...>(detail::invoke_at<Is>(
-                std::forward<Op>(op), std::forward<Ts>(ts)...)...);
+            return stdx::make_indexed_tuple<Fs...>(
+                detail::invoke_at<Is>(std::forward<Op>(op), std::forward<T>(t),
+                                      std::forward<Ts>(ts)...)...);
         }
-    }(std::make_index_sequence<detail::zip_length_for<Ts...>>{});
+    }(std::make_index_sequence<detail::zip_length_for<T, Ts...>>{});
 }
 
 namespace detail {

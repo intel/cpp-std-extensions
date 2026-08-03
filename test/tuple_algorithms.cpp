@@ -68,6 +68,15 @@ TEST_CASE("n-ary transform", "[tuple_algorithms]") {
     STATIC_REQUIRE(u == stdx::tuple{2, 4, 6});
 }
 
+TEST_CASE("n-ary transform on std::tuple", "[tuple_algorithms]") {
+    STATIC_REQUIRE(stdx::transform([](auto, auto) { return 1; }, std::tuple{},
+                                   std::tuple{}) == std::tuple{});
+    constexpr auto t = std::tuple{1, 2, 3};
+    constexpr auto u =
+        stdx::transform([](auto x, auto y) { return x + y; }, t, t);
+    STATIC_REQUIRE(u == std::tuple{2, 4, 6});
+}
+
 TEST_CASE("rvalue transform", "[tuple_algorithms]") {
     auto t = stdx::tuple{1, 2, 3};
     auto const u = stdx::transform([](int &&x) { return x + 1; }, std::move(t));
@@ -531,6 +540,15 @@ TEST_CASE("filter", "[tuple_algorithms]") {
     constexpr auto u = stdx::filter<is_even>(t);
     STATIC_REQUIRE(u == stdx::tuple{std::integral_constant<int, 2>{},
                                     std::integral_constant<int, 4>{}});
+}
+
+TEST_CASE("filter on std::tuple", "[tuple_algorithms]") {
+    constexpr auto t = std::tuple{
+        std::integral_constant<int, 1>{}, std::integral_constant<int, 2>{},
+        std::integral_constant<int, 3>{}, std::integral_constant<int, 4>{}};
+    constexpr auto u = stdx::filter<is_even>(t);
+    STATIC_REQUIRE(u == std::tuple{std::integral_constant<int, 2>{},
+                                   std::integral_constant<int, 4>{}});
 }
 
 TEST_CASE("copy/move behavior for tuple_cat", "[tuple_algorithms]") {
