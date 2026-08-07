@@ -101,6 +101,13 @@ auto bs = stdx::bitset<8>{0b1010'1010ul};
 for_each([&](auto i) { /* i == 1, 3, 5, 7 */ }, bs);
 ----
 
+To iterate all the unset bits, use:
+[source,cpp]
+----
+auto bs = stdx::bitset<8>{0b1010'1010ul};
+for_each<stdx::unset_bit>([&](auto i) { /* i == 0, 2, 4, 6 */ }, bs);
+----
+
 To support "external" iteration, or use cases like using a bitset to track used
 objects, `lowest_unset` is also provided:
 [source,cpp]

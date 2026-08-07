@@ -350,6 +350,23 @@ TEMPLATE_TEST_CASE("for_each", "[bitset]", std::uint8_t, std::uint16_t,
     CHECK(result == bs);
 }
 
+TEMPLATE_TEST_CASE("for_each (unset bits)", "[bitset]", std::uint8_t,
+                   std::uint16_t, std::uint32_t, std::uint64_t) {
+    constexpr auto bs = stdx::bitset<64, TestType>{0x01020304'05060708ul};
+    auto result = decltype(bs){};
+    for_each<stdx::unset_bit>([&](auto i) { result.set(i); }, bs);
+    CHECK(result.template to<std::uint64_t>() ==
+          ~bs.template to<std::uint64_t>());
+}
+
+TEMPLATE_TEST_CASE("for_each (all bits)", "[bitset]", std::uint8_t,
+                   std::uint16_t, std::uint32_t, std::uint64_t) {
+    constexpr auto bs = stdx::bitset<64, TestType>{0x01020304'05060708ul};
+    auto result = decltype(bs){};
+    for_each<stdx::bit>([&](auto i, bool b) { result.set(i, b); }, bs);
+    CHECK(result == bs);
+}
+
 TEMPLATE_TEST_CASE("for_each iterates in order lsb to msb", "[bitset]",
                    std::uint8_t, std::uint16_t, std::uint32_t, std::uint64_t) {
     constexpr auto bs = stdx::bitset<5, TestType>{0b10101ul};
