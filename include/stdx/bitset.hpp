@@ -21,6 +21,45 @@
 
 namespace stdx {
 inline namespace v1 {
+struct set_bit {
+    template <auto Bit, typename IterArg, auto Mask>
+    constexpr static auto fn(auto e, auto idx, auto &f) {
+        using elem_t = decltype(Bit);
+        while (e != 0) {
+            auto const offset = static_cast<std::size_t>(countr_zero(e));
+            e &= static_cast<elem_t>(~(Bit << offset));
+            f(static_cast<IterArg>(idx + offset));
+        }
+    }
+};
+struct unset_bit {
+    template <auto Bit, typename IterArg, auto Mask>
+    constexpr static auto fn(auto e, auto idx, auto &f) {
+        using elem_t = decltype(Bit);
+        while (e != Mask) {
+            auto const offset = static_cast<std::size_t>(countr_one(e));
+            e |= static_cast<elem_t>(Bit << offset);
+            f(static_cast<IterArg>(idx + offset));
+        }
+    }
+};
+struct bit {
+    template <auto Bit, typename IterArg, auto Mask>
+    constexpr static auto fn(auto e, auto idx, auto &f) {
+        using elem_t = decltype(Bit);
+        for (auto i = std::size_t{}; i < popcount(Mask); ++i) {
+            bool b = e & static_cast<elem_t>(Bit << i);
+            f(static_cast<IterArg>(idx + i), b);
+        }
+    }
+};
+
+namespace detail {
+template <typename T>
+concept bit_spec = std::same_as<T, set_bit> or std::same_as<T, unset_bit> or
+                   std::same_as<T, bit>;
+}
+
 template <auto Size,
           typename StorageElem = decltype(smallest_uint<to_underlying(Size)>())>
 class bitset {
@@ -106,20 +145,20 @@ class bitset {
         return not std::is_enum_v<T> or std::is_same_v<T, decltype(Size)>;
     }
 
-    template <typename F> constexpr auto for_each(F &&f) const -> F {
-        std::size_t i = 0;
-        for (auto e : storage) {
-            while (e != 0) {
-                auto const offset = static_cast<std::size_t>(countr_zero(e));
-                e &= static_cast<elem_t>(~(bit << offset));
-                f(static_cast<iter_arg_t>(i + offset));
-            }
-            i += std::numeric_limits<elem_t>::digits;
+    template <detail::bit_spec Spec, typename F>
+    constexpr auto for_each(F &&f) const -> F {
+        std::size_t idx = 0;
+        for (auto i = std::size_t{}; i < storage_size - 1; ++i) {
+            Spec::template fn<bit, iter_arg_t,
+                              std::numeric_limits<elem_t>::max()>(storage[i],
+                                                                  idx, f);
+            idx += std::numeric_limits<elem_t>::digits;
         }
+        Spec::template fn<bit, iter_arg_t, lastmask>(highbits(), idx, f);
         return std::forward<F>(f);
     }
 
-    template <typename F, auto M, typename... S>
+    template <detail::bit_spec Spec, typename F, auto M, typename... S>
     friend constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F;
 
     template <typename T, typename F, typename R>
@@ -457,10 +496,10 @@ class bitset {
     }
 };
 
-template <typename F, auto M, typename... S>
+template <detail::bit_spec Spec = set_bit, typename F, auto M, typename... S>
 constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F {
     if constexpr (sizeof...(bs) == 1) {
-        return (bs.for_each(std::forward<F>(f)), ...);
+        return (bs.template for_each<Spec>(std::forward<F>(f)), ...);
     } else {
         static_assert(stdx::always_false_v<F>, "unimplemented");
         return f;
@@ -648,9 +687,10 @@ template <typename... Ts> class type_bitset {
         return *this;
     }
 
-    template <typename F> constexpr auto for_each(F &&f) const -> F {
+    template <detail::bit_spec Spec = set_bit, typename F>
+    constexpr auto for_each(F &&f) const -> F {
         constexpr auto callers = make_callers<F>(std::make_index_sequence<N>{});
-        stdx::for_each([&](auto i) { callers[i](f); }, bs);
+        stdx::for_each<Spec>([&](auto i) { callers[i](f); }, bs);
         return f;
     }
 };

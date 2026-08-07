@@ -200,3 +200,12 @@ TEST_CASE("for_each", "[type_bitset]") {
     });
     CHECK(result == "int0float1bool2");
 }
+
+TEST_CASE("for_each (unset bits)", "[type_bitset]") {
+    constexpr auto bs = stdx::type_bitset<int, float, bool>{};
+    auto result = std::string{};
+    bs.for_each<stdx::unset_bit>([&]<typename T, std::size_t I>() -> void {
+        result += std::string{stdx::type_as_string<T>()} + std::to_string(I);
+    });
+    CHECK(result == "int0float1bool2");
+}
