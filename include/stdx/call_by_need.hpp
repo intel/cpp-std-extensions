@@ -46,23 +46,31 @@ struct void_t {};
 template <typename T>
 using is_nonvoid_t = std::bool_constant<not std::is_same_v<T, void_t>>;
 
-template <std::size_t Base, std::size_t Len, typename F, typename Args>
+template <typename CallPolicy, typename F, typename... Args>
+using invoke_result_t =
+    decltype(CallPolicy::invoke(std::declval<F>(), std::declval<Args>()...));
+
+template <typename CallPolicy, std::size_t Base, std::size_t Len, typename F,
+          typename Args>
 constexpr auto invoke(F &&f, Args &&args) -> decltype(auto) {
-    return [&]<std::size_t... Is>(
-               std::index_sequence<Is...>) -> decltype(auto) {
-        using R = std::invoke_result_t<F, decltype(get<Base + Is>(
-                                              std::forward<Args>(args)))...>;
-        if constexpr (std::is_void_v<R>) {
-            std::forward<F>(f)(get<Base + Is>(std::forward<Args>(args))...);
-            return void_t{};
-        } else {
-            return std::forward<F>(f)(
-                get<Base + Is>(std::forward<Args>(args))...);
-        }
-    }(std::make_index_sequence<Len>{});
+    return
+        [&]<std::size_t... Is>(std::index_sequence<Is...>) -> decltype(auto) {
+            using R = invoke_result_t<CallPolicy, F,
+                                      decltype(get<Base + Is>(
+                                          std::forward<Args>(args)))...>;
+            if constexpr (std::is_void_v<R>) {
+                CallPolicy::invoke(std::forward<F>(f),
+                                   get<Base + Is>(std::forward<Args>(args))...);
+                return void_t{};
+            } else {
+                return CallPolicy::invoke(
+                    std::forward<F>(f),
+                    get<Base + Is>(std::forward<Args>(args))...);
+            }
+        }(std::make_index_sequence<Len>{});
 }
 
-template <typename... Fs> struct by_need {
+template <typename CallPolicy, typename... Fs> struct by_need {
     template <typename... Args>
     [[nodiscard]] consteval static auto compute_call_info_impl() {
         auto results = std::array<call_info, sizeof...(Fs) + sizeof...(Args)>{};
@@ -72,8 +80,8 @@ template <typename... Fs> struct by_need {
             [&]<std::size_t N, std::size_t Base, std::size_t Len>() -> bool {
             return [&]<std::size_t... Is>(std::index_sequence<Is...>) -> bool {
                 if constexpr (requires {
-                                  typename std::invoke_result_t<
-                                      nth_t<N, Fs...>,
+                                  typename invoke_result_t<
+                                      CallPolicy, nth_t<N, Fs...>,
                                       nth_t<Base + Is, Args...>...>;
                               }) {
                     results[result_count++] = {N, Base, Len};
@@ -145,15 +153,24 @@ template <typename... Fs> struct by_need {
 struct safe_forward {
     template <typename T> constexpr auto operator()(T &&t) -> T { return t; }
 };
+
+struct default_call_policy_t {
+    template <typename F, typename... Args>
+    constexpr static auto invoke(F &&f, Args &&...args)
+        -> std::invoke_result_t<F, Args...> {
+        return std::forward<F>(f)(std::forward<Args>(args)...);
+    }
+};
 } // namespace cbn_detail
 
-template <tuplelike Fs, tuplelike Args>
+template <typename CallPolicy = cbn_detail::default_call_policy_t, tuplelike Fs,
+          tuplelike Args>
 constexpr auto call_by_need(Fs &&fs, Args &&args) {
     constexpr auto calls =
         [&]<std::size_t... Is, std::size_t... Js>(std::index_sequence<Is...>,
                                                   std::index_sequence<Js...>) {
-            return cbn_detail::by_need<decltype(get<Is>(
-                std::forward<Fs>(fs)))...>::
+            return cbn_detail::by_need<
+                CallPolicy, decltype(get<Is>(std::forward<Fs>(fs)))...>::
                 template compute_call_info<decltype(get<Js>(
                     std::forward<Args>(args)))...>();
         }(std::make_index_sequence<tuple_size_v<std::remove_cvref_t<Fs>>>{},
@@ -165,11 +182,12 @@ constexpr auto call_by_need(Fs &&fs, Args &&args) {
     }(std::make_index_sequence<tuple_size_v<Fs>>{});
 
     auto ret = [&]<std::size_t... Is>(std::index_sequence<Is...>) {
-        return tuple<
-            decltype(cbn_detail::invoke<calls[Is].arg_base, calls[Is].arg_len>(
-                get<calls[Is].fn_idx>(std::move(new_fs)),
-                std::forward<Args>(args)))...>{
-            cbn_detail::invoke<calls[Is].arg_base, calls[Is].arg_len>(
+        return tuple<decltype(cbn_detail::invoke<CallPolicy, calls[Is].arg_base,
+                                                 calls[Is].arg_len>(
+            get<calls[Is].fn_idx>(std::move(new_fs)),
+            std::forward<Args>(args)))...>{
+            cbn_detail::invoke<CallPolicy, calls[Is].arg_base,
+                               calls[Is].arg_len>(
                 get<calls[Is].fn_idx>(std::move(new_fs)),
                 std::forward<Args>(args))...};
     }(std::make_index_sequence<calls.size()>{});
