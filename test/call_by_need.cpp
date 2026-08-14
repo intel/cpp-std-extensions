@@ -214,3 +214,26 @@ TEST_CASE("function returning reference", "[call_by_need]") {
     STATIC_REQUIRE(std::is_same_v<decltype(r), stdx::tuple<int &> const>);
     CHECK(get<0>(r) == 17);
 }
+
+namespace {
+template <typename T> struct custom_call_policy_t {
+    template <typename F, typename... Args>
+    constexpr static auto invoke(F &&f, Args &&...args)
+        -> decltype(std::forward<F>(f).template operator()<T>(
+            std::forward<Args>(args)...)) {
+        return std::forward<F>(f).template operator()<T>(
+            std::forward<Args>(args)...);
+    }
+};
+} // namespace
+
+TEST_CASE("custom call policy", "[call_by_need]") {
+    auto r = stdx::call_by_need<custom_call_policy_t<int>>(
+        stdx::tuple{[&]<typename T>(arg_t<0>) {
+            STATIC_CHECK(std::same_as<T, int>);
+            return 17;
+        }},
+        stdx::tuple{arg<0>});
+    STATIC_REQUIRE(std::is_same_v<decltype(r), stdx::tuple<int>>);
+    CHECK(get<0>(r) == 17);
+}
