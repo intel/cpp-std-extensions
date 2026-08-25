@@ -72,6 +72,7 @@ target_sources(
               include/stdx/intrusive_list.hpp
               include/stdx/iterator.hpp
               include/stdx/latched.hpp
+              include/stdx/meta.hpp
               include/stdx/numeric.hpp
               include/stdx/optional.hpp
               include/stdx/panic.hpp
@@ -89,6 +90,10 @@ target_sources(
               include/stdx/utility.hpp)
 
 if(PROJECT_IS_TOP_LEVEL)
+    set_target_properties(stdx PROPERTIES VERIFY_INTERFACE_HEADER_SETS true)
+    add_dependencies(${INFRA_TARGET_NAMESPACE}quality
+                     stdx_verify_interface_header_sets)
+
     include(CTest)
     add_docs(docs)
     add_subdirectory(test)

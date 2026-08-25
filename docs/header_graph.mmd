@@ -6,13 +6,15 @@ flowchart BT
   array(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/array.hpp">array.hpp</a>)
   atomic(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/atomic.hpp">atomic.hpp</a>)
   ct_conversions(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/ct_conversions.hpp">ct_conversions.hpp</a>)
-  priority(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/priority.hpp">priority.hpp</a>)
+  meta(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/meta.hpp">meta.hpp</a>)
   numeric(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/numeric.hpp">numeric.hpp</a>)
+  priority(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/priority.hpp">priority.hpp</a>)
   array ~~~ compiler
   atomic ~~~ compiler
   ct_conversions --> compiler
-  priority ~~~ compiler
+  meta ~~~ compiler
   numeric ~~~ compiler
+  priority ~~~ compiler
 
   %% level 2
   type_traits(<a href="https://github.com/intel/cpp-std-extensions/tree/main/include/stdx/type_traits.hpp">type_traits.hpp</a>)
