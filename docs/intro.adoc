@@ -19,6 +19,7 @@ The following compilers are supported:
 * clang 18
 * clang 19
 * clang 20
+* clang 21
 * clang 22
 * gcc 12
 * gcc 13
@@ -88,6 +89,7 @@ The following headers are available:
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/intrusive_list.hpp[`intrusive_list.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/iterator.hpp[`iterator.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/latched.hpp[`latched.hpp`]
+* https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/meta.hpp[`meta.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/numeric.hpp[`numeric.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/optional.hpp[`optional.hpp`]
 * https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/panic.hpp[`panic.hpp`]

@@ -1,0 +1,40 @@
+
+== `meta.hpp`
+
+https://github.com/intel/cpp-std-extensions/blob/main/include/stdx/meta.hpp[`meta.hpp`]
+defines some metafunctions intended for compatibility with https://www.boost.org/libs/mp11[`boost::mp11`].
+
+The metafunctions are in the `stdx::mp` namespace.
+
+=== `filtered_index`
+
+`filtered_index` answers the question: given a list and a predicate, if the list
+were filtered (as if by `boost::mp11::mp_copy_if`) by that predicate, where
+would an index in the unfiltered list map to in the filtered list?
+
+`filtered_index_c` is like `filtered_index`, but instead of taking a
+`std::integral_constant`, it takes a plain integral type.
+
+[source,cpp]
+----
+// list: (boost::mp_int<> of) 0, 1, 2, 3, 4
+using list_t = boost::mp11::mp_iota_c<5>;
+
+// predicate
+template <typename T> using is_even = boost::mp11::mp_bool<T::value % 2 == 0>;
+
+// filtered list would be (boost::mp_int<> of) 0, 2, 4
+using index_of_0 = stdx::mp::filtered_index_c<list_t, is_even, 0>;
+using index_of_2 = stdx::mp::filtered_index_c<list_t, is_even, 2>;
+using index_of_4 = stdx::mp::filtered_index_c<list_t, is_even, 4>;
+static_assert(std::same_as<index_of_0, boost::mp11::mp_size_t<0>>);
+static_assert(std::same_as<index_of_2, boost::mp11::mp_size_t<1>>);
+static_assert(std::same_as<index_of_4, boost::mp11::mp_size_t<2>>);
+
+// filtered items don't exist in the list -- by boost convention, the index
+// returned is equal to the (filtered) list size
+using index_of_1 = stdx::mp::filtered_index_c<list_t, is_even, 1>;
+using index_of_3 = stdx::mp::filtered_index_c<list_t, is_even, 3>;
+static_assert(std::same_as<index_of_1, boost::mp11::mp_size_t<3>>);
+static_assert(std::same_as<index_of_3, boost::mp11::mp_size_t<3>>);
+----

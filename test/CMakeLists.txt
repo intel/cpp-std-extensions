@@ -55,6 +55,7 @@ add_tests(
     intrusive_list_properties
     iterator
     latched
+    meta
     numeric
     optional
     overload
