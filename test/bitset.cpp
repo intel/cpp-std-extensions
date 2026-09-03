@@ -350,6 +350,14 @@ TEMPLATE_TEST_CASE("for_each", "[bitset]", std::uint8_t, std::uint16_t,
     CHECK(result == bs);
 }
 
+TEMPLATE_TEST_CASE("member for_each", "[bitset]", std::uint8_t, std::uint16_t,
+                   std::uint32_t, std::uint64_t) {
+    constexpr auto bs = stdx::bitset<64, TestType>{0x01020304'05060708ul};
+    auto result = decltype(bs){};
+    bs.for_each([&](auto i) { result.set(i); });
+    CHECK(result == bs);
+}
+
 TEMPLATE_TEST_CASE("for_each (unset bits)", "[bitset]", std::uint8_t,
                    std::uint16_t, std::uint32_t, std::uint64_t) {
     constexpr auto bs = stdx::bitset<64, TestType>{0x01020304'05060708ul};
@@ -392,6 +400,20 @@ TEMPLATE_TEST_CASE("transform_reduce", "[bitset]", std::uint8_t, std::uint16_t,
             return i == 3 and calls == 2;
         },
         std::logical_or{}, false, bs);
+    CHECK(result);
+    CHECK(calls == bs.count());
+}
+
+TEMPLATE_TEST_CASE("member transform_reduce", "[bitset]", std::uint8_t,
+                   std::uint16_t, std::uint32_t, std::uint64_t) {
+    constexpr auto bs = stdx::bitset<8, TestType>{0b10101010ul};
+    int calls{};
+    auto const result = bs.transform_reduce(
+        [&](auto i) {
+            ++calls;
+            return i == 3 and calls == 2;
+        },
+        std::logical_or{}, false);
     CHECK(result);
     CHECK(calls == bs.count());
 }
