@@ -125,6 +125,9 @@ auto result = transform_reduce([](auto i) { return i * 2 },
 // result is 1*2 + 3*2 + 5*2 + 7*2
 ----
 
+NOTE: Both `for_each` and `transform_reduce` are also member functions on
+`bitset`, as well as free functions.
+
 === `type_bitset`
 
 A `type_bitset` is much the same as a `bitset`, except that it is indexed by types.
