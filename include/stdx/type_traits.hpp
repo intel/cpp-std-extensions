@@ -323,7 +323,12 @@ constexpr auto is_complete_v<T, detail::void_v<sizeof(T)>> = true;
 template <typename T, typename U>
 constexpr auto is_same_template_v = template_base<T>() == template_base<U>();
 
-template <typename T> constexpr auto tuple_size_v = 0u;
+namespace detail {
+struct invalid_tuple_size_t {};
+} // namespace detail
+template <typename T>
+constexpr auto tuple_size_v = detail::invalid_tuple_size_t{};
+
 template <typename T>
     requires requires { T::size(); }
 constexpr auto tuple_size_v<T> = T::size();
