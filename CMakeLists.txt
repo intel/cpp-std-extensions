@@ -7,6 +7,8 @@ project(
     DESCRIPTION "A header-only C++ library that polyfills the standard library."
 )
 
+set(INFRA_PROVIDE_PYTEST_REQS OFF)
+
 include(cmake/get_cpm.cmake)
 if(PROJECT_IS_TOP_LEVEL)
     cpmaddpackage("gh:intel/cicd-repo-infrastructure#dev")
