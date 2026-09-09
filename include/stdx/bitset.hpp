@@ -56,6 +56,17 @@ namespace detail {
 template <typename T>
 concept bit_spec = std::same_as<T, set_bit> or std::same_as<T, unset_bit> or
                    std::same_as<T, bit>;
+
+template <typename T> consteval auto bitset_size(T t) {
+    if constexpr (std::integral<T>) {
+        return static_cast<std::size_t>(t);
+    } else if constexpr (std::is_enum_v<T>) {
+        return t;
+    } else {
+        static_assert(
+            always_false_v<T>,
+            "bitset must be instantiated with an integral or an enum argument");
+    }
 }
 
 template <auto Size,
@@ -471,9 +482,14 @@ class bitset {
         return init;
     }
 };
+} // namespace detail
+
+template <auto Size,
+          typename StorageElem = decltype(smallest_uint<to_underlying(Size)>())>
+using bitset = detail::bitset<detail::bitset_size(Size), StorageElem>;
 
 template <detail::bit_spec Spec = set_bit, typename F, auto M, typename... S>
-constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F {
+constexpr auto for_each(F &&f, detail::bitset<M, S> const &...bs) -> F {
     if constexpr (sizeof...(bs) == 1) {
         return (bs.template for_each<Spec>(std::forward<F>(f)), ...);
     } else {
@@ -484,7 +500,8 @@ constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F {
 
 template <typename T, typename F, typename R, auto M, typename... S>
 [[nodiscard]] constexpr auto transform_reduce(F &&f, R &&r, T init,
-                                              bitset<M, S> const &...bs) -> T {
+                                              detail::bitset<M, S> const &...bs)
+    -> T {
     if constexpr (sizeof...(bs) == 1) {
         return (bs.transform_reduce(std::forward<F>(f), std::forward<R>(r),
                                     std::move(init)),
@@ -496,6 +513,9 @@ template <typename T, typename F, typename R, auto M, typename... S>
 }
 
 namespace detail {
+using ::stdx::for_each;
+using ::stdx::transform_reduce;
+
 template <typename...> constexpr std::size_t index_of = 0;
 
 template <typename T, typename... Us>

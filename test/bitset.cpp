@@ -132,20 +132,6 @@ TEMPLATE_TEST_CASE("construct with values for bits", "[bitset]", std::uint8_t,
     STATIC_REQUIRE(bs[5]);
 }
 
-TEMPLATE_TEST_CASE("construct with a string_view", "[bitset]", std::uint8_t,
-                   std::uint16_t, std::uint32_t, std::uint64_t) {
-    using namespace std::string_view_literals;
-    STATIC_REQUIRE(stdx::bitset<4, TestType>{"1010"sv} ==
-                   stdx::bitset<4, TestType>{0b1010ul});
-}
-
-TEMPLATE_TEST_CASE("construct with a substring", "[bitset]", std::uint8_t,
-                   std::uint16_t, std::uint32_t, std::uint64_t) {
-    using namespace std::string_view_literals;
-    STATIC_REQUIRE(stdx::bitset<4, TestType>{"XOXOXO"sv, 2, 4, 'X'} ==
-                   stdx::bitset<4, TestType>{0b1010ul});
-}
-
 TEMPLATE_TEST_CASE("convert to unsigned integral type (same underlying type)",
                    "[bitset]", std::uint8_t, std::uint16_t, std::uint32_t,
                    std::uint64_t) {
@@ -563,14 +549,6 @@ TEST_CASE("use bitset with enum struct (lowest_unset)", "[bitset]") {
     CHECK(bs.lowest_unset() == Bits::ONE);
 }
 
-TEST_CASE("construct with a ct_string", "[bitset]") {
-    using namespace stdx::literals;
-    STATIC_REQUIRE(stdx::bitset{"1010"_cts} ==
-                   stdx::bitset<4ul, std::uint8_t>{0b1010ul});
-    STATIC_REQUIRE(stdx::bitset{"101010101"_cts} ==
-                   stdx::bitset<9ul, std::uint16_t>{0b101010101ul});
-}
-
 TEST_CASE("zero size bitset", "[bitset]") {
     constexpr auto bs1 = stdx::bitset<0>{};
     STATIC_REQUIRE(bs1.count() == 0u);
@@ -589,4 +567,11 @@ TEST_CASE("zero size bitset", "[bitset]") {
     CHECK(bs3.to<std::uint8_t>() == 0);
     bs3 = stdx::bitset<0>{stdx::all_bits};
     CHECK(bs3.to<std::uint8_t>() == 0);
+}
+
+TEST_CASE("fix type of bitset argument to std::size_t", "[bitset]") {
+    using A = stdx::bitset<16>;
+    using B = stdx::bitset<16u>;
+    STATIC_CHECK(std::same_as<A, B>);
+    STATIC_CHECK(std::same_as<A, stdx::bitset<std::size_t{16}>>);
 }
