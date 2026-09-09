@@ -3,7 +3,6 @@
 #include <stdx/bit.hpp>
 #include <stdx/compiler.hpp>
 #include <stdx/concepts.hpp>
-#include <stdx/ct_string.hpp>
 #include <stdx/detail/bitset_common.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/udls.hpp>
@@ -15,7 +14,6 @@
 #include <cstddef>
 #include <cstdint>
 #include <limits>
-#include <string_view>
 #include <type_traits>
 #include <utility>
 
@@ -183,21 +181,6 @@ class bitset {
             storage.back() &= lastmask;
         }
     }
-
-    constexpr explicit bitset(std::string_view str, std::size_t pos = 0,
-                              std::size_t n = std::string_view::npos,
-                              char one = '1') {
-        auto const len = std::min(n, str.size() - pos);
-        auto i = std::size_t{};
-        auto const s = str.substr(pos, std::min(len, N));
-        // NOLINTNEXTLINE(modernize-loop-convert)
-        for (auto it = std::rbegin(s); it != std::rend(s); ++it) {
-            set(i++, *it == one);
-        }
-    }
-
-    constexpr explicit bitset(ct_string<N + 1> s)
-        : bitset{static_cast<std::string_view>(s)} {}
 
     template <typename T> [[nodiscard]] constexpr auto to() const -> T {
         if constexpr (N == 0) {
@@ -518,8 +501,6 @@ template <typename T, typename F, typename R, auto M, typename... S>
         return init;
     }
 }
-
-template <std::size_t N> bitset(ct_string<N>) -> bitset<N - 1>;
 
 namespace detail {
 template <typename...> constexpr std::size_t index_of = 0;
