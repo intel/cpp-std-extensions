@@ -55,16 +55,6 @@ Or by specifying which bits are set and using `stdx::place_bits`:
 auto bs = stdx::bitset<8>{stdx::place_bits, 2, 3}; // bits 2 and 3 set
 ----
 
-Or with a string_view (potentially by substring and with a known value for
-set bits):
-[source,cpp]
-----
-using namespace std::string_view_literals;
-auto bs1 = stdx::bitset<8>{"1100"sv};            // bits 2 and 3 set
-auto bs2 = stdx::bitset<8>{"1100"sv, 0, 2};      // bits 0 and 1 set
-auto bs3 = stdx::bitset<8>{"AABB"sv, 0, 2, 'A'}; // bits 0 and 1 set
-----
-
 To convert a bitset back to an integral type, `to<T>` is available where `T` is
 an unsigned integral type large enough to fit all the bits. And `to_natural`
 produces the smallest such unsigned integral type.
