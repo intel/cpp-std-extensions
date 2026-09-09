@@ -143,13 +143,6 @@ class bitset {
         return not std::is_enum_v<T> or std::is_same_v<T, decltype(Size)>;
     }
 
-    template <detail::bit_spec Spec, typename F, auto M, typename... S>
-    friend constexpr auto for_each(F &&f, bitset<M, S> const &...bs) -> F;
-
-    template <typename T, typename F, typename R, auto M, typename... S>
-    friend constexpr auto transform_reduce(F &&f, R &&r, T init,
-                                           bitset<M, S> const &...bs) -> T;
-
   public:
     constexpr bitset() = default;
     constexpr explicit bitset(std::uint64_t value) {
