@@ -459,3 +459,39 @@ TEST_CASE("bit_destructure (split in three)", "[bit]") {
     CHECK(b == 0x3456u);
     CHECK(c == 0x12u);
 }
+
+TEST_CASE("bit_structure (degenerate case)", "[bit]") {
+    constexpr auto x = stdx::bit_structure<std::uint16_t>(0b11u);
+    STATIC_CHECK(x == 0b11u);
+    STATIC_CHECK(std::same_as<decltype(x), std::uint16_t const>);
+}
+
+TEST_CASE("bit_structure (two parts)", "[bit]") {
+    constexpr auto x = stdx::bit_structure<std::uint16_t, 2>(0b01u, 0b10u);
+    STATIC_CHECK(x == 0b10'01u);
+    STATIC_CHECK(std::same_as<decltype(x), std::uint16_t const>);
+}
+
+TEST_CASE("bit_structure (three parts)", "[bit]") {
+    constexpr auto x =
+        stdx::bit_structure<std::uint32_t, 3, 5>(0b01u, 0b10u, 0b10u);
+    STATIC_CHECK(x == 0b10'10'001u);
+    STATIC_CHECK(std::same_as<decltype(x), std::uint32_t const>);
+}
+
+TEST_CASE("bit_{de}structure round-trip", "[bit]") {
+    constexpr auto x = std::uint32_t{0x1234'5678u};
+    auto [a, b, c] = stdx::bit_destructure<8, 24>(x);
+    auto y = stdx::bit_structure<std::uint32_t, 8, 24>(a, b, c);
+    CHECK(x == y);
+}
+
+TEST_CASE("bit_structure (inferred type)", "[bit]") {
+    constexpr auto x = std::uint32_t{0x1234'5678u};
+    auto [a, b, c] = stdx::bit_destructure<8, 24>(x);
+    STATIC_CHECK(std::same_as<decltype(a), std::uint32_t>);
+    STATIC_CHECK(std::same_as<decltype(b), std::uint32_t>);
+    STATIC_CHECK(std::same_as<decltype(c), std::uint32_t>);
+    auto y = stdx::bit_structure<8, 24>(a, b, c);
+    CHECK(x == y);
+}
