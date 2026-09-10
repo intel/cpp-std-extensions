@@ -462,5 +462,23 @@ constexpr auto bit_destructure(T t) -> std::array<T, sizeof...(Offsets) + 1> {
     return bit_detail::bit_destructure_impl<Offsets..., bit_size<T>()>(
         t, std::make_index_sequence<sizeof...(Offsets) + 1>{});
 }
+
+template <unsigned_integral T, std::size_t... Offsets, unsigned_integral... Ts>
+    requires(sizeof...(Ts) - sizeof...(Offsets) == 1)
+constexpr auto bit_structure(Ts... ts) -> T {
+    constexpr auto shifted = []<std::size_t Offset>(auto x) -> T {
+        return static_cast<T>(static_cast<T>(x) << Offset);
+    };
+    return [&]<std::size_t... Os>() -> T {
+        return (T{} | ... | shifted.template operator()<Os>(ts));
+    }.template operator()<std::size_t{}, Offsets...>();
+}
+
+template <std::size_t... Offsets, unsigned_integral... Ts>
+    requires(sizeof...(Ts) - sizeof...(Offsets) == 1)
+constexpr auto bit_structure(Ts... ts) -> std::common_type_t<Ts...> {
+    using T = std::common_type_t<Ts...>;
+    return bit_structure<T, Offsets...>(ts...);
+}
 } // namespace v1
 } // namespace stdx

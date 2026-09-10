@@ -107,6 +107,37 @@ constexpr std::size_t x = stdx::bit_size<std::uint8_t>();
 static_assert(x == 8);
 ----
 
+=== `bit_structure`
+
+`bit_structure` is the opposite of
+xref:bit.adoc#_bit_destructure[`bit_destructure`]: a function for packing
+several unsigned integral values into a larger bit width value. It is a more
+general case of xref:bit.adoc#_bit_pack[`bit_pack`].
+
+[source,cpp]
+----
+std::uint32_t const x = 0x1234'5678u;
+auto const [a, b, c] = stdx::bit_destructure<8, 24>(x);
+// a = 0x78u, b = 0x3456u, c = 0x12u
+// a, b and c are all std::uint32_t
+
+auto const x = stdx::bit_structure<8, 24>(a, b, c);
+// x = 0x1234'5678u (a std::uint32_t)
+
+// or:
+auto const y = stdx::bit_structure<std::uint64_t, 8, 24>(a, b, c);
+// y = 0x1234'5678u (a std::uint64_t)
+----
+
+The arguments to `bit_structure` must all be unsigned integral types. If the
+type template argument is omitted as in the first example here, the
+https://cppreference.com/cpp/types/common_type[`std::common_type_t`] of the
+given arguments will be assumed.
+
+NOTE: Unlike `bit_pack`, `bit_structure` takes the arguments in
+_increasing_ order of significance, and the template arguments representing the
+split boundaries must be in increasing order.
+
 === `bit_unpack`
 
 `bit_unpack` is a function for unpacking an unsigned integral values into multiple
