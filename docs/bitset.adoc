@@ -22,6 +22,8 @@ platform.
 * `size` does the same as `count()`: `capacity()` is the static size
 * `empty` (size == 0) is provided
 * `clear` does the same as `reset`
+* The single-argument constructor (from `std::uint64_t`) is `explicit`. There is
+  also an assignment operator from `std::uint64_t`.
 
 A bitset has two template parameters: the size of the bitset and the storage
 element type to use. The storage element type must be unsigned.
