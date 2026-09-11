@@ -192,3 +192,11 @@ TEST_CASE("CT_WRAP", "[ct_string]") {
         STATIC_REQUIRE(CT_WRAP(X) == "hello"_ctst);
     }.template operator()<"hello">();
 }
+
+TEST_CASE("named object", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    using T = stdx::with_name<"test">;
+    STATIC_CHECK(stdx::named<T>);
+    STATIC_CHECK(stdx::name_of_v<T> == "test"_cts);
+    STATIC_CHECK(stdx::constant_name_of_v<T> == "test"_ctst);
+}
