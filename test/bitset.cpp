@@ -575,3 +575,9 @@ TEST_CASE("fix type of bitset argument to std::size_t", "[bitset]") {
     STATIC_CHECK(std::same_as<A, B>);
     STATIC_CHECK(std::same_as<A, stdx::bitset<std::size_t{16}>>);
 }
+
+TEST_CASE("bitset assign", "[bitset]") {
+    auto bs = stdx::bitset<16>{};
+    bs = 0xa5a5;
+    CHECK(bs.to_natural() == 0xa5a5);
+}

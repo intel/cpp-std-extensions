@@ -170,6 +170,11 @@ class bitset {
         }
     }
 
+    constexpr auto operator=(std::uint64_t value) -> bitset & {
+        *this = bitset{value};
+        return *this;
+    }
+
     template <typename... Bs>
     constexpr explicit bitset(place_bits_t, Bs... bs) {
         static_assert(((std::is_integral_v<Bs> or std::is_enum_v<Bs>) and ...),
