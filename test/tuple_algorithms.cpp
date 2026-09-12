@@ -1,5 +1,6 @@
 #include "detail/tuple_types.hpp"
 
+#include <stdx/ct_string.hpp>
 #include <stdx/span.hpp>
 #include <stdx/tuple_algorithms.hpp>
 #include <stdx/utility.hpp>
@@ -979,31 +980,26 @@ TEST_CASE("gather with move only types", "[tuple_algorithms]") {
 }
 
 namespace {
-template <typename T> struct named_int {
-    using name_t = T;
+template <stdx::ct_string Name> struct named_int : stdx::with_name<Name> {
+    constexpr named_int(int v) : value{v} {}
     int value;
     friend constexpr auto operator==(named_int, named_int) -> bool = default;
 };
-
-template <typename T> using name_of_t = typename T::name_t;
 } // namespace
 
 TEST_CASE("gather_by with projection", "[tuple_algorithms]") {
-    struct A;
-    struct B;
-    struct C;
-    constexpr auto t = stdx::tuple{named_int<C>{3}, named_int<B>{11},
-                                   named_int<A>{0}, named_int<B>{12}};
-    constexpr auto gathered = stdx::gather_by<name_of_t>(t);
+    constexpr auto t = stdx::tuple{named_int<"C">{3}, named_int<"B">{11},
+                                   named_int<"A">{0}, named_int<"B">{12}};
+    constexpr auto gathered = stdx::gather_by<stdx::constant_name_of_t>(t);
     STATIC_REQUIRE(
         std::is_same_v<decltype(gathered),
-                       stdx::tuple<stdx::tuple<named_int<A>>,
-                                   stdx::tuple<named_int<B>, named_int<B>>,
-                                   stdx::tuple<named_int<C>>> const>);
-    CHECK(get<0>(gathered) == stdx::tuple{named_int<A>{0}});
+                       stdx::tuple<stdx::tuple<named_int<"A">>,
+                                   stdx::tuple<named_int<"B">, named_int<"B">>,
+                                   stdx::tuple<named_int<"C">>> const>);
+    CHECK(get<0>(gathered) == stdx::tuple{named_int<"A">{0}});
     CHECK(stdx::get<1>(gathered).fold_left(
               0, [](auto x, auto y) { return x + y.value; }) == 23);
-    CHECK(get<2>(gathered) == stdx::tuple{named_int<C>{3}});
+    CHECK(get<2>(gathered) == stdx::tuple{named_int<"C">{3}});
 }
 
 TEST_CASE("tuple_cons", "[tuple_algorithms]") {
