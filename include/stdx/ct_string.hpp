@@ -182,5 +182,25 @@ template <ct_string S> consteval auto operator""_cts() { return S; }
 template <ct_string S> consteval auto operator""_ctst() { return cts_t<S>{}; }
 } // namespace ct_string_literals
 } // namespace literals
+
+template <ct_string Name> struct with_name {
+    constexpr static auto name = Name;
+    friend constexpr auto operator==(with_name, with_name) -> bool = default;
+};
+
+namespace detail {
+template <typename T>
+concept is_ct_string =
+    stdx::is_value_specialization_of_v<std::remove_cvref_t<T>, ct_string>;
+}
+
+template <typename T>
+concept named = requires {
+    { T::name } -> detail::is_ct_string;
+};
+
+template <named T> constexpr auto name_of_v = T::name;
+template <named T> using constant_name_of_t = cts_t<T::name>;
+template <named T> constexpr auto constant_name_of_v = constant_name_of_t<T>{};
 } // namespace v1
 } // namespace stdx
