@@ -199,4 +199,16 @@ TEST_CASE("named object", "[ct_string]") {
     STATIC_CHECK(stdx::named<T>);
     STATIC_CHECK(stdx::name_of_v<T> == "test"_cts);
     STATIC_CHECK(stdx::constant_name_of_v<T> == "test"_ctst);
+
+    STATIC_CHECK(stdx::matching_name<T, "test">);
+    STATIC_CHECK(stdx::matching_name_t<T, "test">::value);
+    STATIC_CHECK(stdx::matching_name_q<"test">::template fn<T>::value);
+
+    using U = stdx::with_name<"not test">;
+    STATIC_CHECK(stdx::same_name<T, T>);
+    STATIC_CHECK(stdx::same_name_t<T, T>::value);
+    STATIC_CHECK(stdx::same_name_q<T>::template fn<T>::value);
+    STATIC_CHECK(not stdx::same_name<T, U>);
+    STATIC_CHECK(not stdx::same_name_t<T, U>::value);
+    STATIC_CHECK(not stdx::same_name_q<T>::template fn<U>::value);
 }

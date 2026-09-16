@@ -202,5 +202,25 @@ concept named = requires {
 template <named T> constexpr auto name_of_v = T::name;
 template <named T> using constant_name_of_t = cts_t<T::name>;
 template <named T> constexpr auto constant_name_of_v = constant_name_of_t<T>{};
+
+template <typename T, stdx::ct_string Name>
+concept matching_name = T::name == Name;
+
+template <typename T, stdx::ct_string Name>
+using matching_name_t = std::bool_constant<matching_name<T, Name>>;
+
+template <stdx::ct_string N> struct matching_name_q {
+    template <typename T> using fn = matching_name_t<T, N>;
+};
+
+template <typename T, typename U>
+concept same_name = named<T> and named<U> and matching_name<T, name_of_v<U>>;
+
+template <typename T, typename U>
+using same_name_t = std::bool_constant<same_name<T, U>>;
+
+template <named T> struct same_name_q {
+    template <named U> using fn = same_name_t<T, U>;
+};
 } // namespace v1
 } // namespace stdx
