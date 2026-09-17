@@ -113,3 +113,73 @@ constexpr auto s = "hello"_ctst;
 static_assert(always_true<s>);    // implicit conversion
 static_assert(always_true<+s>);   // explicit conversion with +
 ----
+
+=== Named Types
+
+`ct_string.hpp` also contains some functionality that can be used to name types
+with a `ct_string`, and detect and retrieve names easily.
+
+==== `with_name`
+
+`with_name` is an empty class template that exposes a `constexpr static` `ct_string`
+`name` member. A type named in this way models the `named` concept.
+
+[source,cpp]
+----
+struct S : stdx::with_name<"name"> {
+  // constexpr static auto name = stdx::ct_string{"name"};
+};
+
+static_assert(stdx::named<S>);
+----
+
+==== `name_of_v` and `constant_name_of_{t,v}`
+
+To retrieve the name of a type, use `name_of_v`. To get it as a `cts_t`, use
+`constant_name_of_v` (whose type is `constant_name_of_t`).
+
+[source,cpp]
+----
+static_assert(stdx::name_of_v<S> == "name"_cts);
+static_assert(stdx::constant_name_of_v<S> == "name"_ctst>);
+using N = stdx::constant_name_of_t<S>; // stdx::cts_t<"name">
+----
+
+==== `matching_name` and `same_name`
+
+Use the `matching_name` concept to check whether a type's name matches a string.
+Use `same_name` to check whether two types are named the same.
+
+[source,cpp]
+----
+static_assert(stdx::matching_name<S, "name">);
+static_assert(stdx::same_name<S, stdx::with_name<"name">>);
+----
+
+`matching_name` and `same_name` have corresponding
+https://cppreference.com/cpp/types/integral_constant[`std::bool_constant`] types
+and
+https://www.boost.org/doc/libs/latest/libs/mp11/doc/html/mp11.html#definitions[quoted
+metafunctions] for metaprogramming use.
+
+[source,cpp]
+----
+// _t indicates a std::bool_constant of the concept
+static_assert(stdx::matching_name_t<S, "name">::value);
+static_assert(stdx::same_name_t<S, stdx::with_name<"name">>::value);
+
+// _q indicates a quoted metafunction that exposes fn (returning a std::bool_constant)
+static_assert(stdx::matching_name_q<"name">::template fn<S>::value);
+static_assert(stdx::same_name_q<stdx::with_name<"name">>::template fn<S>::value);
+----
+
+==== Formatted names
+
+Because a `ct_string` can be implicitly constructed from the result of a fully
+compile-time invocation of `STDX_CT_FORMAT`, types can be named by formatting:
+
+[source,cpp]
+----
+auto suffix = "name"_ctst;
+struct S : stdx::with_name<STDX_CT_FORMAT("S {}", suffix)> {};
+----
