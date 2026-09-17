@@ -145,6 +145,21 @@ static_assert(stdx::constant_name_of_v<S> == "name"_ctst>);
 using N = stdx::constant_name_of_t<S>; // stdx::cts_t<"name">
 ----
 
+==== `name_for` and `constant_name_for`
+
+When you don't know whether or not a type has a name, `name_for` will return
+either its name or a `ct_string` of its type. `constant_name_for` will return
+the same content as a `cts_t`.
+
+[source,cpp]
+----
+static_assert(stdx::name_for<S>() == "name"_cts);
+static_assert(stdx::name_for<int>() == "int"_cts);
+
+static_assert(stdx::constant_name_for<S>() == "name"_ctst);
+static_assert(stdx::constant_name_for<int>() == "int"_ctst);
+----
+
 ==== `matching_name` and `same_name`
 
 Use the `matching_name` concept to check whether a type's name matches a string.
