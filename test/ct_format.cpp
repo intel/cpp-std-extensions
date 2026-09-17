@@ -609,3 +609,10 @@ TEST_CASE("format a format_result with named ct argument (2/after rt arg)",
                          STDX_CT_FORMAT("(year={y})", 2022)) == expected);
     STDX_PRAGMA(diagnostic pop)
 }
+
+TEST_CASE("object with formatted name", "[ct_format]") {
+    using namespace stdx::ct_string_literals;
+    auto s = "test"_ctst;
+    using T = stdx::with_name<STDX_CT_FORMAT("T {}", s)>;
+    STATIC_CHECK(stdx::name_of_v<T> == "T test"_cts);
+}
