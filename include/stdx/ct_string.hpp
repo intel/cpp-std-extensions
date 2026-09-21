@@ -1,6 +1,7 @@
 #pragma once
 
 #include <stdx/compiler.hpp>
+#include <stdx/ct_conversions.hpp>
 #include <stdx/type_traits.hpp>
 #include <stdx/utility.hpp>
 
@@ -222,5 +223,18 @@ using same_name_t = std::bool_constant<same_name<T, U>>;
 template <named T> struct same_name_q {
     template <named U> using fn = same_name_t<T, U>;
 };
+
+template <typename T> consteval auto name_for() {
+    if constexpr (named<T>) {
+        return name_of_v<T>;
+    } else {
+        constexpr auto name = type_as_string<T>();
+        return ct_string<name.size() + 1>{name};
+    }
+}
+
+template <typename T> consteval auto constant_name_for() {
+    return cts_t<name_for<T>()>{};
+}
 } // namespace v1
 } // namespace stdx

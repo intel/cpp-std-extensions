@@ -212,3 +212,12 @@ TEST_CASE("named object", "[ct_string]") {
     STATIC_CHECK(not stdx::same_name_t<T, U>::value);
     STATIC_CHECK(not stdx::same_name_q<T>::template fn<U>::value);
 }
+
+TEST_CASE("name or type fallback", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    using T = stdx::with_name<"test">;
+    STATIC_CHECK(stdx::name_for<T>() == "test"_cts);
+    STATIC_CHECK(stdx::name_for<int>() == "int"_cts);
+    STATIC_CHECK(stdx::constant_name_for<T>() == "test"_ctst);
+    STATIC_CHECK(stdx::constant_name_for<int>() == "int"_ctst);
+}
