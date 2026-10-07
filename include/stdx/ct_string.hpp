@@ -236,5 +236,11 @@ template <typename T> consteval auto name_for() {
 template <typename T> consteval auto constant_name_for() {
     return cts_t<name_for<T>()>{};
 }
+
+namespace detail {
+template <std::size_t N>
+// NOLINTNEXTLINE(*-avoid-c-arrays)
+map_value_helper(char const (&)[N]) -> map_value_helper<ct_string<N>>;
+} // namespace detail
 } // namespace v1
 } // namespace stdx
