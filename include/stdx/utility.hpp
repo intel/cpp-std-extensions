@@ -31,8 +31,8 @@ template <typename T> struct map_value_helper {
 };
 template <typename T> map_value_helper(T) -> map_value_helper<T>;
 
-template <auto V> struct map_value_t {
-    constexpr static inline auto value = V;
+template <map_value_helper V> struct map_value_t {
+    constexpr static inline auto value = V.value;
 };
 
 template <typename... Ts> struct type_map : Ts... {};
@@ -45,13 +45,12 @@ template <typename K, typename V> struct type_pair {
     using value_type = V;
 };
 template <typename K, typename V> using tt_pair = type_pair<K, V>;
-template <detail::map_value_helper K, typename V, typename = void>
-using vt_pair = tt_pair<detail::map_value_t<K.value>, V>;
+template <detail::map_value_helper K, typename V>
+using vt_pair = tt_pair<detail::map_value_t<K>, V>;
 template <typename K, detail::map_value_helper V>
-using tv_pair = tt_pair<K, detail::map_value_t<V.value>>;
+using tv_pair = tt_pair<K, detail::map_value_t<V>>;
 template <detail::map_value_helper K, detail::map_value_helper V>
-using vv_pair =
-    tt_pair<detail::map_value_t<K.value>, detail::map_value_t<V.value>>;
+using vv_pair = tt_pair<detail::map_value_t<K>, detail::map_value_t<V>>;
 
 template <typename... Ts> using type_map = shrink_t<detail::type_map<Ts...>>;
 
@@ -82,12 +81,11 @@ using reverse_type_lookup_t =
 
 template <typename M, detail::map_value_helper K, typename Default = missing_t>
 using value_lookup_t =
-    decltype(detail::lookup<detail::map_value_t<K.value>, Default>(
-        expand<M>()));
+    decltype(detail::lookup<detail::map_value_t<K>, Default>(expand<M>()));
 
 template <typename M, detail::map_value_helper V, typename Default = missing_t>
 using reverse_value_lookup_t =
-    decltype(detail::reverse_lookup<detail::map_value_t<V.value>, Default>(
+    decltype(detail::reverse_lookup<detail::map_value_t<V>, Default>(
         expand<M>()));
 
 namespace detail {
@@ -99,29 +97,29 @@ template <typename M, typename K, detail::map_value_helper Default = missing>
 constexpr static auto type_lookup_v =
     type_or_t<detail::is_present,
               decltype(detail::lookup<K, missing_t>(expand<M>())),
-              detail::map_value_t<Default.value>>::value;
+              detail::map_value_t<Default>>::value;
 
 template <typename M, typename V, detail::map_value_helper Default = missing>
 constexpr static auto reverse_type_lookup_v =
     type_or_t<detail::is_present,
               decltype(detail::reverse_lookup<V, missing_t>(expand<M>())),
-              detail::map_value_t<Default.value>>::value;
+              detail::map_value_t<Default>>::value;
 
 template <typename M, detail::map_value_helper K,
           detail::map_value_helper Default = missing>
 constexpr static auto value_lookup_v =
     type_or_t<detail::is_present,
-              decltype(detail::lookup<detail::map_value_t<K.value>, missing_t>(
+              decltype(detail::lookup<detail::map_value_t<K>, missing_t>(
                   expand<M>())),
-              detail::map_value_t<Default.value>>::value;
+              detail::map_value_t<Default>>::value;
 
 template <typename M, detail::map_value_helper V,
           detail::map_value_helper Default = missing>
 constexpr static auto reverse_value_lookup_v =
     type_or_t<detail::is_present,
-              decltype(detail::reverse_lookup<detail::map_value_t<V.value>,
+              decltype(detail::reverse_lookup<detail::map_value_t<V>,
                                               missing_t>(expand<M>())),
-              detail::map_value_t<Default.value>>::value;
+              detail::map_value_t<Default>>::value;
 
 template <typename T, typename U>
 [[nodiscard]] constexpr auto forward_like(U &&u) noexcept -> decltype(auto) {
