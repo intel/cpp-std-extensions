@@ -1,3 +1,4 @@
+#include <stdx/ct_string.hpp>
 #include <stdx/utility.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -18,7 +19,7 @@ TEST_CASE("look up type in map", "[type map]") {
 
 TEST_CASE("look up type not in map", "[type map]") {
     using M = stdx::type_map<stdx::type_pair<A, X>, stdx::type_pair<B, Y>>;
-    STATIC_REQUIRE(std::is_same_v<stdx::type_lookup_t<M, Z>, void>);
+    STATIC_REQUIRE(std::is_same_v<stdx::type_lookup_t<M, Z>, stdx::missing_t>);
     STATIC_REQUIRE(std::is_same_v<stdx::type_lookup_t<M, Z, int>, int>);
 }
 
@@ -30,8 +31,21 @@ TEST_CASE("look up type in map (by value)", "[type map]") {
 
 TEST_CASE("look up type not in map (by value)", "[type map]") {
     using M = stdx::type_map<stdx::vt_pair<0, X>, stdx::vt_pair<1, Y>>;
-    STATIC_REQUIRE(std::is_same_v<stdx::value_lookup_t<M, 2>, void>);
+    STATIC_REQUIRE(std::is_same_v<stdx::value_lookup_t<M, 2>, stdx::missing_t>);
     STATIC_REQUIRE(std::is_same_v<stdx::value_lookup_t<M, 2, int>, int>);
+}
+
+TEST_CASE("look up type in map (by string value)", "[type map]") {
+    using M = stdx::type_map<stdx::vt_pair<"A", X>, stdx::vt_pair<"B", Y>>;
+    STATIC_REQUIRE(std::is_same_v<stdx::value_lookup_t<M, "A">, X>);
+    STATIC_REQUIRE(std::is_same_v<stdx::value_lookup_t<M, "B">, Y>);
+}
+
+TEST_CASE("look up type not in map (by string value)", "[type map]") {
+    using M = stdx::type_map<stdx::vt_pair<"A", X>, stdx::vt_pair<"B", Y>>;
+    STATIC_REQUIRE(
+        std::is_same_v<stdx::value_lookup_t<M, "C">, stdx::missing_t>);
+    STATIC_REQUIRE(std::is_same_v<stdx::value_lookup_t<M, "C", int>, int>);
 }
 
 TEST_CASE("look up value in map (by type)", "[type map]") {
@@ -42,8 +56,22 @@ TEST_CASE("look up value in map (by type)", "[type map]") {
 
 TEST_CASE("look up value not in map (by type)", "[type map]") {
     using M = stdx::type_map<stdx::tv_pair<A, 0>, stdx::tv_pair<B, 1>>;
-    STATIC_REQUIRE(stdx::type_lookup_v<M, Z> == 0);
+    STATIC_REQUIRE(stdx::type_lookup_v<M, Z> == stdx::missing);
     STATIC_REQUIRE(stdx::type_lookup_v<M, Z, 2> == 2);
+}
+
+TEST_CASE("look up string value in map (by type)", "[type map]") {
+    using namespace stdx::literals;
+    using M = stdx::type_map<stdx::tv_pair<A, "X">, stdx::tv_pair<B, "Y">>;
+    STATIC_REQUIRE(stdx::type_lookup_v<M, A> == "X"_cts);
+    STATIC_REQUIRE(stdx::type_lookup_v<M, B> == "Y"_cts);
+}
+
+TEST_CASE("look up string value not in map (by type)", "[type map]") {
+    using namespace stdx::literals;
+    using M = stdx::type_map<stdx::tv_pair<A, "X">, stdx::tv_pair<B, "Y">>;
+    STATIC_REQUIRE(stdx::type_lookup_v<M, Z> == stdx::missing);
+    STATIC_REQUIRE(stdx::type_lookup_v<M, Z, "Z"> == "Z"_cts);
 }
 
 TEST_CASE("look up value in map (by value)", "[type map]") {
@@ -54,8 +82,22 @@ TEST_CASE("look up value in map (by value)", "[type map]") {
 
 TEST_CASE("look up value not in map (by value)", "[type map]") {
     using M = stdx::type_map<stdx::vv_pair<0, 10>, stdx::vv_pair<1, 11>>;
-    STATIC_REQUIRE(stdx::value_lookup_v<M, 2> == 0);
+    STATIC_REQUIRE(stdx::value_lookup_v<M, 2> == stdx::missing);
     STATIC_REQUIRE(stdx::value_lookup_v<M, 2, 3> == 3);
+}
+
+TEST_CASE("look up string value in map (by string value)", "[type map]") {
+    using namespace stdx::literals;
+    using M = stdx::type_map<stdx::vv_pair<"A", "X">, stdx::vv_pair<"B", "Y">>;
+    STATIC_REQUIRE(stdx::value_lookup_v<M, "A"> == "X"_cts);
+    STATIC_REQUIRE(stdx::value_lookup_v<M, "B"> == "Y"_cts);
+}
+
+TEST_CASE("look up string value not in map (by string value)", "[type map]") {
+    using namespace stdx::literals;
+    using M = stdx::type_map<stdx::vv_pair<"A", "X">, stdx::vv_pair<"B", "Y">>;
+    STATIC_REQUIRE(stdx::value_lookup_v<M, "C"> == stdx::missing);
+    STATIC_REQUIRE(stdx::value_lookup_v<M, "C", "Z"> == "Z"_cts);
 }
 
 TEST_CASE("reverse look up type in map", "[type map]") {
@@ -66,7 +108,8 @@ TEST_CASE("reverse look up type in map", "[type map]") {
 
 TEST_CASE("reverse look up type not in map", "[type map]") {
     using M = stdx::type_map<stdx::type_pair<A, X>, stdx::type_pair<B, Y>>;
-    STATIC_REQUIRE(std::is_same_v<stdx::reverse_type_lookup_t<M, Z>, void>);
+    STATIC_REQUIRE(
+        std::is_same_v<stdx::reverse_type_lookup_t<M, Z>, stdx::missing_t>);
     STATIC_REQUIRE(std::is_same_v<stdx::reverse_type_lookup_t<M, Z, int>, int>);
 }
 
@@ -78,9 +121,24 @@ TEST_CASE("reverse look up type in map (by value)", "[type map]") {
 
 TEST_CASE("reverse look up type not in map (by value)", "[type map]") {
     using M = stdx::type_map<stdx::tv_pair<X, 0>, stdx::tv_pair<Y, 1>>;
-    STATIC_REQUIRE(std::is_same_v<stdx::reverse_value_lookup_t<M, 2>, void>);
+    STATIC_REQUIRE(
+        std::is_same_v<stdx::reverse_value_lookup_t<M, 2>, stdx::missing_t>);
     STATIC_REQUIRE(
         std::is_same_v<stdx::reverse_value_lookup_t<M, 2, int>, int>);
+}
+
+TEST_CASE("reverse look up type in map (by string value)", "[type map]") {
+    using M = stdx::type_map<stdx::tv_pair<X, "A">, stdx::tv_pair<Y, "B">>;
+    STATIC_REQUIRE(std::is_same_v<stdx::reverse_value_lookup_t<M, "A">, X>);
+    STATIC_REQUIRE(std::is_same_v<stdx::reverse_value_lookup_t<M, "B">, Y>);
+}
+
+TEST_CASE("reverse look up type not in map (by string value)", "[type map]") {
+    using M = stdx::type_map<stdx::tv_pair<X, "A">, stdx::tv_pair<Y, "B">>;
+    STATIC_REQUIRE(
+        std::is_same_v<stdx::reverse_value_lookup_t<M, "C">, stdx::missing_t>);
+    STATIC_REQUIRE(
+        std::is_same_v<stdx::reverse_value_lookup_t<M, "C", int>, int>);
 }
 
 TEST_CASE("reverse look up value in map (by type)", "[type map]") {
@@ -91,8 +149,22 @@ TEST_CASE("reverse look up value in map (by type)", "[type map]") {
 
 TEST_CASE("reverse look up value not in map (by type)", "[type map]") {
     using M = stdx::type_map<stdx::vt_pair<0, A>, stdx::vt_pair<1, B>>;
-    STATIC_REQUIRE(stdx::reverse_type_lookup_v<M, Z> == 0);
+    STATIC_REQUIRE(stdx::reverse_type_lookup_v<M, Z> == stdx::missing);
     STATIC_REQUIRE(stdx::reverse_type_lookup_v<M, Z, 2> == 2);
+}
+
+TEST_CASE("reverse look up string value in map (by type)", "[type map]") {
+    using namespace stdx::literals;
+    using M = stdx::type_map<stdx::vt_pair<"A", A>, stdx::vt_pair<"B", B>>;
+    STATIC_REQUIRE(stdx::reverse_type_lookup_v<M, A> == "A"_cts);
+    STATIC_REQUIRE(stdx::reverse_type_lookup_v<M, B> == "B"_cts);
+}
+
+TEST_CASE("reverse look up string value not in map (by type)", "[type map]") {
+    using namespace stdx::literals;
+    using M = stdx::type_map<stdx::vt_pair<"A", A>, stdx::vt_pair<"B", B>>;
+    STATIC_REQUIRE(stdx::reverse_type_lookup_v<M, Z> == stdx::missing);
+    STATIC_REQUIRE(stdx::reverse_type_lookup_v<M, Z, "C"> == "C"_cts);
 }
 
 TEST_CASE("reverse look up value in map (by value)", "[type map]") {
@@ -103,6 +175,22 @@ TEST_CASE("reverse look up value in map (by value)", "[type map]") {
 
 TEST_CASE("reverse look up value not in map (by value)", "[type map]") {
     using M = stdx::type_map<stdx::vv_pair<0, 10>, stdx::vv_pair<1, 11>>;
-    STATIC_REQUIRE(stdx::reverse_value_lookup_v<M, 2> == 0);
+    STATIC_REQUIRE(stdx::reverse_value_lookup_v<M, 2> == stdx::missing);
     STATIC_REQUIRE(stdx::reverse_value_lookup_v<M, 2, 3> == 3);
+}
+
+TEST_CASE("reverse look up string value in map (by string value)",
+          "[type map]") {
+    using namespace stdx::literals;
+    using M = stdx::type_map<stdx::vv_pair<"X", "A">, stdx::vv_pair<"Y", "B">>;
+    STATIC_REQUIRE(stdx::reverse_value_lookup_v<M, "A"> == "X"_cts);
+    STATIC_REQUIRE(stdx::reverse_value_lookup_v<M, "B"> == "Y"_cts);
+}
+
+TEST_CASE("reverse look up string value not in map (by string value)",
+          "[type map]") {
+    using namespace stdx::literals;
+    using M = stdx::type_map<stdx::vv_pair<"X", "A">, stdx::vv_pair<"Y", "B">>;
+    STATIC_REQUIRE(stdx::reverse_value_lookup_v<M, "C"> == stdx::missing);
+    STATIC_REQUIRE(stdx::reverse_value_lookup_v<M, "C", "Z"> == "Z"_cts);
 }
