@@ -68,6 +68,9 @@ constexpr bool is_callable_v = is_function_v<T> or is_function_object_v<T>;
 
 template <typename T> struct type_identity {
     using type = T;
+    [[nodiscard]] friend constexpr auto operator==(type_identity const &,
+                                                   type_identity const &)
+        -> bool = default;
 };
 template <typename T> using type_identity_t = typename type_identity<T>::type;
 template <typename T>
