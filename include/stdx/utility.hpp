@@ -35,6 +35,11 @@ template <map_value_helper V> struct map_value_t {
     constexpr static inline auto value = V.value;
 };
 
+template <typename T> consteval auto unwrap_map_value(T t) -> T { return t; }
+template <map_value_helper V> consteval auto unwrap_map_value(map_value_t<V>) {
+    return V.value;
+}
+
 template <typename... Ts> struct type_map : Ts... {};
 } // namespace detail
 
@@ -51,8 +56,6 @@ template <typename K, detail::map_value_helper V>
 using tv_pair = tt_pair<K, detail::map_value_t<V>>;
 template <detail::map_value_helper K, detail::map_value_helper V>
 using vv_pair = tt_pair<detail::map_value_t<K>, detail::map_value_t<V>>;
-
-template <typename... Ts> using type_map = shrink_t<detail::type_map<Ts...>>;
 
 namespace detail {
 template <typename K, typename Default>
@@ -120,6 +123,36 @@ constexpr static auto reverse_value_lookup_v =
               decltype(detail::reverse_lookup<detail::map_value_t<V>,
                                               missing_t>(expand<M>())),
               detail::map_value_t<Default>>::value;
+
+template <typename... Ts>
+class type_map : public shrink_t<detail::type_map<Ts...>> {
+    using map_t = shrink_t<detail::type_map<Ts...>>;
+
+    template <typename K> consteval static auto try_lookup() {
+        using V = type_lookup_t<map_t, K>;
+        if constexpr (requires { V{}; }) {
+            return detail::unwrap_map_value(V{});
+        } else {
+            return type_identity_v<V>;
+        }
+    }
+
+  public:
+    template <typename K> consteval auto operator[](K) const {
+        if constexpr (not same_as<decltype(try_lookup<K>()), missing_t>) {
+            return try_lookup<K>();
+        } else if constexpr (requires { typename K::type; }) {
+            return try_lookup<typename K::type>();
+        } else {
+            return missing;
+        }
+    }
+
+    template <typename K> consteval auto operator()(K) const {
+        return this->operator[](
+            detail::map_value_t<detail::map_value_helper{K::value}>{});
+    }
+};
 
 template <typename T, typename U>
 [[nodiscard]] constexpr auto forward_like(U &&u) noexcept -> decltype(auto) {
