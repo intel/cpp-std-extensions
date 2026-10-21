@@ -543,6 +543,15 @@ TEST_CASE("filter", "[tuple_algorithms]") {
                                     std::integral_constant<int, 4>{}});
 }
 
+TEST_CASE("filter an indexed_tuple", "[tuple_algorithms]") {
+    constexpr auto t = stdx::indexed_tuple{
+        std::integral_constant<int, 1>{}, std::integral_constant<int, 2>{},
+        std::integral_constant<int, 3>{}, std::integral_constant<int, 4>{}};
+    constexpr auto u = stdx::filter<is_even>(t);
+    STATIC_REQUIRE(u == stdx::indexed_tuple{std::integral_constant<int, 2>{},
+                                            std::integral_constant<int, 4>{}});
+}
+
 TEST_CASE("filter on std::tuple", "[tuple_algorithms]") {
     constexpr auto t = std::tuple{
         std::integral_constant<int, 1>{}, std::integral_constant<int, 2>{},
