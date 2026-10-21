@@ -133,6 +133,18 @@ template <has_tuple_protocol Tup, typename T>
     return tuple_snoc(std::forward<Tup>(tup), std::forward<T>(t));
 }
 
+namespace detail {
+template <typename T> struct tuple_variation {
+    template <typename... Us>
+    using fn = boost::mp11::mp_assign<T, type_list<Us...>>;
+};
+
+template <typename Idx, typename... Ts>
+struct tuple_variation<indexed_tuple<Idx, Ts...>> {
+    template <typename... Us> using fn = indexed_tuple<Idx, Us...>;
+};
+} // namespace detail
+
 template <template <typename T> typename Pred, has_tuple_protocol T>
 [[nodiscard]] constexpr auto filter(T &&t) {
     using tuple_t = std::remove_cvref_t<T>;
@@ -157,8 +169,8 @@ template <template <typename T> typename Pred, has_tuple_protocol T>
         }();
 
         return [&]<std::size_t... Js>(std::index_sequence<Js...>) {
-            using R = boost::mp11::mp_assign<
-                tuple_t,
+            using R = boost::mp11::mp_apply_q<
+                detail::tuple_variation<tuple_t>,
                 type_list<stdx::tuple_element_t<indices[Js], tuple_t>...>>;
             return R{get<indices[Js]>(std::forward<T>(t))...};
         }(std::make_index_sequence<num_matches>{});
