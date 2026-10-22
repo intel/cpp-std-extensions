@@ -242,5 +242,10 @@ template <std::size_t N>
 // NOLINTNEXTLINE(*-avoid-c-arrays)
 map_value_helper(char const (&)[N]) -> map_value_helper<ct_string<N>>;
 } // namespace detail
+
+template <ct_string S>
+consteval auto shrink() -> decltype(detail::shrink<S>()) {
+    return {};
+}
 } // namespace v1
 } // namespace stdx
