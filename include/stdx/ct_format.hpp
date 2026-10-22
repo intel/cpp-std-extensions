@@ -235,12 +235,12 @@ consteval auto arg_value(std::integral_constant<T, V>) {
     if constexpr (std::is_enum_v<T>) {
         return enum_as_string<V>();
     } else {
-        return V;
+        return expand(V);
     }
 }
 
 template <typename T> consteval auto arg_value(type_identity<T>) {
-    return type_as_string<T>();
+    return type_as_string<expand_t<T>>();
 }
 
 template <ct_string S> consteval auto arg_value(cts_t<S>) { return S; }
@@ -255,7 +255,7 @@ consteval auto arg_value(fmt_cx_value auto a) {
     } else if constexpr (std::is_enum_v<decltype(a())>) {
         return enum_as_string<a()>();
     } else {
-        return a();
+        return expand(a());
     }
 }
 

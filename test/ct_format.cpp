@@ -68,12 +68,27 @@ TEST_CASE("format a compile-time stringish argument (CX_VALUE)",
                    "Hello world"_fmt_res);
 }
 
+TEST_CASE("format a shrunk compile-time stringish argument (CX_VALUE)",
+          "[ct_format]") {
+    using namespace std::string_view_literals;
+    STATIC_REQUIRE(stdx::ct_format<"Hello {}">(CX_VALUE(
+                       stdx::shrink<"world">())) == "Hello world"_fmt_res);
+}
+
 TEST_CASE("format a compile-time stringish argument (ct)", "[ct_format]") {
     using namespace std::string_view_literals;
     STATIC_REQUIRE(stdx::ct_format<"Hello {}">("world"_ctst) ==
                    "Hello world"_fmt_res);
     STATIC_REQUIRE(stdx::ct_format<"Hello {}">(stdx::ct<"world">()) ==
                    "Hello world"_fmt_res);
+}
+
+TEST_CASE("format a shrunk compile-time stringish argument (ct)",
+          "[ct_format]") {
+    using namespace std::string_view_literals;
+    STATIC_REQUIRE(
+        stdx::ct_format<"Hello {}">(stdx::ct<stdx::shrink<"world">()>()) ==
+        "Hello world"_fmt_res);
 }
 
 TEST_CASE("format a compile-time integral argument (CX_VALUE)", "[ct_format]") {
@@ -139,9 +154,19 @@ TEST_CASE("format a type argument (CX_VALUE)", "[ct_format]") {
                    "Hello int"_fmt_res);
 }
 
+TEST_CASE("format a shrunk type argument (CX_VALUE)", "[ct_format]") {
+    STATIC_REQUIRE(stdx::ct_format<"Hello {}">(CX_VALUE(stdx::shrink_t<int>)) ==
+                   "Hello int"_fmt_res);
+}
+
 TEST_CASE("format a type argument (ct)", "[ct_format]") {
     STATIC_REQUIRE(stdx::ct_format<"Hello {}">(stdx::ct<int>()) ==
                    "Hello int"_fmt_res);
+}
+
+TEST_CASE("format a shrunk type argument (ct)", "[ct_format]") {
+    STATIC_REQUIRE(stdx::ct_format<"Hello {}">(
+                       stdx::ct<stdx::shrink_t<int>>()) == "Hello int"_fmt_res);
 }
 
 TEST_CASE("format a compile-time argument with different base", "[ct_format]") {
