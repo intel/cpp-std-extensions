@@ -223,8 +223,16 @@ template <typename T> struct shrinkwrap {
     using type = T;
 };
 
+template <auto V> struct shrinkwrap_value {
+    using is_shrinkwrapped_value = void;
+    constexpr static auto value = V;
+};
+
 template <typename T>
 concept is_shrinkwrapped = requires { typename T::is_shrinkwrapped; };
+template <typename T>
+concept is_shrinkwrapped_value =
+    requires { typename T::is_shrinkwrapped_value; };
 
 template <typename T,
           auto F = []()->auto (*)() -> shrinkwrap<T> { return nullptr; }>
@@ -232,9 +240,20 @@ consteval auto shrink() {
     return F;
 }
 
+template <auto T,
+          auto F = []()->auto (*)() -> shrinkwrap_value<T> { return nullptr; }>
+consteval auto shrink() {
+    return F;
+}
+
 template <typename T>
 concept is_shrunk = requires(T const &t) {
     { t()() } -> is_shrinkwrapped;
+};
+
+template <typename T>
+concept is_shrunk_value = requires(T const &t) {
+    { t()() } -> is_shrinkwrapped_value;
 };
 
 template <typename T> consteval auto maybe_expand() -> T;
@@ -256,6 +275,10 @@ constexpr auto maybe_expand(T &&) ->
         "Danger! expand(T) would return a default-constructed but non-empty "
         "object: use expand_t<T>{} instead if this is what you want");
     return R{};
+}
+template <is_shrunk_value T> constexpr auto maybe_expand(T &&) {
+    using R = decltype(std::remove_cvref_t<T>{}()());
+    return R::value;
 }
 } // namespace detail
 

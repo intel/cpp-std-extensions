@@ -1,4 +1,5 @@
 #include <stdx/ct_conversions.hpp>
+#include <stdx/ct_string.hpp>
 #include <stdx/type_traits.hpp>
 
 #include <catch2/catch_test_macros.hpp>
@@ -244,6 +245,12 @@ TEST_CASE("type shrinkage (by type)", "[type_traits]") {
     STATIC_CHECK(std::is_same_v<stdx::expand_t<X>, C>);
 }
 
+TEST_CASE("two shrunk types are considered the same", "[type_traits]") {
+    using X = stdx::shrink_t<C>;
+    using Y = stdx::shrink_t<C>;
+    STATIC_CHECK(std::is_same_v<X, Y>);
+}
+
 TEST_CASE("type shrinkage (by value)", "[type_traits]") {
     auto c = C{};
     auto x = stdx::shrink(c);
@@ -251,6 +258,35 @@ TEST_CASE("type shrinkage (by value)", "[type_traits]") {
     STATIC_CHECK(stdx::type_as_string<decltype(x)>().size() <
                  stdx::type_as_string<C>().size());
     STATIC_CHECK(std::is_same_v<decltype(y), C>);
+}
+
+TEST_CASE("value shrinkage for ct_strings", "[type_traits]") {
+    using namespace stdx::literals;
+    constexpr auto x = stdx::shrink<"hello"_cts>();
+    constexpr auto y = stdx::expand(x);
+    STATIC_CHECK(y == "hello"_cts);
+}
+
+TEST_CASE("two shrunk ct_strings are considered the same type",
+          "[type_traits]") {
+    constexpr auto x = stdx::shrink<"hello">();
+    constexpr auto y = stdx::shrink<"hello">();
+    STATIC_CHECK(std::is_same_v<decltype(x), decltype(y)>);
+}
+
+namespace {
+template <auto T> consteval auto return_expanded() { return stdx::expand(T); }
+} // namespace
+
+TEST_CASE("pass shrunk ct_string as template argument", "[type_traits]") {
+    using namespace stdx::literals;
+    STATIC_CHECK(return_expanded<stdx::shrink<"hello"_cts>()>() == "hello"_cts);
+}
+
+TEST_CASE("non-shrunk value can be expanded (with no effect)",
+          "[type_traits]") {
+    constexpr auto x = stdx::expand(42);
+    STATIC_CHECK(x == 42);
 }
 
 TEST_CASE("nth type in pack", "[type_traits]") {
