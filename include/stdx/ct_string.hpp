@@ -184,16 +184,25 @@ template <ct_string S> consteval auto operator""_ctst() { return cts_t<S>{}; }
 } // namespace ct_string_literals
 } // namespace literals
 
-template <ct_string Name> struct with_name {
-    constexpr static auto name = Name;
+template <ct_string S> consteval auto shrink() -> decltype(shrink_impl<S>()) {
+    return {};
+}
+
+namespace detail {
+template <auto Name> struct with_name {
+    constexpr static auto name = expand(Name);
     friend constexpr auto operator==(with_name, with_name) -> bool = default;
 };
 
-namespace detail {
 template <typename T>
 concept is_ct_string =
     stdx::is_value_specialization_of_v<std::remove_cvref_t<T>, ct_string>;
-}
+} // namespace detail
+
+template <ct_string Name> using with_name = detail::with_name<shrink<Name>()>;
+template <auto Name>
+    requires detail::is_shrunk_value<decltype(Name)>
+using with_shrunk_name = detail::with_name<Name>;
 
 template <typename T>
 concept named = requires {
@@ -242,10 +251,5 @@ template <std::size_t N>
 // NOLINTNEXTLINE(*-avoid-c-arrays)
 map_value_helper(char const (&)[N]) -> map_value_helper<ct_string<N>>;
 } // namespace detail
-
-template <ct_string S>
-consteval auto shrink() -> decltype(detail::shrink<S>()) {
-    return {};
-}
 } // namespace v1
 } // namespace stdx
