@@ -245,6 +245,12 @@ TEST_CASE("type shrinkage (by type)", "[type_traits]") {
     STATIC_CHECK(std::is_same_v<stdx::expand_t<X>, C>);
 }
 
+TEST_CASE("type shrinkage is idempotent", "[type_traits]") {
+    using X = stdx::shrink_t<C>;
+    using Y = stdx::shrink_t<X>;
+    STATIC_CHECK(std::is_same_v<X, Y>);
+}
+
 TEST_CASE("two shrunk types are considered the same", "[type_traits]") {
     using X = stdx::shrink_t<C>;
     using Y = stdx::shrink_t<C>;
@@ -260,6 +266,14 @@ TEST_CASE("type shrinkage (by value)", "[type_traits]") {
     STATIC_CHECK(std::is_same_v<decltype(y), C>);
 }
 
+TEST_CASE("type shrinkage (by value) is idempotent", "[type_traits]") {
+    auto c = C{};
+    auto x = stdx::shrink(c);
+    auto y = stdx::shrink(x);
+    STATIC_CHECK(std::is_same_v<decltype(x), decltype(y)>);
+    STATIC_CHECK(x == y);
+}
+
 TEST_CASE("value shrinkage for ct_strings", "[type_traits]") {
     using namespace stdx::literals;
     constexpr auto x = stdx::shrink<"hello"_cts>();
@@ -272,6 +286,14 @@ TEST_CASE("two shrunk ct_strings are considered the same type",
     constexpr auto x = stdx::shrink<"hello">();
     constexpr auto y = stdx::shrink<"hello">();
     STATIC_CHECK(std::is_same_v<decltype(x), decltype(y)>);
+    STATIC_CHECK(x == y);
+}
+
+TEST_CASE("ct_string shrinkage is idempotent", "[type_traits]") {
+    constexpr auto x = stdx::shrink<"hello">();
+    constexpr auto y = stdx::shrink(x);
+    STATIC_CHECK(std::is_same_v<decltype(x), decltype(y)>);
+    STATIC_CHECK(x == y);
 }
 
 namespace {
