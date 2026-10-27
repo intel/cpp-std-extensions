@@ -45,7 +45,7 @@ template <bool B> constexpr auto ct_check = ct_check_t<B>{};
 #define STATIC_ASSERT(cond, ...)                                               \
     []<bool B>() -> bool {                                                     \
         constexpr auto S = STDX_CT_FORMAT(__VA_ARGS__);                        \
-        stdx::detail::ct_check<B>.template emit<S>();                          \
+        stdx::detail::ct_check<B>.template emit<+S.str>();                     \
         return B;                                                              \
     }.template operator()<cond>()
 #endif
