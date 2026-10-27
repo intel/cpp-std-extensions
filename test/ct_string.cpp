@@ -213,6 +213,19 @@ TEST_CASE("named object", "[ct_string]") {
     STATIC_CHECK(not stdx::same_name_q<T>::template fn<U>::value);
 }
 
+TEST_CASE("named object with shrunk name", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    constexpr auto n = stdx::shrink<"test">();
+    using T = stdx::with_shrunk_name<n>;
+    STATIC_CHECK(stdx::named<T>);
+    STATIC_CHECK(stdx::name_of_v<T> == "test"_cts);
+    STATIC_CHECK(stdx::constant_name_of_v<T> == "test"_ctst);
+
+    STATIC_CHECK(stdx::matching_name<T, "test">);
+    STATIC_CHECK(stdx::matching_name_t<T, "test">::value);
+    STATIC_CHECK(stdx::matching_name_q<"test">::template fn<T>::value);
+}
+
 TEST_CASE("name or type fallback", "[ct_string]") {
     using namespace stdx::ct_string_literals;
     using T = stdx::with_name<"test">;
