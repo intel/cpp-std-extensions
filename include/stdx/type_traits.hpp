@@ -221,11 +221,18 @@ namespace detail {
 template <typename T> struct shrinkwrap {
     using is_shrinkwrapped = void;
     using type = T;
+    friend constexpr auto operator==(shrinkwrap const &, shrinkwrap const &)
+        -> bool = default;
 };
 
 template <auto V> struct shrinkwrap_value {
     using is_shrinkwrapped_value = void;
+    using type = std::remove_cvref_t<decltype(V)>;
     constexpr static auto value = V;
+
+    friend constexpr auto operator==(shrinkwrap_value const &,
+                                     shrinkwrap_value const &)
+        -> bool = default;
 };
 
 template <typename T>
@@ -268,9 +275,7 @@ template <auto V,
 consteval auto shrink_impl() {
     return F;
 }
-} // namespace stdx
 
-namespace stdx {
 inline namespace v1 {
 namespace detail {
 template <typename T> consteval auto maybe_expand() -> T;
@@ -322,6 +327,13 @@ template <typename T> constexpr auto expand(T &&t) -> decltype(auto) {
 
 template <typename T> using shrink_t = decltype(shrink<T>());
 template <typename T> using expand_t = decltype(expand<T>());
+
+template <detail::is_shrunk_value T, typename U>
+constexpr auto operator==(T const &t, U const &u) -> bool
+    requires requires { expand(t) == u; }
+{
+    return expand(t) == u;
+}
 
 STDX_PRAGMA(diagnostic push)
 #ifdef __clang__
