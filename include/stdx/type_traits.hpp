@@ -327,6 +327,7 @@ template <typename T> constexpr auto expand(T &&t) -> decltype(auto) {
 
 template <typename T> using shrink_t = decltype(shrink<T>());
 template <typename T> using expand_t = decltype(expand<T>());
+template <auto V> constexpr inline auto expand_v = expand(V);
 
 template <detail::is_shrunk_value T, typename U>
 constexpr auto operator==(T const &t, U const &u) -> bool

@@ -234,6 +234,13 @@ TEST_CASE("shrunk ct_string compares equal to ct_string", "[ct_string]") {
     STATIC_CHECK(s == s);
 }
 
+TEST_CASE("expand_v of a shrunk ct_string", "[ct_string]") {
+    using namespace stdx::ct_string_literals;
+    constexpr auto s = stdx::shrink<"test">();
+    STATIC_CHECK(stdx::expand_v<s> == "test"_cts);
+    STATIC_CHECK(std::string_view{stdx::expand_v<s>} == "test");
+}
+
 TEST_CASE("name or type fallback", "[ct_string]") {
     using namespace stdx::ct_string_literals;
     using T = stdx::with_name<"test">;
