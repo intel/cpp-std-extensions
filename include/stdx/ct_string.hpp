@@ -116,8 +116,9 @@ template <ct_string S, char C> [[nodiscard]] consteval auto split() {
             static_cast<std::size_t>(it - S.value.cbegin());
         constexpr auto suffix_size = S.size() - prefix_size;
         return std::pair{
-            ct_string<prefix_size + 1U>{S.value.cbegin(), prefix_size},
-            ct_string<suffix_size>{it + 1, suffix_size - 1U}};
+            ct_string<prefix_size + 1U>{S.value.data(), prefix_size},
+            ct_string<suffix_size>{S.value.data() + prefix_size + 1U,
+                                   suffix_size - 1U}};
     }
 }
 
