@@ -8,6 +8,7 @@
 #include <array>
 #include <concepts>
 #include <cstddef>
+#include <iterator>
 #include <string_view>
 #include <type_traits>
 #include <utility>
@@ -28,23 +29,21 @@ concept format_convertible = requires(T t) {
 template <std::size_t N> struct ct_string {
     consteval ct_string() = default;
 
-    // NOLINTNEXTLINE(*-avoid-c-arrays)
-    consteval explicit(false) ct_string(char const (&str)[N]) {
-        for (auto i = std::size_t{}; i < N; ++i) {
+    template <typename It>
+        requires std::convertible_to<std::iter_value_t<It>, char>
+    constexpr explicit(true) ct_string(It first, std::size_t sz) {
+        for (auto i = std::size_t{}; i < sz; ++i) {
             // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-*)
-            value[i] = str[i];
+            value[i] = *first++;
         }
     }
+
+    // NOLINTNEXTLINE(*-avoid-c-arrays)
+    consteval explicit(false) ct_string(char const (&str)[N])
+        : ct_string{std::data(str), N} {}
 
     template <detail::format_convertible T>
     consteval explicit(false) ct_string(T t) : ct_string(+t) {}
-
-    consteval explicit(true) ct_string(char const *str, std::size_t sz) {
-        for (auto i = std::size_t{}; i < sz; ++i) {
-            // NOLINTNEXTLINE(cppcoreguidelines-pro-bounds-*)
-            value[i] = str[i];
-        }
-    }
 
     consteval explicit(true) ct_string(std::string_view str)
         : ct_string{str.data(), str.size()} {}

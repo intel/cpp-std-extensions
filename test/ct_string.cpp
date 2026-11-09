@@ -4,6 +4,7 @@
 #include <catch2/catch_test_macros.hpp>
 
 #include <iterator>
+#include <set>
 #include <string_view>
 #include <type_traits>
 
@@ -44,6 +45,12 @@ TEST_CASE("equality", "[ct_string]") {
 TEST_CASE("explicit length construction", "[ct_string]") {
     constexpr auto s = stdx::ct_string<3u>{"ABC", 2};
     STATIC_REQUIRE(s == stdx::ct_string{"AB"});
+}
+
+TEST_CASE("construction from iterator + size", "[ct_string]") {
+    std::set<char> from = {'A', 'B', 'C'};
+    auto s = stdx::ct_string<4u>{std::cbegin(from), 3};
+    CHECK(s == stdx::ct_string{"ABC"});
 }
 
 TEST_CASE("from type", "[ct_string]") {
